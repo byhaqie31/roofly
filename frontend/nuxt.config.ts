@@ -19,8 +19,8 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      titleTemplate: "%s · Hauz",
-      title: "Hauz",
+      titleTemplate: "%s · Hauz.my",
+      title: "Hauz.my",
       htmlAttrs: { lang: "en" },
       meta: [
         { charset: "utf-8" },

@@ -105,3 +105,31 @@
     rgba(0, 0, 0, 0.2) 0 1px 2px 0;
   --shadow-focus: rgba(255, 255, 255, 0.1) 0 4px 12px;
 }
+
+/* Explicit light override — used to force light tokens on a subtree
+   (e.g. auth pages) regardless of the document-level data-theme. */
+[data-theme="light"] {
+  --surface-page: #f7f4ed;
+  --surface-button-dark: #1c1c1c;
+  --surface-on-dark: #fcfbf8;
+
+  --text-primary: #1c1c1c;
+  --text-strong: rgba(28, 28, 28, 0.83);
+  --text-body: rgba(28, 28, 28, 0.82);
+  --text-muted: #5f5f5d;
+  --text-faint: rgba(28, 28, 28, 0.4);
+
+  --border-passive: #eceae4;
+  --border-interactive: rgba(28, 28, 28, 0.4);
+  --border-hover: rgba(28, 28, 28, 0.6);
+
+  --accent: #993c1d;
+  --accent-hover: #7a2f17;
+  --accent-soft: rgba(153, 60, 29, 0.08);
+
+  --shadow-button-inset:
+    rgba(255, 255, 255, 0.2) 0 0.5px 0 0 inset,
+    rgba(0, 0, 0, 0.2) 0 0 0 0.5px inset,
+    rgba(0, 0, 0, 0.05) 0 1px 2px 0;
+  --shadow-focus: rgba(0, 0, 0, 0.1) 0 4px 12px;
+}

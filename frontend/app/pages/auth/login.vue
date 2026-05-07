@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import Button from "~/components/ui/Button.vue";
 import Input from "~/components/ui/Input.vue";
+import DemoLoginShortcuts from "~/components/auth/DemoLoginShortcuts.vue";
 
 definePageMeta({ layout: "auth" });
 
@@ -66,5 +67,7 @@ const onSubmit = async () => {
         {{ t("auth.signupAsOwner") }}
       </NuxtLink>
     </p>
+
+    <DemoLoginShortcuts />
   </div>
 </template>

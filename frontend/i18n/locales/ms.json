@@ -1,7 +1,15 @@
 {
   "common": {
-    "appName": "Hauz",
+    "appName": "Hauz.my",
     "tagline": "Urus sewa rumah, lebih mudah.",
+    "marketing": {
+      "headlineLead": "Urus sewa rumah,",
+      "headlineAccent": "lebih mudah.",
+      "subhead": "Pantau penyewa, hasilkan perjanjian, dan kutip sewa — direka untuk tuan rumah Malaysia dengan 1–20 unit.",
+      "pillarVisibility": "Lihat semua sekali pandang",
+      "pillarAutomation": "Sistem buat kerja kejar, bukan anda",
+      "pillarTrust": "Setiap transaksi direkodkan"
+    },
     "save": "Simpan",
     "cancel": "Batal",
     "delete": "Padam",

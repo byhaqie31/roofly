@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { House } from "lucide-vue-next";
 import TenantSidebarNav from "~/components/tenant/SidebarNav.vue";
 import ThemeToggle from "~/components/topbar/ThemeToggle.vue";
 import LangSwitcher from "~/components/topbar/LangSwitcher.vue";
@@ -12,9 +13,10 @@ import UserMenu from "~/components/topbar/UserMenu.vue";
     >
       <NuxtLink
         to="/tenant"
-        class="px-3 py-2 mb-4 text-card-title font-semibold tracking-tight"
+        class="inline-flex items-center gap-2 px-3 py-2 mb-4 text-card-title font-semibold tracking-tight"
       >
-        Hauz
+        <House :size="20" :stroke-width="1.75" class="text-accent" />
+        <span>Hauz.my</span>
       </NuxtLink>
       <TenantSidebarNav />
     </aside>
