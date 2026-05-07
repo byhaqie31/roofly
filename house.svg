@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Soft background circle -->
+  <circle cx="100" cy="100" r="90" fill="#FFF4E6"/>
+
+  <!-- Ground shadow -->
+  <ellipse cx="100" cy="170" rx="55" ry="4" fill="#000" opacity="0.08"/>
+
+  <!-- House body -->
+  <rect x="55" y="95" width="90" height="70" rx="6" fill="#F4A261"/>
+
+  <!-- Roof -->
+  <path d="M 45 100 L 100 55 L 155 100 Z" fill="#E76F51"/>
+
+  <!-- Roof shadow line -->
+  <path d="M 45 100 L 100 55 L 155 100" stroke="#C84B2F" stroke-width="2" fill="none" stroke-linejoin="round"/>
+
+  <!-- Chimney -->
+  <rect x="125" y="65" width="10" height="20" fill="#C84B2F"/>
+
+  <!-- Door -->
+  <rect x="88" y="125" width="24" height="40" rx="3" fill="#6B4423"/>
+  <circle cx="105" cy="148" r="1.5" fill="#FFD93D"/>
+
+  <!-- Window left -->
+  <rect x="65" y="108" width="16" height="16" rx="2" fill="#A8DADC"/>
+  <line x1="73" y1="108" x2="73" y2="124" stroke="#fff" stroke-width="1.5"/>
+  <line x1="65" y1="116" x2="81" y2="116" stroke="#fff" stroke-width="1.5"/>
+
+  <!-- Window right -->
+  <rect x="119" y="108" width="16" height="16" rx="2" fill="#A8DADC"/>
+  <line x1="127" y1="108" x2="127" y2="124" stroke="#fff" stroke-width="1.5"/>
+  <line x1="119" y1="116" x2="135" y2="116" stroke="#fff" stroke-width="1.5"/>
+
+  <!-- Cute face on door (subtle smile vibe via window glints) -->
+  <circle cx="69" cy="113" r="2" fill="#fff" opacity="0.7"/>
+  <circle cx="123" cy="113" r="2" fill="#fff" opacity="0.7"/>
+
+  <!-- Smoke from chimney -->
+  <circle cx="130" cy="55" r="4" fill="#fff" opacity="0.8"/>
+  <circle cx="135" cy="45" r="5" fill="#fff" opacity="0.7"/>
+  <circle cx="128" cy="38" r="3" fill="#fff" opacity="0.6"/>
+
+  <!-- Tiny heart on roof for charm -->
+  <path d="M 100 78 C 98 75, 94 75, 94 78 C 94 81, 100 85, 100 85 C 100 85, 106 81, 106 78 C 106 75, 102 75, 100 78 Z" fill="#FFD93D"/>
+</svg>
