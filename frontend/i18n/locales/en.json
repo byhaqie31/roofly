@@ -1,0 +1,81 @@
+{
+  "common": {
+    "appName": "Hauz",
+    "tagline": "Rent management, simplified.",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "loading": "Loading…",
+    "search": "Search",
+    "language": "Language",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System"
+  },
+  "auth": {
+    "login": "Log in",
+    "logout": "Log out",
+    "register": "Sign up",
+    "email": "Email address",
+    "password": "Password",
+    "forgotPassword": "Forgot your password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "signupAsOwner": "Create owner account",
+    "fullName": "Full name",
+    "phone": "Phone number",
+    "loginTitle": "Welcome back",
+    "loginSubtitle": "Log in to manage your properties.",
+    "registerTitle": "Start with Hauz",
+    "registerSubtitle": "Create an owner account to manage your rentals."
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Enter a valid email address",
+    "minLength": "Must be at least {min} characters",
+    "phoneMy": "Enter a valid Malaysian phone number"
+  },
+  "owner": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "properties": "Properties",
+      "tenants": "Tenants",
+      "agreements": "Agreements",
+      "payments": "Payments",
+      "maintenance": "Maintenance",
+      "reports": "Reports",
+      "settings": "Settings"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "incomeMonth": "Income this month",
+      "occupancy": "Occupancy",
+      "outstanding": "Outstanding rent",
+      "expiringAgreements": "Expiring soon",
+      "emptyState": {
+        "title": "Add your first property",
+        "description": "Properties hold the units you rent out. Start with one and we'll guide you from there.",
+        "cta": "Add property"
+      }
+    }
+  },
+  "tenant": {
+    "nav": {
+      "home": "Home",
+      "agreement": "Agreement",
+      "payments": "Payments",
+      "tickets": "Issues",
+      "profile": "Profile"
+    },
+    "home": {
+      "title": "Welcome",
+      "currentRent": "Current rent",
+      "payNow": "Pay now",
+      "noActiveAgreement": "Your agreement is being prepared by your landlord."
+    }
+  }
+}

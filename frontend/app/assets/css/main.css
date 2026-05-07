@@ -1,0 +1,43 @@
+@import "@fontsource-variable/inter/index.css";
+@import "./tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv11";
+    background: var(--surface-page);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: var(--surface-page);
+    color: var(--text-primary);
+    min-height: 100dvh;
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+    color: var(--text-primary);
+  }
+
+  /* Default focus: soft warm shadow, not sharp ring */
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+
+  h1, h2, h3, h4 {
+    color: var(--text-primary);
+  }
+
+  /* Tabular figures for money + timestamps */
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+}
