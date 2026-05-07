@@ -8,7 +8,7 @@ import Button from "~/components/ui/Button.vue";
  * (see app/stores/auth.ts).
  *
  * Visible only when import.meta.dev is true. Once the real backend lands,
- * this stays useful: the seeded accounts are owner@hauz.my / tenant@hauz.my
+ * this stays useful: the seeded accounts are owner@roofly.my / tenant@roofly.my
  * with the same password, so the shortcuts will hit the real /api/auth/login.
  */
 const auth = useAuthStore();
@@ -17,7 +17,7 @@ const isDev = import.meta.dev;
 
 const enter = async (role: "owner" | "tenant") => {
   loadingRole.value = role;
-  await auth.login(`${role}@hauz.my`, "password");
+  await auth.login(`${role}@roofly.my`, "password");
   await navigateTo(role === "owner" ? "/owner" : "/tenant");
   loadingRole.value = null;
 };

@@ -1,9 +1,9 @@
 type Theme = "light" | "dark" | "system";
 
-const STORAGE_KEY = "hauz_theme";
+const STORAGE_KEY = "roofly_theme";
 
 export const useTheme = () => {
-  const theme = useState<Theme>("hauz-theme", () => "system");
+  const theme = useState<Theme>("roofly-theme", () => "system");
 
   const applyTheme = (next: Theme) => {
     if (!import.meta.client) return;

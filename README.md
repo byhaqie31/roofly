@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src=".github/assets/house.svg" alt="Hauz" width="160">
+<img src=".github/assets/house.svg" alt="Roofly" width="160">
 
-# Hauz 🏡
+# Roofly 🏡
 
 ### Rent management, simplified.
 
@@ -14,7 +14,7 @@ Track tenants, generate agreements, collect rent online — all in one place.
 [![Tailwind](https://img.shields.io/badge/Tailwind-3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://mysql.com)
 
-[**Live Demo**](https://hauz.my) · [**Roadmap**](#-roadmap)
+[**Live Demo**](https://roofly.my) · [**Roadmap**](#-roadmap)
 
 </div>
 
@@ -22,7 +22,7 @@ Track tenants, generate agreements, collect rent online — all in one place.
 
 ## ✨ What it does
 
-Most Malaysian landlords manage rentals through a messy mix of WhatsApp, Excel, and paper agreements. Hauz fixes that.
+Most Malaysian landlords manage rentals through a messy mix of WhatsApp, Excel, and paper agreements. Roofly fixes that.
 
 🏠 **For owners** → Dashboard, agreements, rent tracking, maintenance Kanban
 👥 **For tenants** → Pay rent in 2 taps, view agreement, report issues
@@ -39,16 +39,16 @@ Most Malaysian landlords manage rentals through a messy mix of WhatsApp, Excel, 
 ## 🚀 Quick start
 
 ```bash
-git clone https://github.com/byhaqie31/hauz.git
-cd hauz
+git clone https://github.com/byhaqie31/roofly.git
+cd roofly
 docker compose up -d --build
 docker compose exec backend php artisan migrate --seed
 ```
 
 Open `http://localhost:3000` and log in:
 
-- 🏠 **Owner:** `owner@hauz.my` / `password`
-- 👥 **Tenant:** `tenant@hauz.my` / `password`
+- 🏠 **Owner:** `owner@roofly.my` / `password`
+- 👥 **Tenant:** `tenant@roofly.my` / `password`
 
 ---
 

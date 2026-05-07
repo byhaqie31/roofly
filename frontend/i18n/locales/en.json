@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Hauz.my",
+    "appName": "Roofly.my",
     "tagline": "Rent management, simplified.",
     "marketing": {
       "headlineLead": "Rent management,",
@@ -38,7 +38,7 @@
     "phone": "Phone number",
     "loginTitle": "Welcome back",
     "loginSubtitle": "Log in to manage your properties.",
-    "registerTitle": "Start with Hauz",
+    "registerTitle": "Start with Roofly",
     "registerSubtitle": "Create an owner account to manage your rentals."
   },
   "validation": {

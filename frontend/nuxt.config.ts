@@ -19,8 +19,8 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      titleTemplate: "%s · Hauz.my",
-      title: "Hauz.my",
+      titleTemplate: "%s · Roofly.my",
+      title: "Roofly.my",
       htmlAttrs: { lang: "en" },
       meta: [
         { charset: "utf-8" },
@@ -39,7 +39,7 @@ export default defineNuxtConfig({
     ],
     detectBrowserLanguage: {
       useCookie: true,
-      cookieKey: "hauz_locale",
+      cookieKey: "roofly_locale",
       redirectOn: "root",
     },
   },

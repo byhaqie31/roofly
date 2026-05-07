@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Hauz.my",
+    "appName": "Roofly.my",
     "tagline": "Urus sewa rumah, lebih mudah.",
     "marketing": {
       "headlineLead": "Urus sewa rumah,",
@@ -38,7 +38,7 @@
     "phone": "Nombor telefon",
     "loginTitle": "Selamat kembali",
     "loginSubtitle": "Log masuk untuk uruskan hartanah anda.",
-    "registerTitle": "Mula dengan Hauz",
+    "registerTitle": "Mula dengan Roofly",
     "registerSubtitle": "Cipta akaun pemilik untuk urus penyewaan."
   },
   "validation": {

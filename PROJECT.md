@@ -1,10 +1,10 @@
-# Hauz — Project Planning Document
+# Roofly — Project Planning Document
 
 > **Last updated:** May 2026
 > **Status:** Pre-development — Phase 1 scaffolding next
 > **Owner:** Qie ([@byhaqie31](https://github.com/byhaqie31))
 
-This is the source of truth for everything Hauz. Architecture decisions, scope boundaries, naming choices, and roadmap. When in doubt, this doc wins over memory.
+This is the source of truth for everything Roofly. Architecture decisions, scope boundaries, naming choices, and roadmap. When in doubt, this doc wins over memory.
 
 ---
 
@@ -34,14 +34,14 @@ This is the source of truth for everything Hauz. Architecture decisions, scope b
 
 | Attribute | Value |
 |---|---|
-| **Name** | Hauz |
-| **Domain** | hauz.my (primary) |
+| **Name** | Roofly |
+| **Domain** | roofly.my (primary) |
 | **Tagline (EN)** | Rent management, simplified. |
 | **Tagline (BM)** | Urus sewa rumah, lebih mudah. |
 | **One-liner** | A property rental management platform that helps Malaysian landlords manage tenants, agreements, rent collection, and maintenance — all in one place. |
 | **Brand personality** | Modern, calm, trustworthy. Premium feel without being intimidating. |
 | **Visual direction** | Clean, minimal, slightly editorial. Off-white backgrounds, generous whitespace, warm accent (terracotta or deep teal). |
-| **Repository** | `github.com/byhaqie31/hauz` (private until Phase 7) |
+| **Repository** | `github.com/byhaqie31/roofly` (private until Phase 7) |
 | **Parent ecosystem** | [Axel Nova Ventures](https://axelnova.tech) |
 
 ---
@@ -97,9 +97,9 @@ Tenants suffer too: no clear way to pay rent, retrieve their agreement, or repor
 
 ### Competitive Positioning
 
-| Competitor | Why Hauz wins |
+| Competitor | Why Roofly wins |
 |---|---|
-| Speedhome / iBilik | Those are listing platforms. Hauz manages *after* the tenant moves in. |
+| Speedhome / iBilik | Those are listing platforms. Roofly manages *after* the tenant moves in. |
 | Excel + WhatsApp | Obviously. |
 | Buildium / AppFolio | Built for Malaysian context (FPX, BM/EN, RM, local templates, WhatsApp). |
 | Property agents | Owners keep their margin. RM 30–80/mo vs agent's 1 month rent + 10% commission. |
@@ -249,7 +249,7 @@ Every feature must tie back to one of these:
 ## 8. Repository Structure
 
 ```
-hauz/
+roofly/
 ├── README.md
 ├── PROJECT.md                       ← this file
 ├── docker-compose.yml
@@ -574,7 +574,7 @@ Items still TBD before/during build:
 
 - [ ] **Brand color** — deep teal (#0F6E56), warm terracotta (#993C1D), or something else?
 - [ ] **Logo direction** — stick with house illustration, or design a wordmark?
-- [ ] **Domain** — hauz.my (more local trust) or hauz.app (more SaaS-feel)?
+- [ ] **Domain** — roofly.my (more local trust) or roofly.app (more SaaS-feel)?
 - [ ] **Agreement template** — write generic, or partner with a lawyer for vetted version?
 - [ ] **Beta recruitment channel** — LinkedIn, FB property groups, Reddit r/malaysia, friends-and-family?
 - [ ] **Payment provider primary** — Billplz (fastest) or Fiuu (your existing connection)?
@@ -617,8 +617,8 @@ Items still TBD before/during build:
 
 ### Environment
 - **Local:** Docker Compose
-- **Staging:** subdomain on VPS (`staging.hauz.my`)
-- **Production:** main domain (`hauz.my` and `app.hauz.my`)
+- **Staging:** subdomain on VPS (`staging.roofly.my`)
+- **Production:** main domain (`roofly.my` and `app.roofly.my`)
 - **Secrets:** Never commit; use `.env.example` for structure, GitHub Secrets for CI
 
 ---
@@ -626,8 +626,8 @@ Items still TBD before/during build:
 ## Appendix: Quick Reference
 
 ### Demo accounts (seeded)
-- Owner: `owner@hauz.my` / `password`
-- Tenant: `tenant@hauz.my` / `password`
+- Owner: `owner@roofly.my` / `password`
+- Tenant: `tenant@roofly.my` / `password`
 
 ### Critical commands
 ```bash
@@ -649,10 +649,10 @@ docker compose down -v && docker compose up -d --build
 ```
 
 ### Key URLs
-- Production: https://hauz.my
-- Staging: https://staging.hauz.my
-- API base: https://hauz.my/api
-- Repo: https://github.com/byhaqie31/hauz
+- Production: https://roofly.my
+- Staging: https://staging.roofly.my
+- API base: https://roofly.my/api
+- Repo: https://github.com/byhaqie31/roofly
 - Project board: TBD (GitHub Projects)
 
 ---

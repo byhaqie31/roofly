@@ -36,7 +36,7 @@ const pillars = computed(() => [
         class="relative inline-flex items-center gap-2 text-card-title font-semibold tracking-tight w-fit"
       >
         <House :size="22" :stroke-width="1.75" style="color: #c44d26" />
-        <span>Hauz.my</span>
+        <span>Roofly.my</span>
       </NuxtLink>
 
       <!-- Center: editorial headline + sub -->
@@ -88,7 +88,7 @@ const pillars = computed(() => [
           class="text-micro"
           style="color: rgba(247, 244, 237, 0.6)"
         >
-          © {{ new Date().getFullYear() }} Hauz.my · {{ t("common.tagline") }}
+          © {{ new Date().getFullYear() }} Roofly.my · {{ t("common.tagline") }}
         </p>
       </div>
     </aside>
@@ -102,7 +102,7 @@ const pillars = computed(() => [
           class="md:hidden inline-flex items-center gap-2 text-card-title font-semibold tracking-tight"
         >
           <House :size="22" :stroke-width="1.75" class="text-accent" />
-          <span>Hauz.my</span>
+          <span>Roofly.my</span>
         </NuxtLink>
         <div class="flex items-center gap-1 ml-auto">
           <LangSwitcher />
@@ -116,7 +116,7 @@ const pillars = computed(() => [
       </main>
 
       <footer class="px-6 py-4 text-center text-micro text-ink-muted md:hidden">
-        © {{ new Date().getFullYear() }} Hauz.my · {{ $t("common.tagline") }}
+        © {{ new Date().getFullYear() }} Roofly.my · {{ $t("common.tagline") }}
       </footer>
     </div>
   </div>

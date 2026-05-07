@@ -1,4 +1,4 @@
-# Hauz frontend — Nuxt 3 dev container (Node 22-alpine).
+# Roofly frontend — Nuxt 3 dev container (Node 22-alpine).
 # Production build will get a separate multi-stage Dockerfile in Phase 6.
 
 FROM node:22-alpine

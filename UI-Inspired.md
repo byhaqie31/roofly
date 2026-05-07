@@ -1,6 +1,6 @@
 # Design System Inspired by Lovable
 
-> **Purpose:** Reference / inspiration material for Hauz's UI language. This document captures what we learned from studying Lovable's site. It is NOT the project standard — see [UI-Standards.md](UI-Standards.md) for the actual rules we follow.
+> **Purpose:** Reference / inspiration material for Roofly's UI language. This document captures what we learned from studying Lovable's site. It is NOT the project standard — see [UI-Standards.md](UI-Standards.md) for the actual rules we follow.
 
 ---
 

@@ -1,13 +1,13 @@
-# Claude Code Prompt — Hauz Phase 1 Scaffolding
+# Claude Code Prompt — Roofly Phase 1 Scaffolding
 
-Copy everything below into a fresh Claude Code session inside your `hauz` repo.
+Copy everything below into a fresh Claude Code session inside your `roofly` repo.
 
 ---
 
 ## The Prompt
 
 ```
-You are helping me bootstrap a new SaaS project called Hauz — a property rental
+You are helping me bootstrap a new SaaS project called Roofly — a property rental
 management platform for Malaysian landlords. Read PROJECT.md in the repo root
 first; it's the source of truth for all architecture decisions, naming, and scope.
 
@@ -76,9 +76,9 @@ You will set up:
    - Middleware: 'role:owner', 'role:tenant', 'role:admin'
 
 8. **Seeders with realistic Malaysian data**
-   - 1 admin: admin@hauz.my / password
-   - 1 owner: owner@hauz.my / password (Cik Aminah, KL phone)
-   - 1 tenant: tenant@hauz.my / password (Adi)
+   - 1 admin: admin@roofly.my / password
+   - 1 owner: owner@roofly.my / password (Cik Aminah, KL phone)
+   - 1 tenant: tenant@roofly.my / password (Adi)
    - 3 properties for the owner (a condo in Mont Kiara, a landed in Bangsar,
      a shoplot in Bukit Bintang) with realistic Jalan addresses and Malaysian
      postcodes
@@ -159,10 +159,10 @@ Read PROJECT.md now and propose the plan.
 ## How to use this prompt
 
 ### 1. Make sure your repo has both files
-Before pasting the prompt, your local `hauz/` repo should have:
+Before pasting the prompt, your local `roofly/` repo should have:
 
 ```
-hauz/
+roofly/
 ├── README.md
 ├── PROJECT.md          ← the planning doc (next file in this delivery)
 └── .github/
@@ -180,7 +180,7 @@ git push origin main
 ### 2. Open Claude Code in the repo
 
 ```bash
-cd ~/hauz
+cd ~/roofly
 claude
 ```
 

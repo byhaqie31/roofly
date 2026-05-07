@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Hauz — local development stack.
+# Roofly — local development stack.
 #
 # Phase 1.1: data services only (mysql, redis, rabbitmq).
 # Backend (php-fpm) and frontend (node) services land in their respective
@@ -13,7 +13,7 @@
 services:
   mysql:
     image: mysql:8.0
-    container_name: hauz-mysql
+    container_name: roofly-mysql
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -30,11 +30,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - hauz
+      - roofly
 
   redis:
     image: redis:7-alpine
-    container_name: hauz-redis
+    container_name: roofly-redis
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     ports:
@@ -47,11 +47,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - hauz
+      - roofly
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
-    container_name: hauz-rabbitmq
+    container_name: roofly-rabbitmq
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
@@ -67,13 +67,13 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - hauz
+      - roofly
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: hauz-frontend
+    container_name: roofly-frontend
     restart: unless-stopped
     ports:
       - "${FRONTEND_PORT}:3000"
@@ -90,7 +90,7 @@ services:
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
     networks:
-      - hauz
+      - roofly
 
   # backend:
   #   added in Phase 1 backend install commit (Laravel 11 + php-fpm)
@@ -106,5 +106,5 @@ volumes:
   frontend_nuxt:
 
 networks:
-  hauz:
+  roofly:
     driver: bridge

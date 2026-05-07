@@ -1,7 +1,7 @@
-# Hauz UI Standards
+# Roofly UI Standards
 
 > **Status:** Locked-in for Phase 1 onwards. Update as decisions evolve.
-> **Inspiration:** [UI-Inspired.md](UI-Inspired.md) — Lovable's warm-cream, opacity-driven, border-defined system. Read that first; this document adapts it to Hauz.
+> **Inspiration:** [UI-Inspired.md](UI-Inspired.md) — Lovable's warm-cream, opacity-driven, border-defined system. Read that first; this document adapts it to Roofly.
 > **Override priority:** UI-Standards.md > [PROJECT.md](PROJECT.md) > earlier prompts/memory. When in conflict, this wins for visual + interaction language.
 
 ---
@@ -60,7 +60,7 @@ All design tokens live in `frontend/assets/css/tokens.css` and mirror to `tailwi
 --accent-soft:  rgba(153, 60, 29, 0.08);  /* tint for active nav items, badges */
 ```
 
-### 1.5 Status (Hauz extensions)
+### 1.5 Status (Roofly extensions)
 
 The Lovable system bans saturated accents. We bend the rule **only** for status pills, where meaning can't be encoded in neutrals alone. Keep them muted, warm-toned, never neon.
 
@@ -368,7 +368,7 @@ Browsershot renders Tailwind HTML to PDF. PDFs are brand surfaces too — same s
 - Borders: `#ECEAE4` solid (survives flattening)
 - Font: Inter, embedded via `@font-face` data URL inside the Blade template (no external network at render time)
 - Margins: 24mm top/bottom, 20mm left/right
-- Header: Hauz wordmark left, document type right (e.g., "Tenancy agreement")
+- Header: Roofly wordmark left, document type right (e.g., "Tenancy agreement")
 - Footer: generated date, "Page X of Y", document ID — `var(--text-muted)` 10pt
 - Money: same `RM 1,500.00` format, `tabular-nums`
 
