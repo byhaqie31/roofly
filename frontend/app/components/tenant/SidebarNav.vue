@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  Home,
+  DoorOpen,
   FileText,
   Receipt,
   Wrench,
@@ -10,7 +10,7 @@ import {
 const { t } = useI18n();
 
 const items = computed(() => [
-  { to: "/tenant", label: t("tenant.nav.home"), icon: Home, exact: true },
+  { to: "/tenant", label: t("tenant.nav.home"), icon: DoorOpen, exact: true },
   { to: "/tenant/agreement", label: t("tenant.nav.agreement"), icon: FileText },
   { to: "/tenant/payments", label: t("tenant.nav.payments"), icon: Receipt },
   { to: "/tenant/tickets", label: t("tenant.nav.tickets"), icon: Wrench },
