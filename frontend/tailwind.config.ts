@@ -2,7 +2,7 @@ import type { Config } from "tailwindcss";
 
 /**
  * Tailwind config — mirrors design tokens from assets/css/tokens.css.
- * Per UI-Standards.md, tokens are the source of truth; Tailwind utilities
+ * Per docs/frontend/UI-STANDARDS.md, tokens are the source of truth; Tailwind utilities
  * reference CSS variables so dark mode swaps automatically.
  */
 export default {
@@ -92,7 +92,7 @@ export default {
         sans: ['"Inter Variable"', "ui-sans-serif", "system-ui", "sans-serif"],
       },
       fontSize: {
-        // Display scale per UI-Standards.md § 2.3
+        // Display scale per docs/frontend/UI-STANDARDS.md § 2.3
         "display-hero": ["3.75rem", { lineHeight: "1.05", letterSpacing: "-1.5px", fontWeight: "600" }],
         "display-section": ["3rem", { lineHeight: "1.0", letterSpacing: "-1.2px", fontWeight: "600" }],
         "display-sub": ["2.25rem", { lineHeight: "1.1", letterSpacing: "-0.9px", fontWeight: "600" }],
