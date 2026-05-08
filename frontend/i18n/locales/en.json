@@ -312,7 +312,9 @@
         "kinds": {
           "overdue": "Overdue",
           "expiring": "Expiring",
-          "notice_given": "Notice given"
+          "notice_given": "Notice given",
+          "ticket_new": "New ticket",
+          "ticket_reopened": "Reopened"
         }
       },
       "emptyState": {
@@ -363,6 +365,84 @@
       "empty": {
         "title": "Reports unlock with activity",
         "description": "Once you have agreements and payments, this is where annual income, occupancy, and tax reports live."
+      }
+    },
+    "tickets": {
+      "subtitle": "Issues reported by tenants or logged by you. Drag context with you when you click into a ticket.",
+      "createCta": "Log ticket",
+      "columnEmpty": "Nothing here.",
+      "byOwner": "You",
+      "empty": {
+        "title": "No tickets yet",
+        "description": "Log a ticket on a unit's behalf, or wait for tenants to report issues from their app."
+      },
+      "status": {
+        "new": "New",
+        "in_progress": "In progress",
+        "resolved": "Resolved",
+        "reopened": "Reopened"
+      },
+      "category": {
+        "plumbing": "Plumbing",
+        "electrical": "Electrical",
+        "appliance": "Appliance",
+        "structural": "Structural",
+        "pest": "Pest",
+        "other": "Other"
+      },
+      "priority": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "urgent": "Urgent"
+      },
+      "create": {
+        "title": "Log a ticket",
+        "description": "Capture an issue against a unit. You can attribute it to yourself or a tenant.",
+        "submit": "Log ticket",
+        "createdToast": "Ticket logged",
+        "reporterOwner": "Me (owner)",
+        "fields": {
+          "unit": "Unit",
+          "reporter": "Logged by",
+          "category": "Category",
+          "priority": "Priority",
+          "title": "Summary",
+          "description": "Details"
+        },
+        "placeholders": {
+          "unit": "Pick a unit",
+          "title": "e.g. Kitchen tap dripping",
+          "description": "What's happening, what's been tried, when it started…"
+        }
+      },
+      "detail": {
+        "back": "Back to maintenance",
+        "notFound": "Ticket not found.",
+        "description": "Description",
+        "comments": "Comments",
+        "addComment": "Add a comment",
+        "postComment": "Post comment",
+        "commentPlaceholder": "Update for the tenant or note for yourself…",
+        "commentToast": "Comment added",
+        "noComments": "No comments yet.",
+        "tenant": "Tenant",
+        "statusActions": "Status",
+        "statusHelp": "Move this ticket forward.",
+        "statusToast": "Marked {status}",
+        "noTransitions": "No transitions available from this state.",
+        "transitions": {
+          "new": "Move back to New",
+          "in_progress": "Mark in progress",
+          "resolved": "Mark resolved",
+          "reopened": "Reopen"
+        },
+        "photos": {
+          "title": "Photos",
+          "help": "Tenant-uploaded photos arrive in Phase 4 once file storage is wired up.",
+          "placeholderTitle": "Photo upload arrives in Phase 4",
+          "placeholderHelp": "Once file storage is wired, photos attached to the ticket appear here."
+        }
       }
     },
     "properties": {

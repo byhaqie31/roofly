@@ -529,7 +529,110 @@ Late-fee accrual is a backend concern (cron job per [PROJECT.md § Flow 3 step 6
 
 ---
 
-## 7. Dashboard & Reports
+## 7. Maintenance tickets
+
+Cross-entity flow: a `Ticket` is a tenant-or-owner-reported issue against a `Unit`, with a comment thread for back-and-forth and a four-state status workflow. Owner UX is a Kanban board + detail page.
+
+### 7.1 Types
+
+```ts
+// app/types/ticket.ts
+export type TicketStatus = "new" | "in_progress" | "resolved" | "reopened";
+export type TicketCategory =
+  | "plumbing" | "electrical" | "appliance" | "structural" | "pest" | "other";
+export type TicketPriority = "low" | "medium" | "high" | "urgent";
+export type TicketReporterRole = "owner" | "tenant";
+
+export interface Ticket {
+  id: string;
+  unitId: string;                  // FK -> Unit
+  reporterId: string;              // tenant id, or "owner-1" when role === "owner"
+  reporterRole: TicketReporterRole;
+  category: TicketCategory;
+  priority: TicketPriority;
+  title: string;                   // ≤100 chars, shown on Kanban cards
+  description: string;             // long body, shown on detail page
+  status: TicketStatus;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt?: string;             // set when status flips to "resolved"
+  // Photos: Phase 4+ (file storage)
+}
+
+export interface TicketComment {
+  id: string;
+  ticketId: string;
+  authorId: string;
+  authorRole: TicketReporterRole;
+  body: string;
+  createdAt: string;
+}
+```
+
+### 7.2 Status workflow
+
+A small transition map enforces the allowed paths so the detail-page action buttons stay correct. Lives next to the type for proximity:
+
+```ts
+export const TICKET_TRANSITIONS: Record<TicketStatus, TicketStatus[]> = {
+  new:         ["in_progress", "resolved"],
+  in_progress: ["resolved", "new"],          // "new" = regression / re-triage
+  resolved:    ["reopened"],
+  reopened:    ["in_progress", "resolved"],
+};
+```
+
+### 7.3 Kanban + detail UX
+
+**[pages/owner/maintenance.vue](../../frontend/app/pages/owner/maintenance.vue)** — four-column Kanban (`New` / `In progress` / `Resolved` / `Reopened`). Cards are read-only navigation: clicking a card opens the detail page. **No drag-and-drop yet** — keeps the build dependency-free. If we add it later, the same card markup wraps in a draggable.
+
+```
+┌─ Maintenance ─────────────────────────────────────────  [+ Log ticket] ─┐
+│                                                                          │
+│  ┌─ NEW (2) ──┐  ┌─ IN PROGRESS (2) ┐  ┌─ RESOLVED (2) ┐  ┌─ REOPENED (1) ┐
+│  │ [Urgent]   │  │ [High]            │  │ [Low]          │  │ [High]      │
+│  │ Power…     │  │ Bath drain…       │  │ Tap drip       │  │ Heater…     │
+│  │ KLCC · …   │  │ KLCC · …          │  │ KLCC · …       │  │ Subang · …  │
+│  │            │  │                   │  │                │  │             │
+│  │ [Medium]   │  │ [High]            │  │ [Medium]       │  │             │
+│  │ Repaint…   │  │ Termites…         │  │ Sticky lock    │  │             │
+│  └────────────┘  └───────────────────┘  └────────────────┘  └─────────────┘
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+**[pages/owner/maintenance/[id].vue](../../frontend/app/pages/owner/maintenance/%5Bid%5D.vue)** — detail page with three regions:
+
+- **Header**: priority pill + status pill + category caption, title, breadcrumb to property/unit + reporter.
+- **Main column**: `Description` card (full body, preserves line breaks), `Comments` thread card with author avatar (owner = ink-fill, tenant = green-soft), and an inline "Add a comment" textarea that posts owner-attributed comments.
+- **Side column**: `Status` card whose buttons come straight from `TICKET_TRANSITIONS[currentStatus]` — only valid moves render. `Photos` card stays a Phase-4 stub (re-uses the `runtimeConfig.public.features.documents` flag).
+
+**[TicketCreateModal.vue](../../frontend/app/components/owner/TicketCreateModal.vue)** — owner-side modal at `size="md"`. Fields: unit (select listing all units with property prefix), `Logged by` (Me / any tenant — mock-flexibility, real flow would auto-derive from active agreement), category, priority, summary, details. Created ticket lands in the `New` column.
+
+### 7.4 Mock seed
+
+[mocks/tickets.ts](../../frontend/app/mocks/tickets.ts) carries **7 tickets** spanning all four statuses, three priorities, and five categories — at least one ticket in every Kanban column with a couple in the busy ones. Tickets use realistic Malaysian-rental scenarios (storm-tripped main panel, termite frames, tap drip, water-heater regression) so the demo reads as believable.
+
+[ticketCommentsMock](../../frontend/app/mocks/tickets.ts) gives three tickets a real thread (plumber-scheduled → tenant-confirmed → resolved; pest exterminator booked + tenant move-out note; water-heater original-fix + regression report) so the comments UI doesn't show a single ghost ticket.
+
+### 7.5 Dashboard wire-up
+
+`useDashboard()` (see § 8) loads `useTickets().list()` alongside the other entities and surfaces two new `AttentionKind`s in the "Needs attention" feed:
+
+- `ticket_new` — only **high / urgent** priority new tickets (low/medium stay in the Kanban so the feed isn't noisy)
+- `ticket_reopened` — *all* reopened tickets, since by definition they need re-triage
+
+Tone mapping in [pages/owner/index.vue](../../frontend/app/pages/owner/index.vue): `ticket_new` → `pending` (amber), `ticket_reopened` → `overdue` (red).
+
+### 7.6 Schema impact for backend
+
+- **`tickets` table**: `id`, `unit_id` (FK), `reporter_id` (FK → users), `reporter_role` enum, `category` enum, `priority` enum, `title`, `description` (text), `status` enum, `created_at`, `updated_at`, `resolved_at` (nullable).
+- **`ticket_comments` table**: `id`, `ticket_id` (FK), `author_id` (FK → users), `author_role` enum, `body` (text), `created_at`.
+- **Endpoints the frontend mocks today**: `GET /tickets` (+ `?expand=unit,property,reporter,comments`), `GET /tickets/:id`, `POST /tickets`, `PATCH /tickets/:id/status` (body `{ status }`), `POST /tickets/:id/comments` (body `{ body }`).
+- Photos defer to Phase 4 (polymorphic `documents` table already in PROJECT.md).
+
+---
+
+## 8. Dashboard & Reports
 
 The first screens that **read across multiple entities** rather than owning one. They live on top of the existing services — no new mocks, no service writes — so the mock→backend swap for individual entities automatically picks up here.
 
@@ -613,7 +716,7 @@ If we ever need richer charts (multi-series, axes), revisit this — but the cur
 
 ---
 
-## 8. Migration plan (per entity)
+## 9. Migration plan (per entity)
 
 When the backend endpoint for an entity ships:
 
@@ -626,7 +729,7 @@ Entities migrate independently; we don't need a big-bang swap.
 
 ---
 
-## 9. Decisions
+## 10. Decisions
 
 | Question | Decision |
 |---|---|
@@ -641,10 +744,11 @@ Entities migrate independently; we don't need a big-bang swap.
 | Charts | **Hand-rolled CSS/HTML in [MiniBarChart.vue](../../frontend/app/components/ui/MiniBarChart.vue)** — no chart-library dep. Monochrome palette + simple bar visuals don't justify the bundle / theming cost. Revisit if multi-series or axes show up. |
 | CSV export | **Client-side Blob** via [utils/csv.ts](../../frontend/app/utils/csv.ts) (RFC 4180 escaping + UTF-8 BOM for Excel). No file storage required, works pre-Phase-4. |
 | Cross-entity reads | Aggregations live in **read-only composables** on top of services (`useDashboard`, `useReports`) — no service writes, no new mocks. Mock→backend swap stays per-entity. |
+| Kanban interactions | **Read-only cards + buttons-on-detail** for status transitions — no drag-and-drop library yet. Allowed transitions come from a static `TICKET_TRANSITIONS` map. Revisit when DnD is genuinely the better UX. |
 
 ---
 
-## 10. Order of work
+## 11. Order of work
 
 1. `app/types/property.ts` + `app/schemas/property.ts` (Zod) + `app/mocks/properties.ts` + `app/services/useProperties.ts`.
 2. Install `reka-ui`. Build thin wrappers `~/components/ui/Modal.vue` and `Select.vue` (style per [UI-STANDARDS.md](UI-STANDARDS.md)).
@@ -652,4 +756,5 @@ Entities migrate independently; we don't need a big-bang swap.
 4. Properties list rendering on [pages/owner/properties.vue](../../frontend/app/pages/owner/properties.vue) — replace EmptyState when list non-empty.
 5. Property detail route `pages/owner/properties/[id].vue` with **Basics** (Tier 2) and **Ownership & costs** (Tier 3) tabs.
 6. Repeat the type → schema → mock → service → UI loop for Units, Tenants, Agreements, Invoices/Payments.
-7. **Cross-entity views** — `useDashboard` + `useReports` composables → dashboard tiles, 12-month chart, "Needs attention" feed → reports page (year picker, per-property breakdown, CSV export, PDF stub). See § 7.
+7. **Maintenance tickets** — types + status transition map + Zod schemas + `useTickets` service + Kanban + detail page with comment thread + create modal. See § 7.
+8. **Cross-entity views** — `useDashboard` + `useReports` composables → dashboard tiles, 12-month chart, "Needs attention" feed → reports page (year picker, per-property breakdown, CSV export, PDF stub). See § 8.

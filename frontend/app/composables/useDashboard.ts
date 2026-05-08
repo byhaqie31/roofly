@@ -5,13 +5,19 @@ import type { Tenant } from "~/types/tenant";
 import type { Agreement } from "~/types/agreement";
 import type { Invoice } from "~/types/invoice";
 import type { Payment } from "~/types/payment";
+import type { Ticket } from "~/types/ticket";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const ymKey = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 
-export type AttentionKind = "overdue" | "expiring" | "notice_given";
+export type AttentionKind =
+  | "overdue"
+  | "expiring"
+  | "notice_given"
+  | "ticket_new"
+  | "ticket_reopened";
 
 export interface AttentionItem {
   kind: AttentionKind;
@@ -34,16 +40,18 @@ export const useDashboard = () => {
   const agreements = ref<Agreement[]>([]);
   const invoices = ref<Invoice[]>([]);
   const payments = ref<Payment[]>([]);
+  const tickets = ref<Ticket[]>([]);
 
   const load = async () => {
     loading.value = true;
     try {
-      const [props, us, ts, ags, invsWithRefs] = await Promise.all([
+      const [props, us, ts, ags, invsWithRefs, tk] = await Promise.all([
         useProperties().list(),
         useUnits().list(),
         useTenants().list(),
         useAgreements().list(),
         useInvoices().listWithRefs(),
+        useTickets().list(),
       ]);
       properties.value = props;
       units.value = us;
@@ -51,6 +59,7 @@ export const useDashboard = () => {
       agreements.value = ags;
       invoices.value = invsWithRefs.map((x) => x.invoice);
       payments.value = invsWithRefs.flatMap((x) => x.payments);
+      tickets.value = tk;
     } finally {
       loading.value = false;
     }
@@ -154,6 +163,32 @@ export const useDashboard = () => {
           title: t.name,
           meta: "",
           link: `/owner/tenants/${t.id}`,
+        });
+      });
+
+    // High/urgent new tickets — low/medium new tickets stay in the Kanban
+    // so they don't crowd the feed.
+    tickets.value
+      .filter((t) => t.status === "new")
+      .filter((t) => t.priority === "high" || t.priority === "urgent")
+      .forEach((t) => {
+        items.push({
+          kind: "ticket_new",
+          title: t.title,
+          meta: t.priority,
+          link: `/owner/maintenance/${t.id}`,
+        });
+      });
+
+    // All reopened tickets surface — by definition they need attention again.
+    tickets.value
+      .filter((t) => t.status === "reopened")
+      .forEach((t) => {
+        items.push({
+          kind: "ticket_reopened",
+          title: t.title,
+          meta: t.priority,
+          link: `/owner/maintenance/${t.id}`,
         });
       });
 

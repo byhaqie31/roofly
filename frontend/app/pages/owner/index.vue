@@ -27,10 +27,15 @@ const outstandingCount = computed(
     ).length,
 );
 
-const attentionTone: Record<AttentionKind, "overdue" | "maintenance" | "draft"> = {
+const attentionTone: Record<
+  AttentionKind,
+  "overdue" | "maintenance" | "draft" | "pending"
+> = {
   overdue: "overdue",
   expiring: "maintenance",
   notice_given: "draft",
+  ticket_new: "pending",
+  ticket_reopened: "overdue",
 };
 </script>
 

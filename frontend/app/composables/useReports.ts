@@ -5,16 +5,11 @@ import type { Tenant } from "~/types/tenant";
 import type { Agreement } from "~/types/agreement";
 import type { Invoice } from "~/types/invoice";
 import type { Payment } from "~/types/payment";
+import type { MonthlyBucket } from "~/composables/useDashboard";
 import { computeCapitalGains, type CapitalGainsSnapshot } from "~/utils/rpgt";
 
 const ymKey = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-
-export interface MonthlyBucket {
-  key: string;
-  label: string;
-  amount: number;        // sen
-}
 
 export interface PropertyReportRow {
   property: Property;

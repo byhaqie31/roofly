@@ -312,7 +312,9 @@
         "kinds": {
           "overdue": "Tertunggak",
           "expiring": "Akan tamat",
-          "notice_given": "Notis diberi"
+          "notice_given": "Notis diberi",
+          "ticket_new": "Tiket baru",
+          "ticket_reopened": "Dibuka semula"
         }
       },
       "emptyState": {
@@ -363,6 +365,84 @@
       "empty": {
         "title": "Laporan akan dipaparkan setelah ada aktiviti",
         "description": "Apabila anda ada perjanjian dan pembayaran, di sinilah pendapatan tahunan, kadar penghunian, dan laporan cukai dipaparkan."
+      }
+    },
+    "tickets": {
+      "subtitle": "Isu dilapor oleh penyewa atau dilog oleh anda. Konteks dibawa bersama apabila anda klik ke dalam tiket.",
+      "createCta": "Log tiket",
+      "columnEmpty": "Tiada apa-apa di sini.",
+      "byOwner": "Anda",
+      "empty": {
+        "title": "Tiada tiket lagi",
+        "description": "Log tiket bagi pihak unit, atau tunggu penyewa melaporkan isu dari aplikasi mereka."
+      },
+      "status": {
+        "new": "Baru",
+        "in_progress": "Dalam proses",
+        "resolved": "Selesai",
+        "reopened": "Dibuka semula"
+      },
+      "category": {
+        "plumbing": "Paip",
+        "electrical": "Elektrik",
+        "appliance": "Perkakas",
+        "structural": "Struktur",
+        "pest": "Serangga",
+        "other": "Lain-lain"
+      },
+      "priority": {
+        "low": "Rendah",
+        "medium": "Sederhana",
+        "high": "Tinggi",
+        "urgent": "Kritikal"
+      },
+      "create": {
+        "title": "Log tiket",
+        "description": "Rekodkan isu pada unit. Anda boleh kaitkan kepada diri sendiri atau penyewa.",
+        "submit": "Log tiket",
+        "createdToast": "Tiket dilog",
+        "reporterOwner": "Saya (pemilik)",
+        "fields": {
+          "unit": "Unit",
+          "reporter": "Dilog oleh",
+          "category": "Kategori",
+          "priority": "Keutamaan",
+          "title": "Ringkasan",
+          "description": "Butiran"
+        },
+        "placeholders": {
+          "unit": "Pilih unit",
+          "title": "cth. Paip dapur menitik",
+          "description": "Apa yang berlaku, apa yang telah dicuba, bila bermula…"
+        }
+      },
+      "detail": {
+        "back": "Kembali ke senarai tiket",
+        "notFound": "Tiket tidak dijumpai.",
+        "description": "Penerangan",
+        "comments": "Komen",
+        "addComment": "Tambah komen",
+        "postComment": "Hantar komen",
+        "commentPlaceholder": "Maklum balas untuk penyewa atau nota untuk diri sendiri…",
+        "commentToast": "Komen ditambah",
+        "noComments": "Tiada komen lagi.",
+        "tenant": "Penyewa",
+        "statusActions": "Status",
+        "statusHelp": "Gerakkan tiket ini ke status seterusnya.",
+        "statusToast": "Ditandakan {status}",
+        "noTransitions": "Tiada peralihan dari keadaan ini.",
+        "transitions": {
+          "new": "Kembalikan ke Baru",
+          "in_progress": "Tandakan dalam proses",
+          "resolved": "Tandakan selesai",
+          "reopened": "Buka semula"
+        },
+        "photos": {
+          "title": "Foto",
+          "help": "Foto yang dimuat naik penyewa tiba di Fasa 4 setelah storan fail siap.",
+          "placeholderTitle": "Muat naik foto tiba di Fasa 4",
+          "placeholderHelp": "Apabila storan fail siap, foto yang dilampirkan kepada tiket akan dipaparkan di sini."
+        }
       }
     },
     "properties": {
