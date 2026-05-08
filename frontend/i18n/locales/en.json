@@ -69,6 +69,78 @@
         "description": "Properties hold the units you rent out. Start with one and we'll guide you from there.",
         "cta": "Add property"
       }
+    },
+    "properties": {
+      "addCta": "Add property",
+      "addModal": {
+        "title": "Add property",
+        "description": "Capture the basics now — you can fill in unit and ownership details after.",
+        "submit": "Add property",
+        "fields": {
+          "name": "Property name",
+          "type": "Type",
+          "address": "Address",
+          "city": "City",
+          "state": "State",
+          "postcode": "Postcode"
+        },
+        "placeholders": {
+          "name": "e.g. Suria KLCC #12-3A",
+          "address": "Street address",
+          "state": "Choose state",
+          "postcode": "5-digit"
+        }
+      },
+      "types": {
+        "condo": "Condominium",
+        "landed": "Landed",
+        "shoplot": "Shoplot",
+        "room": "Room"
+      },
+      "detail": {
+        "back": "Back to properties",
+        "notFound": "Property not found.",
+        "save": "Save changes",
+        "saved": "Saved",
+        "tabs": {
+          "basics": "Basics",
+          "costs": "Ownership & costs"
+        },
+        "basicsHelp": "Physical characteristics — these mostly don't change once recorded.",
+        "costsHelp": "Recurring costs and reference numbers — your personal house ledger.",
+        "fields": {
+          "yearBuilt": "Year built",
+          "builtUpSqft": "Built-up area (sqft)",
+          "landSqft": "Land area (sqft)",
+          "bedrooms": "Bedrooms",
+          "bathrooms": "Bathrooms",
+          "parkingLots": "Parking lots",
+          "furnishing": "Furnishing",
+          "titleType": "Title type",
+          "tenureExpiry": "Tenure expiry",
+          "strataTitle": "Strata title",
+          "purchaseDate": "Purchase date",
+          "purchasePrice": "Purchase price (RM)",
+          "monthlyMaintenanceFee": "Monthly maintenance fee (RM)",
+          "quitRentAnnual": "Quit rent / year (RM)",
+          "assessmentRateAnnual": "Assessment rate / year (RM)",
+          "insurancePolicyNo": "Insurance policy no.",
+          "insuranceProvider": "Insurance provider",
+          "tnbAccountNo": "TNB account no.",
+          "waterAccountNo": "Water account no.",
+          "indahWaterAccountNo": "Indah Water account no.",
+          "notes": "Notes"
+        },
+        "furnishingOptions": {
+          "unfurnished": "Unfurnished",
+          "partial": "Partial",
+          "fully": "Fully furnished"
+        },
+        "titleTypeOptions": {
+          "freehold": "Freehold",
+          "leasehold": "Leasehold"
+        }
+      }
     }
   },
   "tenant": {

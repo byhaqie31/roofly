@@ -69,6 +69,78 @@
         "description": "Hartanah mengandungi unit yang anda sewakan. Mula dengan satu dan kami akan bantu seterusnya.",
         "cta": "Tambah hartanah"
       }
+    },
+    "properties": {
+      "addCta": "Tambah hartanah",
+      "addModal": {
+        "title": "Tambah hartanah",
+        "description": "Isi maklumat asas dahulu — butiran unit dan pemilikan boleh diisi kemudian.",
+        "submit": "Tambah hartanah",
+        "fields": {
+          "name": "Nama hartanah",
+          "type": "Jenis",
+          "address": "Alamat",
+          "city": "Bandar",
+          "state": "Negeri",
+          "postcode": "Poskod"
+        },
+        "placeholders": {
+          "name": "cth. Suria KLCC #12-3A",
+          "address": "Alamat jalan",
+          "state": "Pilih negeri",
+          "postcode": "5-digit"
+        }
+      },
+      "types": {
+        "condo": "Kondominium",
+        "landed": "Tanah",
+        "shoplot": "Lot kedai",
+        "room": "Bilik"
+      },
+      "detail": {
+        "back": "Kembali ke senarai hartanah",
+        "notFound": "Hartanah tidak dijumpai.",
+        "save": "Simpan perubahan",
+        "saved": "Disimpan",
+        "tabs": {
+          "basics": "Asas",
+          "costs": "Pemilikan & kos"
+        },
+        "basicsHelp": "Ciri-ciri fizikal — biasanya tidak berubah selepas direkod.",
+        "costsHelp": "Kos berulang dan nombor rujukan — lejar peribadi hartanah anda.",
+        "fields": {
+          "yearBuilt": "Tahun dibina",
+          "builtUpSqft": "Keluasan binaan (kp)",
+          "landSqft": "Keluasan tanah (kp)",
+          "bedrooms": "Bilik tidur",
+          "bathrooms": "Bilik air",
+          "parkingLots": "Tempat letak kereta",
+          "furnishing": "Perabot",
+          "titleType": "Jenis hak milik",
+          "tenureExpiry": "Tarikh tamat pajakan",
+          "strataTitle": "Hak milik strata",
+          "purchaseDate": "Tarikh belian",
+          "purchasePrice": "Harga belian (RM)",
+          "monthlyMaintenanceFee": "Yuran penyelenggaraan bulanan (RM)",
+          "quitRentAnnual": "Cukai tanah / tahun (RM)",
+          "assessmentRateAnnual": "Cukai pintu / tahun (RM)",
+          "insurancePolicyNo": "No. polisi insurans",
+          "insuranceProvider": "Penyedia insurans",
+          "tnbAccountNo": "No. akaun TNB",
+          "waterAccountNo": "No. akaun air",
+          "indahWaterAccountNo": "No. akaun Indah Water",
+          "notes": "Catatan"
+        },
+        "furnishingOptions": {
+          "unfurnished": "Tanpa perabot",
+          "partial": "Separa berperabot",
+          "fully": "Berperabot penuh"
+        },
+        "titleTypeOptions": {
+          "freehold": "Pegangan bebas",
+          "leasehold": "Pajakan"
+        }
+      }
     }
   },
   "tenant": {

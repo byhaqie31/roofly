@@ -20,6 +20,7 @@
     "lucide-vue-next": "^0.475.0",
     "nuxt": "^4.4.4",
     "pinia": "^3.0.3",
+    "reka-ui": "^2.9.7",
     "vee-validate": "^4.15.0",
     "vue": "^3.5.33",
     "vue-router": "^5.0.6",

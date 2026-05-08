@@ -1,75 +1,48 @@
-# Nuxt Minimal Starter
+# Roofly frontend (Nuxt 4)
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Owner + tenant UIs. Runs in a Docker container alongside the rest of the stack — see [docker-compose.yml](../docker-compose.yml) at the repo root.
 
-## Setup
-
-Make sure to install dependencies:
+## Quickstart
 
 ```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
+# from the repo root
+docker compose up -d frontend
 ```
 
-## Development Server
+App at http://localhost:3000.
 
-Start the development server on `http://localhost:3000`:
+## Adding a dependency
+
+**Important:** the container has an isolated `frontend_node_modules` volume (declared in [docker-compose.yml](../docker-compose.yml#L83)). Running `npm install <pkg>` on the host **does not** reach the container — Vite inside the container will still throw `Cannot find package '<pkg>'`.
+
+**Default workflow — rebuild the image:**
 
 ```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
+docker compose build frontend
+docker compose up -d frontend
 ```
 
-## Production
+The Dockerfile re-runs `npm ci` on every build, so the container's `node_modules` volume picks up the new package. This is the path to use before committing — it guarantees CI matches.
 
-Build the application for production:
+**Faster alternative while iterating:**
 
 ```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+docker compose exec frontend npm install <pkg>
+docker compose restart frontend   # so Vite clears its module cache
 ```
 
-Locally preview production build:
+Same rule applies to removing or upgrading a dependency: change `package.json` on the host, then rebuild (or `exec npm install`) to sync the container.
+
+## Common commands
 
 ```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
+docker compose exec frontend npm run typecheck
+docker compose exec frontend npm run build
+docker compose logs -f frontend
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Docs
+
+- [../docs/frontend/UI-STANDARDS.md](../docs/frontend/UI-STANDARDS.md) — visual + interaction language
+- [../docs/frontend/MOCK-POC.md](../docs/frontend/MOCK-POC.md) — current frontend-first mock plan
+- [Nuxt 4 docs](https://nuxt.com/docs)

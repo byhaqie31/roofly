@@ -10,6 +10,10 @@ export default defineNuxtConfig({
     "@vee-validate/nuxt",
   ],
 
+  imports: {
+    dirs: ["services"],
+  },
+
   css: ["~/assets/css/main.css"],
 
   tailwindcss: {

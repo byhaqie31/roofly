@@ -176,14 +176,19 @@ Two weights only. **Do not use 700+.**
 ### 3.2 Cards
 
 ```
-bg: var(--surface-page)
+bg: var(--surface-raised)          /* default — raised tone, #ffffff / #2e2b25 */
+   | var(--surface-page)           /* opt-out via tone="flat" */
 border: 1px solid var(--border-passive)
 radius: var(--radius-lg)
 padding: 24px (standard), 16px (compact)
 box-shadow: NONE
 ```
 
-If you reach for `box-shadow` on a card, you're solving the wrong problem. Use a border or empty space.
+Cards default to `tone="raised"` so they read as lifted surfaces against the cream/charcoal page. Drop to `tone="flat"` only when a card is purely a layout container with no content of its own to set apart (rare).
+
+The same `var(--surface-raised)` is applied to other lifted surfaces — Modal, Select dropdown, popovers, and the mobile drawer — so all "panel" surfaces share one tone.
+
+If you reach for `box-shadow` on a card, you're solving the wrong problem. Use a border or empty space — the raised tone already gives the lift.
 
 ### 3.3 Inputs & forms
 

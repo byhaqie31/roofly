@@ -34,7 +34,7 @@ const initials = computed(() => {
     <Transition name="fade">
       <div
         v-if="open"
-        class="absolute right-0 mt-2 w-56 rounded-lg border border-line-passive bg-surface-page shadow-modal p-2 z-50"
+        class="absolute right-0 mt-2 w-56 rounded-lg border border-line-passive bg-surface-raised shadow-modal p-2 z-50"
         @mouseleave="open = false"
       >
         <div class="px-3 py-2 border-b border-line-passive">

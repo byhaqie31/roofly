@@ -22,6 +22,7 @@ export default {
       colors: {
         surface: {
           page: "var(--surface-page)",
+          raised: "var(--surface-raised)",
           dark: "var(--surface-button-dark)",
           ondark: "var(--surface-on-dark)",
           hover: "var(--surface-hover)",
