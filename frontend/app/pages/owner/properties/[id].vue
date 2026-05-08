@@ -10,6 +10,7 @@ import Modal from "~/components/ui/Modal.vue";
 import PropertyIdentityForm from "~/components/owner/PropertyIdentityForm.vue";
 import PropertyBasicsForm from "~/components/owner/PropertyBasicsForm.vue";
 import PropertyCostsForm from "~/components/owner/PropertyCostsForm.vue";
+import UnitsPanel from "~/components/owner/UnitsPanel.vue";
 import { useToast } from "~/composables/useToast";
 import type { Property } from "~/types/property";
 
@@ -117,6 +118,8 @@ const tabTriggerClass =
           </TabsContent>
         </TabsRoot>
       </Card>
+
+      <UnitsPanel :property-id="property.id" />
 
       <div class="mt-6 flex justify-end">
         <Button variant="ghost" @click="showDeleteConfirm = true">

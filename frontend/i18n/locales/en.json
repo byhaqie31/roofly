@@ -49,6 +49,40 @@
     "phoneMy": "Enter a valid Malaysian phone number"
   },
   "owner": {
+    "units": {
+      "sectionTitle": "Units",
+      "sectionHelp": "Each property has at least one unit. Tenants and agreements attach to units.",
+      "addCta": "Add unit",
+      "addTitle": "Add unit",
+      "editTitle": "Edit unit",
+      "save": "Save",
+      "add": "Add unit",
+      "delete": "Delete unit",
+      "createdToast": "Unit added",
+      "deletedToast": "Unit deleted",
+      "emptyTitle": "No units yet.",
+      "emptyHelp": "Add your first unit to start tracking tenants and agreements.",
+      "deleteConfirm": {
+        "title": "Delete this unit?",
+        "body": "This will remove \"{label}\" and any attached records. This cannot be undone.",
+        "confirm": "Yes, delete"
+      },
+      "fields": {
+        "label": "Label",
+        "status": "Status",
+        "bedrooms": "Bedrooms",
+        "bathrooms": "Bathrooms",
+        "sqft": "Sqft"
+      },
+      "placeholders": {
+        "label": "e.g. Master room, Whole unit, Ground floor shop"
+      },
+      "status": {
+        "vacant": "Vacant",
+        "occupied": "Occupied",
+        "maintenance": "Maintenance"
+      }
+    },
     "nav": {
       "dashboard": "Dashboard",
       "properties": "Properties",

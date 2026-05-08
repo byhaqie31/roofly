@@ -49,6 +49,40 @@
     "phoneMy": "Sila masukkan nombor telefon Malaysia yang sah"
   },
   "owner": {
+    "units": {
+      "sectionTitle": "Unit",
+      "sectionHelp": "Setiap hartanah perlu ada sekurang-kurangnya satu unit. Penyewa dan perjanjian dilampirkan kepada unit.",
+      "addCta": "Tambah unit",
+      "addTitle": "Tambah unit",
+      "editTitle": "Edit unit",
+      "save": "Simpan",
+      "add": "Tambah unit",
+      "delete": "Padam unit",
+      "createdToast": "Unit ditambah",
+      "deletedToast": "Unit dipadam",
+      "emptyTitle": "Belum ada unit.",
+      "emptyHelp": "Tambah unit pertama untuk mula merekod penyewa dan perjanjian.",
+      "deleteConfirm": {
+        "title": "Padam unit ini?",
+        "body": "Tindakan ini akan memadam \"{label}\" dan rekod berkaitan. Tidak boleh dibatalkan.",
+        "confirm": "Ya, padam"
+      },
+      "fields": {
+        "label": "Label",
+        "status": "Status",
+        "bedrooms": "Bilik tidur",
+        "bathrooms": "Bilik air",
+        "sqft": "Keluasan (kp)"
+      },
+      "placeholders": {
+        "label": "cth. Bilik utama, Seluruh unit, Tingkat bawah kedai"
+      },
+      "status": {
+        "vacant": "Kosong",
+        "occupied": "Berpenghuni",
+        "maintenance": "Penyelenggaraan"
+      }
+    },
     "nav": {
       "dashboard": "Papan pemuka",
       "properties": "Hartanah",
