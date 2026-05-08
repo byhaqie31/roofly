@@ -4,6 +4,12 @@ import { unitsMock } from "~/mocks/units";
 const USE_MOCK = true;
 
 export const useUnits = () => {
+  const list = async (): Promise<Unit[]> => {
+    if (USE_MOCK) return structuredClone(unitsMock);
+    const { request } = useApi();
+    return request<Unit[]>("/units");
+  };
+
   const listByProperty = async (propertyId: string): Promise<Unit[]> => {
     if (USE_MOCK) {
       return structuredClone(
@@ -62,5 +68,5 @@ export const useUnits = () => {
     await request(`/units/${id}`, { method: "DELETE" });
   };
 
-  return { listByProperty, get, create, update, remove };
+  return { list, listByProperty, get, create, update, remove };
 };

@@ -80,17 +80,28 @@ const tabTriggerClass =
     </Card>
 
     <template v-else>
-      <header class="mb-6">
-        <Pill tone="neutral" class="mb-3">
-          {{ t(`owner.properties.types.${property.type}`) }}
-        </Pill>
-        <h1 class="text-display-sub font-semibold tracking-snug text-ink">
-          {{ property.name }}
-        </h1>
-        <p class="mt-2 text-caption text-ink-muted">
-          {{ property.address }}, {{ property.city }}, {{ property.state }}
-          {{ property.postcode }}
-        </p>
+      <header class="mb-6 flex items-end justify-between gap-4">
+        <div class="min-w-0">
+          <Pill tone="neutral" class="mb-3">
+            {{ t(`owner.properties.types.${property.type}`) }}
+          </Pill>
+          <h1 class="text-display-sub font-semibold tracking-snug text-ink">
+            {{ property.name }}
+          </h1>
+          <p class="mt-2 text-caption text-ink-muted">
+            {{ property.address }}, {{ property.city }}, {{ property.state }}
+            {{ property.postcode }}
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          class="shrink-0"
+          @click="showDeleteConfirm = true"
+        >
+          <Icon name="Trash2" :size="14" class="mr-1" />
+          {{ t("owner.properties.detail.delete") }}
+        </Button>
       </header>
 
       <Card padding="loose">
@@ -120,13 +131,6 @@ const tabTriggerClass =
       </Card>
 
       <UnitsPanel :property-id="property.id" />
-
-      <div class="mt-6 flex justify-end">
-        <Button variant="ghost" @click="showDeleteConfirm = true">
-          <Icon name="Trash2" :size="14" class="mr-1" />
-          {{ t("owner.properties.detail.delete") }}
-        </Button>
-      </div>
 
       <Modal
         v-model:open="showDeleteConfirm"

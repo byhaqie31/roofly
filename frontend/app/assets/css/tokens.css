@@ -103,6 +103,42 @@
   --accent-hover: #d55d32;
   --accent-soft: rgba(196, 77, 38, 0.20);
 
+  /* Status — unit (dark) */
+  --status-vacant: #a8a5a1;
+  --status-vacant-soft: rgba(168, 165, 161, 0.18);
+  --status-occupied: #5fb886;
+  --status-occupied-soft: rgba(95, 184, 134, 0.18);
+  --status-maintenance: #d99a47;
+  --status-maintenance-soft: rgba(217, 154, 71, 0.18);
+
+  /* Status — invoice (dark) */
+  --status-paid: #5fb886;
+  --status-paid-soft: rgba(95, 184, 134, 0.18);
+  --status-pending: #a8a5a1;
+  --status-pending-soft: rgba(168, 165, 161, 0.18);
+  --status-overdue: #d96a45;
+  --status-overdue-soft: rgba(217, 106, 69, 0.18);
+  --status-cancelled: rgba(247, 244, 237, 0.5);
+  --status-cancelled-soft: rgba(247, 244, 237, 0.08);
+
+  /* Status — agreement (dark) */
+  --status-draft: #a8a5a1;
+  --status-draft-soft: rgba(168, 165, 161, 0.18);
+  --status-active: #5fb886;
+  --status-active-soft: rgba(95, 184, 134, 0.18);
+  --status-expired: rgba(247, 244, 237, 0.5);
+  --status-expired-soft: rgba(247, 244, 237, 0.08);
+  --status-terminated: #d96a45;
+  --status-terminated-soft: rgba(217, 106, 69, 0.18);
+
+  /* Priority — ticket (dark) */
+  --priority-low: #a8a5a1;
+  --priority-low-soft: rgba(168, 165, 161, 0.18);
+  --priority-medium: #d99a47;
+  --priority-medium-soft: rgba(217, 154, 71, 0.18);
+  --priority-high: #d96a45;
+  --priority-high-soft: rgba(217, 106, 69, 0.18);
+
   --shadow-button-inset:
     rgba(255, 255, 255, 0.06) 0 0.5px 0 0 inset,
     rgba(0, 0, 0, 0.4) 0 0 0 0.5px inset,
@@ -132,6 +168,42 @@
   --accent: #993c1d;
   --accent-hover: #7a2f17;
   --accent-soft: rgba(153, 60, 29, 0.18);
+
+  /* Status — unit (light) */
+  --status-vacant: #5f5f5d;
+  --status-vacant-soft: rgba(95, 95, 93, 0.08);
+  --status-occupied: #2f6b4a;
+  --status-occupied-soft: rgba(47, 107, 74, 0.08);
+  --status-maintenance: #b0731a;
+  --status-maintenance-soft: rgba(176, 115, 26, 0.08);
+
+  /* Status — invoice (light) */
+  --status-paid: #2f6b4a;
+  --status-paid-soft: rgba(47, 107, 74, 0.08);
+  --status-pending: #5f5f5d;
+  --status-pending-soft: rgba(95, 95, 93, 0.08);
+  --status-overdue: #993c1d;
+  --status-overdue-soft: rgba(153, 60, 29, 0.08);
+  --status-cancelled: rgba(28, 28, 28, 0.4);
+  --status-cancelled-soft: rgba(28, 28, 28, 0.04);
+
+  /* Status — agreement (light) */
+  --status-draft: #5f5f5d;
+  --status-draft-soft: rgba(95, 95, 93, 0.08);
+  --status-active: #2f6b4a;
+  --status-active-soft: rgba(47, 107, 74, 0.08);
+  --status-expired: rgba(28, 28, 28, 0.4);
+  --status-expired-soft: rgba(28, 28, 28, 0.04);
+  --status-terminated: #993c1d;
+  --status-terminated-soft: rgba(153, 60, 29, 0.08);
+
+  /* Priority — ticket (light) */
+  --priority-low: #5f5f5d;
+  --priority-low-soft: rgba(95, 95, 93, 0.08);
+  --priority-medium: #b0731a;
+  --priority-medium-soft: rgba(176, 115, 26, 0.08);
+  --priority-high: #993c1d;
+  --priority-high-soft: rgba(153, 60, 29, 0.08);
 
   --shadow-button-inset:
     rgba(255, 255, 255, 0.2) 0 0.5px 0 0 inset,

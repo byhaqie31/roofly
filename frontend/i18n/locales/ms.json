@@ -49,6 +49,82 @@
     "phoneMy": "Sila masukkan nombor telefon Malaysia yang sah"
   },
   "owner": {
+    "agreements": {
+      "addCta": "Tambah perjanjian",
+      "addTitle": "Tambah perjanjian",
+      "editTitle": "Edit perjanjian",
+      "save": "Simpan",
+      "add": "Tambah perjanjian",
+      "delete": "Padam perjanjian",
+      "createdToast": "Perjanjian dicipta",
+      "deletedToast": "Perjanjian dipadam",
+      "emptyTitle": "Belum ada perjanjian.",
+      "emptyDescription": "Cipta perjanjian setelah penyewa ditetapkan kepada satu unit.",
+      "unknownTenant": "Penyewa tidak diketahui",
+      "dueOn": "Hari ke-{day}",
+      "deleteConfirm": {
+        "title": "Padam perjanjian ini?",
+        "body": "Tindakan ini akan memadam perjanjian dan invois berkaitan secara kekal. Tidak boleh dibatalkan.",
+        "confirm": "Ya, padam"
+      },
+      "fields": {
+        "property": "Hartanah",
+        "unit": "Unit",
+        "tenant": "Penyewa",
+        "startDate": "Tarikh mula",
+        "endDate": "Tarikh tamat",
+        "rentAmount": "Sewa bulanan (RM)",
+        "depositAmount": "Deposit jaminan (RM)",
+        "lateFee": "Caj lewat (RM)",
+        "rentDueDay": "Hari sewa perlu dibayar (1–28)",
+        "status": "Status"
+      },
+      "placeholders": {
+        "property": "Pilih hartanah",
+        "unit": "Pilih unit",
+        "unitDisabled": "Pilih hartanah dahulu",
+        "tenant": "Pilih penyewa"
+      },
+      "status": {
+        "draft": "Draf",
+        "active": "Aktif",
+        "expired": "Tamat tempoh",
+        "terminated": "Ditamatkan"
+      }
+    },
+    "tenants": {
+      "inviteCta": "Jemput penyewa",
+      "inviteTitle": "Jemput penyewa",
+      "inviteHelp": "Maklumat ini akan direkodkan. Jemputan magic-link akan aktif apabila pengesahan akaun siap.",
+      "editTitle": "Edit penyewa",
+      "save": "Simpan",
+      "delete": "Buang penyewa",
+      "invitedToast": "Penyewa dijemput",
+      "deletedToast": "Penyewa dibuang",
+      "emptyTitle": "Belum ada penyewa.",
+      "emptyDescription": "Penyewa akan muncul di sini setelah anda menjemput mereka. Setiap penyewa dilampirkan kepada unit melalui perjanjian.",
+      "deleteConfirm": {
+        "title": "Buang penyewa ini?",
+        "body": "Tindakan ini akan membuang {name} dan jemputan tertangguh. Perjanjian sedia ada kekal direkod.",
+        "confirm": "Ya, buang"
+      },
+      "fields": {
+        "name": "Nama penuh",
+        "email": "Emel",
+        "phone": "Telefon",
+        "status": "Status"
+      },
+      "placeholders": {
+        "name": "cth. Aminah Binti Yusof",
+        "email": "Alamat emel penyewa",
+        "phone": "+60 12-345 6789"
+      },
+      "status": {
+        "invited": "Dijemput",
+        "active": "Aktif",
+        "moved_out": "Telah keluar"
+      }
+    },
     "units": {
       "sectionTitle": "Unit",
       "sectionHelp": "Setiap hartanah perlu ada sekurang-kurangnya satu unit. Penyewa dan perjanjian dilampirkan kepada unit.",

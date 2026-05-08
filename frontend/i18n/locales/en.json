@@ -49,6 +49,82 @@
     "phoneMy": "Enter a valid Malaysian phone number"
   },
   "owner": {
+    "agreements": {
+      "addCta": "Add agreement",
+      "addTitle": "Add agreement",
+      "editTitle": "Edit agreement",
+      "save": "Save",
+      "add": "Add agreement",
+      "delete": "Delete agreement",
+      "createdToast": "Agreement created",
+      "deletedToast": "Agreement deleted",
+      "emptyTitle": "No agreements yet.",
+      "emptyDescription": "Create an agreement once you have a tenant assigned to a unit.",
+      "unknownTenant": "Unknown tenant",
+      "dueOn": "Due day {day}",
+      "deleteConfirm": {
+        "title": "Delete this agreement?",
+        "body": "This will permanently remove the agreement and any attached invoices. This cannot be undone.",
+        "confirm": "Yes, delete"
+      },
+      "fields": {
+        "property": "Property",
+        "unit": "Unit",
+        "tenant": "Tenant",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "rentAmount": "Monthly rent (RM)",
+        "depositAmount": "Security deposit (RM)",
+        "lateFee": "Late fee (RM)",
+        "rentDueDay": "Rent due day (1–28)",
+        "status": "Status"
+      },
+      "placeholders": {
+        "property": "Choose property",
+        "unit": "Choose unit",
+        "unitDisabled": "Pick a property first",
+        "tenant": "Choose tenant"
+      },
+      "status": {
+        "draft": "Draft",
+        "active": "Active",
+        "expired": "Expired",
+        "terminated": "Terminated"
+      }
+    },
+    "tenants": {
+      "inviteCta": "Invite tenant",
+      "inviteTitle": "Invite tenant",
+      "inviteHelp": "We'll record this contact. Magic-link invites land when authentication ships.",
+      "editTitle": "Edit tenant",
+      "save": "Save",
+      "delete": "Remove tenant",
+      "invitedToast": "Tenant invited",
+      "deletedToast": "Tenant removed",
+      "emptyTitle": "No tenants yet.",
+      "emptyDescription": "Tenants appear here once you invite them. Each tenant attaches to a unit via an agreement.",
+      "deleteConfirm": {
+        "title": "Remove this tenant?",
+        "body": "This will remove {name} and any pending invite. Existing agreements stay on record.",
+        "confirm": "Yes, remove"
+      },
+      "fields": {
+        "name": "Full name",
+        "email": "Email",
+        "phone": "Phone",
+        "status": "Status"
+      },
+      "placeholders": {
+        "name": "e.g. Aminah Binti Yusof",
+        "email": "Their email address",
+        "phone": "+60 12-345 6789"
+      },
+      "status": {
+        "invited": "Invited",
+        "active": "Active",
+        "moved_out": "Moved out"
+      }
+    },
     "units": {
       "sectionTitle": "Units",
       "sectionHelp": "Each property has at least one unit. Tenants and agreements attach to units.",

@@ -90,6 +90,22 @@ The Lovable system bans saturated accents. We bend the rule **only** for status 
 
 Each status color has a paired `-soft` variant at 8% opacity for pill backgrounds. Status colors appear **only inside pills** — never in headings, body, or card backgrounds.
 
+**Dark mode requires lighter variants** — the values above are nearly invisible on the `#1c1a17` page bg. Override every status + priority token in `[data-theme="dark"]` and bump `-soft` opacity to ~18%:
+
+```css
+/* dark-mode overrides — same semantic mapping, lifted for contrast */
+--status-vacant:      #A8A5A1;  /* light grey, matches text-muted */
+--status-occupied:    #5FB886;  /* lifted green, still muted */
+--status-maintenance: #D99A47;  /* lifted amber */
+--status-overdue:     #D96A45;  /* coral, near accent-hover */
+--status-cancelled:   rgba(247, 244, 237, 0.5);
+--status-expired:     rgba(247, 244, 237, 0.5);
+--status-terminated:  #D96A45;
+/* …and the corresponding -soft pairs at 18% opacity */
+```
+
+Both `:root` (default) and `[data-theme="light"]` (explicit override) carry the light values; `[data-theme="dark"]` carries the lifted ones. Keep the semantic mapping identical across themes — only the perceptual lightness changes.
+
 ### 1.6 Shadows
 
 ```css
@@ -283,6 +299,40 @@ Tailwind defaults: `2 (8px)`, `3 (12px)`, `4 (16px)`, `6 (24px)`, `8 (32px)`, `1
 ### 4.3 Breakpoints
 
 Tailwind defaults are fine. Sidebar collapses to drawer at `md` (768px).
+
+### 4.4 Detail-page header
+
+Resource detail pages (property, tenant, agreement, etc.) share one header pattern: a single flex row with the **title block on the left** and **resource-level actions on the right, baseline-aligned with the bottom of the title block** (i.e. on the same line as the supporting/address copy, not the eyebrow pill).
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│ [Eyebrow pill]                                                │
+│ Resource title (display-sub)                                  │
+│ supporting line · ID · location          [Action]  [Action]   │
+└───────────────────────────────────────────────────────────────┘
+```
+
+```vue
+<header class="mb-6 flex items-end justify-between gap-4">
+  <div class="min-w-0">
+    <Pill tone="neutral" class="mb-3">{{ eyebrow }}</Pill>
+    <h1 class="text-display-sub font-semibold tracking-snug text-ink">
+      {{ title }}
+    </h1>
+    <p class="mt-2 text-caption text-ink-muted">{{ supporting }}</p>
+  </div>
+  <Button variant="ghost" size="sm" class="shrink-0" @click="...">
+    <Icon name="Trash2" :size="14" class="mr-1" />
+    Delete
+  </Button>
+</header>
+```
+
+Rules:
+- `items-end` on the flex parent so actions sit next to the supporting line, not floating up to the eyebrow.
+- `min-w-0` on the title block + `shrink-0` on the action so a long title truncates instead of pushing the button out of view.
+- Use `Button size="sm" variant="ghost"` for destructive / utility actions here. Reserve `variant="primary"` for the page's main CTA, which usually lives on the *list* page (e.g. `+ Add property`), not the detail page.
+- Don't stack actions on a separate row above the content card — that introduces a stray gap and breaks the rhythm.
 
 ---
 
