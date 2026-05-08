@@ -7,13 +7,13 @@ import Button from "~/components/ui/Button.vue";
  * dashboard. Auth is mocked in Phase 1, so the email prefix decides role
  * (see app/stores/auth.ts).
  *
- * Visible only when import.meta.dev is true. Once the real backend lands,
- * this stays useful: the seeded accounts are owner@roofly.my / tenant@roofly.my
- * with the same password, so the shortcuts will hit the real /api/auth/login.
+ * Visible in local dev (import.meta.dev) and on the demo deployment
+ * (NUXT_PUBLIC_DEMO_MODE=true). Hidden on real prod.
  */
 const auth = useAuthStore();
 const loadingRole = ref<"owner" | "tenant" | null>(null);
-const isDev = import.meta.dev;
+const config = useRuntimeConfig();
+const showShortcuts = import.meta.dev || config.public.demoMode;
 
 const enter = async (role: "owner" | "tenant") => {
   loadingRole.value = role;
@@ -25,7 +25,7 @@ const enter = async (role: "owner" | "tenant") => {
 
 <template>
   <section
-    v-if="isDev"
+    v-if="showShortcuts"
     class="mt-8 pt-6 border-t border-line-passive"
     aria-label="Demo shortcuts"
   >
@@ -33,7 +33,7 @@ const enter = async (role: "owner" | "tenant") => {
       <p class="text-micro font-medium uppercase tracking-wider text-ink-muted">
         Demo shortcuts
       </p>
-      <span class="text-micro text-ink-faint">Dev only</span>
+      <span class="text-micro text-ink-faint">Demo only</span>
     </div>
 
     <div class="grid grid-cols-2 gap-2">

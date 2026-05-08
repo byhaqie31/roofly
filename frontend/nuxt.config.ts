@@ -74,6 +74,10 @@ export default defineNuxtConfig({
         // NUXT_PUBLIC_FEATURE_DOCUMENTS=false to hide the placeholder if needed.
         documents: process.env.NUXT_PUBLIC_FEATURE_DOCUMENTS !== "false",
       },
+      // Demo deploy (demo.roofly.my) sets NUXT_PUBLIC_DEMO_MODE=true so the
+      // owner/tenant quick-login shortcuts on the login page are visible to clients.
+      // Local dev still shows them via import.meta.dev.
+      demoMode: process.env.NUXT_PUBLIC_DEMO_MODE === "true",
     },
   },
 

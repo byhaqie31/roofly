@@ -14,3 +14,6 @@ services:
       - NODE_ENV=production
       - HOST=0.0.0.0
       - PORT=3000
+      # Show owner/tenant quick-login shortcuts on demo.roofly.my login page.
+      # Real prod (when main deploys) will not set this and shortcuts stay hidden.
+      - NUXT_PUBLIC_DEMO_MODE=true
