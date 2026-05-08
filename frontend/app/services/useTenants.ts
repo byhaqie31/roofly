@@ -1,17 +1,17 @@
 import type { Tenant, TenantInput, TenantUpdate } from "~/types/tenant";
 import { tenantsMock } from "~/mocks/tenants";
 
-const USE_MOCK = true;
-
 export const useTenants = () => {
+  const { public: { useMock } } = useRuntimeConfig();
+
   const list = async (): Promise<Tenant[]> => {
-    if (USE_MOCK) return structuredClone(tenantsMock);
+    if (useMock) return structuredClone(tenantsMock);
     const { request } = useApi();
     return request<Tenant[]>("/tenants");
   };
 
   const get = async (id: string): Promise<Tenant | null> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const found = tenantsMock.find((t) => t.id === id);
       return found ? structuredClone(found) : null;
     }
@@ -20,7 +20,7 @@ export const useTenants = () => {
   };
 
   const invite = async (input: TenantInput): Promise<Tenant> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const now = new Date().toISOString();
       const created: Tenant = {
         id: crypto.randomUUID(),
@@ -40,7 +40,7 @@ export const useTenants = () => {
   };
 
   const update = async (id: string, patch: TenantUpdate): Promise<Tenant> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const idx = tenantsMock.findIndex((t) => t.id === id);
       if (idx === -1) throw new Error(`Tenant ${id} not found`);
       const existing = tenantsMock[idx]!;
@@ -65,7 +65,7 @@ export const useTenants = () => {
   };
 
   const remove = async (id: string): Promise<void> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const idx = tenantsMock.findIndex((t) => t.id === id);
       if (idx !== -1) tenantsMock.splice(idx, 1);
       return;

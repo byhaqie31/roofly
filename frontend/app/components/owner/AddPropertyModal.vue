@@ -4,7 +4,7 @@ import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import { propertyInputSchema } from "~/schemas/property";
 import { MY_STATES } from "~/types/property";
-import type { Property, PropertyInput } from "~/types/property";
+import type { MalaysianState, Property, PropertyInput } from "~/types/property";
 import { useToast } from "~/composables/useToast";
 import Modal from "~/components/ui/Modal.vue";
 import Input from "~/components/ui/Input.vue";
@@ -25,7 +25,8 @@ const initialValues: PropertyInput = {
   name: "",
   address: "",
   city: "",
-  state: "",
+  // Empty until the user picks; the Zod enum rejects "" so it never reaches the API.
+  state: "" as MalaysianState,
   postcode: "",
   type: "condo",
 };

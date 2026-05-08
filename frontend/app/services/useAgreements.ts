@@ -11,8 +11,6 @@ import { propertiesMock } from "~/mocks/properties";
 import { unitsMock } from "~/mocks/units";
 import { tenantsMock } from "~/mocks/tenants";
 
-const USE_MOCK = true;
-
 export interface AgreementWithRefs {
   agreement: Agreement;
   unit: Unit | null;
@@ -35,20 +33,22 @@ const hydrate = (a: Agreement): AgreementWithRefs => {
 };
 
 export const useAgreements = () => {
+  const { public: { useMock } } = useRuntimeConfig();
+
   const list = async (): Promise<Agreement[]> => {
-    if (USE_MOCK) return structuredClone(agreementsMock);
+    if (useMock) return structuredClone(agreementsMock);
     const { request } = useApi();
     return request<Agreement[]>("/agreements");
   };
 
   const listWithRefs = async (): Promise<AgreementWithRefs[]> => {
-    if (USE_MOCK) return agreementsMock.map(hydrate);
+    if (useMock) return agreementsMock.map(hydrate);
     const { request } = useApi();
     return request<AgreementWithRefs[]>("/agreements?expand=unit,property,tenant");
   };
 
   const get = async (id: string): Promise<Agreement | null> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const found = agreementsMock.find((a) => a.id === id);
       return found ? structuredClone(found) : null;
     }
@@ -57,7 +57,7 @@ export const useAgreements = () => {
   };
 
   const create = async (input: AgreementInput): Promise<Agreement> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const created: Agreement = {
         id: crypto.randomUUID(),
         ...input,
@@ -74,7 +74,7 @@ export const useAgreements = () => {
     id: string,
     patch: AgreementUpdate,
   ): Promise<Agreement> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const idx = agreementsMock.findIndex((a) => a.id === id);
       if (idx === -1) throw new Error(`Agreement ${id} not found`);
       const merged: Agreement = { ...agreementsMock[idx]!, ...patch };
@@ -89,7 +89,7 @@ export const useAgreements = () => {
   };
 
   const remove = async (id: string): Promise<void> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const idx = agreementsMock.findIndex((a) => a.id === id);
       if (idx !== -1) agreementsMock.splice(idx, 1);
       return;

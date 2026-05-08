@@ -19,6 +19,8 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const { show } = useToast();
+const { public: { features } } = useRuntimeConfig();
+const documentsEnabled = features.documents;
 
 const tenant = ref<Tenant | null>(null);
 const loading = ref(true);
@@ -59,6 +61,8 @@ const statusTone = (status: TenantStatus) => {
       return "draft";
     case "active":
       return "active";
+    case "notice_given":
+      return "maintenance";
     case "moved_out":
       return "expired";
   }
@@ -143,7 +147,7 @@ const tabTriggerClass =
         </TabsRoot>
       </Card>
 
-      <div class="mt-6">
+      <div v-if="documentsEnabled" class="mt-6">
         <Card padding="loose">
           <header class="mb-4">
             <h2 class="text-card-title font-semibold text-ink">

@@ -36,6 +36,7 @@ const [status] = defineField("status");
 const statusOptions = computed(() => [
   { value: "invited", label: t("owner.tenants.status.invited") },
   { value: "active", label: t("owner.tenants.status.active") },
+  { value: "notice_given", label: t("owner.tenants.status.notice_given") },
   { value: "moved_out", label: t("owner.tenants.status.moved_out") },
 ]);
 

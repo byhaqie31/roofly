@@ -34,8 +34,10 @@ export interface PropertyMortgage {
 }
 
 export interface PropertyCoOwner {
+  id: string;                   // uuid; stable across edits
   name: string;
-  sharePct: number;             // 0-100
+  sharePct: number;             // 0-100; sum across coOwners must === 100
+  isPrimary: boolean;           // exactly one true per property; matches Property.ownerId
 }
 
 export interface PropertyOwnership {
@@ -57,8 +59,6 @@ export interface PropertyOwnership {
   valuationSource?: ValuationSource;
   // Mortgage
   mortgage?: PropertyMortgage;
-  // Co-owners
-  coOwners?: PropertyCoOwner[];
 }
 
 export interface PropertyUtilities {
@@ -80,7 +80,7 @@ export interface PropertyUtilities {
 export interface Property {
   // Identity
   id: string;
-  ownerId: string;
+  ownerId: string;              // matches the coOwners entry with isPrimary === true
   name: string;
   internalLabel?: string;
   type: PropertyType;
@@ -88,7 +88,7 @@ export interface Property {
   // Location
   address: string;
   city: string;
-  state: string;
+  state: MalaysianState;
   postcode: string;
   // Specifications
   yearBuilt?: number;
@@ -98,9 +98,12 @@ export interface Property {
   bathrooms?: number;
   parkingLots?: number;
   furnishing?: Furnishing;
-  // JSON sub-objects
+  // JSON sub-objects on the backend
   ownership?: PropertyOwnership;
   utilities?: PropertyUtilities;
+  // Separate `property_co_owners` table on backend (see MOCK-POC.md §4.7).
+  // Always at least one entry; the primary's user_id matches `ownerId`.
+  coOwners: PropertyCoOwner[];
   // Server-assigned
   createdAt: string;
 }

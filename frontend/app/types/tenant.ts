@@ -1,4 +1,8 @@
-export type TenantStatus = "invited" | "active" | "moved_out";
+export type TenantStatus =
+  | "invited"        // sent invite, hasn't accepted
+  | "active"         // signed agreement, currently occupying
+  | "notice_given"   // tenant gave notice — owners want the 30-day vacancy heads-up
+  | "moved_out";     // gone, agreement closed
 
 export interface TenantPersonal {
   icNumber?: string;          // MyKad e.g. "880314-14-5687"

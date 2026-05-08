@@ -3,7 +3,11 @@
  * Brackets reflect the post-2024 schedule for citizens / PRs:
  *   Year 1-2: 30%, Year 3: 20%, Year 4: 15%, Year 5: 10%, Year 6+: 5%.
  *
- * This is a *snapshot estimate* only. Real filings should consult LHDN.
+ * Out of scope: non-citizen / foreigner / company brackets (different rates),
+ * disposal-side costs (agent commission, sale legal fees) reducing net gain,
+ * and renovation receipts that count as allowable expenses.
+ *
+ * This is a snapshot estimate. Real filings should consult LHDN.
  */
 
 export const rpgtRate = (yearsHeld: number): number => {

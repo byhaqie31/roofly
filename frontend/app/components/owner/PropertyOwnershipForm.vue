@@ -3,7 +3,7 @@ import { computed, ref } from "vue";
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import { propertyOwnershipFormSchema } from "~/schemas/property";
-import type { Property } from "~/types/property";
+import type { Property, PropertyCoOwner } from "~/types/property";
 import { useToast } from "~/composables/useToast";
 import { computeCapitalGains } from "~/utils/rpgt";
 import Input from "~/components/ui/Input.vue";
@@ -51,7 +51,9 @@ const initialValues = {
     maturityDate: m.maturityDate ?? "",
     interestRatePct: m.interestRatePct,
   },
-  coOwners: (o.coOwners ?? []).map((co) => ({ ...co })),
+  // Co-owners live top-level on the property, but they're edited in this form.
+  // On save we extract them and send a separate top-level patch.
+  coOwners: props.property.coOwners.map((co) => ({ ...co })),
 };
 
 const { defineField, handleSubmit, errors, values } = useForm({
@@ -80,8 +82,33 @@ const [mortgageTenure] = defineField("mortgage.tenureYears");
 const [mortgageMaturity] = defineField("mortgage.maturityDate");
 const [mortgageRate] = defineField("mortgage.interestRatePct");
 
-const { fields: coOwnerFields, push: addCoOwner, remove: removeCoOwner } =
-  useFieldArray<{ name: string; sharePct: number }>("coOwners");
+const { fields: coOwnerFields, push: pushCoOwner, remove: removeCoOwnerAt, update: updateCoOwner } =
+  useFieldArray<PropertyCoOwner>("coOwners");
+
+const addCoOwner = () =>
+  pushCoOwner({
+    id: crypto.randomUUID(),
+    name: "",
+    sharePct: 0,
+    isPrimary: false,
+  });
+
+const removeCoOwner = (idx: number) => {
+  const target = coOwnerFields.value[idx]?.value;
+  // Block removing the primary; user must nominate a new primary first.
+  if (target?.isPrimary) {
+    show(t("owner.properties.detail.coOwners.cantRemovePrimary"), "danger");
+    return;
+  }
+  removeCoOwnerAt(idx);
+};
+
+const setPrimary = (idx: number) => {
+  coOwnerFields.value.forEach((field, i) => {
+    const v = field.value as PropertyCoOwner;
+    updateCoOwner(i, { ...v, isPrimary: i === idx });
+  });
+};
 
 const titleTypeOptions = computed(() => [
   {
@@ -110,6 +137,14 @@ const sharePctTotal = computed(() =>
     (sum, co) => sum + (co?.sharePct ?? 0),
     0,
   ),
+);
+
+const primaryCount = computed(
+  () => (values.coOwners ?? []).filter((c) => c?.isPrimary).length,
+);
+
+const coOwnersValid = computed(
+  () => sharePctTotal.value === 100 && primaryCount.value === 1,
 );
 
 const gainsSnapshot = computed(() =>
@@ -152,8 +187,10 @@ const onSubmit = handleSubmit(async (vals) => {
                 interestRatePct: vals.mortgage.interestRatePct,
               }
             : undefined,
-        coOwners: (vals.coOwners ?? []).length > 0 ? vals.coOwners : undefined,
       },
+      // Co-owners are top-level on Property — they go in a separate
+      // `property_co_owners` table on the backend, not the ownership JSON.
+      coOwners: vals.coOwners,
     });
     show(t("common.savedToast"), "success");
     emit("saved", updated);
@@ -411,9 +448,24 @@ const sectionHeading =
         :key="field.key"
         class="flex flex-wrap items-end gap-3"
       >
+        <label
+          class="flex cursor-pointer items-center gap-2 self-end pb-2"
+          :title="t('owner.properties.detail.coOwners.primaryHint')"
+        >
+          <input
+            type="radio"
+            name="coOwnerPrimary"
+            class="h-4 w-4 accent-ink"
+            :checked="(field.value as PropertyCoOwner).isPrimary"
+            @change="setPrimary(idx)"
+          />
+          <span class="text-caption text-ink-muted">
+            {{ t("owner.properties.detail.coOwners.primaryLabel") }}
+          </span>
+        </label>
         <div class="min-w-[12rem] flex-1">
           <Input
-            v-model="(field.value as { name: string }).name"
+            v-model="(field.value as PropertyCoOwner).name"
             :label="
               idx === 0 ? t('owner.properties.detail.fields.coOwnerName') : undefined
             "
@@ -422,7 +474,7 @@ const sectionHeading =
         </div>
         <div class="w-32">
           <Input
-            v-model="(field.value as { sharePct: number }).sharePct"
+            v-model="(field.value as PropertyCoOwner).sharePct"
             type="number"
             :min="0"
             :max="100"
@@ -436,34 +488,54 @@ const sectionHeading =
         <Button
           variant="ghost"
           size="sm"
+          :disabled="(field.value as PropertyCoOwner).isPrimary"
+          :title="
+            (field.value as PropertyCoOwner).isPrimary
+              ? t('owner.properties.detail.coOwners.cantRemovePrimary')
+              : undefined
+          "
           @click="removeCoOwner(idx)"
         >
           <Icon name="X" :size="14" />
         </Button>
       </div>
 
-      <div class="flex items-center justify-between gap-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          @click="addCoOwner({ name: '', sharePct: 0 })"
-        >
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <Button variant="ghost" size="sm" @click="addCoOwner">
           + {{ t("owner.properties.detail.addCoOwner") }}
         </Button>
-        <span
-          v-if="coOwnerFields.length > 0"
-          :class="[
-            'text-caption tabular-nums',
-            sharePctTotal === 100 ? 'text-status-active' : 'text-status-maintenance',
-          ]"
-        >
-          {{ t("owner.properties.detail.shareSum", { pct: sharePctTotal }) }}
-        </span>
+        <div class="flex items-center gap-4">
+          <span
+            :class="[
+              'text-caption tabular-nums',
+              sharePctTotal === 100 ? 'text-status-active' : 'text-status-maintenance',
+            ]"
+          >
+            {{ t("owner.properties.detail.shareSum", { pct: sharePctTotal }) }}
+          </span>
+          <span
+            v-if="primaryCount !== 1"
+            class="text-caption text-status-maintenance"
+          >
+            {{ t("owner.properties.detail.coOwners.primaryRequired") }}
+          </span>
+        </div>
       </div>
     </section>
 
-    <div class="flex justify-end pt-2">
-      <Button type="submit" variant="primary" :loading="submitting">
+    <div class="flex flex-col items-end gap-2 pt-2">
+      <p
+        v-if="!coOwnersValid"
+        class="text-caption text-status-maintenance"
+      >
+        {{ t("owner.properties.detail.coOwners.blockedSave") }}
+      </p>
+      <Button
+        type="submit"
+        variant="primary"
+        :loading="submitting"
+        :disabled="!coOwnersValid"
+      >
         {{ t("owner.properties.detail.save") }}
       </Button>
     </div>

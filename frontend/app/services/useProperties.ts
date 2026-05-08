@@ -5,17 +5,17 @@ import type {
 } from "~/types/property";
 import { propertiesMock } from "~/mocks/properties";
 
-const USE_MOCK = true;
-
 export const useProperties = () => {
+  const { public: { useMock } } = useRuntimeConfig();
+
   const list = async (): Promise<Property[]> => {
-    if (USE_MOCK) return structuredClone(propertiesMock);
+    if (useMock) return structuredClone(propertiesMock);
     const { request } = useApi();
     return request<Property[]>("/properties");
   };
 
   const get = async (id: string): Promise<Property | null> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const found = propertiesMock.find((p) => p.id === id);
       return found ? structuredClone(found) : null;
     }
@@ -24,11 +24,22 @@ export const useProperties = () => {
   };
 
   const create = async (input: PropertyInput): Promise<Property> => {
-    if (USE_MOCK) {
+    if (useMock) {
+      // Auto-insert the creating user as the primary co-owner with 100% share.
+      // TODO: replace placeholder name once auth lands and we have the real user.
+      const primaryCoOwnerId = crypto.randomUUID();
       const created: Property = {
         id: crypto.randomUUID(),
-        ownerId: "owner-1",
+        ownerId: primaryCoOwnerId,
         ...input,
+        coOwners: [
+          {
+            id: primaryCoOwnerId,
+            name: "Primary owner",
+            sharePct: 100,
+            isPrimary: true,
+          },
+        ],
         createdAt: new Date().toISOString(),
       };
       propertiesMock.push(created);
@@ -42,7 +53,7 @@ export const useProperties = () => {
     id: string,
     patch: PropertyUpdate,
   ): Promise<Property> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const idx = propertiesMock.findIndex((p) => p.id === id);
       if (idx === -1) throw new Error(`Property ${id} not found`);
       const existing = propertiesMock[idx]!;
@@ -55,6 +66,12 @@ export const useProperties = () => {
         utilities: patch.utilities
           ? { ...(existing.utilities ?? {}), ...patch.utilities }
           : existing.utilities,
+        // coOwners replaces wholesale (it's a list, not a partial object).
+        // Keep ownerId in sync with whichever entry is marked primary.
+        coOwners: patch.coOwners ?? existing.coOwners,
+        ownerId: patch.coOwners
+          ? (patch.coOwners.find((c) => c.isPrimary)?.id ?? existing.ownerId)
+          : existing.ownerId,
       };
       propertiesMock[idx] = merged;
       return structuredClone(merged);
@@ -67,7 +84,7 @@ export const useProperties = () => {
   };
 
   const remove = async (id: string): Promise<void> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const idx = propertiesMock.findIndex((p) => p.id === id);
       if (idx !== -1) propertiesMock.splice(idx, 1);
       return;

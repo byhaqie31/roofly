@@ -15,12 +15,15 @@ import PropertyDocumentsPanel from "~/components/owner/PropertyDocumentsPanel.vu
 import UnitsPanel from "~/components/owner/UnitsPanel.vue";
 import { useToast } from "~/composables/useToast";
 import type { Property } from "~/types/property";
+import { tabCompletion } from "~/utils/propertyCompletion";
 
 definePageMeta({ layout: "owner" });
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const { show } = useToast();
+const { public: { features } } = useRuntimeConfig();
+const documentsEnabled = features.documents;
 
 const property = ref<Property | null>(null);
 const loading = ref(true);
@@ -55,74 +58,15 @@ const confirmDelete = async () => {
   }
 };
 
-const isFilled = (v: unknown) =>
-  v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && v.length === 0);
-
-const fullnessPct = (filled: number, total: number) =>
-  total === 0 ? 0 : Math.round((filled / total) * 100);
-
-const detailsFullness = computed(() => {
-  const p = property.value;
-  if (!p) return 0;
-  const fields = [
-    p.name,
-    p.internalLabel,
-    p.type,
-    p.notes,
-    p.address,
-    p.city,
-    p.state,
-    p.postcode,
-    p.yearBuilt,
-    p.builtUpSqft,
-    p.landSqft,
-    p.bedrooms,
-    p.bathrooms,
-    p.parkingLots,
-    p.furnishing,
-  ];
-  return fullnessPct(fields.filter(isFilled).length, fields.length);
-});
-
-const ownershipFullness = computed(() => {
-  const o = property.value?.ownership ?? {};
-  const fields = [
-    o.titleType,
-    o.titleNumber,
-    o.lotNumber,
-    o.tenureExpiry,
-    o.strataTitle,
-    o.masterTitle,
-    o.purchaseDate,
-    o.purchasePrice,
-    o.stampDuty,
-    o.legalFees,
-    o.currentMarketValue,
-    o.lastValuedAt,
-    o.valuationSource,
-    o.mortgage && Object.values(o.mortgage).some(isFilled) ? true : undefined,
-    o.coOwners,
-  ];
-  return fullnessPct(fields.filter(isFilled).length, fields.length);
-});
-
-const utilitiesFullness = computed(() => {
-  const u = property.value?.utilities ?? {};
-  const fields = [
-    u.monthlyMaintenanceFee,
-    u.sinkingFund,
-    u.quitRentAnnual,
-    u.assessmentRateAnnual,
-    u.buildingInsuranceAnnual,
-    u.tnbAccountNo,
-    u.waterAccountNo,
-    u.indahWaterAccountNo,
-    u.internetAccountNo,
-    u.managementCorpName,
-    u.managementCorpPhone,
-  ];
-  return fullnessPct(fields.filter(isFilled).length, fields.length);
-});
+const detailsFullness = computed(() =>
+  property.value ? tabCompletion(property.value, "details") : 0,
+);
+const ownershipFullness = computed(() =>
+  property.value ? tabCompletion(property.value, "ownership") : 0,
+);
+const utilitiesFullness = computed(() =>
+  property.value ? tabCompletion(property.value, "utilities") : 0,
+);
 
 const tabTriggerClass =
   "-mb-px inline-flex items-center border-b-2 border-transparent px-4 py-2 text-body text-ink-muted outline-none transition hover:text-ink focus-visible:shadow-focus data-[state=active]:border-ink data-[state=active]:text-ink";
@@ -232,7 +176,11 @@ const tabTriggerClass =
                 class="ml-1.5 h-1.5 w-1.5 rounded-full bg-line-passive"
               />
             </TabsTrigger>
-            <TabsTrigger value="documents" :class="tabTriggerClass">
+            <TabsTrigger
+              v-if="documentsEnabled"
+              value="documents"
+              :class="tabTriggerClass"
+            >
               {{ t("owner.properties.detail.tabs.documents") }}
               <span
                 class="ml-1.5 h-1.5 w-1.5 rounded-full bg-line-passive"
@@ -253,7 +201,11 @@ const tabTriggerClass =
           <TabsContent value="utilities" class="outline-none">
             <PropertyUtilitiesForm :property="property" @saved="onSaved" />
           </TabsContent>
-          <TabsContent value="documents" class="outline-none">
+          <TabsContent
+            v-if="documentsEnabled"
+            value="documents"
+            class="outline-none"
+          >
             <PropertyDocumentsPanel />
           </TabsContent>
         </TabsRoot>

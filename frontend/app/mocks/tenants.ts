@@ -65,4 +65,27 @@ export const tenantsMock: Tenant[] = [
       relationship: "Spouse",
     },
   },
+  // Notice given — anchors upcoming-vacancy widgets on the dashboard.
+  {
+    id: "t-siti",
+    name: "Siti Khadijah Binti Rahim",
+    email: "siti.khadijah@example.com",
+    phone: "+60 11-2233 4455",
+    status: "notice_given",
+    invitedAt: "2025-02-05T09:00:00Z",
+    createdAt: "2025-02-05T09:00:00Z",
+    personal: {
+      icNumber: "910420-10-3344",
+      dateOfBirth: "1991-04-20",
+      occupation: "Teacher",
+      employer: "SMK Bukit Bintang",
+      monthlyIncome: 600_000,           // RM 6,000
+      nationality: "Malaysian",
+    },
+    emergencyContact: {
+      name: "Rahim Bin Hassan",
+      phone: "+60 12-987 6543",
+      relationship: "Father",
+    },
+  },
 ];

@@ -222,6 +222,7 @@
       "status": {
         "invited": "Dijemput",
         "active": "Aktif",
+        "notice_given": "Notis diberi",
         "moved_out": "Telah keluar"
       },
       "detail": {
@@ -431,7 +432,14 @@
         },
         "addCoOwner": "Tambah pemilik",
         "shareSum": "Jumlah: {pct}%",
-        "coOwnersHelp": "Pemilikan bersama. Bahagian patut berjumlah 100%.",
+        "coOwnersHelp": "Pemilikan bersama. Bahagian mesti berjumlah tepat 100%, dan satu pemilik mesti ditandakan utama.",
+        "coOwners": {
+          "primaryLabel": "Utama",
+          "primaryHint": "Pemilik utama menguruskan senarai ini dan menerima notifikasi.",
+          "primaryRequired": "Pilih pemilik utama",
+          "cantRemovePrimary": "Tetapkan pemilik utama yang lain sebelum mengeluarkan ini.",
+          "blockedSave": "Bahagian mesti berjumlah 100% dengan satu pemilik utama sebelum simpan."
+        },
         "acquisitionTotal": "Jumlah kos pembelian",
         "utilitiesAnnual": "Jumlah berulang tahunan",
         "utilitiesMonthly": "Setara bulanan",
@@ -441,7 +449,7 @@
           "rpgt": "Anggaran RPGT",
           "net": "Hasil bersih",
           "cost": "Kos pembelian",
-          "disclaimer": "Anggaran sahaja — berdasarkan nilai pasaran, kos pembelian, dan kadar RPGT pemastautin Malaysia. Bukan nasihat cukai."
+          "disclaimer": "Anggaran sahaja — andaian individu pemastautin; bukan warganegara, warga asing, dan syarikat dikenakan kadar berbeza. Kos jualan (komisen agen, yuran guaman jualan) dan perbelanjaan ubahsuai tidak diambil kira. Bukan nasihat cukai."
         },
         "overview": {
           "totalUnits": "Unit",

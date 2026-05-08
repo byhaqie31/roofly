@@ -13,6 +13,8 @@ const statusTone = (status: TenantStatus) => {
       return "draft";
     case "active":
       return "active";
+    case "notice_given":
+      return "maintenance";
     case "moved_out":
       return "expired";
   }

@@ -1,17 +1,17 @@
 import type { Unit, UnitInput, UnitUpdate } from "~/types/unit";
 import { unitsMock } from "~/mocks/units";
 
-const USE_MOCK = true;
-
 export const useUnits = () => {
+  const { public: { useMock } } = useRuntimeConfig();
+
   const list = async (): Promise<Unit[]> => {
-    if (USE_MOCK) return structuredClone(unitsMock);
+    if (useMock) return structuredClone(unitsMock);
     const { request } = useApi();
     return request<Unit[]>("/units");
   };
 
   const listByProperty = async (propertyId: string): Promise<Unit[]> => {
-    if (USE_MOCK) {
+    if (useMock) {
       return structuredClone(
         unitsMock.filter((u) => u.propertyId === propertyId),
       );
@@ -21,7 +21,7 @@ export const useUnits = () => {
   };
 
   const get = async (id: string): Promise<Unit | null> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const found = unitsMock.find((u) => u.id === id);
       return found ? structuredClone(found) : null;
     }
@@ -30,7 +30,7 @@ export const useUnits = () => {
   };
 
   const create = async (input: UnitInput): Promise<Unit> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const created: Unit = {
         id: crypto.randomUUID(),
         ...input,
@@ -47,7 +47,7 @@ export const useUnits = () => {
   };
 
   const update = async (id: string, patch: UnitUpdate): Promise<Unit> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const idx = unitsMock.findIndex((u) => u.id === id);
       if (idx === -1) throw new Error(`Unit ${id} not found`);
       const merged: Unit = { ...unitsMock[idx]!, ...patch };
@@ -59,7 +59,7 @@ export const useUnits = () => {
   };
 
   const remove = async (id: string): Promise<void> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const idx = unitsMock.findIndex((u) => u.id === id);
       if (idx !== -1) unitsMock.splice(idx, 1);
       return;

@@ -222,6 +222,7 @@
       "status": {
         "invited": "Invited",
         "active": "Active",
+        "notice_given": "Notice given",
         "moved_out": "Moved out"
       },
       "detail": {
@@ -431,7 +432,14 @@
         },
         "addCoOwner": "Add co-owner",
         "shareSum": "Total: {pct}%",
-        "coOwnersHelp": "Joint ownership splits. Shares should add up to 100%.",
+        "coOwnersHelp": "Joint ownership splits. Shares must sum to exactly 100%, and one co-owner must be marked primary.",
+        "coOwners": {
+          "primaryLabel": "Primary",
+          "primaryHint": "The primary co-owner manages this listing and receives notifications.",
+          "primaryRequired": "Pick a primary co-owner",
+          "cantRemovePrimary": "Make another co-owner primary before removing this one.",
+          "blockedSave": "Shares must sum to 100% with exactly one primary before saving."
+        },
         "acquisitionTotal": "Total acquisition cost",
         "utilitiesAnnual": "Annual recurring total",
         "utilitiesMonthly": "Monthly equivalent",
@@ -441,7 +449,7 @@
           "rpgt": "Estimated RPGT",
           "net": "Net proceeds",
           "cost": "Acquisition cost",
-          "disclaimer": "Estimate only — based on market value, acquisition cost, and Malaysian-resident RPGT brackets. Not tax advice."
+          "disclaimer": "Estimate only — assumes resident-individual filing; non-citizens, foreigners, and companies have different rates. Disposal-side costs (agent commission, sale legal fees) and renovation expenses are not factored in. Not tax advice."
         },
         "overview": {
           "totalUnits": "Units",

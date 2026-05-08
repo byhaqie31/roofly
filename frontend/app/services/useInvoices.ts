@@ -10,8 +10,6 @@ import { unitsMock } from "~/mocks/units";
 import { propertiesMock } from "~/mocks/properties";
 import { tenantsMock } from "~/mocks/tenants";
 
-const USE_MOCK = true;
-
 export interface InvoiceWithRefs {
   invoice: Invoice;
   agreement: Agreement | null;
@@ -44,20 +42,22 @@ const hydrate = (inv: Invoice): InvoiceWithRefs => {
 };
 
 export const useInvoices = () => {
+  const { public: { useMock } } = useRuntimeConfig();
+
   const list = async (): Promise<Invoice[]> => {
-    if (USE_MOCK) return structuredClone(invoicesMock);
+    if (useMock) return structuredClone(invoicesMock);
     const { request } = useApi();
     return request<Invoice[]>("/invoices");
   };
 
   const listWithRefs = async (): Promise<InvoiceWithRefs[]> => {
-    if (USE_MOCK) return invoicesMock.map(hydrate);
+    if (useMock) return invoicesMock.map(hydrate);
     const { request } = useApi();
     return request<InvoiceWithRefs[]>("/invoices?expand=agreement,unit,property,tenant,payments");
   };
 
   const get = async (id: string): Promise<Invoice | null> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const found = invoicesMock.find((i) => i.id === id);
       return found ? structuredClone(found) : null;
     }
@@ -69,7 +69,7 @@ export const useInvoices = () => {
     id: string,
     status: InvoiceStatus,
   ): Promise<Invoice> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const idx = invoicesMock.findIndex((i) => i.id === id);
       if (idx === -1) throw new Error(`Invoice ${id} not found`);
       invoicesMock[idx] = { ...invoicesMock[idx]!, status };
@@ -85,7 +85,7 @@ export const useInvoices = () => {
   const recordPayment = async (
     input: PaymentInput,
   ): Promise<{ payment: Payment; invoice: Invoice }> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const now = new Date().toISOString();
       const payment: Payment = {
         id: crypto.randomUUID(),
@@ -110,7 +110,7 @@ export const useInvoices = () => {
   };
 
   const sendInvoice = async (id: string): Promise<{ sentAt: string }> => {
-    if (USE_MOCK) {
+    if (useMock) {
       // No persistent state for "lastSentAt" yet — backend will own that.
       return { sentAt: new Date().toISOString() };
     }

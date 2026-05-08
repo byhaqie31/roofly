@@ -65,6 +65,15 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE ?? "http://localhost:8000/api",
+      // Single source of truth for mock-vs-API toggle. Phase 2 default: true.
+      // Flip per-environment via NUXT_PUBLIC_USE_MOCK=false once each backend endpoint lands.
+      useMock: process.env.NUXT_PUBLIC_USE_MOCK !== "false",
+      features: {
+        // Documents tabs render a "coming in Phase 4" placeholder by default —
+        // owners see during demos that file uploads are on the way. Set
+        // NUXT_PUBLIC_FEATURE_DOCUMENTS=false to hide the placeholder if needed.
+        documents: process.env.NUXT_PUBLIC_FEATURE_DOCUMENTS !== "false",
+      },
     },
   },
 

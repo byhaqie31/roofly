@@ -43,24 +43,36 @@ frontend/app/
 
 ## 3. The service pattern
 
-Each service composable returns the same shape regardless of backing store:
+Each service composable returns the same shape regardless of backing store. The mock flag is sourced from `runtimeConfig.public.useMock` so all services check one place — flip per-environment via env var, no code edits, no per-service drift.
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      // Default true during Phase 2; set NUXT_PUBLIC_USE_MOCK=false once backend lands.
+      useMock: true,
+    },
+  },
+});
+```
 
 ```ts
 // app/services/useProperties.ts
 import type { Property, PropertyInput } from "~/types/property";
 import { propertiesMock } from "~/mocks/properties";
 
-const USE_MOCK = true; // flip to false when backend is ready
-
 export const useProperties = () => {
+  const { public: { useMock } } = useRuntimeConfig();
+
   const list = async (): Promise<Property[]> => {
-    if (USE_MOCK) return structuredClone(propertiesMock);
+    if (useMock) return structuredClone(propertiesMock);
     const { request } = useApi();
     return request<Property[]>("/properties");
   };
 
   const create = async (input: PropertyInput): Promise<Property> => {
-    if (USE_MOCK) {
+    if (useMock) {
       const created: Property = {
         id: crypto.randomUUID(),
         ...input,
@@ -78,7 +90,7 @@ export const useProperties = () => {
 ```
 
 Notes:
-- `USE_MOCK` is a module-level constant for now. We can promote it to `runtimeConfig.public.useMock` later if we want per-env control without code edits.
+- One source of truth for the mock toggle (`runtimeConfig.public.useMock`); per-entity migration just deletes the `if (useMock)` branch in that service.
 - Services always return promises, even for mocks, so call sites are identical post-swap.
 - `structuredClone` on read prevents accidental mutation of the seed array.
 
@@ -88,10 +100,12 @@ Notes:
 
 ### 4.1 Type
 
-Schema source: [PROJECT.md § properties table](../global/PROJECT.md#L328) extended with two JSON sub-objects (`ownership` + `utilities`) that map to the detail-page tabs. Money is integer **sen** (matches [useMoney.ts](../../frontend/app/composables/useMoney.ts)).
+Schema source: [PROJECT.md § properties table](../global/PROJECT.md#L328) extended with two JSON sub-objects (`ownership` + `utilities`) that map to the detail-page tabs, plus a top-level `coOwners` array that maps to a **separate `property_co_owners` table** on the backend (relational integrity matters for joint ownership — see §4.7). Money is integer **sen** (matches [useMoney.ts](../../frontend/app/composables/useMoney.ts)).
 
 ```ts
 // app/types/property.ts (excerpt)
+import type { MalaysianState } from "./geography";
+
 export interface PropertyMortgage {
   bank?: string;
   loanAmount?: number;          // sen
@@ -103,8 +117,10 @@ export interface PropertyMortgage {
 }
 
 export interface PropertyCoOwner {
+  id: string;                   // uuid; primary owner has isPrimary=true
   name: string;
-  sharePct: number;             // 0-100
+  sharePct: number;             // 0-100; sum across all co-owners must === 100
+  isPrimary: boolean;           // exactly one true; matches Property.ownerId
 }
 
 export interface PropertyOwnership {
@@ -126,8 +142,6 @@ export interface PropertyOwnership {
   valuationSource?: "bank" | "agent" | "self";
   // Mortgage (optional)
   mortgage?: PropertyMortgage;
-  // Joint ownership
-  coOwners?: PropertyCoOwner[];
 }
 
 export interface PropertyUtilities {
@@ -147,7 +161,7 @@ export interface PropertyUtilities {
 export interface Property {
   // Identity
   id: string;
-  ownerId: string;
+  ownerId: string;              // matches the `isPrimary: true` co-owner
   name: string;
   internalLabel?: string;
   type: "condo" | "landed" | "shoplot" | "room";
@@ -155,7 +169,7 @@ export interface Property {
   // Location
   address: string;
   city: string;
-  state: string;                // see §4.3
+  state: MalaysianState;        // see §4.3
   postcode: string;
   // Specifications
   yearBuilt?: number;
@@ -168,6 +182,8 @@ export interface Property {
   // JSON sub-objects — one per detail-page tab
   ownership?: PropertyOwnership;
   utilities?: PropertyUtilities;
+  // Joint ownership — separate table on backend (see §4.7)
+  coOwners: PropertyCoOwner[];  // always at least one entry (the primary owner)
   // Server-assigned
   createdAt: string;
 }
@@ -200,6 +216,8 @@ UX:
 
 ### 4.3 Malaysian states (enum source)
 
+Lives in `app/types/geography.ts` and is imported by `Property` (typed as `MalaysianState` from day one — no `string` interim).
+
 ```ts
 export const MY_STATES = [
   "Johor", "Kedah", "Kelantan", "Melaka", "Negeri Sembilan",
@@ -210,27 +228,71 @@ export const MY_STATES = [
 export type MalaysianState = (typeof MY_STATES)[number];
 ```
 
-(Promote `state` field on `Property` to `MalaysianState` once we're confident — keep as `string` until then to avoid churn while seeding.)
-
 ### 4.4 Mock seed
 
-`app/mocks/properties.ts` carries 4 properties spanning all four `type`s with mixed fullness — one fully populated condo (Suria KLCC), one mid landed (TTDI), one sparse shoplot, one near-empty room (USJ 9). The empty case is intentional so the completion indicators on each tab read as expected.
+`app/mocks/properties.ts` carries **5 properties** with mixed fullness so the detail-page completion indicators read as expected:
 
-### 4.5 Detail page — five-tab structure
+1. **Fully populated condo** — Suria KLCC #12-3A.
+2. **Mid landed (single unit)** — TTDI bungalow.
+3. **Multi-unit landed** — Subang terrace house with master bedroom rental + 2 separate room rentals (3 units under one property — stress-tests the one-property-many-units model end-to-end).
+4. **Sparse shoplot** — Wangsa Walk Shoplot G-12.
+5. **Near-empty room** — USJ 9 single room.
 
-Route: `/owner/properties/[id]`. Header pattern follows [§ 4.4 Detail-page header in UI-STANDARDS](UI-STANDARDS.md). Below the title block, one Card hosts a five-tab interface; below that Card, the `UnitsPanel` continues to render the property's units.
+The empty case is intentional. The multi-unit landed case is intentional too — it surfaces edge cases (per-unit rent allocation, unit-level tenant displays on the property Overview tab) before they can hide until Phase 3.
 
-Each tab trigger shows a small **completion indicator** (✓ when 100%, amber dot when partial, faint dot when empty). The percentage is computed in [pages/owner/properties/[id].vue](../../frontend/app/pages/owner/properties/%5Bid%5D.vue) by counting non-empty fields per tab's owning sub-object.
+### 4.5 Detail page — tab structure
+
+Route: `/owner/properties/[id]`. Header pattern follows [§ 4.4 Detail-page header in UI-STANDARDS](UI-STANDARDS.md). Below the title block, one Card hosts the tabs; below that Card, the `UnitsPanel` continues to render the property's units.
+
+The Documents tab renders a **"coming in Phase 4" placeholder by default** so owners see during demos that file uploads are on the way. The faint dot on the tab trigger + the tooltip do the signaling — clicking lands on a Phase-4 empty state, not a broken feature. Toggle via `runtimeConfig.public.features.documents` (default `true`; set `NUXT_PUBLIC_FEATURE_DOCUMENTS=false` to hide entirely). The same flag will switch to gating real file storage in Phase 4 — flag mechanism stays, semantics shift.
 
 | Tab | Mental mode | Backed by | Notes |
 |---|---|---|---|
 | **Overview** | "How is it doing?" | `useUnits().listByProperty` + `useAgreements().listWithRefs` | Read-only — counts of units (total / occupied), active agreements, monthly income from active rent, list of active tenants. |
 | **Details** | "What is it?" | top-level `Property` columns | One form, three labeled sections: Identity, Location, Specifications. |
-| **Ownership** | "What's the legal/financial picture?" | `Property.ownership` JSON | Title, Acquisition (auto-totaled), Valuation, Mortgage, Co-owners (vee-validate `useFieldArray` repeater with sum-to-100% indicator), and a **capital-gains snapshot** computed via `app/utils/rpgt.ts`. |
+| **Ownership** | "What's the legal/financial picture?" | `Property.ownership` JSON + `Property.coOwners[]` | Title, Acquisition (auto-totaled), Valuation, Mortgage, Co-owners (vee-validate `useFieldArray` repeater — see invariants below), and a **capital-gains snapshot** computed via `app/utils/rpgt.ts`. |
 | **Utilities** | "What does it cost to run?" | `Property.utilities` JSON | Recurring fees (auto annual + monthly equivalent), Service accounts. |
-| **Documents** | "Where are the papers?" | — | Phase 4+ placeholder (file storage not wired). |
+| **Documents** *(Phase 4+)* | "Where are the papers?" | — | Placeholder card visible by default — sets demo expectation that uploads are coming. Trigger carries a faint dot to read as "not wired yet". |
 
-`useProperties().update` deep-merges `ownership` and `utilities` so each tab's form can PATCH only its own slice.
+`useProperties().update` deep-merges `ownership` and `utilities` so each tab's form can PATCH only its own slice. `coOwners` replaces wholesale (it's a list, not a partial object).
+
+#### Completion indicators
+
+Each *visible* tab trigger shows a small completion indicator (✓ when 100%, amber dot when partial, faint dot when empty). Completion is **not** "every field that exists in the type" — that would give every condo a permanent 95% because `landSqft` doesn't apply. Define a deliberate required-field subset per `PropertyType`, lives in [app/utils/propertyCompletion.ts](../../frontend/app/utils/propertyCompletion.ts):
+
+```ts
+// Per-type required fields per tab. Optional/computed fields don't count toward %.
+export const REQUIRED_FIELDS: Record<
+  PropertyType,
+  Record<"details" | "ownership" | "utilities", string[]>
+> = {
+  condo: {
+    details: ["yearBuilt", "builtUpSqft", "bedrooms", "bathrooms", "furnishing"],
+    ownership: ["titleType", "purchaseDate", "purchasePrice", "currentMarketValue"],
+    utilities: ["monthlyMaintenanceFee", "quitRentAnnual", "assessmentRateAnnual"],
+  },
+  landed: {
+    details: ["yearBuilt", "builtUpSqft", "landSqft", "bedrooms", "bathrooms"],
+    ownership: ["titleType", "purchaseDate", "purchasePrice", "currentMarketValue"],
+    utilities: ["quitRentAnnual", "assessmentRateAnnual"],
+  },
+  shoplot: { /* ... */ },
+  room:    { /* ... */ },
+};
+```
+
+Rules:
+- Optional or computed fields (e.g. `acquisitionTotal`, `landSqft` on a condo) are not in the list — they don't drag completion down.
+- The `coOwners` array is "complete" when shares sum to 100 (see invariant below), regardless of count.
+- Mortgage block is "complete" if either fully filled *or* explicitly marked "no mortgage" (a UI checkbox stored as `ownership.mortgage = null`). Don't penalise cash-purchased properties.
+
+#### Co-owner invariants
+
+- `Property.coOwners` always contains **at least one** entry; on property creation, an entry for the creating user is inserted with `sharePct: 100, isPrimary: true`.
+- Exactly one entry has `isPrimary: true`. The primary's identity (matched by `Property.ownerId`) is who manages the listing in app — display, notifications, billing-of-record.
+- Sum of `sharePct` across all entries must equal `100`. Save is **blocked** when sum ≠ 100 (form-level error on the repeater); no auto-redistribute, no warning-only save — joint ownership is legally meaningful.
+- Adding a co-owner does **not** auto-rebalance existing shares — the user must edit them. The repeater shows a live "Total: X% (must be 100%)" line.
+- Removing the primary requires nominating a new primary first; the action is gated in the UI, not silently re-assigned.
 
 ### 4.6 Capital-gains snapshot ([utils/rpgt.ts](../../frontend/app/utils/rpgt.ts))
 
@@ -244,15 +306,20 @@ Resident-individual RPGT brackets:
 | Year 5 | 10% |
 | Year 6+ | 5% |
 
-The snapshot needs `purchasePrice`, `purchaseDate`, and `currentMarketValue` to render. Acquisition cost = `purchasePrice + stampDuty + legalFees`. Gain = `marketValue − acquisitionCost`. RPGT = `gain × bracketRate`. Net = `gain − RPGT`. UI carries an "estimate only — not tax advice" disclaimer.
+The snapshot needs `purchasePrice`, `purchaseDate`, and `currentMarketValue` to render. Acquisition cost = `purchasePrice + stampDuty + legalFees`. Gain = `marketValue − acquisitionCost`. RPGT = `gain × bracketRate`. Net = `gain − RPGT`. UI carries an "estimate only — not tax advice. Assumes resident-individual filing; non-citizens, foreigners, and companies have different rates." disclaimer. Disposal-side allowables (agent commission, sale legal fees) and renovation expenses are out of scope for the snapshot — owners who want a precise figure should consult their tax agent.
 
 ### 4.7 Schema impact for backend
 
 The PROJECT.md `properties` table currently covers Tier 1 only. Recommended extension:
 
-- **Top-level columns**: add `internal_label`, `notes`, `year_built`, `built_up_sqft`, `land_sqft`, `bedrooms`, `bathrooms`, `parking_lots`, `furnishing` as nullable columns. (Drop the previously-proposed `title_type`, `tenure_expiry`, `strata_title` from the column list — they move into the JSON.)
-- **`ownership JSON` column** on `properties` — title info, acquisition, valuation, mortgage, co-owners. Flexible while landlord fields stabilise.
-- **`utilities JSON` column** on `properties` — recurring fees + service-account reference numbers.
+- **Top-level columns on `properties`**: add `internal_label`, `notes`, `year_built`, `built_up_sqft`, `land_sqft`, `bedrooms`, `bathrooms`, `parking_lots`, `furnishing` as nullable columns. (Drop the previously-proposed `title_type`, `tenure_expiry`, `strata_title` from the column list — they move into the `ownership` JSON.)
+- **`ownership JSON` column** on `properties` — title info, acquisition, valuation, mortgage. Flexible while landlord fields stabilise; reasonable for our query scale (one owner has tens, not millions, of properties). Revisit if a concrete report query becomes painful.
+- **`utilities JSON` column** on `properties` — recurring fees + service-account reference numbers. Genuinely auxiliary; no plans to filter on `tnb_account_no`.
+- **`property_co_owners` table** (new, *not* JSON) — relational integrity matters here:
+  - `id`, `property_id` (FK → properties), `user_id` (FK → users, nullable for off-platform co-owners), `name`, `share_pct` (decimal 5,2), `is_primary` (bool), timestamps.
+  - DB-level invariants: per `property_id`, `sum(share_pct) = 100` and `count(is_primary = true) = 1`. Enforce in a migration trigger or in the `Property` repository on save — both is fine.
+  - `properties.owner_id` continues to point at the primary co-owner's `user_id`; the table just makes the joint-ownership picture explicit and queryable ("show all properties where user X is any kind of owner" becomes a simple join).
+- **Mortgage stays nested in `ownership` JSON for now.** TODO: extract to a `property_mortgages` table when we add payment history, refinancing events, or multi-mortgage support.
 - Photos and document uploads (Documents tab) are deferred to Phase 4+ when storage is wired; reuse the polymorphic `documents` table already in PROJECT.md.
 
 ---
@@ -265,7 +332,11 @@ Tenants follow the same Tier 1 / 2 / 3 split as Properties. Difference: tenants 
 
 ```ts
 // app/types/tenant.ts
-export type TenantStatus = "invited" | "active" | "moved_out";
+export type TenantStatus =
+  | "invited"        // sent invite, hasn't accepted
+  | "active"         // signed agreement, currently occupying
+  | "notice_given"   // gave notice, still occupying — owners want the 30-day vacancy heads-up
+  | "moved_out";     // gone, agreement closed
 
 export interface TenantPersonal {
   icNumber?: string;          // MyKad — YYMMDD-PB-####
@@ -313,10 +384,10 @@ The invite flow records the contact and sets `status="invited"`. Magic-link emai
 
 The detail route follows the [§ 4.4 Detail-page header pattern](UI-STANDARDS.md) — title block left, `Delete tenant` ghost button bottom-right of the title.
 
-- **Identity** (Tier 1) — name, email, phone, **plus** status. Status is the one Tier 1 field not in the invite modal; new tenants always start `invited`.
+- **Identity** (Tier 1) — name, email, phone, **plus** status. Status is the one Tier 1 field not in the invite modal; new tenants always start `invited`. Allowed transitions: `invited → active → notice_given → moved_out` (and `invited → moved_out` for declined invites).
 - **Personal** (Tier 2) — IC, DOB, occupation, employer, monthly income (sen ↔ ringgit at the form / service boundary), nationality.
 - **Emergency contact** (Tier 3) — name, phone, relationship.
-- **Documents** — placeholder card. Real uploads (IC copy, payslip, reference letter) land with Phase 4 file storage.
+- **Documents** *(Phase 4+)* — hidden behind the same `runtimeConfig.public.features.documents` flag as the property Documents tab. IC copy, payslip, reference letter all land with Phase 4 file storage; we do not render a placeholder tab.
 
 ### 5.4 Schema impact for backend
 
@@ -329,7 +400,7 @@ Photo + document uploads are Phase 4+; they reuse the polymorphic `documents` ta
 
 ### 5.5 Mock seed
 
-`app/mocks/tenants.ts` carries 4 tenants spanning all three statuses, with mixed Tier 2/3 fullness so the detail page renders both rich and sparse cases.
+`app/mocks/tenants.ts` carries 5 tenants spanning all four statuses (`invited`, `active`, `notice_given`, `moved_out`), with mixed Tier 2/3 fullness so the detail page renders both rich and sparse cases. The `notice_given` case anchors the upcoming-vacancy widgets on the dashboard.
 
 ---
 
@@ -479,6 +550,10 @@ Entities migrate independently; we don't need a big-bang swap.
 | Form validation | **vee-validate + Zod** — already in [package.json](../../frontend/package.json). Schemas in `app/schemas/<entity>.ts`, shared between Add modal and detail-page edit forms. |
 | Field tiers | **Tier 1** in Add Property modal; **Tier 2** as nullable columns + **Tier 3** as `details` JSON, both edited on the property detail page. |
 | Money representation | Integer **sen**, formatted via [useMoney.ts](../../frontend/app/composables/useMoney.ts). |
+| Mock toggle | **`runtimeConfig.public.useMock`** — single source of truth, flipped per-environment via `NUXT_PUBLIC_USE_MOCK`. Per-entity migration just deletes the `if (useMock)` branch in that service. |
+| Co-owners storage | **Separate `property_co_owners` table** on backend (not JSON). DB-enforced invariants: shares sum to 100, exactly one `is_primary`. |
+| Documents tab | **Placeholder visible by default** via `runtimeConfig.public.features.documents` — signals to demo audiences that uploads ship in Phase 4. Same flag will gate real storage when it lands. |
+| Property `state` field type | **`MalaysianState` enum from day one** — no `string` interim. |
 
 ---
 

@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-const tenantStatusSchema = z.enum(["invited", "active", "moved_out"]);
+const tenantStatusSchema = z.enum([
+  "invited",
+  "active",
+  "notice_given",
+  "moved_out",
+]);
 
 const phoneSchema = z
   .string()
