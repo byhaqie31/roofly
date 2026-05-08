@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Sun, Moon, Monitor } from "lucide-vue-next";
-import { ref, computed } from "vue";
+import { computed } from "vue";
 
+const { t } = useI18n();
 const { theme, setTheme } = useTheme();
-const open = ref(false);
 
 const Icon = computed(() => {
   if (theme.value === "dark") return Moon;
@@ -11,20 +11,27 @@ const Icon = computed(() => {
   return Monitor;
 });
 
+const label = computed(() => {
+  if (theme.value === "dark") return t("common.themeDark");
+  if (theme.value === "light") return t("common.themeLight");
+  return t("common.themeSystem");
+});
+
 const cycle = () => {
-  const order: Array<"light" | "dark" | "system"> = ["light", "dark", "system"];
+  const order = ["light", "dark", "system"] as const;
   const idx = order.indexOf(theme.value);
-  setTheme(order[(idx + 1) % order.length]);
+  setTheme(order[(idx + 1) % order.length]!);
 };
 </script>
 
 <template>
   <button
     type="button"
-    class="inline-flex items-center justify-center w-9 h-9 rounded-sm text-ink-strong hover:bg-[rgba(28,28,28,0.04)] focus-visible:shadow-focus transition"
+    class="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-sm text-ink-strong text-caption hover:bg-[rgba(28,28,28,0.04)] focus-visible:shadow-focus transition"
     :aria-label="$t('common.theme')"
     @click="cycle"
   >
-    <component :is="Icon" :size="18" :stroke-width="1.5" />
+    <component :is="Icon" :size="16" :stroke-width="1.5" />
+    <span class="font-medium">{{ label }}</span>
   </button>
 </template>

@@ -20,7 +20,7 @@ const drawerOpen = ref(false);
         to="/tenant"
         class="inline-flex items-center gap-2 px-3 py-2 mb-4 text-card-title font-semibold tracking-tight"
       >
-        <House :size="20" :stroke-width="1.75" class="text-accent" />
+        <House :size="20" :stroke-width="1.75" fill="currentColor" fill-opacity="0.2" class="text-accent" />
         <span>Roofly.my</span>
       </NuxtLink>
       <TenantSidebarNav />
@@ -49,7 +49,7 @@ const drawerOpen = ref(false);
             to="/tenant"
             class="inline-flex items-center gap-2 text-card-title font-semibold tracking-tight"
           >
-            <House :size="20" :stroke-width="1.75" class="text-accent" />
+            <House :size="20" :stroke-width="1.75" fill="currentColor" fill-opacity="0.2" class="text-accent" />
             <span>Roofly.my</span>
           </NuxtLink>
         </div>
