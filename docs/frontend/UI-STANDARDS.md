@@ -2,17 +2,17 @@
 
 > **Status:** Locked-in for Phase 1 onwards. Update as decisions evolve.
 > **Inspiration:** [UI-INSPIRED.md](UI-INSPIRED.md) — Lovable's warm-cream, opacity-driven, border-defined system. Read that first; this document adapts it to Roofly.
-> **Override priority:** UI-STANDARDS.md > [PROJECT.md](../PROJECT.md) > earlier prompts/memory. When in conflict, this wins for visual + interaction language.
+> **Override priority:** UI-STANDARDS.md > [PROJECT.md](../global/PROJECT.md) > earlier prompts/memory. When in conflict, this wins for visual + interaction language.
 
 ---
 
 ## Locked-in decisions
 
-These were open in [PROJECT.md § 16](../PROJECT.md#L571) — locking now so Phase 1+2 can proceed without ambiguity.
+These were open in [PROJECT.md § 16](../global/PROJECT.md#L571) — locking now so Phase 1+2 can proceed without ambiguity.
 
 | Decision | Resolved value | Note |
 |---|---|---|
-| Page background | Warm cream `#F7F4ED` | Supersedes the `#FAFAF7` in [CLAUDE-CODE-PROMPT.md](../CLAUDE-CODE-PROMPT.md). |
+| Page background | Warm cream `#F7F4ED` | Supersedes the `#FAFAF7` in [CLAUDE-CODE-PROMPT.md](../global/CLAUDE-CODE-PROMPT.md). |
 | Brand accent | Deep terracotta `#993C1D` | Used **sparingly** — primary financial CTAs, brand marks, and overdue status only. Supersedes the brighter `#E76F51`. |
 | Display + body font | Inter Variable (self-hosted via `@fontsource-variable/inter`) | Camera Plain Variable from Lovable is the spiritual model; Inter is the implementable substitute. Apply Lovable's principles (negative letter-spacing at display, narrow weight range) to Inter. |
 | Status colors | Single muted set, see § 1.5 | Lovable's "no saturated accents" rule is bent — but only inside status pills. |
@@ -144,7 +144,7 @@ Two weights only. **Do not use 700+.**
 
 ### 2.4 Rules
 
-- **Sentence case** in all UI strings (already in [PROJECT.md § 17](../PROJECT.md#L584)). No Title Case. No ALL CAPS except 3-letter status pills if absolutely needed.
+- **Sentence case** in all UI strings (already in [PROJECT.md § 17](../global/PROJECT.md#L584)). No Title Case. No ALL CAPS except 3-letter status pills if absolutely needed.
 - Negative letter-spacing only at display sizes (≥36px). Body always normal.
 - `tabular-nums` font-feature on all money columns and timestamps so digits align.
 
@@ -222,7 +222,7 @@ One pill per row; never stack pills.
 
 ### 3.6 Money display
 
-- Stored as cents (per [ADR-002](../PROJECT.md#L370)), formatted at the render edge.
+- Stored as cents (per [ADR-002](../global/PROJECT.md#L370)), formatted at the render edge.
 - Format: `RM 1,500.00` — non-breaking space between `RM` and the number, comma thousands, always two decimals.
 - Negative: `−RM 250.00` (Unicode minus `−`, not hyphen).
 - Totals / emphasis lines: `var(--text-primary)`, weight 600.
@@ -299,7 +299,7 @@ Reach for the lowest level that works.
 
 ## 6. Iconography
 
-- **Library:** Lucide (per [PROJECT.md § 7](../PROJECT.md#L226))
+- **Library:** Lucide (per [PROJECT.md § 7](../global/PROJECT.md#L226))
 - **Stroke:** 1.5px (default — do not change)
 - **Sizes:** 16px inline, 18px nav, 24px headers, 64px empty states
 - **Color:** inherit from text — never colorize
