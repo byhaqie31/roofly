@@ -9,6 +9,7 @@
   --surface-page: #f7f4ed;
   --surface-button-dark: #1c1c1c;
   --surface-on-dark: #fcfbf8;
+  --surface-hover: rgba(153, 60, 29, 0.05);
 
   /* Text — opacity-derived from #1c1c1c */
   --text-primary: #1c1c1c;
@@ -25,7 +26,7 @@
   /* Brand accent (use sparingly) */
   --accent: #993c1d;
   --accent-hover: #7a2f17;
-  --accent-soft: rgba(153, 60, 29, 0.08);
+  --accent-soft: rgba(153, 60, 29, 0.18);
 
   /* Status — unit */
   --status-vacant: #5f5f5d;
@@ -84,6 +85,7 @@
   --surface-page: #1c1a17;
   --surface-button-dark: #f7f4ed;
   --surface-on-dark: #1c1a17;
+  --surface-hover: rgba(247, 244, 237, 0.12);
 
   --text-primary: #f7f4ed;
   --text-strong: rgba(247, 244, 237, 0.92);
@@ -97,7 +99,7 @@
 
   --accent: #c44d26;
   --accent-hover: #d55d32;
-  --accent-soft: rgba(196, 77, 38, 0.12);
+  --accent-soft: rgba(196, 77, 38, 0.20);
 
   --shadow-button-inset:
     rgba(255, 255, 255, 0.06) 0 0.5px 0 0 inset,
@@ -112,6 +114,7 @@
   --surface-page: #f7f4ed;
   --surface-button-dark: #1c1c1c;
   --surface-on-dark: #fcfbf8;
+  --surface-hover: rgba(153, 60, 29, 0.05);
 
   --text-primary: #1c1c1c;
   --text-strong: rgba(28, 28, 28, 0.83);
@@ -125,7 +128,7 @@
 
   --accent: #993c1d;
   --accent-hover: #7a2f17;
-  --accent-soft: rgba(153, 60, 29, 0.08);
+  --accent-soft: rgba(153, 60, 29, 0.18);
 
   --shadow-button-inset:
     rgba(255, 255, 255, 0.2) 0 0.5px 0 0 inset,

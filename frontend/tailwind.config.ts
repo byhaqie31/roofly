@@ -24,6 +24,7 @@ export default {
           page: "var(--surface-page)",
           dark: "var(--surface-button-dark)",
           ondark: "var(--surface-on-dark)",
+          hover: "var(--surface-hover)",
         },
         ink: {
           DEFAULT: "var(--text-primary)",
