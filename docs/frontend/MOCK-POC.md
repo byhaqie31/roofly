@@ -716,7 +716,81 @@ If we ever need richer charts (multi-series, axes), revisit this — but the cur
 
 ---
 
-## 9. Migration plan (per entity)
+## 9. Settings
+
+The account-level surface — the only page in the owner shell that doesn't read across the entity tables. Edits the logged-in owner's profile, preferences, notification rules, and subscription tier.
+
+### 9.1 Types
+
+```ts
+// app/types/owner.ts
+export interface OwnerProfile {
+  id: string;                       // matches AuthUser.id from the auth store
+  name: string;
+  email: string;                    // managed by auth — read-only on this page
+  phone: string;
+  photoUrl?: string;                // Phase 4+
+  businessName?: string;
+  bankAccountLast4?: string;        // display-only; bank linkage lives elsewhere
+}
+
+export interface OwnerPreferences {
+  locale: "en" | "ms";
+  theme: "light" | "dark" | "system";
+  moneyLocale: "en-MY";             // forward-compat for future locales
+}
+
+export interface NotificationPreferences {
+  events: Record<NotificationEvent, boolean>;
+  channels: Record<NotificationChannel, boolean>;  // display-only until Phase 4
+}
+
+export type PlanTier = "free" | "starter" | "pro" | "business";
+
+export interface OwnerAccount {
+  profile: OwnerProfile;
+  preferences: OwnerPreferences;
+  notifications: NotificationPreferences;
+  planTier: PlanTier;
+}
+```
+
+`NotificationEvent` covers the five actionable triggers — `rent_reminder`, `agreement_expiry`, `payment_received`, `ticket_update`, `invite_accepted`. The list is intentionally event-shaped, not channel-shaped: Phase 4 adds per-channel rules on top without renaming anything.
+
+### 9.2 Tab structure
+
+Same Reka-UI Tabs primitive as the property/tenant detail pages. Four tabs:
+
+| Tab | Content | State source |
+|---|---|---|
+| **Profile** | Identity (name, email read-only, phone, business name), photo placeholder, masked bank account. | `OwnerAccount.profile` |
+| **Preferences** | Language radio (English / Bahasa Melayu) + theme radio (Light / Dark / System) — applied to the live UI on save via `setLocale()` and `setTheme()`. | `OwnerAccount.preferences` (cookie-backed for theme + locale, Pinia for the rest) |
+| **Notifications** | Five event toggles + a Phase-4 banner explaining channels (email + WhatsApp) ship later. In-app notifications are documented as always-on. | `OwnerAccount.notifications.events` |
+| **Plan** | Four-tier ladder (Free / Starter / Pro / Business), current tier highlighted, upgrade CTAs toast a Phase-7 stub. | `Plan[]` from `useOwnerSettings().listPlans()` + `OwnerAccount.planTier` |
+
+### 9.3 Composable + service
+
+[useOwnerSettings.ts](../../frontend/app/services/useOwnerSettings.ts) keeps the same pattern as the entity services: `get` + per-tab patch (`updateProfile`, `updatePreferences`, `updateNotifications`) + `listPlans`. Each tab owns its own form, submits its slice, and re-emits the fresh `OwnerAccount` to the parent page so the other tabs stay in sync.
+
+The Preferences form is special — it applies its values to the live app *immediately on save* (via `useTheme().setTheme` and `useI18n().setLocale`) so the change is visible without reload. Cookies handle persistence across reloads; the service-layer call is for the eventual backend swap.
+
+### 9.4 Mock seed
+
+[mocks/owner.ts](../../frontend/app/mocks/owner.ts) carries a single record whose `id` matches the auth-store stub user (`stub-owner`). Notifications start with all five events on; channels start with `email + in_app` enabled and `whatsapp` off (defaulted off until WhatsApp Cloud API is wired). Plan tier is `free` so the upgrade CTAs stay visible.
+
+[plansMock](../../frontend/app/mocks/owner.ts) carries the four tiers from [PROJECT.md § 12](../global/PROJECT.md) (`Free` / `Starter` / `Pro` / `Business`) — pricing in RM, units cap, description key — used display-only by the Plan panel.
+
+### 9.5 Schema impact for backend
+
+- **`users` table** already covers `name` / `email` / `phone` (Tier 1 per § 5.4). Add `business_name`, `photo_path` (Phase 4), and a nullable `bank_account_last4` snapshot.
+- **`owner_preferences` JSON** column on `users` (or sibling table) — `{ locale, theme, money_locale }`. Could also be a kv-store; small enough to stay JSON.
+- **`notification_preferences` JSON** column on `users` — `{ events: {...}, channels: {...} }`. Phase 4 may promote channels into a per-event matrix; the JSON shape absorbs that without a migration.
+- **Subscription / plan** is its own concern in Phase 7 — likely a `subscriptions` table joined to `users.id`. The frontend currently reads `account.planTier` from the same payload as profile.
+- **Endpoints the frontend mocks today**: `GET /account`, `PATCH /account/profile`, `PATCH /account/preferences`, `PATCH /account/notifications`, `GET /plans`.
+
+---
+
+## 10. Migration plan (per entity)
 
 When the backend endpoint for an entity ships:
 
@@ -729,7 +803,7 @@ Entities migrate independently; we don't need a big-bang swap.
 
 ---
 
-## 10. Decisions
+## 11. Decisions
 
 | Question | Decision |
 |---|---|
@@ -748,7 +822,7 @@ Entities migrate independently; we don't need a big-bang swap.
 
 ---
 
-## 11. Order of work
+## 12. Order of work
 
 1. `app/types/property.ts` + `app/schemas/property.ts` (Zod) + `app/mocks/properties.ts` + `app/services/useProperties.ts`.
 2. Install `reka-ui`. Build thin wrappers `~/components/ui/Modal.vue` and `Select.vue` (style per [UI-STANDARDS.md](UI-STANDARDS.md)).
@@ -758,3 +832,4 @@ Entities migrate independently; we don't need a big-bang swap.
 6. Repeat the type → schema → mock → service → UI loop for Units, Tenants, Agreements, Invoices/Payments.
 7. **Maintenance tickets** — types + status transition map + Zod schemas + `useTickets` service + Kanban + detail page with comment thread + create modal. See § 7.
 8. **Cross-entity views** — `useDashboard` + `useReports` composables → dashboard tiles, 12-month chart, "Needs attention" feed → reports page (year picker, per-property breakdown, CSV export, PDF stub). See § 8.
+9. **Settings** — `useOwnerSettings` composable + 4-tab page (Profile / Preferences / Notifications / Plan). Closes the owner shell. See § 9.

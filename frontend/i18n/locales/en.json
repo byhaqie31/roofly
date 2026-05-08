@@ -445,6 +445,106 @@
         }
       }
     },
+    "settings": {
+      "subtitle": "Profile, preferences, notifications, and plan.",
+      "save": "Save changes",
+      "tabs": {
+        "profile": "Profile",
+        "preferences": "Preferences",
+        "notifications": "Notifications",
+        "plan": "Plan"
+      },
+      "profile": {
+        "identity": "Identity",
+        "identityHelp": "How tenants and the system know you.",
+        "fields": {
+          "name": "Full name",
+          "email": "Email",
+          "phone": "Phone",
+          "businessName": "Business name (optional)"
+        },
+        "placeholders": {
+          "businessName": "e.g. Aminah Properties"
+        },
+        "emailManagedNote": "Email is managed by your account login — change it from auth settings.",
+        "photo": "Profile photo",
+        "photoHelp": "Profile photos arrive in Phase 4 once file storage is wired up.",
+        "photoPlaceholderTitle": "Photo upload arrives in Phase 4",
+        "photoPlaceholderHelp": "Once file storage is wired, your profile photo will live here.",
+        "payout": "Payout account",
+        "payoutHelp": "Where rent collections will be deposited. Bank linkage is managed via your finance settings.",
+        "bankMasked": "Maybank account ending in"
+      },
+      "preferences": {
+        "languageHelp": "Affects every label, date format, and translated message in the app.",
+        "themeHelp": "Pick a fixed theme or follow your operating system.",
+        "themeLightHelp": "Always use the light token set.",
+        "themeDarkHelp": "Always use the dark token set.",
+        "themeSystemHelp": "Follow your OS preference."
+      },
+      "notifications": {
+        "channelTitle": "Delivery channels",
+        "channelHelp": "We'll send notifications via email and WhatsApp once Phase 4 wires up Resend + WhatsApp Cloud API. In-app notifications are always on.",
+        "channelStatus": {
+          "phase4": "Phase 4"
+        },
+        "eventsTitle": "What gets a notification",
+        "eventsHelp": "Toggle the events you want to be told about. You can adjust per-channel rules later.",
+        "events": {
+          "rent_reminder": {
+            "title": "Rent reminders",
+            "help": "7d / 3d / 1d before each invoice is due, plus an alert when an invoice goes overdue."
+          },
+          "agreement_expiry": {
+            "title": "Agreement expiry alerts",
+            "help": "60d / 30d / 7d before any active agreement reaches its end date."
+          },
+          "payment_received": {
+            "title": "Payment received",
+            "help": "Confirmation each time a tenant pays an invoice — useful as a manual cross-check."
+          },
+          "ticket_update": {
+            "title": "Maintenance ticket updates",
+            "help": "When tenants log a new ticket, comment on one, or status changes."
+          },
+          "invite_accepted": {
+            "title": "Tenant invite accepted",
+            "help": "When a tenant accepts your magic-link invite and links to a unit."
+          }
+        }
+      },
+      "plan": {
+        "title": "Subscription",
+        "help": "Plans cap how many active units you can manage. Upgrade arrives in Phase 7.",
+        "current": "Current",
+        "free": "Free",
+        "permonth": "/ month",
+        "unitsCap": "Up to {n} units",
+        "unitsUnlimited": "Unlimited units",
+        "upgradeCta": "Upgrade",
+        "upgradeStub": "Subscriptions arrive in Phase 7. Demo only for now.",
+        "youreOnThis": "You're on this plan.",
+        "disclaimer": "Pricing is illustrative. Final pricing + billing land with the Phase 7 marketing release.",
+        "tiers": {
+          "free": {
+            "name": "Free",
+            "description": "For single-property owners testing the waters."
+          },
+          "starter": {
+            "name": "Starter",
+            "description": "For small landlords with a handful of units."
+          },
+          "pro": {
+            "name": "Pro",
+            "description": "For growing portfolios with reporting needs."
+          },
+          "business": {
+            "name": "Business",
+            "description": "For agents and multi-org operators."
+          }
+        }
+      }
+    },
     "properties": {
       "addCta": "Add property",
       "addModal": {

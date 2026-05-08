@@ -445,6 +445,106 @@
         }
       }
     },
+    "settings": {
+      "subtitle": "Profil, keutamaan, notifikasi, dan pelan langganan.",
+      "save": "Simpan perubahan",
+      "tabs": {
+        "profile": "Profil",
+        "preferences": "Keutamaan",
+        "notifications": "Notifikasi",
+        "plan": "Pelan"
+      },
+      "profile": {
+        "identity": "Identiti",
+        "identityHelp": "Cara penyewa dan sistem mengenali anda.",
+        "fields": {
+          "name": "Nama penuh",
+          "email": "E-mel",
+          "phone": "Telefon",
+          "businessName": "Nama perniagaan (pilihan)"
+        },
+        "placeholders": {
+          "businessName": "cth. Aminah Properties"
+        },
+        "emailManagedNote": "E-mel diuruskan oleh login akaun anda — tukar dari tetapan auth.",
+        "photo": "Foto profil",
+        "photoHelp": "Foto profil tiba di Fasa 4 setelah storan fail siap.",
+        "photoPlaceholderTitle": "Muat naik foto tiba di Fasa 4",
+        "photoPlaceholderHelp": "Apabila storan fail siap, foto profil anda akan dipaparkan di sini.",
+        "payout": "Akaun bayaran",
+        "payoutHelp": "Tempat kutipan sewa akan dimasukkan. Akaun bank diuruskan melalui tetapan kewangan.",
+        "bankMasked": "Akaun Maybank berakhir dengan"
+      },
+      "preferences": {
+        "languageHelp": "Mempengaruhi setiap label, format tarikh, dan mesej terjemahan dalam aplikasi.",
+        "themeHelp": "Pilih tema tetap atau ikut sistem operasi anda.",
+        "themeLightHelp": "Sentiasa gunakan set token cerah.",
+        "themeDarkHelp": "Sentiasa gunakan set token gelap.",
+        "themeSystemHelp": "Ikut keutamaan OS anda."
+      },
+      "notifications": {
+        "channelTitle": "Saluran penghantaran",
+        "channelHelp": "Notifikasi akan dihantar melalui e-mel dan WhatsApp setelah Fasa 4 menyambungkan Resend + WhatsApp Cloud API. Notifikasi dalam-aplikasi sentiasa aktif.",
+        "channelStatus": {
+          "phase4": "Fasa 4"
+        },
+        "eventsTitle": "Apa yang dapat notifikasi",
+        "eventsHelp": "Togol acara yang anda mahu diberitahu. Peraturan setiap saluran boleh dilaras kemudian.",
+        "events": {
+          "rent_reminder": {
+            "title": "Peringatan sewa",
+            "help": "7h / 3h / 1h sebelum invois jatuh tempo, dan amaran apabila invois tertunggak."
+          },
+          "agreement_expiry": {
+            "title": "Amaran tamat perjanjian",
+            "help": "60h / 30h / 7h sebelum mana-mana perjanjian aktif sampai tarikh tamat."
+          },
+          "payment_received": {
+            "title": "Pembayaran diterima",
+            "help": "Pengesahan setiap kali penyewa membayar invois — berguna sebagai semakan manual."
+          },
+          "ticket_update": {
+            "title": "Kemaskini tiket penyelenggaraan",
+            "help": "Apabila penyewa log tiket baru, beri komen, atau status berubah."
+          },
+          "invite_accepted": {
+            "title": "Jemputan penyewa diterima",
+            "help": "Apabila penyewa menerima pautan jemputan dan dipautkan ke unit."
+          }
+        }
+      },
+      "plan": {
+        "title": "Langganan",
+        "help": "Pelan menentukan had unit aktif yang boleh anda urus. Naik taraf tiba di Fasa 7.",
+        "current": "Semasa",
+        "free": "Percuma",
+        "permonth": "/ bulan",
+        "unitsCap": "Sehingga {n} unit",
+        "unitsUnlimited": "Unit tanpa had",
+        "upgradeCta": "Naik taraf",
+        "upgradeStub": "Langganan tiba di Fasa 7. Demo sahaja buat masa ini.",
+        "youreOnThis": "Anda berada pada pelan ini.",
+        "disclaimer": "Harga adalah ilustrasi. Harga muktamad + bil tiba dengan pelancaran Fasa 7.",
+        "tiers": {
+          "free": {
+            "name": "Percuma",
+            "description": "Untuk pemilik hartanah tunggal yang baru bermula."
+          },
+          "starter": {
+            "name": "Pemula",
+            "description": "Untuk pemilik kecil dengan beberapa unit."
+          },
+          "pro": {
+            "name": "Pro",
+            "description": "Untuk portfolio yang sedang berkembang dengan keperluan laporan."
+          },
+          "business": {
+            "name": "Perniagaan",
+            "description": "Untuk ejen dan operator pelbagai-organisasi."
+          }
+        }
+      }
+    },
     "properties": {
       "addCta": "Tambah hartanah",
       "addModal": {
