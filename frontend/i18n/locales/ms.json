@@ -292,14 +292,77 @@
     },
     "dashboard": {
       "title": "Papan pemuka",
+      "subtitle": "Gambaran ringkas portfolio anda buat masa kini.",
       "incomeMonth": "Pendapatan bulan ini",
+      "incomeMonthHelp": "Pembayaran berjaya yang diterima dalam bulan kalendar semasa.",
       "occupancy": "Kadar penghunian",
+      "occupancyHelp": "{occupied} daripada {total} unit dihuni",
       "outstanding": "Sewa tertunggak",
+      "outstandingHelp": "{count} invois belum dibayar (tertunda + tertunggak, termasuk denda lewat)",
       "expiringAgreements": "Akan tamat",
+      "expiringHelp": "Perjanjian aktif yang akan tamat dalam 60 hari.",
+      "incomeChart": {
+        "title": "Pendapatan — 12 bulan terakhir",
+        "help": "Jumlah pembayaran berjaya setiap bulan. Bar yang dipaparkan ialah bulan semasa."
+      },
+      "attention": {
+        "title": "Perlu perhatian",
+        "help": "Perkara yang perlu diuruskan minggu ini.",
+        "empty": "Tiada apa-apa untuk diuruskan. Bagus!",
+        "kinds": {
+          "overdue": "Tertunggak",
+          "expiring": "Akan tamat",
+          "notice_given": "Notis diberi"
+        }
+      },
       "emptyState": {
         "title": "Tambah hartanah pertama",
         "description": "Hartanah mengandungi unit yang anda sewakan. Mula dengan satu dan kami akan bantu seterusnya.",
         "cta": "Tambah hartanah"
+      }
+    },
+    "reports": {
+      "subtitle": "Pendapatan tahun ke tahun, sewa tertunggak, dan kedudukan modal mengikut hartanah.",
+      "yearLabel": "Tahun",
+      "totalIncome": "Pendapatan untuk {year}",
+      "totalIncomeHelp": "Jumlah pembayaran berjaya yang diterima dalam {year}.",
+      "totalOutstanding": "Sewa tertunggak",
+      "totalOutstandingHelp": "Invois belum dibayar yang tarikh akhirnya dalam tahun ini (tertunda + tertunggak, dengan denda lewat).",
+      "csvDownload": "Muat turun CSV",
+      "csvDownloaded": "CSV dimuat turun",
+      "pdfDownload": "Muat turun PDF",
+      "pdfStub": "Eksport PDF tiba di Fasa 4 setelah storan fail siap.",
+      "monthlyBreakdown": {
+        "title": "Pendapatan bulanan — {year}",
+        "help": "Pembayaran berjaya dikelompokkan mengikut bulan kalendar."
+      },
+      "perProperty": {
+        "title": "Pecahan setiap hartanah",
+        "help": "Pendapatan, sewa tertunggak, kadar penghunian, dan kedudukan modal bersih untuk setiap hartanah.",
+        "disclaimer": "Keuntungan bersih menggunakan anggaran RPGT individu pemastautin. Anggaran sahaja, bukan nasihat cukai.",
+        "cols": {
+          "name": "Hartanah",
+          "units": "Unit",
+          "occupancy": "Penghunian",
+          "income": "Pendapatan",
+          "outstanding": "Tertunggak",
+          "netGain": "Untung bersih (RPGT)"
+        }
+      },
+      "csv": {
+        "property": "Hartanah",
+        "type": "Jenis",
+        "city": "Bandar",
+        "units": "Unit",
+        "occupied": "Dihuni",
+        "occupancy": "Kadar penghunian %",
+        "income": "Pendapatan (RM)",
+        "outstanding": "Tertunggak (RM)",
+        "netGain": "Untung bersih RM (anggaran RPGT)"
+      },
+      "empty": {
+        "title": "Laporan akan dipaparkan setelah ada aktiviti",
+        "description": "Apabila anda ada perjanjian dan pembayaran, di sinilah pendapatan tahunan, kadar penghunian, dan laporan cukai dipaparkan."
       }
     },
     "properties": {

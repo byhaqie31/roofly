@@ -292,14 +292,77 @@
     },
     "dashboard": {
       "title": "Dashboard",
+      "subtitle": "Snapshot of how your portfolio is doing right now.",
       "incomeMonth": "Income this month",
+      "incomeMonthHelp": "Successful payments received in the current calendar month.",
       "occupancy": "Occupancy",
+      "occupancyHelp": "{occupied} of {total} units occupied",
       "outstanding": "Outstanding rent",
+      "outstandingHelp": "{count} unpaid invoices (pending + overdue, including late fees)",
       "expiringAgreements": "Expiring soon",
+      "expiringHelp": "Active agreements ending within 60 days.",
+      "incomeChart": {
+        "title": "Income — last 12 months",
+        "help": "Sum of successful payments per month. Highlighted bar is the current month."
+      },
+      "attention": {
+        "title": "Needs attention",
+        "help": "Things to act on this week.",
+        "empty": "Nothing needs your attention. Nice work.",
+        "kinds": {
+          "overdue": "Overdue",
+          "expiring": "Expiring",
+          "notice_given": "Notice given"
+        }
+      },
       "emptyState": {
         "title": "Add your first property",
         "description": "Properties hold the units you rent out. Start with one and we'll guide you from there.",
         "cta": "Add property"
+      }
+    },
+    "reports": {
+      "subtitle": "Year-over-year income, outstanding rent, and capital position by property.",
+      "yearLabel": "Year",
+      "totalIncome": "Income for {year}",
+      "totalIncomeHelp": "Sum of successful payments received in {year}.",
+      "totalOutstanding": "Outstanding rent",
+      "totalOutstandingHelp": "Unpaid invoices due in this year (pending + overdue, with late fees).",
+      "csvDownload": "Download CSV",
+      "csvDownloaded": "CSV downloaded",
+      "pdfDownload": "Download PDF",
+      "pdfStub": "PDF export arrives in Phase 4 once file storage is wired up.",
+      "monthlyBreakdown": {
+        "title": "Monthly income — {year}",
+        "help": "Successful payments grouped by calendar month."
+      },
+      "perProperty": {
+        "title": "Per-property breakdown",
+        "help": "Income, outstanding rent, occupancy, and net capital position for each property.",
+        "disclaimer": "Net gain uses the resident-individual RPGT estimate. Estimate only, not tax advice.",
+        "cols": {
+          "name": "Property",
+          "units": "Units",
+          "occupancy": "Occupancy",
+          "income": "Income",
+          "outstanding": "Outstanding",
+          "netGain": "Net gain (RPGT)"
+        }
+      },
+      "csv": {
+        "property": "Property",
+        "type": "Type",
+        "city": "City",
+        "units": "Units",
+        "occupied": "Occupied",
+        "occupancy": "Occupancy %",
+        "income": "Income (RM)",
+        "outstanding": "Outstanding (RM)",
+        "netGain": "Net gain RM (RPGT estimate)"
+      },
+      "empty": {
+        "title": "Reports unlock with activity",
+        "description": "Once you have agreements and payments, this is where annual income, occupancy, and tax reports live."
       }
     },
     "properties": {

@@ -529,7 +529,91 @@ Late-fee accrual is a backend concern (cron job per [PROJECT.md § Flow 3 step 6
 
 ---
 
-## 7. Migration plan (per entity)
+## 7. Dashboard & Reports
+
+The first screens that **read across multiple entities** rather than owning one. They live on top of the existing services — no new mocks, no service writes — so the mock→backend swap for individual entities automatically picks up here.
+
+### 7.1 Composable layer
+
+Two read-only aggregation composables sit between the services and the pages. Each loads the same five collections in parallel (`Properties`, `Units`, `Tenants`, `Agreements`, `useInvoices().listWithRefs()` → invoices + payments) and exposes computeds for its page.
+
+| Composable | Page | Focus |
+|---|---|---|
+| [useDashboard.ts](../../frontend/app/composables/useDashboard.ts) | [pages/owner/index.vue](../../frontend/app/pages/owner/index.vue) | "What's happening **right now**" — current-month tiles + trailing-12-month chart + needs-attention feed. |
+| [useReports.ts](../../frontend/app/composables/useReports.ts) | [pages/owner/reports.vue](../../frontend/app/pages/owner/reports.vue) | "How did **year X** go" — year-aware totals + per-property breakdown with RPGT snapshot. Year picker derives options from actual payment/invoice data. |
+
+Both share an aggregation contract:
+
+- **Money is sen everywhere**. Pages format with `useMoney().formatRM` or `<MoneyDisplay>` at the boundary.
+- **`successful` payments only count** toward income. `pending` / `failed` are excluded.
+- **Outstanding** = sum of `(amount + lateFee)` across `pending` + `overdue` invoices.
+- **Occupancy** = `units.filter(status === "occupied").length / units.length`.
+
+### 7.2 Dashboard (`/owner`)
+
+Header tiles → 12-month income chart → "Needs attention" list.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Dashboard                                                      │
+│  Snapshot of how your portfolio is doing right now.            │
+│                                                                 │
+│  ┌Income─────┐ ┌Occupancy─┐ ┌Outstanding┐ ┌Expiring────┐      │
+│  │ RM X,XXX  │ │  XX%      │ │ RM X,XXX  │ │     N      │      │
+│  │ This mo.  │ │ N of M    │ │ N invoices│ │ Next 60d   │      │
+│  └───────────┘ └───────────┘ └───────────┘ └────────────┘      │
+│                                                                 │
+│  ┌── Income — last 12 months ─────────────────────────────┐    │
+│  │  ▁▂▃▅▄▆▅▇▆█  ← current month bar uses ink, others ▌   │    │
+│  │  J F M A M J J A S O N D                                │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                                                                 │
+│  ┌── Needs attention ─────────────────────────────────────┐    │
+│  │  [Overdue]      INV-0023 · Aminah Yusof          →    │    │
+│  │  [Expiring]     Arif Hakim · 28d                  →    │    │
+│  │  [Notice given] Siti Khadijah                     →    │    │
+│  └─────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+`needsAttention` rolls together three signals into one click-through list:
+
+- Each `overdue` invoice → links to `/owner/payments`
+- Each `active` agreement with `endDate` within 60 days → links to `/owner/agreements`
+- Each tenant in `notice_given` → links to that tenant's detail page
+
+When a tile or feed is empty (no properties yet), the page shows the existing "Add your first property" empty state and hides the rest.
+
+### 7.3 Reports (`/owner/reports`)
+
+Year picker on the left, CSV + PDF buttons on the right. Below: two summary tiles, a 12-month bar chart for the chosen year, and a per-property breakdown table.
+
+Per-property row carries: property + city, units (occupied/total), occupancy %, income for year, outstanding, **net gain (RPGT)** — pulled via `computeCapitalGains` from [utils/rpgt.ts](../../frontend/app/utils/rpgt.ts) so the resident-individual disclaimer applies (see § 4.6).
+
+**CSV download works today** — [utils/csv.ts](../../frontend/app/utils/csv.ts) builds an RFC 4180-correct string with a UTF-8 BOM (so Excel opens it cleanly) and triggers a Blob download. No backend dependency. Filename pattern: `roofly-report-{year}.csv`.
+
+**PDF download is a Phase-4 stub** — the button toasts a "PDF arrives once file storage is wired" message. Same Phase-4 deferral as the property/tenant Documents placeholders.
+
+### 7.4 MiniBarChart
+
+[components/ui/MiniBarChart.vue](../../frontend/app/components/ui/MiniBarChart.vue) — hand-rolled CSS/HTML bars, no chart library. Decision rationale:
+
+- Monochrome aesthetic is one or two tones (`bg-ink` for the highlighted bar, `bg-ink-muted/40` for the rest, `bg-line-passive` for empty months) — a chart lib like Chart.js / unovis would either need heavy theming or fight us.
+- Bundle stays clean. `chart.js` minified is ~70 KB; we don't need axes, legends, tooltips, or animations for this.
+- Hover `title` per bar gives the value; `aria-label` on the wrapper carries an accessible summary.
+
+If we ever need richer charts (multi-series, axes), revisit this — but the current need is satisfied.
+
+### 7.5 Schema impact for backend
+
+**No new endpoints.** Both pages are pure aggregation over data the backend already returns through the existing services. When the entity endpoints land:
+
+1. Flip `useMock` (already centralized in `runtimeConfig.public.useMock`) and the dashboard/reports follow automatically.
+2. If aggregation becomes slow at portfolio scale (probably not for a single landlord with tens of properties — see § 4.7's JSON-vs-columns reasoning), add purpose-built aggregation endpoints later: `GET /reports/dashboard?asOf=...` and `GET /reports/yearly/:year`. The composables would swap their parallel-fetch logic for a single call; the page contracts wouldn't change.
+
+---
+
+## 8. Migration plan (per entity)
 
 When the backend endpoint for an entity ships:
 
@@ -542,7 +626,7 @@ Entities migrate independently; we don't need a big-bang swap.
 
 ---
 
-## 8. Decisions
+## 9. Decisions
 
 | Question | Decision |
 |---|---|
@@ -554,14 +638,18 @@ Entities migrate independently; we don't need a big-bang swap.
 | Co-owners storage | **Separate `property_co_owners` table** on backend (not JSON). DB-enforced invariants: shares sum to 100, exactly one `is_primary`. |
 | Documents tab | **Placeholder visible by default** via `runtimeConfig.public.features.documents` — signals to demo audiences that uploads ship in Phase 4. Same flag will gate real storage when it lands. |
 | Property `state` field type | **`MalaysianState` enum from day one** — no `string` interim. |
+| Charts | **Hand-rolled CSS/HTML in [MiniBarChart.vue](../../frontend/app/components/ui/MiniBarChart.vue)** — no chart-library dep. Monochrome palette + simple bar visuals don't justify the bundle / theming cost. Revisit if multi-series or axes show up. |
+| CSV export | **Client-side Blob** via [utils/csv.ts](../../frontend/app/utils/csv.ts) (RFC 4180 escaping + UTF-8 BOM for Excel). No file storage required, works pre-Phase-4. |
+| Cross-entity reads | Aggregations live in **read-only composables** on top of services (`useDashboard`, `useReports`) — no service writes, no new mocks. Mock→backend swap stays per-entity. |
 
 ---
 
-## 9. Order of work
+## 10. Order of work
 
 1. `app/types/property.ts` + `app/schemas/property.ts` (Zod) + `app/mocks/properties.ts` + `app/services/useProperties.ts`.
 2. Install `reka-ui`. Build thin wrappers `~/components/ui/Modal.vue` and `Select.vue` (style per [UI-STANDARDS.md](UI-STANDARDS.md)).
 3. `AddPropertyModal.vue` (Tier 1) wired to the `+ Add property` button on [pages/owner/properties.vue](../../frontend/app/pages/owner/properties.vue#L17).
 4. Properties list rendering on [pages/owner/properties.vue](../../frontend/app/pages/owner/properties.vue) — replace EmptyState when list non-empty.
 5. Property detail route `pages/owner/properties/[id].vue` with **Basics** (Tier 2) and **Ownership & costs** (Tier 3) tabs.
-6. Repeat the type → schema → mock → service → UI loop for Units, Tenants, Agreements, etc.
+6. Repeat the type → schema → mock → service → UI loop for Units, Tenants, Agreements, Invoices/Payments.
+7. **Cross-entity views** — `useDashboard` + `useReports` composables → dashboard tiles, 12-month chart, "Needs attention" feed → reports page (year picker, per-property breakdown, CSV export, PDF stub). See § 7.
