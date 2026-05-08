@@ -9,6 +9,19 @@ export const tenantsMock: Tenant[] = [
     status: "active",
     invitedAt: "2025-08-15T10:00:00Z",
     createdAt: "2025-08-15T10:00:00Z",
+    personal: {
+      icNumber: "880314-14-5687",
+      dateOfBirth: "1988-03-14",
+      occupation: "Marketing manager",
+      employer: "Petronas",
+      monthlyIncome: 1_200_000,        // RM 12,000
+      nationality: "Malaysian",
+    },
+    emergencyContact: {
+      name: "Yusof Bin Hamid",
+      phone: "+60 19-555 0011",
+      relationship: "Father",
+    },
   },
   {
     id: "t-arif",
@@ -18,6 +31,12 @@ export const tenantsMock: Tenant[] = [
     status: "active",
     invitedAt: "2025-11-02T09:00:00Z",
     createdAt: "2025-11-02T09:00:00Z",
+    personal: {
+      icNumber: "920701-08-1234",
+      dateOfBirth: "1992-07-01",
+      occupation: "Café owner",
+      nationality: "Malaysian",
+    },
   },
   {
     id: "t-li-wei",
@@ -36,5 +55,14 @@ export const tenantsMock: Tenant[] = [
     status: "moved_out",
     invitedAt: "2024-03-10T08:00:00Z",
     createdAt: "2024-03-10T08:00:00Z",
+    personal: {
+      occupation: "Software engineer",
+      nationality: "Indian",
+    },
+    emergencyContact: {
+      name: "Priya Kumar",
+      phone: "+60 13-100 2222",
+      relationship: "Spouse",
+    },
   },
 ];

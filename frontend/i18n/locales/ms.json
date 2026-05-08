@@ -112,17 +112,50 @@
         "name": "Nama penuh",
         "email": "Emel",
         "phone": "Telefon",
-        "status": "Status"
+        "status": "Status",
+        "icNumber": "No. MyKad",
+        "dateOfBirth": "Tarikh lahir",
+        "occupation": "Pekerjaan",
+        "employer": "Majikan",
+        "monthlyIncome": "Pendapatan bulanan (RM)",
+        "nationality": "Kewarganegaraan",
+        "emergencyName": "Nama kenalan",
+        "emergencyPhone": "Telefon kenalan",
+        "relationship": "Hubungan"
       },
       "placeholders": {
         "name": "cth. Aminah Binti Yusof",
         "email": "Alamat emel penyewa",
-        "phone": "+60 12-345 6789"
+        "phone": "+60 12-345 6789",
+        "icNumber": "880314-14-5687",
+        "nationality": "cth. Warganegara Malaysia",
+        "emergencyName": "Orang yang boleh dihubungi jika perlu",
+        "relationship": "cth. Pasangan, Ibu bapa, Adik-beradik"
       },
       "status": {
         "invited": "Dijemput",
         "active": "Aktif",
         "moved_out": "Telah keluar"
+      },
+      "detail": {
+        "back": "Kembali ke senarai penyewa",
+        "notFound": "Penyewa tidak dijumpai.",
+        "save": "Simpan perubahan",
+        "delete": "Buang penyewa",
+        "tabs": {
+          "identity": "Identiti",
+          "personal": "Peribadi",
+          "emergency": "Hubungan kecemasan"
+        },
+        "identityHelp": "Cara untuk hubungi penyewa. Status menunjukkan keadaan terkini.",
+        "personalHelp": "Profil dan butiran pengesahan. Hanya anda boleh lihat; penyewa uruskan akaun mereka sendiri.",
+        "emergencyHelp": "Siapa untuk dihubungi jika tidak dapat hubungi penyewa — kecemasan, terkunci, isu tengah malam.",
+        "documents": {
+          "title": "Dokumen",
+          "help": "Salinan IC, slip gaji, helaian tandatangan perjanjian, dll.",
+          "placeholderTitle": "Muat naik dokumen tiba di Fasa 4.",
+          "placeholderHelp": "Apabila storan fail siap, anda boleh muat naik salinan IC, slip gaji, dan surat rujukan di sini."
+        }
       }
     },
     "units": {

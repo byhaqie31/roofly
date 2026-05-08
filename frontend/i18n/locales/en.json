@@ -112,17 +112,50 @@
         "name": "Full name",
         "email": "Email",
         "phone": "Phone",
-        "status": "Status"
+        "status": "Status",
+        "icNumber": "MyKad / IC number",
+        "dateOfBirth": "Date of birth",
+        "occupation": "Occupation",
+        "employer": "Employer",
+        "monthlyIncome": "Monthly income (RM)",
+        "nationality": "Nationality",
+        "emergencyName": "Contact name",
+        "emergencyPhone": "Contact phone",
+        "relationship": "Relationship"
       },
       "placeholders": {
         "name": "e.g. Aminah Binti Yusof",
         "email": "Their email address",
-        "phone": "+60 12-345 6789"
+        "phone": "+60 12-345 6789",
+        "icNumber": "880314-14-5687",
+        "nationality": "e.g. Malaysian",
+        "emergencyName": "Person we can call if there's an issue",
+        "relationship": "e.g. Spouse, Parent, Sibling"
       },
       "status": {
         "invited": "Invited",
         "active": "Active",
         "moved_out": "Moved out"
+      },
+      "detail": {
+        "back": "Back to tenants",
+        "notFound": "Tenant not found.",
+        "save": "Save changes",
+        "delete": "Remove tenant",
+        "tabs": {
+          "identity": "Identity",
+          "personal": "Personal",
+          "emergency": "Emergency contact"
+        },
+        "identityHelp": "How we contact this tenant. Status reflects their current relationship with you.",
+        "personalHelp": "Profile and verification details. Only you see this; the tenant manages their own account.",
+        "emergencyHelp": "Who to reach if you can't get hold of the tenant — illness, lockouts, late-night issues.",
+        "documents": {
+          "title": "Documents",
+          "help": "IC copy, payslip, agreement signature page, etc.",
+          "placeholderTitle": "Document upload arrives in Phase 4.",
+          "placeholderHelp": "Once file storage is wired up you can upload IC copies, payslips, and reference letters here."
+        }
       }
     },
     "units": {

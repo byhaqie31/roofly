@@ -43,7 +43,20 @@ export const useTenants = () => {
     if (USE_MOCK) {
       const idx = tenantsMock.findIndex((t) => t.id === id);
       if (idx === -1) throw new Error(`Tenant ${id} not found`);
-      const merged: Tenant = { ...tenantsMock[idx]!, ...patch };
+      const existing = tenantsMock[idx]!;
+      const merged: Tenant = {
+        ...existing,
+        ...patch,
+        personal: patch.personal
+          ? { ...(existing.personal ?? {}), ...patch.personal }
+          : existing.personal,
+        emergencyContact: patch.emergencyContact
+          ? {
+              ...(existing.emergencyContact ?? {}),
+              ...patch.emergencyContact,
+            }
+          : existing.emergencyContact,
+      };
       tenantsMock[idx] = merged;
       return structuredClone(merged);
     }

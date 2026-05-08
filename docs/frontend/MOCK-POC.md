@@ -84,7 +84,7 @@ Notes:
 
 ---
 
-## 4. First entity: Properties
+## 4. Properties
 
 ### 4.1 Type
 
@@ -161,7 +161,7 @@ UX:
 - Modal component: `app/components/owner/AddPropertyModal.vue` (new).
 - Triggered from the `+ Add property` button in [pages/owner/properties.vue](../../frontend/app/pages/owner/properties.vue#L17).
 - On submit: call `useProperties().create(input)`, close modal on success, push the returned `Property` into the local list ref.
-- Built on `~/components/ui/Modal.vue` + `Select.vue` (Reka UI wrappers — see §6) and existing `Input.vue` / `Button.vue`.
+- Built on `~/components/ui/Modal.vue` + `Select.vue` (Reka UI wrappers — see §7) and existing `Input.vue` / `Button.vue`.
 - Validation via **vee-validate + Zod** (already installed). Schema lives in `app/schemas/property.ts` and is shared with the detail-page edit form.
 - All labels go through i18n (`en.json`, `ms.json`) under `owner.properties.addModal.*`.
 
@@ -268,7 +268,83 @@ Photos are deferred to Phase 4+ when storage (S3 / R2 / similar) is wired.
 
 ---
 
-## 5. Migration plan (per entity)
+## 5. Tenants
+
+Tenants follow the same Tier 1 / 2 / 3 split as Properties. Difference: tenants are cross-property (no parent), so the detail page is a standalone route at `/owner/tenants/[id]` rather than a panel on another page.
+
+### 5.1 Type
+
+```ts
+// app/types/tenant.ts
+export type TenantStatus = "invited" | "active" | "moved_out";
+
+export interface TenantPersonal {
+  icNumber?: string;          // MyKad — YYMMDD-PB-####
+  dateOfBirth?: string;       // ISO date
+  occupation?: string;
+  employer?: string;
+  monthlyIncome?: number;     // sen
+  nationality?: string;
+  photoUrl?: string;          // Phase 4+
+}
+
+export interface TenantEmergencyContact {
+  name?: string;
+  phone?: string;
+  relationship?: string;
+}
+
+export interface Tenant {
+  // Tier 1 — captured in invite modal
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  status: TenantStatus;
+  invitedAt: string;
+  createdAt: string;
+  // Tier 2 — JSON column on backend
+  personal?: TenantPersonal;
+  // Tier 3 — JSON column on backend
+  emergencyContact?: TenantEmergencyContact;
+}
+```
+
+### 5.2 Invite modal (Tier 1 only)
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `name` | text | ✓ | 2–80 chars |
+| `email` | email | ✓ | Standard email validation |
+| `phone` | tel | ✓ | MY-friendly regex `^[\d\s+\-()]{8,20}$` |
+
+The invite flow records the contact and sets `status="invited"`. Magic-link emails arrive when authentication ships.
+
+### 5.3 Detail page tabs
+
+The detail route follows the [§ 4.4 Detail-page header pattern](UI-STANDARDS.md) — title block left, `Delete tenant` ghost button bottom-right of the title.
+
+- **Identity** (Tier 1) — name, email, phone, **plus** status. Status is the one Tier 1 field not in the invite modal; new tenants always start `invited`.
+- **Personal** (Tier 2) — IC, DOB, occupation, employer, monthly income (sen ↔ ringgit at the form / service boundary), nationality.
+- **Emergency contact** (Tier 3) — name, phone, relationship.
+- **Documents** — placeholder card. Real uploads (IC copy, payslip, reference letter) land with Phase 4 file storage.
+
+### 5.4 Schema impact for backend
+
+PROJECT.md's `users` table covers Tier 1 (with `role="tenant"`). Tier 2/3 are extensions — recommend two nullable JSON columns on `users`:
+
+- `personal_info JSON` — Tier 2.
+- `emergency_contact JSON` — Tier 3.
+
+Photo + document uploads are Phase 4+; they reuse the polymorphic `documents` table already in PROJECT.md.
+
+### 5.5 Mock seed
+
+`app/mocks/tenants.ts` carries 4 tenants spanning all three statuses, with mixed Tier 2/3 fullness so the detail page renders both rich and sparse cases.
+
+---
+
+## 6. Migration plan (per entity)
 
 When the backend endpoint for an entity ships:
 
@@ -281,7 +357,7 @@ Entities migrate independently; we don't need a big-bang swap.
 
 ---
 
-## 6. Decisions
+## 7. Decisions
 
 | Question | Decision |
 |---|---|
@@ -292,7 +368,7 @@ Entities migrate independently; we don't need a big-bang swap.
 
 ---
 
-## 7. Order of work
+## 8. Order of work
 
 1. `app/types/property.ts` + `app/schemas/property.ts` (Zod) + `app/mocks/properties.ts` + `app/services/useProperties.ts`.
 2. Install `reka-ui`. Build thin wrappers `~/components/ui/Modal.vue` and `Select.vue` (style per [UI-STANDARDS.md](UI-STANDARDS.md)).

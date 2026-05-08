@@ -20,9 +20,9 @@ const statusTone = (status: TenantStatus) => {
 </script>
 
 <template>
-  <button
-    type="button"
-    class="block w-full rounded-lg text-left outline-none transition hover:opacity-95 focus-visible:shadow-focus"
+  <NuxtLink
+    :to="`/owner/tenants/${tenant.id}`"
+    class="block rounded-lg outline-none transition hover:opacity-95 focus-visible:shadow-focus"
   >
     <Card padding="standard">
       <div class="mb-3 flex items-start justify-between gap-3">
@@ -31,9 +31,7 @@ const statusTone = (status: TenantStatus) => {
         </Pill>
       </div>
       <h3 class="truncate text-card-title text-ink">{{ tenant.name }}</h3>
-      <div
-        class="mt-2 flex flex-col gap-1 text-caption text-ink-muted"
-      >
+      <div class="mt-2 flex flex-col gap-1 text-caption text-ink-muted">
         <span class="inline-flex items-center gap-1.5 truncate">
           <Icon name="Mail" :size="14" /> {{ tenant.email }}
         </span>
@@ -42,5 +40,5 @@ const statusTone = (status: TenantStatus) => {
         </span>
       </div>
     </Card>
-  </button>
+  </NuxtLink>
 </template>

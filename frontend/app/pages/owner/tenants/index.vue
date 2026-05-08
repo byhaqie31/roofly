@@ -4,7 +4,7 @@ import Card from "~/components/ui/Card.vue";
 import EmptyState from "~/components/ui/EmptyState.vue";
 import Button from "~/components/ui/Button.vue";
 import TenantCard from "~/components/owner/TenantCard.vue";
-import TenantFormModal from "~/components/owner/TenantFormModal.vue";
+import TenantInviteModal from "~/components/owner/TenantInviteModal.vue";
 import type { Tenant } from "~/types/tenant";
 
 definePageMeta({ layout: "owner" });
@@ -14,7 +14,6 @@ useHead({ title: () => t("owner.nav.tenants") });
 const tenants = ref<Tenant[]>([]);
 const loading = ref(true);
 const showModal = ref(false);
-const editingTenant = ref<Tenant | null>(null);
 
 const refresh = async () => {
   tenants.value = await useTenants().list();
@@ -29,20 +28,10 @@ onMounted(async () => {
 });
 
 const onInvite = () => {
-  editingTenant.value = null;
   showModal.value = true;
 };
 
-const onEdit = (tenant: Tenant) => {
-  editingTenant.value = tenant;
-  showModal.value = true;
-};
-
-const onSaved = async () => {
-  await refresh();
-};
-
-const onDeleted = async () => {
+const onInvited = async () => {
   await refresh();
 };
 </script>
@@ -77,15 +66,9 @@ const onDeleted = async () => {
         v-for="ten in tenants"
         :key="ten.id"
         :tenant="ten"
-        @click="onEdit(ten)"
       />
     </div>
 
-    <TenantFormModal
-      v-model:open="showModal"
-      :tenant="editingTenant"
-      @saved="onSaved"
-      @deleted="onDeleted"
-    />
+    <TenantInviteModal v-model:open="showModal" @invited="onInvited" />
   </div>
 </template>
