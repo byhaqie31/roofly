@@ -47,18 +47,20 @@ gh pr create --base main --head UAT --title "release: vX.Y" --body "..."
 
 ## Ruleset details
 
+The current setup intentionally keeps **review optional** — the team is small enough that approval requirements are friction without a real safety benefit. PR-and-CI is the only enforced gate; reviews are opt-in (you can still request one when you want a second pair of eyes).
+
 ### `protect-UAT` (id `16134423`)
 
-- 1 review required, codeowner review, dismiss stale reviews on push, conversation resolution required
+- **PR required** — direct push to `UAT` is blocked
+- 0 approvals required (self-merge OK)
 - No deletion, no force-push
-- Admin bypass enabled (so a solo dev can self-merge until a partner joins)
+- Admin bypass enabled
 - Squash + rebase merges only (no merge commits)
 
 ### `protect-main` (id `16140859`)
 
 Same as `protect-UAT` plus:
-- **Linear history** required (forbids merge commits at all)
-- **Last-push approval** required (any push after approval re-resets the review)
+- **Linear history** required (forbids merge commits in history at all)
 
 ## Repo settings
 
@@ -112,11 +114,11 @@ gh api -X POST repos/byhaqie31/roofly/rulesets --input - <<'JSON'
     {
       "type": "pull_request",
       "parameters": {
-        "required_approving_review_count": 1,
-        "dismiss_stale_reviews_on_push": true,
-        "require_code_owner_review": true,
+        "required_approving_review_count": 0,
+        "dismiss_stale_reviews_on_push": false,
+        "require_code_owner_review": false,
         "require_last_push_approval": false,
-        "required_review_thread_resolution": true,
+        "required_review_thread_resolution": false,
         "allowed_merge_methods": ["squash", "rebase"]
       }
     }
@@ -146,11 +148,11 @@ gh api -X POST repos/byhaqie31/roofly/rulesets --input - <<'JSON'
     {
       "type": "pull_request",
       "parameters": {
-        "required_approving_review_count": 1,
-        "dismiss_stale_reviews_on_push": true,
-        "require_code_owner_review": true,
-        "require_last_push_approval": true,
-        "required_review_thread_resolution": true,
+        "required_approving_review_count": 0,
+        "dismiss_stale_reviews_on_push": false,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": false,
         "allowed_merge_methods": ["squash", "rebase"]
       }
     }
@@ -198,13 +200,15 @@ gh api repos/byhaqie31/roofly/rulesets \
   --jq '.[] | {id, name, refs: .conditions.ref_name.include}'
 ```
 
-## Tighten later (when partner joins)
+## Tighten later (as the team grows)
 
-The current setup is calibrated for a solo dev. After a second collaborator is on board:
+The current setup is calibrated for a small high-trust team where review is opt-in. As the team scales, dial these back up by re-running the ruleset PUT with stricter values:
 
-- **Drop admin bypass on `protect-main`** (set `"bypass_actors": []`) so even you can't self-merge to prod
-- **Add `.github/CODEOWNERS`** so the codeowner-review requirement actually has someone to ping
-- **Consider `require_last_push_approval: true` on `protect-UAT`** if staging starts to feel too loose
+- **Require approvals** — set `required_approving_review_count: 1` (or 2) on `protect-UAT` and `protect-main` once you have enough reviewers that waiting isn't a bottleneck
+- **Require codeowner review** — set `require_code_owner_review: true` and add a `.github/CODEOWNERS` file so PRs auto-route to the right people based on which paths they touch
+- **Require last-push approval** — set `require_last_push_approval: true` on `protect-main` so any push after approval re-resets the review (prevents sneaking changes in post-review)
+- **Require thread resolution** — set `required_review_thread_resolution: true` so unresolved reviewer comments block merge
+- **Drop admin bypass** — set `"bypass_actors": []` on `protect-main` so even admins must go through the PR flow for prod
 
 ## Rollback / removal
 
