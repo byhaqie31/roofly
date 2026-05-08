@@ -13,6 +13,7 @@
     "save": "Simpan",
     "cancel": "Batal",
     "delete": "Padam",
+    "savedToast": "Disimpan",
     "back": "Kembali",
     "next": "Seterusnya",
     "submit": "Hantar",
@@ -76,6 +77,7 @@
         "title": "Tambah hartanah",
         "description": "Isi maklumat asas dahulu — butiran unit dan pemilikan boleh diisi kemudian.",
         "submit": "Tambah hartanah",
+        "createdToast": "Hartanah ditambah",
         "fields": {
           "name": "Nama hartanah",
           "type": "Jenis",
@@ -102,10 +104,19 @@
         "notFound": "Hartanah tidak dijumpai.",
         "save": "Simpan perubahan",
         "saved": "Disimpan",
+        "delete": "Padam hartanah",
+        "deletedToast": "Hartanah dipadam",
+        "deleteConfirm": {
+          "title": "Padam hartanah ini?",
+          "body": "Tindakan ini akan memadam {name} dan rekod berkaitan. Tidak boleh dibatalkan.",
+          "confirm": "Ya, padam"
+        },
         "tabs": {
+          "identity": "Identiti",
           "basics": "Asas",
           "costs": "Pemilikan & kos"
         },
+        "identityHelp": "Maklumat ringkas yang dipaparkan pada kad hartanah. Guna untuk betulkan ejaan atau tukar nama.",
         "basicsHelp": "Ciri-ciri fizikal — biasanya tidak berubah selepas direkod.",
         "costsHelp": "Kos berulang dan nombor rujukan — lejar peribadi hartanah anda.",
         "fields": {

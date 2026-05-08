@@ -63,5 +63,15 @@ export const useProperties = () => {
     });
   };
 
-  return { list, get, create, update };
+  const remove = async (id: string): Promise<void> => {
+    if (USE_MOCK) {
+      const idx = propertiesMock.findIndex((p) => p.id === id);
+      if (idx !== -1) propertiesMock.splice(idx, 1);
+      return;
+    }
+    const { request } = useApi();
+    await request(`/properties/${id}`, { method: "DELETE" });
+  };
+
+  return { list, get, create, update, remove };
 };

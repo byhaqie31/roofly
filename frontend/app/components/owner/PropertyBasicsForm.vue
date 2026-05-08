@@ -4,6 +4,7 @@ import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import { propertyBasicsSchema } from "~/schemas/property";
 import type { Property } from "~/types/property";
+import { useToast } from "~/composables/useToast";
 import Input from "~/components/ui/Input.vue";
 import Select from "~/components/ui/Select.vue";
 import Button from "~/components/ui/Button.vue";
@@ -12,6 +13,7 @@ const props = defineProps<{ property: Property }>();
 const emit = defineEmits<{ saved: [property: Property] }>();
 
 const { t } = useI18n();
+const { show } = useToast();
 const submitting = ref(false);
 
 const initialValues = {
@@ -79,6 +81,7 @@ const onSubmit = handleSubmit(async (values) => {
   try {
     const updated = await useProperties().update(props.property.id, values);
     emit("saved", updated);
+    show(t("common.savedToast"), "success");
   } finally {
     submitting.value = false;
   }

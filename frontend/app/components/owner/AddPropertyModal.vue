@@ -5,6 +5,7 @@ import { toTypedSchema } from "@vee-validate/zod";
 import { propertyInputSchema } from "~/schemas/property";
 import { MY_STATES } from "~/types/property";
 import type { Property, PropertyInput } from "~/types/property";
+import { useToast } from "~/composables/useToast";
 import Modal from "~/components/ui/Modal.vue";
 import Input from "~/components/ui/Input.vue";
 import Select from "~/components/ui/Select.vue";
@@ -17,6 +18,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const { show } = useToast();
 const submitting = ref(false);
 
 const initialValues: PropertyInput = {
@@ -57,6 +59,7 @@ const onSubmit = handleSubmit(async (values) => {
     const created = await useProperties().create(values);
     emit("created", created);
     emit("update:open", false);
+    show(t("owner.properties.addModal.createdToast"), "success");
   } finally {
     submitting.value = false;
   }

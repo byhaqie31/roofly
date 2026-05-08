@@ -13,6 +13,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
+    "savedToast": "Saved",
     "back": "Back",
     "next": "Next",
     "submit": "Submit",
@@ -76,6 +77,7 @@
         "title": "Add property",
         "description": "Capture the basics now — you can fill in unit and ownership details after.",
         "submit": "Add property",
+        "createdToast": "Property added",
         "fields": {
           "name": "Property name",
           "type": "Type",
@@ -102,10 +104,19 @@
         "notFound": "Property not found.",
         "save": "Save changes",
         "saved": "Saved",
+        "delete": "Delete property",
+        "deletedToast": "Property deleted",
+        "deleteConfirm": {
+          "title": "Delete this property?",
+          "body": "This will remove {name} and any attached records. This cannot be undone.",
+          "confirm": "Yes, delete"
+        },
         "tabs": {
+          "identity": "Identity",
           "basics": "Basics",
           "costs": "Ownership & costs"
         },
+        "identityHelp": "The summary shown on the property card. Use this to fix a typo or rename a unit.",
         "basicsHelp": "Physical characteristics — these mostly don't change once recorded.",
         "costsHelp": "Recurring costs and reference numbers — your personal house ledger.",
         "fields": {
