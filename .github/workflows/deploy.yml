@@ -1,0 +1,34 @@
+name: Deploy demo.roofly.my to Hostinger VPS
+
+on:
+  push:
+    branches:
+      - demo-roofly
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/roofly-demo
+            git pull origin demo-roofly
+            docker compose up -d --build
+
+            # Verify app is responding
+            sleep 5
+            if curl -sf http://localhost:3001 > /dev/null; then
+              echo "App is running"
+            else
+              echo "WARNING: App may not be responding"
+              docker logs demo-roofly --tail 30
+            fi
+
+            docker image prune -f
