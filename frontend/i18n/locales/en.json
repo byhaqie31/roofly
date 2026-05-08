@@ -12,8 +12,23 @@
     },
     "save": "Save",
     "cancel": "Cancel",
+    "close": "Close",
     "delete": "Delete",
     "savedToast": "Saved",
+    "months": {
+      "jan": "January",
+      "feb": "February",
+      "mar": "March",
+      "apr": "April",
+      "may": "May",
+      "jun": "June",
+      "jul": "July",
+      "aug": "August",
+      "sep": "September",
+      "oct": "October",
+      "nov": "November",
+      "dec": "December"
+    },
     "back": "Back",
     "next": "Next",
     "submit": "Submit",
@@ -49,6 +64,78 @@
     "phoneMy": "Enter a valid Malaysian phone number"
   },
   "owner": {
+    "payments": {
+      "emptyTitle": "No invoices yet.",
+      "emptyDescription": "Invoices appear once an agreement is active. They're generated monthly based on the rent due day.",
+      "emptyFilter": "No invoices match this filter.",
+      "recordCta": "Record payment",
+      "recordedToast": "Payment recorded",
+      "dueOn": "Due {date}",
+      "paidOn": "Paid {date}",
+      "filters": {
+        "all": "All",
+        "pending": "Pending",
+        "overdue": "Overdue",
+        "paid": "Paid",
+        "cancelled": "Cancelled",
+        "allMonths": "All months",
+        "allYears": "All years",
+        "clear": "Clear filters"
+      },
+      "pagination": {
+        "showing": "Showing {from}–{to} of {total}",
+        "prev": "Previous",
+        "next": "Next",
+        "page": "Page {current} of {total}"
+      },
+      "columns": {
+        "invoice": "Invoice",
+        "tenant": "Tenant",
+        "due": "Due date",
+        "amount": "Amount",
+        "status": "Status",
+        "action": "Action"
+      },
+      "status": {
+        "pending": "Pending",
+        "paid": "Paid",
+        "overdue": "Overdue",
+        "cancelled": "Cancelled"
+      },
+      "methods": {
+        "fpx": "FPX",
+        "card": "Card",
+        "cash": "Cash",
+        "transfer": "Bank transfer"
+      },
+      "fields": {
+        "amount": "Amount (RM)",
+        "method": "Payment method",
+        "paidAt": "Paid on",
+        "reference": "Reference"
+      },
+      "placeholders": {
+        "reference": "Optional transaction ref"
+      },
+      "recordModal": {
+        "title": "Record payment"
+      },
+      "viewModal": {
+        "period": "Billing period",
+        "billTo": "Bill to",
+        "property": "Property",
+        "rent": "Rent",
+        "lateFee": "Late fee",
+        "total": "Total due",
+        "payments": "Payments received",
+        "share": "Copy link",
+        "download": "Download PDF",
+        "send": "Send to tenant",
+        "shareToast": "Share link copied (mock)",
+        "downloadToast": "PDF download arrives with Phase 4 file storage.",
+        "sentToast": "Invoice sent to {email}"
+      }
+    },
     "agreements": {
       "addCta": "Add agreement",
       "addTitle": "Add agreement",

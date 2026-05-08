@@ -194,7 +194,7 @@ UX:
 - Modal component: `app/components/owner/AddPropertyModal.vue` (new).
 - Triggered from the `+ Add property` button in [pages/owner/properties.vue](../../frontend/app/pages/owner/properties.vue#L17).
 - On submit: call `useProperties().create(input)`, close modal on success, push the returned `Property` into the local list ref.
-- Built on `~/components/ui/Modal.vue` + `Select.vue` (Reka UI wrappers — see §7) and existing `Input.vue` / `Button.vue`.
+- Built on `~/components/ui/Modal.vue` + `Select.vue` (Reka UI wrappers — see §8) and existing `Input.vue` / `Button.vue`.
 - Validation via **vee-validate + Zod** (already installed). Schema lives in `app/schemas/property.ts` and is shared with the detail-page edit form.
 - All labels go through i18n (`en.json`, `ms.json`) under `owner.properties.addModal.*`.
 
@@ -333,7 +333,132 @@ Photo + document uploads are Phase 4+; they reuse the polymorphic `documents` ta
 
 ---
 
-## 6. Migration plan (per entity)
+## 6. Payments (invoices + payments)
+
+The first cross-entity flow — invoices are derived from active/expired agreements (one per month based on `rentDueDay`), and payments settle invoices. Both live behind `/owner/payments`.
+
+### 6.1 Types
+
+```ts
+// app/types/invoice.ts
+export type InvoiceStatus = "pending" | "paid" | "overdue" | "cancelled";
+export interface Invoice {
+  id: string;
+  agreementId: string;
+  invoiceNumber: string;     // INV-0001, sequenced chronologically
+  amount: number;            // sen
+  lateFee: number;           // sen
+  dueDate: string;           // ISO date
+  status: InvoiceStatus;
+  createdAt: string;
+}
+
+// app/types/payment.ts
+export type PaymentMethod = "fpx" | "card" | "cash" | "transfer";
+export type PaymentStatus = "pending" | "successful" | "failed";
+export interface Payment {
+  id: string;
+  invoiceId: string;
+  amount: number;            // sen
+  method: PaymentMethod;
+  status: PaymentStatus;
+  paidAt: string;            // ISO datetime
+  reference?: string;
+  createdAt: string;
+}
+```
+
+### 6.2 Mock generator
+
+[mocks/invoices.ts](../../frontend/app/mocks/invoices.ts) walks each agreement month-by-month from `startDate` to `min(endDate, today + 30 days)`. Status is decided by simple heuristic:
+
+- `paid` — invoice older than 30 days *or* under an `expired` / `terminated` agreement (a matching `payment` is also generated).
+- `overdue` — due in the last 30 days, unpaid (carries `lateFee` from the agreement).
+- `pending` — due in the future (we generate up to 30 days ahead so the table always has a "next" invoice).
+- `draft` agreements produce **no** invoices.
+
+After generation, all invoices are sorted by `dueDate` and renumbered `INV-0001..INV-NNNN` so the table reads chronologically.
+
+### 6.3 Service
+
+[services/useInvoices.ts](../../frontend/app/services/useInvoices.ts) exposes:
+
+- `list()` / `listWithRefs()` — `WithRefs` joins each invoice with its agreement → unit → property → tenant + matched payments. Used by the table.
+- `recordPayment(input)` — creates a `Payment`, flips invoice `status` to `paid`. Returns `{ payment, invoice }`.
+- `sendInvoice(id)` — mock returns `{ sentAt }`. Backend will own actual email/WhatsApp dispatch.
+- `updateStatus(id, status)` — for cancellation.
+
+### 6.4 List page UX
+
+[pages/owner/payments.vue](../../frontend/app/pages/owner/payments.vue) — the first **TanStack Table** screen, per [UI-STANDARDS § 3.5](UI-STANDARDS.md#L215). Filter row layout:
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│ [All N] [Pending] [Overdue] [Paid] [Cancelled] [Clear]   [Month ▾] [Year ▾] │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+- **Status pills** — left side, with counts that reflect the *currently date-filtered* subset (so "Pending 2" inside `Year=2026` means 2 pending in 2026).
+- **Month + Year dropdowns** — right side. Year options derived from the data; Month is fixed Jan–Dec via `common.months.*`. Both default to "All".
+- **Sortable columns**: `dueDate` (default desc), `amount`. Invoice / Tenant / Status / Action are scan-only.
+- **Pagination**: 20 rows / page via `getPaginationRowModel`. Page index resets to 0 whenever any filter changes (TanStack doesn't auto-reset).
+- **Invoice number is a clickable link** — opens [InvoiceViewModal](../../frontend/app/components/owner/InvoiceViewModal.vue).
+- **Action column**: `Record payment` button for `pending` / `overdue`; "Paid {date}" text for `paid`; "—" for `cancelled`.
+
+### 6.5 Record payment modal
+
+[RecordPaymentModal.vue](../../frontend/app/components/owner/RecordPaymentModal.vue) — pre-fills `amount` with `rent + lateFee` (ringgit at the form boundary, sen at the service boundary), `method=fpx`, `paidAt=today`. Optional free-text `reference`. Submit creates a `Payment` and flips the invoice.
+
+### 6.6 Invoice view modal
+
+[InvoiceViewModal.vue](../../frontend/app/components/owner/InvoiceViewModal.vue) at `size="lg"` — wide enough that the four footer actions sit on one line.
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ INV-0029                                          [×]   │
+│   Billing period · June 2026                  [Pending] │
+│   Due 04/06/2026                                        │
+│                                                          │
+│   BILL TO                                                │
+│     Arif Hakim                                           │
+│     arif.hakim@example.com · +60 17-888 1234            │
+│                                                          │
+│   PROPERTY                                               │
+│     Wangsa Walk Shoplot G-12                             │
+│     Ground floor shop                                    │
+│                                                          │
+│   ┌────────────────────────────────────────────────┐   │
+│   │  Rent                          RM 4,000.00     │   │
+│   │  Late fee (if any)                RM 50.00     │   │
+│   │  ─────────────────────────────────────────────  │   │
+│   │  Total due                     RM 4,050.00     │   │
+│   └────────────────────────────────────────────────┘   │
+│                                                          │
+│   PAYMENTS RECEIVED  (when paid)                         │
+│     · FPX  04/06/2026  · FPX-20260604     RM 4,000.00   │
+│                                                          │
+│ [Copy link]  [Download PDF]            [Send to tenant] │
+└──────────────────────────────────────────────────────────┘
+```
+
+UX rules locked in here:
+
+- **No redundant Close button** in the footer — top-right `×` and click-outside already close the modal. Reuse this rule for any future read-mostly modal.
+- **Send to tenant** is the only primary action; Copy link + Download PDF are ghost-tone stubs that toast a Phase-4 disclaimer (PDF generation needs file storage).
+- **Send is hidden** when `status === "cancelled"`.
+
+### 6.7 Schema impact for backend
+
+`invoices` and `payments` tables are already in [PROJECT.md § Database schema](../global/PROJECT.md#L328) — no extension needed. Two endpoints we mocked that the backend should expose:
+
+- `POST /invoices/:id/payments` — record a payment + flip invoice status. Body matches `PaymentInput`.
+- `POST /invoices/:id/send` — dispatch invoice via email / WhatsApp. Returns `{ sentAt }`.
+
+Late-fee accrual is a backend concern (cron job per [PROJECT.md § Flow 3 step 6](../global/PROJECT.md#L184)). The mock just snapshots `agreement.lateFee` onto overdue invoices for display.
+
+---
+
+## 7. Migration plan (per entity)
 
 When the backend endpoint for an entity ships:
 
@@ -346,7 +471,7 @@ Entities migrate independently; we don't need a big-bang swap.
 
 ---
 
-## 7. Decisions
+## 8. Decisions
 
 | Question | Decision |
 |---|---|
@@ -357,7 +482,7 @@ Entities migrate independently; we don't need a big-bang swap.
 
 ---
 
-## 8. Order of work
+## 9. Order of work
 
 1. `app/types/property.ts` + `app/schemas/property.ts` (Zod) + `app/mocks/properties.ts` + `app/services/useProperties.ts`.
 2. Install `reka-ui`. Build thin wrappers `~/components/ui/Modal.vue` and `Select.vue` (style per [UI-STANDARDS.md](UI-STANDARDS.md)).

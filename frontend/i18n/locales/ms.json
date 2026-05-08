@@ -12,8 +12,23 @@
     },
     "save": "Simpan",
     "cancel": "Batal",
+    "close": "Tutup",
     "delete": "Padam",
     "savedToast": "Disimpan",
+    "months": {
+      "jan": "Januari",
+      "feb": "Februari",
+      "mar": "Mac",
+      "apr": "April",
+      "may": "Mei",
+      "jun": "Jun",
+      "jul": "Julai",
+      "aug": "Ogos",
+      "sep": "September",
+      "oct": "Oktober",
+      "nov": "November",
+      "dec": "Disember"
+    },
     "back": "Kembali",
     "next": "Seterusnya",
     "submit": "Hantar",
@@ -49,6 +64,78 @@
     "phoneMy": "Sila masukkan nombor telefon Malaysia yang sah"
   },
   "owner": {
+    "payments": {
+      "emptyTitle": "Belum ada invois.",
+      "emptyDescription": "Invois akan muncul setelah perjanjian aktif. Dijana bulanan mengikut hari sewa.",
+      "emptyFilter": "Tiada invois sepadan dengan penapis ini.",
+      "recordCta": "Rekod pembayaran",
+      "recordedToast": "Pembayaran direkod",
+      "dueOn": "Tarikh tamat {date}",
+      "paidOn": "Dibayar {date}",
+      "filters": {
+        "all": "Semua",
+        "pending": "Tertangguh",
+        "overdue": "Tertunggak",
+        "paid": "Telah dibayar",
+        "cancelled": "Dibatalkan",
+        "allMonths": "Semua bulan",
+        "allYears": "Semua tahun",
+        "clear": "Padam penapis"
+      },
+      "pagination": {
+        "showing": "Menunjukkan {from}–{to} daripada {total}",
+        "prev": "Sebelum",
+        "next": "Seterusnya",
+        "page": "Halaman {current} daripada {total}"
+      },
+      "columns": {
+        "invoice": "Invois",
+        "tenant": "Penyewa",
+        "due": "Tarikh tamat",
+        "amount": "Jumlah",
+        "status": "Status",
+        "action": "Tindakan"
+      },
+      "status": {
+        "pending": "Tertangguh",
+        "paid": "Telah dibayar",
+        "overdue": "Tertunggak",
+        "cancelled": "Dibatalkan"
+      },
+      "methods": {
+        "fpx": "FPX",
+        "card": "Kad",
+        "cash": "Tunai",
+        "transfer": "Pindahan bank"
+      },
+      "fields": {
+        "amount": "Jumlah (RM)",
+        "method": "Kaedah pembayaran",
+        "paidAt": "Tarikh bayaran",
+        "reference": "Rujukan"
+      },
+      "placeholders": {
+        "reference": "Rujukan transaksi (pilihan)"
+      },
+      "recordModal": {
+        "title": "Rekod pembayaran"
+      },
+      "viewModal": {
+        "period": "Tempoh bil",
+        "billTo": "Untuk",
+        "property": "Hartanah",
+        "rent": "Sewa",
+        "lateFee": "Caj lewat",
+        "total": "Jumlah perlu dibayar",
+        "payments": "Bayaran diterima",
+        "share": "Salin pautan",
+        "download": "Muat turun PDF",
+        "send": "Hantar ke penyewa",
+        "shareToast": "Pautan kongsi disalin (mock)",
+        "downloadToast": "Muat turun PDF tiba dengan storan fail Fasa 4.",
+        "sentToast": "Invois dihantar ke {email}"
+      }
+    },
     "agreements": {
       "addCta": "Tambah perjanjian",
       "addTitle": "Tambah perjanjian",
