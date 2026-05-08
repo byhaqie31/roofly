@@ -88,58 +88,91 @@ Notes:
 
 ### 4.1 Type
 
-Schema source: [PROJECT.md § properties table](../global/PROJECT.md#L328) for Tier 1; Tier 2/3 are extensions detailed in §4.5–4.7. Money is integer **sen** (matches [useMoney.ts](../../frontend/app/composables/useMoney.ts)).
+Schema source: [PROJECT.md § properties table](../global/PROJECT.md#L328) extended with two JSON sub-objects (`ownership` + `utilities`) that map to the detail-page tabs. Money is integer **sen** (matches [useMoney.ts](../../frontend/app/composables/useMoney.ts)).
 
 ```ts
-// app/types/property.ts
-export type PropertyType = "condo" | "landed" | "shoplot" | "room";
-export type Furnishing = "unfurnished" | "partial" | "fully";
-export type TitleType = "freehold" | "leasehold";
+// app/types/property.ts (excerpt)
+export interface PropertyMortgage {
+  bank?: string;
+  loanAmount?: number;          // sen
+  outstandingBalance?: number;  // sen
+  monthlyInstalment?: number;   // sen
+  tenureYears?: number;
+  maturityDate?: string;
+  interestRatePct?: number;
+}
 
-// Tier 3 — flexible "house ledger" detail. Backend stores as JSON.
-export interface PropertyDetails {
-  purchaseDate?: string;            // ISO date
-  purchasePrice?: number;           // sen
-  monthlyMaintenanceFee?: number;   // sen
-  quitRentAnnual?: number;          // sen
-  assessmentRateAnnual?: number;    // sen
-  insurancePolicyNo?: string;
-  insuranceProvider?: string;
+export interface PropertyCoOwner {
+  name: string;
+  sharePct: number;             // 0-100
+}
+
+export interface PropertyOwnership {
+  // Title — for the Title section
+  titleType?: "freehold" | "leasehold";
+  titleNumber?: string;
+  lotNumber?: string;
+  tenureExpiry?: string;
+  strataTitle?: boolean;
+  masterTitle?: boolean;
+  // Acquisition — drives the gains snapshot
+  purchaseDate?: string;
+  purchasePrice?: number;       // sen
+  stampDuty?: number;           // sen
+  legalFees?: number;           // sen
+  // Valuation
+  currentMarketValue?: number;  // sen
+  lastValuedAt?: string;
+  valuationSource?: "bank" | "agent" | "self";
+  // Mortgage (optional)
+  mortgage?: PropertyMortgage;
+  // Joint ownership
+  coOwners?: PropertyCoOwner[];
+}
+
+export interface PropertyUtilities {
+  monthlyMaintenanceFee?: number;
+  sinkingFund?: number;
+  quitRentAnnual?: number;
+  assessmentRateAnnual?: number;
+  buildingInsuranceAnnual?: number;
   tnbAccountNo?: string;
   waterAccountNo?: string;
   indahWaterAccountNo?: string;
-  notes?: string;
-  photos?: string[];                // URLs — Phase 4+
+  internetAccountNo?: string;
+  managementCorpName?: string;
+  managementCorpPhone?: string;
 }
 
 export interface Property {
-  // Tier 1 — required, captured in Add Property modal
+  // Identity
   id: string;
   ownerId: string;
   name: string;
+  internalLabel?: string;
+  type: "condo" | "landed" | "shoplot" | "room";
+  notes?: string;
+  // Location
   address: string;
   city: string;
-  state: string;                    // see §4.3
+  state: string;                // see §4.3
   postcode: string;
-  type: PropertyType;
-  // Tier 2 — optional columns, edited on detail page
+  // Specifications
   yearBuilt?: number;
   builtUpSqft?: number;
   landSqft?: number;
   bedrooms?: number;
   bathrooms?: number;
   parkingLots?: number;
-  furnishing?: Furnishing;
-  titleType?: TitleType;
-  tenureExpiry?: string;            // ISO date — only when leasehold
-  strataTitle?: boolean;
-  // Tier 3 — JSON blob
-  details?: PropertyDetails;
+  furnishing?: "unfurnished" | "partial" | "fully";
+  // JSON sub-objects — one per detail-page tab
+  ownership?: PropertyOwnership;
+  utilities?: PropertyUtilities;
   // Server-assigned
   createdAt: string;
 }
 
-// Add Property modal submits Tier 1 only — Tier 2/3 are edited on the detail page.
+// Add Property modal still captures Tier 1 only — everything else is edited on the detail page.
 export type PropertyInput = Pick<
   Property,
   "name" | "address" | "city" | "state" | "postcode" | "type"
@@ -181,90 +214,46 @@ export type MalaysianState = (typeof MY_STATES)[number];
 
 ### 4.4 Mock seed
 
-```ts
-// app/mocks/properties.ts
-import type { Property } from "~/types/property";
+`app/mocks/properties.ts` carries 4 properties spanning all four `type`s with mixed fullness — one fully populated condo (Suria KLCC), one mid landed (TTDI), one sparse shoplot, one near-empty room (USJ 9). The empty case is intentional so the completion indicators on each tab read as expected.
 
-export const propertiesMock: Property[] = [
-  {
-    id: "11111111-1111-1111-1111-111111111111",
-    ownerId: "owner-1",
-    // Tier 1
-    name: "Suria KLCC #12-3A",
-    address: "Jalan Ampang, Lot 241",
-    city: "Kuala Lumpur",
-    state: "W.P. Kuala Lumpur",
-    postcode: "50088",
-    type: "condo",
-    // Tier 2
-    yearBuilt: 2008,
-    builtUpSqft: 1100,
-    bedrooms: 3,
-    bathrooms: 2,
-    parkingLots: 1,
-    furnishing: "fully",
-    titleType: "freehold",
-    strataTitle: true,
-    // Tier 3
-    details: {
-      monthlyMaintenanceFee: 45_000,        // RM 450.00
-      assessmentRateAnnual: 120_000,        // RM 1,200.00
-      tnbAccountNo: "220012345678",
-      notes: "Master bedroom AC serviced 2025-11.",
-    },
-    createdAt: "2026-01-12T09:00:00Z",
-  },
-  // Add 2–3 more representative entries: one landed, one shoplot, one room.
-  // Mix Tier 2/3 fullness so the detail page has both rich and sparse cases.
-];
-```
+### 4.5 Detail page — five-tab structure
 
----
+Route: `/owner/properties/[id]`. Header pattern follows [§ 4.4 Detail-page header in UI-STANDARDS](UI-STANDARDS.md). Below the title block, one Card hosts a five-tab interface; below that Card, the `UnitsPanel` continues to render the property's units.
 
-### 4.5 Property detail page — "Basics" tab (Tier 2)
+Each tab trigger shows a small **completion indicator** (✓ when 100%, amber dot when partial, faint dot when empty). The percentage is computed in [pages/owner/properties/[id].vue](../../frontend/app/pages/owner/properties/%5Bid%5D.vue) by counting non-empty fields per tab's owning sub-object.
 
-| Field | Type | Validation | Notes |
+| Tab | Mental mode | Backed by | Notes |
 |---|---|---|---|
-| `yearBuilt` | number (year) | 1900 ≤ y ≤ current year | Useful for maintenance + insurance |
-| `builtUpSqft` | number | > 0 | Common landlord reference |
-| `landSqft` | number | > 0 | Show only when `type` is `landed` or `shoplot` |
-| `bedrooms` | number | 0–20 | Defaults onto first unit, useful at property level for landed |
-| `bathrooms` | number | 0–20 | Same |
-| `parkingLots` | number | 0–20 | Negotiation point with tenants |
-| `furnishing` | select | enum | unfurnished / partial / fully |
-| `titleType` | select | enum | freehold / leasehold |
-| `tenureExpiry` | date | required iff `titleType=leasehold` | MY tenure detail |
-| `strataTitle` | toggle | boolean | Auto-true for `condo`, editable for `landed` |
+| **Overview** | "How is it doing?" | `useUnits().listByProperty` + `useAgreements().listWithRefs` | Read-only — counts of units (total / occupied), active agreements, monthly income from active rent, list of active tenants. |
+| **Details** | "What is it?" | top-level `Property` columns | One form, three labeled sections: Identity, Location, Specifications. |
+| **Ownership** | "What's the legal/financial picture?" | `Property.ownership` JSON | Title, Acquisition (auto-totaled), Valuation, Mortgage, Co-owners (vee-validate `useFieldArray` repeater with sum-to-100% indicator), and a **capital-gains snapshot** computed via `app/utils/rpgt.ts`. |
+| **Utilities** | "What does it cost to run?" | `Property.utilities` JSON | Recurring fees (auto annual + monthly equivalent), Service accounts. |
+| **Documents** | "Where are the papers?" | — | Phase 4+ placeholder (file storage not wired). |
 
-UX: edited inline on the property detail page, saved via `useProperties().update(id, patch)`. Same Zod schema (partial) as the modal — lives in `app/schemas/property.ts`.
+`useProperties().update` deep-merges `ownership` and `utilities` so each tab's form can PATCH only its own slice.
 
-### 4.6 Property detail page — "Ownership & costs" tab (Tier 3)
+### 4.6 Capital-gains snapshot ([utils/rpgt.ts](../../frontend/app/utils/rpgt.ts))
 
-| Field | Type | Notes |
-|---|---|---|
-| `purchaseDate` | date | ROI / tax base |
-| `purchasePrice` | money (sen) | ROI / tax base — input formatted via `useMoney` |
-| `monthlyMaintenanceFee` | money (sen) | Condo / strata only |
-| `quitRentAnnual` | money (sen) | Cukai tanah |
-| `assessmentRateAnnual` | money (sen) | Cukai pintu |
-| `insurancePolicyNo` | text | Reference when claiming |
-| `insuranceProvider` | text | Same |
-| `tnbAccountNo` | text | Utility transfer at handover |
-| `waterAccountNo` | text | Same |
-| `indahWaterAccountNo` | text | Sewerage |
-| `notes` | textarea | Catch-all |
-| `photos` | image[] | **Phase 4+** — needs storage; out of scope for POC |
+Resident-individual RPGT brackets:
 
-All Tier 3 fields are optional and free-form. Treat this tab as the owner's personal ledger — no validation beyond type checks and money parsing.
+| Holding period | Rate |
+|---|---|
+| Years 1–2 | 30% |
+| Year 3 | 20% |
+| Year 4 | 15% |
+| Year 5 | 10% |
+| Year 6+ | 5% |
+
+The snapshot needs `purchasePrice`, `purchaseDate`, and `currentMarketValue` to render. Acquisition cost = `purchasePrice + stampDuty + legalFees`. Gain = `marketValue − acquisitionCost`. RPGT = `gain × bracketRate`. Net = `gain − RPGT`. UI carries an "estimate only — not tax advice" disclaimer.
 
 ### 4.7 Schema impact for backend
 
-The PROJECT.md `properties` table covers Tier 1 only. The backend will need to extend it:
+The PROJECT.md `properties` table currently covers Tier 1 only. Recommended extension:
 
-- **Tier 2 → add nullable columns** to `properties`. Stable, queryable, indexable. Worth a migration.
-- **Tier 3 → add a single `details JSON` column** to `properties`. Flexible while we discover what landlords actually fill in. Skip indexing.
-
-Photos are deferred to Phase 4+ when storage (S3 / R2 / similar) is wired.
+- **Top-level columns**: add `internal_label`, `notes`, `year_built`, `built_up_sqft`, `land_sqft`, `bedrooms`, `bathrooms`, `parking_lots`, `furnishing` as nullable columns. (Drop the previously-proposed `title_type`, `tenure_expiry`, `strata_title` from the column list — they move into the JSON.)
+- **`ownership JSON` column** on `properties` — title info, acquisition, valuation, mortgage, co-owners. Flexible while landlord fields stabilise.
+- **`utilities JSON` column** on `properties` — recurring fees + service-account reference numbers.
+- Photos and document uploads (Documents tab) are deferred to Phase 4+ when storage is wired; reuse the polymorphic `documents` table already in PROJECT.md.
 
 ---
 

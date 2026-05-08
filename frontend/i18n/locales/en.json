@@ -255,14 +255,31 @@
           "confirm": "Yes, delete"
         },
         "tabs": {
-          "identity": "Identity",
-          "basics": "Basics",
-          "costs": "Ownership & costs"
+          "overview": "Overview",
+          "details": "Details",
+          "ownership": "Ownership",
+          "utilities": "Utilities",
+          "documents": "Documents"
         },
-        "identityHelp": "The summary shown on the property card. Use this to fix a typo or rename a unit.",
-        "basicsHelp": "Physical characteristics — these mostly don't change once recorded.",
-        "costsHelp": "Recurring costs and reference numbers — your personal house ledger.",
+        "overviewHelp": "What's happening with this property right now.",
+        "detailsHelp": "Identity, location, and physical specs. Edit anytime.",
+        "ownershipHelp": "Who owns it, what it cost, what it's worth, and what's owed.",
+        "utilitiesHelp": "Recurring fees and service-account numbers — what it costs to run.",
+        "sections": {
+          "identity": "Identity",
+          "location": "Location",
+          "specifications": "Specifications",
+          "title": "Title information",
+          "acquisition": "Acquisition",
+          "valuation": "Valuation",
+          "mortgage": "Mortgage",
+          "coOwners": "Co-owners",
+          "recurringFees": "Recurring fees",
+          "serviceAccounts": "Service accounts"
+        },
         "fields": {
+          "internalLabel": "Internal label",
+          "notes": "Notes",
           "yearBuilt": "Year built",
           "builtUpSqft": "Built-up area (sqft)",
           "landSqft": "Land area (sqft)",
@@ -271,19 +288,45 @@
           "parkingLots": "Parking lots",
           "furnishing": "Furnishing",
           "titleType": "Title type",
-          "tenureExpiry": "Tenure expiry",
+          "titleNumber": "Title number",
+          "lotNumber": "Lot number",
+          "tenureExpiry": "Lease expires",
           "strataTitle": "Strata title",
+          "masterTitle": "Master title",
           "purchaseDate": "Purchase date",
           "purchasePrice": "Purchase price (RM)",
-          "monthlyMaintenanceFee": "Monthly maintenance fee (RM)",
+          "stampDuty": "Stamp duty (RM)",
+          "legalFees": "Legal fees (RM)",
+          "currentMarketValue": "Current market value (RM)",
+          "lastValuedAt": "Last valued",
+          "valuationSource": "Valuation source",
+          "mortgageBank": "Bank",
+          "loanAmount": "Loan amount (RM)",
+          "outstandingBalance": "Outstanding balance (RM)",
+          "monthlyInstalment": "Monthly instalment (RM)",
+          "tenureYears": "Tenure (years)",
+          "maturityDate": "Maturity date",
+          "interestRatePct": "Interest rate (%)",
+          "coOwnerName": "Co-owner",
+          "coOwnerSharePct": "Share (%)",
+          "monthlyMaintenanceFee": "Maintenance fee / month (RM)",
+          "sinkingFund": "Sinking fund / month (RM)",
           "quitRentAnnual": "Quit rent / year (RM)",
-          "assessmentRateAnnual": "Assessment rate / year (RM)",
-          "insurancePolicyNo": "Insurance policy no.",
-          "insuranceProvider": "Insurance provider",
+          "assessmentRateAnnual": "Assessment / year (RM)",
+          "buildingInsuranceAnnual": "Building insurance / year (RM)",
           "tnbAccountNo": "TNB account no.",
           "waterAccountNo": "Water account no.",
           "indahWaterAccountNo": "Indah Water account no.",
-          "notes": "Notes"
+          "internetAccountNo": "Internet account no.",
+          "managementCorpName": "Management corp",
+          "managementCorpPhone": "Management phone"
+        },
+        "placeholders": {
+          "internalLabel": "Optional short reference",
+          "notes": "Anything else worth remembering about this property",
+          "titleNumber": "PN 12345 / Geran 67890",
+          "mortgageBank": "e.g. Maybank, CIMB",
+          "coOwnerName": "Co-owner name"
         },
         "furnishingOptions": {
           "unfurnished": "Unfurnished",
@@ -293,6 +336,38 @@
         "titleTypeOptions": {
           "freehold": "Freehold",
           "leasehold": "Leasehold"
+        },
+        "valuationSources": {
+          "bank": "Bank valuation",
+          "agent": "Agent estimate",
+          "self": "Self-estimate"
+        },
+        "addCoOwner": "Add co-owner",
+        "shareSum": "Total: {pct}%",
+        "coOwnersHelp": "Joint ownership splits. Shares should add up to 100%.",
+        "acquisitionTotal": "Total acquisition cost",
+        "utilitiesAnnual": "Annual recurring total",
+        "utilitiesMonthly": "Monthly equivalent",
+        "gainsSnapshot": "Capital gains snapshot",
+        "gains": {
+          "gain": "Gross gain",
+          "rpgt": "Estimated RPGT",
+          "net": "Net proceeds",
+          "cost": "Acquisition cost",
+          "disclaimer": "Estimate only — based on market value, acquisition cost, and Malaysian-resident RPGT brackets. Not tax advice."
+        },
+        "overview": {
+          "totalUnits": "Units",
+          "occupied": "Occupied",
+          "activeAgreements": "Active agreements",
+          "monthlyIncome": "Monthly income",
+          "activeTenants": "Active tenants",
+          "noActive": "No active agreements on this property yet."
+        },
+        "documents": {
+          "help": "Title deeds, S&P agreement, insurance policy, tax receipts, photos.",
+          "placeholderTitle": "Document upload arrives in Phase 4.",
+          "placeholderHelp": "Once file storage is wired up you can keep title deeds, insurance policies, and tax receipts here."
         }
       }
     }

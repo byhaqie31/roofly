@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { TabsRoot, TabsList, TabsTrigger, TabsContent } from "reka-ui";
 import Card from "~/components/ui/Card.vue";
@@ -7,9 +7,11 @@ import Pill from "~/components/ui/Pill.vue";
 import Icon from "~/components/ui/Icon.vue";
 import Button from "~/components/ui/Button.vue";
 import Modal from "~/components/ui/Modal.vue";
-import PropertyIdentityForm from "~/components/owner/PropertyIdentityForm.vue";
-import PropertyBasicsForm from "~/components/owner/PropertyBasicsForm.vue";
-import PropertyCostsForm from "~/components/owner/PropertyCostsForm.vue";
+import PropertyOverviewPanel from "~/components/owner/PropertyOverviewPanel.vue";
+import PropertyDetailsForm from "~/components/owner/PropertyDetailsForm.vue";
+import PropertyOwnershipForm from "~/components/owner/PropertyOwnershipForm.vue";
+import PropertyUtilitiesForm from "~/components/owner/PropertyUtilitiesForm.vue";
+import PropertyDocumentsPanel from "~/components/owner/PropertyDocumentsPanel.vue";
 import UnitsPanel from "~/components/owner/UnitsPanel.vue";
 import { useToast } from "~/composables/useToast";
 import type { Property } from "~/types/property";
@@ -53,8 +55,77 @@ const confirmDelete = async () => {
   }
 };
 
+const isFilled = (v: unknown) =>
+  v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && v.length === 0);
+
+const fullnessPct = (filled: number, total: number) =>
+  total === 0 ? 0 : Math.round((filled / total) * 100);
+
+const detailsFullness = computed(() => {
+  const p = property.value;
+  if (!p) return 0;
+  const fields = [
+    p.name,
+    p.internalLabel,
+    p.type,
+    p.notes,
+    p.address,
+    p.city,
+    p.state,
+    p.postcode,
+    p.yearBuilt,
+    p.builtUpSqft,
+    p.landSqft,
+    p.bedrooms,
+    p.bathrooms,
+    p.parkingLots,
+    p.furnishing,
+  ];
+  return fullnessPct(fields.filter(isFilled).length, fields.length);
+});
+
+const ownershipFullness = computed(() => {
+  const o = property.value?.ownership ?? {};
+  const fields = [
+    o.titleType,
+    o.titleNumber,
+    o.lotNumber,
+    o.tenureExpiry,
+    o.strataTitle,
+    o.masterTitle,
+    o.purchaseDate,
+    o.purchasePrice,
+    o.stampDuty,
+    o.legalFees,
+    o.currentMarketValue,
+    o.lastValuedAt,
+    o.valuationSource,
+    o.mortgage && Object.values(o.mortgage).some(isFilled) ? true : undefined,
+    o.coOwners,
+  ];
+  return fullnessPct(fields.filter(isFilled).length, fields.length);
+});
+
+const utilitiesFullness = computed(() => {
+  const u = property.value?.utilities ?? {};
+  const fields = [
+    u.monthlyMaintenanceFee,
+    u.sinkingFund,
+    u.quitRentAnnual,
+    u.assessmentRateAnnual,
+    u.buildingInsuranceAnnual,
+    u.tnbAccountNo,
+    u.waterAccountNo,
+    u.indahWaterAccountNo,
+    u.internetAccountNo,
+    u.managementCorpName,
+    u.managementCorpPhone,
+  ];
+  return fullnessPct(fields.filter(isFilled).length, fields.length);
+});
+
 const tabTriggerClass =
-  "-mb-px border-b-2 border-transparent px-4 py-2 text-body text-ink-muted outline-none transition hover:text-ink focus-visible:shadow-focus data-[state=active]:border-ink data-[state=active]:text-ink";
+  "-mb-px inline-flex items-center border-b-2 border-transparent px-4 py-2 text-body text-ink-muted outline-none transition hover:text-ink focus-visible:shadow-focus data-[state=active]:border-ink data-[state=active]:text-ink";
 </script>
 
 <template>
@@ -105,27 +176,85 @@ const tabTriggerClass =
       </header>
 
       <Card padding="loose">
-        <TabsRoot default-value="basics">
-          <TabsList class="mb-6 flex gap-1 border-b border-line-passive">
-            <TabsTrigger value="identity" :class="tabTriggerClass">
-              {{ t("owner.properties.detail.tabs.identity") }}
+        <TabsRoot default-value="overview">
+          <TabsList class="mb-6 flex flex-wrap gap-1 border-b border-line-passive">
+            <TabsTrigger value="overview" :class="tabTriggerClass">
+              {{ t("owner.properties.detail.tabs.overview") }}
             </TabsTrigger>
-            <TabsTrigger value="basics" :class="tabTriggerClass">
-              {{ t("owner.properties.detail.tabs.basics") }}
+            <TabsTrigger value="details" :class="tabTriggerClass">
+              {{ t("owner.properties.detail.tabs.details") }}
+              <Icon
+                v-if="detailsFullness === 100"
+                name="Check"
+                :size="12"
+                class="ml-1.5 text-status-active"
+              />
+              <span
+                v-else-if="detailsFullness > 0"
+                class="ml-1.5 h-1.5 w-1.5 rounded-full bg-status-maintenance"
+              />
+              <span
+                v-else
+                class="ml-1.5 h-1.5 w-1.5 rounded-full bg-line-passive"
+              />
             </TabsTrigger>
-            <TabsTrigger value="costs" :class="tabTriggerClass">
-              {{ t("owner.properties.detail.tabs.costs") }}
+            <TabsTrigger value="ownership" :class="tabTriggerClass">
+              {{ t("owner.properties.detail.tabs.ownership") }}
+              <Icon
+                v-if="ownershipFullness === 100"
+                name="Check"
+                :size="12"
+                class="ml-1.5 text-status-active"
+              />
+              <span
+                v-else-if="ownershipFullness > 0"
+                class="ml-1.5 h-1.5 w-1.5 rounded-full bg-status-maintenance"
+              />
+              <span
+                v-else
+                class="ml-1.5 h-1.5 w-1.5 rounded-full bg-line-passive"
+              />
+            </TabsTrigger>
+            <TabsTrigger value="utilities" :class="tabTriggerClass">
+              {{ t("owner.properties.detail.tabs.utilities") }}
+              <Icon
+                v-if="utilitiesFullness === 100"
+                name="Check"
+                :size="12"
+                class="ml-1.5 text-status-active"
+              />
+              <span
+                v-else-if="utilitiesFullness > 0"
+                class="ml-1.5 h-1.5 w-1.5 rounded-full bg-status-maintenance"
+              />
+              <span
+                v-else
+                class="ml-1.5 h-1.5 w-1.5 rounded-full bg-line-passive"
+              />
+            </TabsTrigger>
+            <TabsTrigger value="documents" :class="tabTriggerClass">
+              {{ t("owner.properties.detail.tabs.documents") }}
+              <span
+                class="ml-1.5 h-1.5 w-1.5 rounded-full bg-line-passive"
+                :title="t('owner.properties.detail.documents.placeholderTitle')"
+              />
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="identity" class="outline-none">
-            <PropertyIdentityForm :property="property" @saved="onSaved" />
+          <TabsContent value="overview" class="outline-none">
+            <PropertyOverviewPanel :property="property" />
           </TabsContent>
-          <TabsContent value="basics" class="outline-none">
-            <PropertyBasicsForm :property="property" @saved="onSaved" />
+          <TabsContent value="details" class="outline-none">
+            <PropertyDetailsForm :property="property" @saved="onSaved" />
           </TabsContent>
-          <TabsContent value="costs" class="outline-none">
-            <PropertyCostsForm :property="property" @saved="onSaved" />
+          <TabsContent value="ownership" class="outline-none">
+            <PropertyOwnershipForm :property="property" @saved="onSaved" />
+          </TabsContent>
+          <TabsContent value="utilities" class="outline-none">
+            <PropertyUtilitiesForm :property="property" @saved="onSaved" />
+          </TabsContent>
+          <TabsContent value="documents" class="outline-none">
+            <PropertyDocumentsPanel />
           </TabsContent>
         </TabsRoot>
       </Card>

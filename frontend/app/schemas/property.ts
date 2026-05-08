@@ -4,8 +4,16 @@ import { MY_STATES } from "~/types/property";
 const propertyTypeSchema = z.enum(["condo", "landed", "shoplot", "room"]);
 const furnishingSchema = z.enum(["unfurnished", "partial", "fully"]);
 const titleTypeSchema = z.enum(["freehold", "leasehold"]);
-const sen = z.number().int().nonnegative();
+const valuationSourceSchema = z.enum(["bank", "agent", "self"]);
 
+const ringgit = z.number().nonnegative();
+const optionalIsoDate = z
+  .union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)])
+  .optional();
+
+const currentYear = new Date().getFullYear();
+
+// Add Property modal — Tier 1
 export const propertyInputSchema = z.object({
   name: z.string().min(2).max(80),
   address: z.string().min(5).max(200),
@@ -15,20 +23,63 @@ export const propertyInputSchema = z.object({
   type: propertyTypeSchema,
 });
 
-const currentYear = new Date().getFullYear();
+// Details tab — combined Identity + Location + Specifications
+export const propertyDetailsFormSchema = z.object({
+  // Identity
+  name: z.string().min(2).max(80),
+  internalLabel: z.string().max(40).optional(),
+  type: propertyTypeSchema,
+  notes: z.string().max(2000).optional(),
+  // Location
+  address: z.string().min(5).max(200),
+  city: z.string().min(2).max(60),
+  state: z.enum([...MY_STATES] as [string, ...string[]]),
+  postcode: z.string().regex(/^\d{5}$/, "Postcode must be 5 digits"),
+  // Specifications
+  yearBuilt: z.number().int().min(1900).max(currentYear).optional(),
+  builtUpSqft: z.number().positive().optional(),
+  landSqft: z.number().positive().optional(),
+  bedrooms: z.number().int().min(0).max(20).optional(),
+  bathrooms: z.number().int().min(0).max(20).optional(),
+  parkingLots: z.number().int().min(0).max(20).optional(),
+  furnishing: furnishingSchema.optional(),
+});
 
-export const propertyBasicsSchema = z
+// Mortgage sub-schema (ringgit-mode for the form)
+const mortgageFormSchema = z.object({
+  bank: z.string().max(80).optional(),
+  loanAmount: ringgit.optional(),
+  outstandingBalance: ringgit.optional(),
+  monthlyInstalment: ringgit.optional(),
+  tenureYears: z.number().int().min(0).max(40).optional(),
+  maturityDate: optionalIsoDate,
+  interestRatePct: z.number().min(0).max(20).optional(),
+});
+
+// Co-owner row
+const coOwnerSchema = z.object({
+  name: z.string().min(1, "Name required"),
+  sharePct: z.number().min(0).max(100),
+});
+
+// Ownership tab — ringgit-mode for money
+export const propertyOwnershipFormSchema = z
   .object({
-    yearBuilt: z.number().int().min(1900).max(currentYear).optional(),
-    builtUpSqft: z.number().positive().optional(),
-    landSqft: z.number().positive().optional(),
-    bedrooms: z.number().int().min(0).max(20).optional(),
-    bathrooms: z.number().int().min(0).max(20).optional(),
-    parkingLots: z.number().int().min(0).max(20).optional(),
-    furnishing: furnishingSchema.optional(),
     titleType: titleTypeSchema.optional(),
-    tenureExpiry: z.string().optional(),
+    titleNumber: z.string().max(80).optional(),
+    lotNumber: z.string().max(80).optional(),
+    tenureExpiry: optionalIsoDate,
     strataTitle: z.boolean().optional(),
+    masterTitle: z.boolean().optional(),
+    purchaseDate: optionalIsoDate,
+    purchasePrice: ringgit.optional(),
+    stampDuty: ringgit.optional(),
+    legalFees: ringgit.optional(),
+    currentMarketValue: ringgit.optional(),
+    lastValuedAt: optionalIsoDate,
+    valuationSource: valuationSourceSchema.optional(),
+    mortgage: mortgageFormSchema.optional(),
+    coOwners: z.array(coOwnerSchema).optional(),
   })
   .refine(
     (data) => data.titleType !== "leasehold" || !!data.tenureExpiry,
@@ -38,39 +89,22 @@ export const propertyBasicsSchema = z
     },
   );
 
-export const propertyDetailsSchema = z.object({
-  purchaseDate: z.string().optional(),
-  purchasePrice: sen.optional(),
-  monthlyMaintenanceFee: sen.optional(),
-  quitRentAnnual: sen.optional(),
-  assessmentRateAnnual: sen.optional(),
-  insurancePolicyNo: z.string().max(100).optional(),
-  insuranceProvider: z.string().max(100).optional(),
+// Utilities tab — ringgit-mode for money
+export const propertyUtilitiesFormSchema = z.object({
+  monthlyMaintenanceFee: ringgit.optional(),
+  sinkingFund: ringgit.optional(),
+  quitRentAnnual: ringgit.optional(),
+  assessmentRateAnnual: ringgit.optional(),
+  buildingInsuranceAnnual: ringgit.optional(),
   tnbAccountNo: z.string().max(50).optional(),
   waterAccountNo: z.string().max(50).optional(),
   indahWaterAccountNo: z.string().max(50).optional(),
-  notes: z.string().max(2000).optional(),
-  photos: z.array(z.string().url()).optional(),
+  internetAccountNo: z.string().max(50).optional(),
+  managementCorpName: z.string().max(120).optional(),
+  managementCorpPhone: z.string().max(40).optional(),
 });
 
 export type PropertyInputDto = z.infer<typeof propertyInputSchema>;
-export type PropertyBasicsDto = z.infer<typeof propertyBasicsSchema>;
-export type PropertyDetailsDto = z.infer<typeof propertyDetailsSchema>;
-
-const ringgit = z.number().nonnegative();
-
-export const propertyDetailsFormSchema = z.object({
-  purchaseDate: z.string().optional(),
-  purchasePrice: ringgit.optional(),
-  monthlyMaintenanceFee: ringgit.optional(),
-  quitRentAnnual: ringgit.optional(),
-  assessmentRateAnnual: ringgit.optional(),
-  insurancePolicyNo: z.string().max(100).optional(),
-  insuranceProvider: z.string().max(100).optional(),
-  tnbAccountNo: z.string().max(50).optional(),
-  waterAccountNo: z.string().max(50).optional(),
-  indahWaterAccountNo: z.string().max(50).optional(),
-  notes: z.string().max(2000).optional(),
-});
-
-export type PropertyDetailsFormDto = z.infer<typeof propertyDetailsFormSchema>;
+export type PropertyDetailsDto = z.infer<typeof propertyDetailsFormSchema>;
+export type PropertyOwnershipDto = z.infer<typeof propertyOwnershipFormSchema>;
+export type PropertyUtilitiesDto = z.infer<typeof propertyUtilitiesFormSchema>;

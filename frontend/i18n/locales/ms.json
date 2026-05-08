@@ -255,14 +255,31 @@
           "confirm": "Ya, padam"
         },
         "tabs": {
-          "identity": "Identiti",
-          "basics": "Asas",
-          "costs": "Pemilikan & kos"
+          "overview": "Ringkasan",
+          "details": "Butiran",
+          "ownership": "Pemilikan",
+          "utilities": "Utiliti",
+          "documents": "Dokumen"
         },
-        "identityHelp": "Maklumat ringkas yang dipaparkan pada kad hartanah. Guna untuk betulkan ejaan atau tukar nama.",
-        "basicsHelp": "Ciri-ciri fizikal — biasanya tidak berubah selepas direkod.",
-        "costsHelp": "Kos berulang dan nombor rujukan — lejar peribadi hartanah anda.",
+        "overviewHelp": "Apa yang sedang berlaku dengan hartanah ini sekarang.",
+        "detailsHelp": "Identiti, lokasi, dan spesifikasi fizikal. Boleh diubah bila-bila masa.",
+        "ownershipHelp": "Siapa pemilik, kos asal, nilai semasa, dan baki hutang.",
+        "utilitiesHelp": "Yuran berulang dan nombor akaun perkhidmatan — kos operasi.",
+        "sections": {
+          "identity": "Identiti",
+          "location": "Lokasi",
+          "specifications": "Spesifikasi",
+          "title": "Maklumat hak milik",
+          "acquisition": "Pembelian",
+          "valuation": "Penilaian",
+          "mortgage": "Pinjaman",
+          "coOwners": "Pemilik bersama",
+          "recurringFees": "Yuran berulang",
+          "serviceAccounts": "Akaun perkhidmatan"
+        },
         "fields": {
+          "internalLabel": "Label dalaman",
+          "notes": "Catatan",
           "yearBuilt": "Tahun dibina",
           "builtUpSqft": "Keluasan binaan (kp)",
           "landSqft": "Keluasan tanah (kp)",
@@ -271,19 +288,45 @@
           "parkingLots": "Tempat letak kereta",
           "furnishing": "Perabot",
           "titleType": "Jenis hak milik",
+          "titleNumber": "Nombor hak milik",
+          "lotNumber": "Nombor lot",
           "tenureExpiry": "Tarikh tamat pajakan",
           "strataTitle": "Hak milik strata",
+          "masterTitle": "Hak milik induk",
           "purchaseDate": "Tarikh belian",
           "purchasePrice": "Harga belian (RM)",
-          "monthlyMaintenanceFee": "Yuran penyelenggaraan bulanan (RM)",
+          "stampDuty": "Duti setem (RM)",
+          "legalFees": "Yuran guaman (RM)",
+          "currentMarketValue": "Nilai pasaran semasa (RM)",
+          "lastValuedAt": "Tarikh penilaian",
+          "valuationSource": "Sumber penilaian",
+          "mortgageBank": "Bank",
+          "loanAmount": "Jumlah pinjaman (RM)",
+          "outstandingBalance": "Baki belum dijelaskan (RM)",
+          "monthlyInstalment": "Ansuran bulanan (RM)",
+          "tenureYears": "Tempoh (tahun)",
+          "maturityDate": "Tarikh matang",
+          "interestRatePct": "Kadar faedah (%)",
+          "coOwnerName": "Pemilik bersama",
+          "coOwnerSharePct": "Bahagian (%)",
+          "monthlyMaintenanceFee": "Yuran penyelenggaraan / bulan (RM)",
+          "sinkingFund": "Kumpulan wang penampan / bulan (RM)",
           "quitRentAnnual": "Cukai tanah / tahun (RM)",
           "assessmentRateAnnual": "Cukai pintu / tahun (RM)",
-          "insurancePolicyNo": "No. polisi insurans",
-          "insuranceProvider": "Penyedia insurans",
+          "buildingInsuranceAnnual": "Insurans bangunan / tahun (RM)",
           "tnbAccountNo": "No. akaun TNB",
           "waterAccountNo": "No. akaun air",
           "indahWaterAccountNo": "No. akaun Indah Water",
-          "notes": "Catatan"
+          "internetAccountNo": "No. akaun internet",
+          "managementCorpName": "Pengurusan bangunan",
+          "managementCorpPhone": "Telefon pengurusan"
+        },
+        "placeholders": {
+          "internalLabel": "Rujukan ringkas (pilihan)",
+          "notes": "Apa-apa lagi yang patut diingat",
+          "titleNumber": "PN 12345 / Geran 67890",
+          "mortgageBank": "cth. Maybank, CIMB",
+          "coOwnerName": "Nama pemilik bersama"
         },
         "furnishingOptions": {
           "unfurnished": "Tanpa perabot",
@@ -293,6 +336,38 @@
         "titleTypeOptions": {
           "freehold": "Pegangan bebas",
           "leasehold": "Pajakan"
+        },
+        "valuationSources": {
+          "bank": "Penilaian bank",
+          "agent": "Anggaran ejen",
+          "self": "Anggaran sendiri"
+        },
+        "addCoOwner": "Tambah pemilik",
+        "shareSum": "Jumlah: {pct}%",
+        "coOwnersHelp": "Pemilikan bersama. Bahagian patut berjumlah 100%.",
+        "acquisitionTotal": "Jumlah kos pembelian",
+        "utilitiesAnnual": "Jumlah berulang tahunan",
+        "utilitiesMonthly": "Setara bulanan",
+        "gainsSnapshot": "Anggaran keuntungan modal",
+        "gains": {
+          "gain": "Keuntungan kasar",
+          "rpgt": "Anggaran RPGT",
+          "net": "Hasil bersih",
+          "cost": "Kos pembelian",
+          "disclaimer": "Anggaran sahaja — berdasarkan nilai pasaran, kos pembelian, dan kadar RPGT pemastautin Malaysia. Bukan nasihat cukai."
+        },
+        "overview": {
+          "totalUnits": "Unit",
+          "occupied": "Berpenghuni",
+          "activeAgreements": "Perjanjian aktif",
+          "monthlyIncome": "Pendapatan bulanan",
+          "activeTenants": "Penyewa aktif",
+          "noActive": "Belum ada perjanjian aktif untuk hartanah ini."
+        },
+        "documents": {
+          "help": "Geran hak milik, perjanjian S&P, polisi insurans, resit cukai, gambar.",
+          "placeholderTitle": "Muat naik dokumen tiba di Fasa 4.",
+          "placeholderHelp": "Apabila storan fail siap, anda boleh simpan geran, polisi insurans, dan resit cukai di sini."
         }
       }
     }

@@ -49,9 +49,12 @@ export const useProperties = () => {
       const merged: Property = {
         ...existing,
         ...patch,
-        details: patch.details
-          ? { ...(existing.details ?? {}), ...patch.details }
-          : existing.details,
+        ownership: patch.ownership
+          ? { ...(existing.ownership ?? {}), ...patch.ownership }
+          : existing.ownership,
+        utilities: patch.utilities
+          ? { ...(existing.utilities ?? {}), ...patch.utilities }
+          : existing.utilities,
       };
       propertiesMock[idx] = merged;
       return structuredClone(merged);
