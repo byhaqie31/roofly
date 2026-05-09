@@ -2,6 +2,13 @@
 import { computed, ref } from "vue";
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
+import {
+  DropdownMenuRoot,
+  DropdownMenuTrigger,
+  DropdownMenuPortal,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "reka-ui";
 import { propertyOwnershipFormSchema } from "~/schemas/property";
 import type { Property, PropertyCoOwner } from "~/types/property";
 import { useToast } from "~/composables/useToast";
@@ -443,61 +450,123 @@ const sectionHeading =
         {{ t("owner.properties.detail.coOwnersHelp") }}
       </p>
 
-      <div
-        v-for="(field, idx) in coOwnerFields"
-        :key="field.key"
-        class="flex flex-wrap items-end gap-3"
-      >
-        <label
-          class="flex cursor-pointer items-center gap-2 self-end pb-2"
-          :title="t('owner.properties.detail.coOwners.primaryHint')"
+      <div class="space-y-3">
+        <div
+          v-for="(field, idx) in coOwnerFields"
+          :key="field.key"
+          class="rounded-md border border-line-passive p-3 sm:border-0 sm:p-0"
         >
-          <input
-            type="radio"
-            name="coOwnerPrimary"
-            class="h-4 w-4 accent-ink"
-            :checked="(field.value as PropertyCoOwner).isPrimary"
-            @change="setPrimary(idx)"
-          />
-          <span class="text-caption text-ink-muted">
-            {{ t("owner.properties.detail.coOwners.primaryLabel") }}
-          </span>
-        </label>
-        <div class="min-w-[12rem] flex-1">
-          <Input
-            v-model="(field.value as PropertyCoOwner).name"
-            :label="
-              idx === 0 ? t('owner.properties.detail.fields.coOwnerName') : undefined
-            "
-            :placeholder="t('owner.properties.detail.placeholders.coOwnerName')"
-          />
+          <div
+            class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:gap-3"
+          >
+            <!-- Name field — label row pairs with the action on mobile. -->
+            <div class="sm:min-w-[10rem] sm:flex-1">
+              <div class="mb-1.5 flex items-center justify-between gap-2">
+                <span class="text-caption font-normal text-ink-strong">
+                  {{ t("owner.properties.detail.fields.coOwnerName") }}
+                </span>
+                <!-- Mobile: action beside the Co-owner label -->
+                <DropdownMenuRoot>
+                  <DropdownMenuTrigger as-child>
+                    <button
+                      type="button"
+                      class="inline-flex h-7 w-7 items-center justify-center rounded-sm text-ink-muted outline-none transition hover:bg-surface-hover hover:text-ink focus-visible:shadow-focus sm:hidden"
+                      :aria-label="t('owner.properties.detail.coOwners.actionsAria')"
+                    >
+                      <Icon name="MoreVertical" :size="16" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuContent
+                      :side-offset="4"
+                      align="end"
+                      class="z-50 min-w-[10rem] rounded-md border border-line-passive bg-surface-raised p-1 shadow-modal"
+                    >
+                      <DropdownMenuItem
+                        v-if="!(field.value as PropertyCoOwner).isPrimary"
+                        class="flex cursor-pointer select-none items-center gap-2 rounded-sm px-3 py-2 text-caption text-ink-strong outline-none transition data-[highlighted]:bg-surface-hover"
+                        @select="setPrimary(idx)"
+                      >
+                        <Icon name="Star" :size="14" />
+                        {{ t("owner.properties.detail.coOwners.menuSetPrimary") }}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        class="flex cursor-pointer select-none items-center gap-2 rounded-sm px-3 py-2 text-caption text-ink-strong outline-none transition data-[highlighted]:bg-surface-hover"
+                        @select="removeCoOwner(idx)"
+                      >
+                        <Icon name="Trash2" :size="14" />
+                        {{ t("owner.properties.detail.coOwners.menuRemove") }}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuRoot>
+              </div>
+              <Input
+                v-model="(field.value as PropertyCoOwner).name"
+                :label="undefined"
+                :placeholder="t('owner.properties.detail.placeholders.coOwnerName')"
+              >
+                <template
+                  v-if="(field.value as PropertyCoOwner).isPrimary"
+                  #suffix
+                >
+                  <span
+                    class="inline-flex items-center gap-1 rounded-pill bg-status-active-soft px-2 py-0.5 text-micro font-medium text-status-active"
+                  >
+                    <Icon name="Star" :size="12" />
+                    {{ t("owner.properties.detail.coOwners.primaryLabel") }}
+                  </span>
+                </template>
+              </Input>
+            </div>
+
+            <div class="sm:w-28">
+              <Input
+                v-model="(field.value as PropertyCoOwner).sharePct"
+                type="number"
+                :min="0"
+                :max="100"
+                :label="t('owner.properties.detail.fields.coOwnerSharePct')"
+              />
+            </div>
+
+            <!-- Desktop: action at end of fields row, aligned to input bottom. -->
+            <DropdownMenuRoot>
+              <DropdownMenuTrigger as-child>
+                <button
+                  type="button"
+                  class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-sm text-ink-muted outline-none transition hover:bg-surface-hover hover:text-ink focus-visible:shadow-focus sm:inline-flex"
+                  :aria-label="t('owner.properties.detail.coOwners.actionsAria')"
+                >
+                  <Icon name="MoreVertical" :size="16" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuContent
+                  :side-offset="4"
+                  align="end"
+                  class="z-50 min-w-[10rem] rounded-md border border-line-passive bg-surface-raised p-1 shadow-modal"
+                >
+                  <DropdownMenuItem
+                    v-if="!(field.value as PropertyCoOwner).isPrimary"
+                    class="flex cursor-pointer select-none items-center gap-2 rounded-sm px-3 py-2 text-caption text-ink-strong outline-none transition data-[highlighted]:bg-surface-hover"
+                    @select="setPrimary(idx)"
+                  >
+                    <Icon name="Star" :size="14" />
+                    {{ t("owner.properties.detail.coOwners.menuSetPrimary") }}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    class="flex cursor-pointer select-none items-center gap-2 rounded-sm px-3 py-2 text-caption text-ink-strong outline-none transition data-[highlighted]:bg-surface-hover"
+                    @select="removeCoOwner(idx)"
+                  >
+                    <Icon name="Trash2" :size="14" />
+                    {{ t("owner.properties.detail.coOwners.menuRemove") }}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenuPortal>
+            </DropdownMenuRoot>
+          </div>
         </div>
-        <div class="w-32">
-          <Input
-            v-model="(field.value as PropertyCoOwner).sharePct"
-            type="number"
-            :min="0"
-            :max="100"
-            :label="
-              idx === 0
-                ? t('owner.properties.detail.fields.coOwnerSharePct')
-                : undefined
-            "
-          />
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          :disabled="(field.value as PropertyCoOwner).isPrimary"
-          :title="
-            (field.value as PropertyCoOwner).isPrimary
-              ? t('owner.properties.detail.coOwners.cantRemovePrimary')
-              : undefined
-          "
-          @click="removeCoOwner(idx)"
-        >
-          <Icon name="X" :size="14" />
-        </Button>
       </div>
 
       <div class="flex flex-wrap items-center justify-between gap-3">

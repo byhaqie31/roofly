@@ -48,7 +48,7 @@ const onDeleted = async () => {
 <template>
   <div class="mt-6">
     <Card padding="loose">
-      <header class="mb-5 flex items-start justify-between gap-3">
+      <header class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 class="text-card-title font-semibold text-ink">
             {{ t("owner.units.sectionTitle") }}
@@ -60,7 +60,7 @@ const onDeleted = async () => {
             {{ t("owner.units.sectionHelp") }}
           </p>
         </div>
-        <Button variant="ghost" @click="onAdd">
+        <Button variant="ghost" class="self-start" @click="onAdd">
           + {{ t("owner.units.addCta") }}
         </Button>
       </header>

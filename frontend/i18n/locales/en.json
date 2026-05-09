@@ -72,6 +72,7 @@
       "recordedToast": "Payment recorded",
       "dueOn": "Due {date}",
       "paidOn": "Paid {date}",
+      "late": "late",
       "filters": {
         "all": "All",
         "pending": "Pending",
@@ -80,6 +81,12 @@
         "cancelled": "Cancelled",
         "allMonths": "All months",
         "allYears": "All years",
+        "allPeriods": "All periods",
+        "period": "Filter by period",
+        "periodAria": "Filter invoices by month and year",
+        "periodAriaActive": "Period filter: {label}. Tap to change.",
+        "year": "Year",
+        "month": "Month",
         "clear": "Clear filters"
       },
       "pagination": {
@@ -128,11 +135,9 @@
         "lateFee": "Late fee",
         "total": "Total due",
         "payments": "Payments received",
-        "share": "Copy link",
         "download": "Download PDF",
         "send": "Send to tenant",
-        "shareToast": "Share link copied (mock)",
-        "downloadToast": "PDF download arrives with Phase 4 file storage.",
+        "downloadToast": "Coming soon — PDF download arrives in the next phase.",
         "sentToast": "Invoice sent to {email}"
       }
     },
@@ -177,6 +182,65 @@
         "active": "Active",
         "expired": "Expired",
         "terminated": "Terminated"
+      },
+      "detail": {
+        "back": "Back to agreements",
+        "notFound": "Agreement not found.",
+        "save": "Save changes",
+        "newSubtitle": "Set the parties, term, and rent. You can refine the rest after saving.",
+        "termsHelp": "Parties, dates, and money. Editable any time before the agreement is signed.",
+        "tabs": {
+          "overview": "Overview",
+          "terms": "Terms",
+          "documents": "Documents"
+        },
+        "overviewHelp": "What's in this agreement at a glance.",
+        "sections": {
+          "parties": "Parties",
+          "term": "Term",
+          "money": "Money"
+        },
+        "overview": {
+          "status": "Status",
+          "term": "Term length",
+          "monthlyRent": "Monthly rent",
+          "timeline": "Timeline",
+          "parties": "Parties",
+          "money": "Money",
+          "months": "{n} months",
+          "years": "{n} years",
+          "daysRemaining": "{n} days remaining",
+          "expiringIn": "Expiring in {n} days",
+          "expiredAgo": "Expired {n} days ago",
+          "startsIn": "Starts in {n} days"
+        },
+        "documents": {
+          "help": "Signed lease, addendums, inspection checklists, inventory list, and exit letters live here.",
+          "placeholderTitle": "Coming soon",
+          "placeholderHelp": "Coming soon — file upload arrives in the next phase. You'll be able to attach the signed agreement and supporting documents here.",
+          "slots": {
+            "lease": {
+              "title": "Signed lease agreement",
+              "help": "The executed PDF, signed by both parties."
+            },
+            "addendum": {
+              "title": "Addendums & amendments",
+              "help": "Renewals, rent adjustments, or any post-signing changes."
+            },
+            "inspection": {
+              "title": "Move-in inspection",
+              "help": "Condition checklist with photos at handover."
+            },
+            "inventory": {
+              "title": "Inventory list",
+              "help": "Furniture and fittings handed over with the unit."
+            },
+            "exit": {
+              "title": "Exit letter & move-out report",
+              "help": "Notice to vacate plus the move-out condition report."
+            }
+          }
+        }
       }
     },
     "tenants": {
@@ -241,8 +305,8 @@
         "documents": {
           "title": "Documents",
           "help": "IC copy, payslip, agreement signature page, etc.",
-          "placeholderTitle": "Document upload arrives in Phase 4.",
-          "placeholderHelp": "Once file storage is wired up you can upload IC copies, payslips, and reference letters here."
+          "placeholderTitle": "Coming soon",
+          "placeholderHelp": "Document upload arrives in the next phase. You'll be able to attach IC copies, payslips, and reference letters here."
         }
       }
     },
@@ -292,14 +356,261 @@
     },
     "dashboard": {
       "title": "Dashboard",
+      "subtitle": "Snapshot of how your portfolio is doing right now.",
       "incomeMonth": "Income this month",
+      "incomeMonthHelp": "Successful payments received in the current calendar month.",
       "occupancy": "Occupancy",
+      "occupancyHelp": "{occupied} of {total} units occupied",
       "outstanding": "Outstanding rent",
+      "outstandingHelp": "{count} unpaid invoices (pending + overdue, including late fees)",
       "expiringAgreements": "Expiring soon",
+      "expiringHelp": "Active agreements ending within 60 days.",
+      "incomeChart": {
+        "title": "Income — last 12 months",
+        "help": "Sum of successful payments per month. Highlighted bar is the current month.",
+        "avgLabel": "avg",
+        "total": "Total received",
+        "average": "Avg / month",
+        "bestMonth": "Best month"
+      },
+      "attention": {
+        "title": "Needs attention",
+        "help": "Things to act on this week.",
+        "empty": "Nothing needs your attention. Nice work.",
+        "kinds": {
+          "overdue": "Overdue",
+          "expiring": "Expiring",
+          "notice_given": "Notice given",
+          "ticket_new": "New ticket",
+          "ticket_reopened": "Reopened"
+        }
+      },
       "emptyState": {
         "title": "Add your first property",
         "description": "Properties hold the units you rent out. Start with one and we'll guide you from there.",
         "cta": "Add property"
+      }
+    },
+    "reports": {
+      "subtitle": "Year-over-year income, outstanding rent, and capital position by property.",
+      "yearLabel": "Year",
+      "totalIncome": "Income for {year}",
+      "totalIncomeHelp": "Sum of successful payments received in {year}.",
+      "totalOutstanding": "Outstanding rent",
+      "totalOutstandingHelp": "Unpaid invoices due in this year (pending + overdue, with late fees).",
+      "csvDownload": "Download CSV",
+      "csvDownloaded": "CSV downloaded",
+      "pdfDownload": "Download PDF",
+      "pdfStub": "Coming soon — PDF export arrives in the next phase, once file storage is wired up.",
+      "monthlyBreakdown": {
+        "title": "Monthly income — {year}",
+        "help": "Successful payments grouped by calendar month."
+      },
+      "perProperty": {
+        "title": "Per-property breakdown",
+        "help": "Income, outstanding rent, occupancy, and net capital position for each property.",
+        "disclaimer": "Net gain uses the resident-individual RPGT estimate. Estimate only, not tax advice.",
+        "cols": {
+          "name": "Property",
+          "units": "Units",
+          "occupancy": "Occupancy",
+          "income": "Income",
+          "outstanding": "Outstanding",
+          "netGain": "Net gain (RPGT)"
+        }
+      },
+      "csv": {
+        "property": "Property",
+        "type": "Type",
+        "city": "City",
+        "units": "Units",
+        "occupied": "Occupied",
+        "occupancy": "Occupancy %",
+        "income": "Income (RM)",
+        "outstanding": "Outstanding (RM)",
+        "netGain": "Net gain RM (RPGT estimate)"
+      },
+      "empty": {
+        "title": "Reports unlock with activity",
+        "description": "Once you have agreements and payments, this is where annual income, occupancy, and tax reports live."
+      }
+    },
+    "tickets": {
+      "subtitle": "Issues reported by tenants or logged by you. Drag context with you when you click into a ticket.",
+      "createCta": "Log ticket",
+      "columnEmpty": "Nothing here.",
+      "byOwner": "You",
+      "empty": {
+        "title": "No tickets yet",
+        "description": "Log a ticket on a unit's behalf, or wait for tenants to report issues from their app."
+      },
+      "status": {
+        "new": "New",
+        "in_progress": "In progress",
+        "resolved": "Resolved",
+        "reopened": "Reopened"
+      },
+      "category": {
+        "plumbing": "Plumbing",
+        "electrical": "Electrical",
+        "appliance": "Appliance",
+        "structural": "Structural",
+        "pest": "Pest",
+        "other": "Other"
+      },
+      "priority": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "urgent": "Urgent"
+      },
+      "create": {
+        "title": "Log a ticket",
+        "description": "Capture an issue against a unit. You can attribute it to yourself or a tenant.",
+        "submit": "Log ticket",
+        "createdToast": "Ticket logged",
+        "reporterOwner": "Me (owner)",
+        "fields": {
+          "unit": "Unit",
+          "reporter": "Logged by",
+          "category": "Category",
+          "priority": "Priority",
+          "title": "Summary",
+          "description": "Details"
+        },
+        "placeholders": {
+          "unit": "Pick a unit",
+          "title": "e.g. Kitchen tap dripping",
+          "description": "What's happening, what's been tried, when it started…"
+        }
+      },
+      "detail": {
+        "back": "Back to maintenance",
+        "notFound": "Ticket not found.",
+        "description": "Description",
+        "comments": "Comments",
+        "addComment": "Add a comment",
+        "postComment": "Post comment",
+        "commentPlaceholder": "Update for the tenant or note for yourself…",
+        "commentToast": "Comment added",
+        "noComments": "No comments yet.",
+        "tenant": "Tenant",
+        "statusActions": "Status",
+        "statusHelp": "Move this ticket forward.",
+        "statusToast": "Marked {status}",
+        "noTransitions": "No transitions available from this state.",
+        "transitions": {
+          "new": "Move back to New",
+          "in_progress": "Mark in progress",
+          "resolved": "Mark resolved",
+          "reopened": "Reopen"
+        },
+        "photos": {
+          "title": "Photos",
+          "help": "Coming soon — tenant-uploaded photos arrive in the next phase, once file storage is wired up.",
+          "placeholderTitle": "Coming soon",
+          "placeholderHelp": "Photos attached to the ticket arrive in the next phase, once file storage is wired."
+        }
+      }
+    },
+    "settings": {
+      "subtitle": "Profile, preferences, notifications, and plan.",
+      "save": "Save changes",
+      "tabs": {
+        "profile": "Profile",
+        "preferences": "Preferences",
+        "notifications": "Notifications",
+        "plan": "Plan"
+      },
+      "profile": {
+        "identity": "Identity",
+        "identityHelp": "How tenants and the system know you.",
+        "fields": {
+          "name": "Full name",
+          "email": "Email",
+          "phone": "Phone",
+          "businessName": "Business name (optional)"
+        },
+        "placeholders": {
+          "businessName": "e.g. Aminah Properties"
+        },
+        "emailManagedNote": "Email is managed by your account login — change it from auth settings.",
+        "photo": "Profile photo",
+        "photoHelp": "Coming soon — profile photos arrive in the next phase, once file storage is wired up.",
+        "photoPlaceholderTitle": "Coming soon",
+        "photoPlaceholderHelp": "Profile photos arrive in the next phase, once file storage is wired.",
+        "payout": "Payout account",
+        "payoutHelp": "Where rent collections will be deposited. Bank linkage is managed via your finance settings.",
+        "bankMasked": "Maybank account ending in"
+      },
+      "preferences": {
+        "languageHelp": "Affects every label, date format, and translated message in the app.",
+        "themeHelp": "Pick a fixed theme or follow your operating system.",
+        "themeLightHelp": "Always use the light token set.",
+        "themeDarkHelp": "Always use the dark token set.",
+        "themeSystemHelp": "Follow your OS preference."
+      },
+      "notifications": {
+        "channelTitle": "Delivery channels",
+        "channelHelp": "We'll send notifications via email and WhatsApp once the next phase wires up Resend + WhatsApp Cloud API. In-app notifications are always on.",
+        "channelStatus": {
+          "comingSoon": "Coming soon"
+        },
+        "eventsTitle": "What gets a notification",
+        "eventsHelp": "Toggle the events you want to be told about. You can adjust per-channel rules later.",
+        "events": {
+          "rent_reminder": {
+            "title": "Rent reminders",
+            "help": "7d / 3d / 1d before each invoice is due, plus an alert when an invoice goes overdue."
+          },
+          "agreement_expiry": {
+            "title": "Agreement expiry alerts",
+            "help": "60d / 30d / 7d before any active agreement reaches its end date."
+          },
+          "payment_received": {
+            "title": "Payment received",
+            "help": "Confirmation each time a tenant pays an invoice — useful as a manual cross-check."
+          },
+          "ticket_update": {
+            "title": "Maintenance ticket updates",
+            "help": "When tenants log a new ticket, comment on one, or status changes."
+          },
+          "invite_accepted": {
+            "title": "Tenant invite accepted",
+            "help": "When a tenant accepts your magic-link invite and links to a unit."
+          }
+        }
+      },
+      "plan": {
+        "title": "Subscription",
+        "help": "Plans cap how many active units you can manage. Upgrade arrives in the next phase.",
+        "current": "Current",
+        "free": "Free",
+        "permonth": "/ month",
+        "unitsCap": "Up to {n} units",
+        "unitsUnlimited": "Unlimited units",
+        "upgradeCta": "Upgrade",
+        "upgradeStub": "Coming soon — subscriptions arrive in the next phase. Demo only for now.",
+        "youreOnThis": "You're on this plan.",
+        "disclaimer": "Pricing is illustrative. Final pricing + billing arrive in the next phase.",
+        "tiers": {
+          "free": {
+            "name": "Free",
+            "description": "For single-property owners testing the waters."
+          },
+          "starter": {
+            "name": "Starter",
+            "description": "For small landlords with a handful of units."
+          },
+          "pro": {
+            "name": "Pro",
+            "description": "For growing portfolios with reporting needs."
+          },
+          "business": {
+            "name": "Business",
+            "description": "For agents and multi-org operators."
+          }
+        }
       }
     },
     "properties": {
@@ -435,10 +746,12 @@
         "coOwnersHelp": "Joint ownership splits. Shares must sum to exactly 100%, and one co-owner must be marked primary.",
         "coOwners": {
           "primaryLabel": "Primary",
-          "primaryHint": "The primary co-owner manages this listing and receives notifications.",
           "primaryRequired": "Pick a primary co-owner",
           "cantRemovePrimary": "Make another co-owner primary before removing this one.",
-          "blockedSave": "Shares must sum to 100% with exactly one primary before saving."
+          "blockedSave": "Shares must sum to 100% with exactly one primary before saving.",
+          "actionsAria": "Co-owner actions",
+          "menuSetPrimary": "Set as primary",
+          "menuRemove": "Remove"
         },
         "acquisitionTotal": "Total acquisition cost",
         "utilitiesAnnual": "Annual recurring total",
@@ -461,8 +774,8 @@
         },
         "documents": {
           "help": "Title deeds, S&P agreement, insurance policy, tax receipts, photos.",
-          "placeholderTitle": "Document upload arrives in Phase 4.",
-          "placeholderHelp": "Once file storage is wired up you can keep title deeds, insurance policies, and tax receipts here."
+          "placeholderTitle": "Coming soon",
+          "placeholderHelp": "Document upload arrives in the next phase. You'll be able to attach title deeds, insurance policies, and tax receipts here."
         }
       }
     }

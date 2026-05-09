@@ -14,6 +14,10 @@ export default defineNuxtConfig({
     dirs: ["services"],
   },
 
+  imports: {
+    dirs: ["services"],
+  },
+
   css: ["~/assets/css/main.css"],
 
   tailwindcss: {
@@ -30,6 +34,10 @@ export default defineNuxtConfig({
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
         { name: "description", content: "Rent management, simplified." },
+      ],
+      link: [
+        { rel: "icon", type: "image/png", href: "/home.png" },
+        { rel: "apple-touch-icon", href: "/home.png" },
       ],
       link: [
         { rel: "icon", type: "image/png", href: "/home.png" },

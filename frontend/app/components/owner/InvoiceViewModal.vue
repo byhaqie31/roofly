@@ -48,10 +48,6 @@ const periodLabel = computed(() => {
   return date.toLocaleString("en-MY", { month: "long", year: "numeric" });
 });
 
-const onShare = () => {
-  show(t("owner.payments.viewModal.shareToast"), "default");
-};
-
 const onDownload = () => {
   show(t("owner.payments.viewModal.downloadToast"), "default");
 };
@@ -178,15 +174,10 @@ const onSend = async () => {
     </div>
 
     <template #footer>
-      <Button variant="ghost" @click="onShare">
-        <Icon name="Link2" :size="14" class="mr-1" />
-        {{ t("owner.payments.viewModal.share") }}
-      </Button>
       <Button variant="ghost" @click="onDownload">
         <Icon name="Download" :size="14" class="mr-1" />
         {{ t("owner.payments.viewModal.download") }}
       </Button>
-      <div class="flex-1" />
       <Button
         v-if="row && row.invoice.status !== 'cancelled'"
         variant="primary"

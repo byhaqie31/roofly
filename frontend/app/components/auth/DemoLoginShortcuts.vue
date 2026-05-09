@@ -7,9 +7,16 @@ import Button from "~/components/ui/Button.vue";
  * dashboard. Auth is mocked in Phase 1, so the email prefix decides role
  * (see app/stores/auth.ts).
  *
- * Visible in local dev (import.meta.dev) and on the demo deployment
- * (NUXT_PUBLIC_DEMO_MODE=true). Hidden on real prod.
+ * Visible only when import.meta.dev is true. Once the real backend lands,
+ * this stays useful: the seeded accounts are owner@roofly.my / tenant@roofly.my
+ * with the same password, so the shortcuts will hit the real /api/auth/login.
  */
+
+// Flip to true once the tenant shell is ready to demo. The button's
+// click handler and loading state are already wired — only the visual
+// gate below switches presentations.
+const TENANT_ENABLED = false;
+
 const auth = useAuthStore();
 const loadingRole = ref<"owner" | "tenant" | null>(null);
 const config = useRuntimeConfig();
@@ -31,9 +38,9 @@ const enter = async (role: "owner" | "tenant") => {
   >
     <div class="flex items-center justify-between mb-3">
       <p class="text-micro font-medium uppercase tracking-wider text-ink-muted">
-        Demo shortcuts
+        Demo Credentials
       </p>
-      <span class="text-micro text-ink-faint">Demo only</span>
+      <span class="text-micro text-ink-faint">For demo purposes only</span>
     </div>
 
     <div class="grid grid-cols-2 gap-2">
@@ -47,7 +54,9 @@ const enter = async (role: "owner" | "tenant") => {
         <Building2 :size="16" :stroke-width="1.5" />
         Continue as owner
       </Button>
+
       <Button
+        v-if="TENANT_ENABLED"
         variant="ghost"
         size="sm"
         :loading="loadingRole === 'tenant'"
@@ -57,6 +66,23 @@ const enter = async (role: "owner" | "tenant") => {
         <DoorOpen :size="16" :stroke-width="1.5" />
         Continue as tenant
       </Button>
+
+      <button
+        v-else
+        type="button"
+        aria-disabled="true"
+        aria-label="Tenant login — coming soon"
+        tabindex="-1"
+        class="flex flex-col items-center justify-center gap-0.5 rounded-sm border border-dashed border-line-passive bg-transparent px-3 py-1.5 text-caption text-ink-muted outline-none cursor-not-allowed transition"
+      >
+        <span class="inline-flex items-center gap-2">
+          <DoorOpen :size="16" :stroke-width="1.5" />
+          Continue as tenant
+        </span>
+        <span class="text-micro text-ink-faint">
+          Coming soon
+        </span>
+      </button>
     </div>
   </section>
 </template>

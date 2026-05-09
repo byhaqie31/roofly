@@ -7,6 +7,7 @@ import Pill from "~/components/ui/Pill.vue";
 import Icon from "~/components/ui/Icon.vue";
 import Button from "~/components/ui/Button.vue";
 import Modal from "~/components/ui/Modal.vue";
+import Select from "~/components/ui/Select.vue";
 import PropertyOverviewPanel from "~/components/owner/PropertyOverviewPanel.vue";
 import PropertyDetailsForm from "~/components/owner/PropertyDetailsForm.vue";
 import PropertyOwnershipForm from "~/components/owner/PropertyOwnershipForm.vue";
@@ -29,6 +30,7 @@ const property = ref<Property | null>(null);
 const loading = ref(true);
 const showDeleteConfirm = ref(false);
 const deleting = ref(false);
+const activeTab = ref<string>("overview");
 
 onMounted(async () => {
   try {
@@ -70,17 +72,48 @@ const utilitiesFullness = computed(() =>
 
 const tabTriggerClass =
   "-mb-px inline-flex items-center border-b-2 border-transparent px-4 py-2 text-body text-ink-muted outline-none transition hover:text-ink focus-visible:shadow-focus data-[state=active]:border-ink data-[state=active]:text-ink";
+
+// Mobile dropdown source — Documents is filtered out when the flag is off so
+// the Select stays in sync with the tab strip.
+const tabOptions = computed(() => {
+  const base = [
+    { value: "overview", label: t("owner.properties.detail.tabs.overview") },
+    { value: "details", label: t("owner.properties.detail.tabs.details") },
+    { value: "ownership", label: t("owner.properties.detail.tabs.ownership") },
+    { value: "utilities", label: t("owner.properties.detail.tabs.utilities") },
+  ];
+  if (documentsEnabled) {
+    base.push({
+      value: "documents",
+      label: t("owner.properties.detail.tabs.documents"),
+    });
+  }
+  return base;
+});
 </script>
 
 <template>
   <div>
-    <NuxtLink
-      to="/owner/properties"
-      class="mb-6 inline-flex items-center gap-1 text-caption text-ink-muted transition hover:text-ink"
-    >
-      <Icon name="ArrowLeft" :size="14" />
-      {{ t("owner.properties.detail.back") }}
-    </NuxtLink>
+    <div class="mb-6 flex items-center justify-between gap-2">
+      <NuxtLink
+        to="/owner/properties"
+        class="inline-flex items-center gap-1 text-caption text-ink-muted transition hover:text-ink"
+      >
+        <Icon name="ArrowLeft" :size="14" />
+        {{ t("owner.properties.detail.back") }}
+      </NuxtLink>
+      <!-- Mobile: delete pairs with the back link -->
+      <Button
+        v-if="property"
+        variant="ghost"
+        size="sm"
+        class="sm:hidden"
+        @click="showDeleteConfirm = true"
+      >
+        <Icon name="Trash2" :size="14" class="mr-1" />
+        {{ t("owner.properties.detail.delete") }}
+      </Button>
+    </div>
 
     <Card v-if="loading" padding="loose">
       <p class="text-center text-body text-ink-muted">
@@ -95,8 +128,8 @@ const tabTriggerClass =
     </Card>
 
     <template v-else>
-      <header class="mb-6 flex items-end justify-between gap-4">
-        <div class="min-w-0">
+      <header class="mb-6 sm:flex sm:items-end sm:justify-between sm:gap-4">
+        <div class="sm:min-w-0">
           <Pill tone="neutral" class="mb-3">
             {{ t(`owner.properties.types.${property.type}`) }}
           </Pill>
@@ -108,10 +141,11 @@ const tabTriggerClass =
             {{ property.postcode }}
           </p>
         </div>
+        <!-- Desktop: delete sits next to the title's supporting line -->
         <Button
           variant="ghost"
           size="sm"
-          class="shrink-0"
+          class="hidden shrink-0 sm:inline-flex"
           @click="showDeleteConfirm = true"
         >
           <Icon name="Trash2" :size="14" class="mr-1" />
@@ -120,8 +154,12 @@ const tabTriggerClass =
       </header>
 
       <Card padding="loose">
-        <TabsRoot default-value="overview">
-          <TabsList class="mb-6 flex flex-wrap gap-1 border-b border-line-passive">
+        <TabsRoot v-model="activeTab">
+          <!-- Mobile: dropdown picker. Desktop: tab strip. -->
+          <div class="mb-6 sm:hidden">
+            <Select v-model="activeTab" :options="tabOptions" />
+          </div>
+          <TabsList class="mb-6 hidden flex-wrap gap-1 border-b border-line-passive sm:flex">
             <TabsTrigger value="overview" :class="tabTriggerClass">
               {{ t("owner.properties.detail.tabs.overview") }}
             </TabsTrigger>

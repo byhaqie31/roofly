@@ -17,21 +17,25 @@ import Button from "~/components/ui/Button.vue";
 import Select from "~/components/ui/Select.vue";
 import RecordPaymentModal from "~/components/owner/RecordPaymentModal.vue";
 import InvoiceViewModal from "~/components/owner/InvoiceViewModal.vue";
+import InvoicePeriodFilter from "~/components/owner/InvoicePeriodFilter.vue";
+import InvoiceCard from "~/components/owner/InvoiceCard.vue";
 import type { InvoiceStatus } from "~/types/invoice";
 import type { InvoiceWithRefs } from "~/services/useInvoices";
 
 definePageMeta({ layout: "owner" });
 const { t } = useI18n();
 const { formatRM } = useMoney();
+const { isMobile } = useBreakpoint();
 useHead({ title: () => t("owner.nav.payments") });
 
-const PAGE_SIZE = 20;
+const DESKTOP_PAGE_SIZE = 20;
+const MOBILE_PAGE_SIZE = 8;
 
 const rows = ref<InvoiceWithRefs[]>([]);
 const loading = ref(true);
 const statusFilter = ref<InvoiceStatus | "all">("all");
-const filterMonth = ref<string>("all"); // "01"-"12" or "all"
-const filterYear = ref<string>("all");  // "2026" or "all"
+const filterMonth = ref<string>("all");
+const filterYear = ref<string>("all");
 const sorting = ref<SortingState>([{ id: "dueDate", desc: true }]);
 const showRecordModal = ref(false);
 const showViewModal = ref(false);
@@ -80,40 +84,10 @@ const dateFilteredRows = computed(() => {
   return result;
 });
 
-const yearOptions = computed(() => {
+const yearList = computed(() => {
   const years = new Set<string>();
   rows.value.forEach((r) => years.add(r.invoice.dueDate.slice(0, 4)));
-  return [
-    { value: "all", label: t("owner.payments.filters.allYears") },
-    ...Array.from(years)
-      .sort()
-      .reverse()
-      .map((y) => ({ value: y, label: y })),
-  ];
-});
-
-const monthOptions = computed(() => {
-  const labels = [
-    "jan",
-    "feb",
-    "mar",
-    "apr",
-    "may",
-    "jun",
-    "jul",
-    "aug",
-    "sep",
-    "oct",
-    "nov",
-    "dec",
-  ];
-  return [
-    { value: "all", label: t("owner.payments.filters.allMonths") },
-    ...labels.map((key, idx) => ({
-      value: (idx + 1).toString().padStart(2, "0"),
-      label: t(`common.months.${key}`),
-    })),
-  ];
+  return Array.from(years).sort().reverse();
 });
 
 const counts = computed(() => {
@@ -144,6 +118,13 @@ const clearFilters = () => {
   filterMonth.value = "all";
   filterYear.value = "all";
 };
+
+const statusSelectOptions = computed(() =>
+  statusFilters.map((f) => ({
+    value: f.value,
+    label: `${t(`owner.payments.filters.${f.key}`)} (${counts.value[f.value] ?? 0})`,
+  })),
+);
 
 const formatDate = (iso: string) => {
   if (!iso) return "—";
@@ -239,7 +220,7 @@ const columns = computed<ColumnDef<InvoiceWithRefs>[]>(() => [
           h(
             "div",
             { class: "text-micro tabular-nums text-status-overdue" },
-            `+${formatRM(r.invoice.lateFee)} late`,
+            `+${formatRM(r.invoice.lateFee)} ${t("owner.payments.late")}`,
           ),
         );
       }
@@ -303,7 +284,7 @@ const table = useVueTable({
     return columns.value;
   },
   initialState: {
-    pagination: { pageSize: PAGE_SIZE, pageIndex: 0 },
+    pagination: { pageSize: DESKTOP_PAGE_SIZE, pageIndex: 0 },
   },
   state: {
     get sorting() {
@@ -323,6 +304,15 @@ watch([statusFilter, filterMonth, filterYear], () => {
   table.setPageIndex(0);
 });
 
+watch(
+  isMobile,
+  (mobile) => {
+    table.setPageSize(mobile ? MOBILE_PAGE_SIZE : DESKTOP_PAGE_SIZE);
+    table.setPageIndex(0);
+  },
+  { immediate: true },
+);
+
 const pageRange = computed(() => {
   const total = filteredRows.value.length;
   if (total === 0) return { from: 0, to: 0, total: 0 };
@@ -333,6 +323,8 @@ const pageRange = computed(() => {
   return { from, to, total };
 });
 
+const pageRows = computed(() => table.getRowModel().rows.map((r) => r.original));
+
 const sortIcon = (id: string) => {
   const sort = sorting.value.find((s) => s.id === id);
   if (!sort) return "ChevronsUpDown";
@@ -342,16 +334,31 @@ const sortIcon = (id: string) => {
 
 <template>
   <div>
-    <header class="mb-8 flex items-end justify-between">
+    <header class="mb-6 sm:mb-8">
       <h1 class="text-display-sub font-semibold tracking-snug">
         {{ t("owner.nav.payments") }}
       </h1>
     </header>
 
+    <!-- Filters: mobile = status select left + period popover right; desktop = pill row + period popover -->
     <div
-      class="mb-4 flex flex-wrap items-center justify-between gap-3"
+      class="mb-4 flex items-center justify-between gap-3"
     >
-      <div class="flex flex-wrap items-center gap-2">
+      <!-- Mobile status: dropdown.
+           Keyed on the active count so reka-ui's SelectValue (which captures
+           the matching SelectItem's text at mount time, not reactively)
+           refreshes when the data fetch resolves or after a record-payment
+           refresh changes the count. -->
+      <div class="w-44 sm:hidden">
+        <Select
+          :key="counts[statusFilter] ?? 0"
+          v-model="statusFilter"
+          :options="statusSelectOptions"
+        />
+      </div>
+
+      <!-- Desktop status: pill row -->
+      <div class="hidden flex-wrap items-center gap-2 sm:flex">
         <button
           v-for="f in statusFilters"
           :key="f.value"
@@ -378,14 +385,12 @@ const sortIcon = (id: string) => {
           {{ t("owner.payments.filters.clear") }}
         </button>
       </div>
-      <div class="flex items-center gap-2">
-        <div class="w-36">
-          <Select v-model="filterMonth" :options="monthOptions" />
-        </div>
-        <div class="w-32">
-          <Select v-model="filterYear" :options="yearOptions" />
-        </div>
-      </div>
+
+      <InvoicePeriodFilter
+        v-model:month="filterMonth"
+        v-model:year="filterYear"
+        :years="yearList"
+      />
     </div>
 
     <Card v-if="loading" padding="loose">
@@ -402,77 +407,100 @@ const sortIcon = (id: string) => {
       />
     </Card>
 
-    <Card v-else padding="compact">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left">
-          <thead>
-            <tr class="border-b border-line-passive">
-              <th
-                v-for="header in table.getHeaderGroups()[0].headers"
-                :key="header.id"
-                :class="[
-                  'px-3 py-2 text-caption font-semibold text-ink-strong',
-                  header.column.id === 'amount' ? 'text-right' : '',
-                ]"
-              >
-                <button
-                  v-if="header.column.getCanSort()"
-                  type="button"
-                  class="inline-flex items-center gap-1 outline-none transition hover:text-ink focus-visible:shadow-focus"
-                  @click="header.column.toggleSorting()"
+    <template v-else>
+      <!-- Mobile: cards -->
+      <div class="space-y-3 sm:hidden">
+        <InvoiceCard
+          v-for="row in pageRows"
+          :key="row.invoice.id"
+          :row="row"
+          @view="onViewInvoice"
+          @record="onRowAction"
+        />
+        <Card
+          v-if="pageRows.length === 0"
+          padding="loose"
+        >
+          <p class="text-center text-caption text-ink-muted">
+            {{ t("owner.payments.emptyFilter") }}
+          </p>
+        </Card>
+      </div>
+
+      <!-- Desktop: table -->
+      <Card class="hidden sm:block" padding="compact">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-line-passive">
+                <th
+                  v-for="header in table.getHeaderGroups()[0].headers"
+                  :key="header.id"
+                  :class="[
+                    'px-3 py-2 text-caption font-semibold text-ink-strong',
+                    header.column.id === 'amount' ? 'text-right' : '',
+                  ]"
                 >
+                  <button
+                    v-if="header.column.getCanSort()"
+                    type="button"
+                    class="inline-flex items-center gap-1 outline-none transition hover:text-ink focus-visible:shadow-focus"
+                    @click="header.column.toggleSorting()"
+                  >
+                    <FlexRender
+                      :render="header.column.columnDef.header"
+                      :props="header.getContext()"
+                    />
+                    <Icon
+                      :name="sortIcon(header.column.id)"
+                      :size="14"
+                      class="text-ink-muted"
+                    />
+                  </button>
                   <FlexRender
+                    v-else
                     :render="header.column.columnDef.header"
                     :props="header.getContext()"
                   />
-                  <Icon
-                    :name="sortIcon(header.column.id)"
-                    :size="14"
-                    class="text-ink-muted"
-                  />
-                </button>
-                <FlexRender
-                  v-else
-                  :render="header.column.columnDef.header"
-                  :props="header.getContext()"
-                />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="row in table.getRowModel().rows"
-              :key="row.id"
-              class="border-b border-line-passive transition last:border-b-0 hover:bg-[rgba(28,28,28,0.03)]"
-            >
-              <td
-                v-for="cell in row.getVisibleCells()"
-                :key="cell.id"
-                :class="[
-                  'px-3 py-3 align-middle',
-                  cell.column.id === 'amount' ? 'text-right' : '',
-                ]"
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="row in table.getRowModel().rows"
+                :key="row.id"
+                class="border-b border-line-passive transition last:border-b-0 hover:bg-[rgba(28,28,28,0.03)]"
               >
-                <FlexRender
-                  :render="cell.column.columnDef.cell"
-                  :props="cell.getContext()"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                <td
+                  v-for="cell in row.getVisibleCells()"
+                  :key="cell.id"
+                  :class="[
+                    'px-3 py-3 align-middle',
+                    cell.column.id === 'amount' ? 'text-right' : '',
+                  ]"
+                >
+                  <FlexRender
+                    :render="cell.column.columnDef.cell"
+                    :props="cell.getContext()"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      <div
-        v-if="filteredRows.length === 0"
-        class="py-8 text-center text-caption text-ink-muted"
-      >
-        {{ t("owner.payments.emptyFilter") }}
-      </div>
+        <div
+          v-if="filteredRows.length === 0"
+          class="py-8 text-center text-caption text-ink-muted"
+        >
+          {{ t("owner.payments.emptyFilter") }}
+        </div>
+      </Card>
 
+      <!-- Pagination — shared across mobile + desktop -->
       <div
-        v-else
-        class="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-line-passive px-1 pt-3"
+        v-if="filteredRows.length > 0"
+        class="mt-4 flex flex-col gap-3 border-t border-line-passive pt-3 sm:flex-row sm:items-center sm:justify-between"
       >
         <span class="text-caption tabular-nums text-ink-muted">
           {{
@@ -483,7 +511,7 @@ const sortIcon = (id: string) => {
             })
           }}
         </span>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center justify-between gap-2 sm:justify-end">
           <Button
             variant="ghost"
             size="sm"
@@ -512,7 +540,7 @@ const sortIcon = (id: string) => {
           </Button>
         </div>
       </div>
-    </Card>
+    </template>
 
     <RecordPaymentModal
       v-model:open="showRecordModal"
