@@ -72,6 +72,7 @@
       "recordedToast": "Pembayaran direkod",
       "dueOn": "Tarikh tamat {date}",
       "paidOn": "Dibayar {date}",
+      "late": "lewat",
       "filters": {
         "all": "Semua",
         "pending": "Tertangguh",
@@ -80,6 +81,12 @@
         "cancelled": "Dibatalkan",
         "allMonths": "Semua bulan",
         "allYears": "Semua tahun",
+        "allPeriods": "Semua tempoh",
+        "period": "Tapis ikut tempoh",
+        "periodAria": "Tapis invois ikut bulan dan tahun",
+        "periodAriaActive": "Penapis tempoh: {label}. Ketik untuk tukar.",
+        "year": "Tahun",
+        "month": "Bulan",
         "clear": "Padam penapis"
       },
       "pagination": {
@@ -128,10 +135,8 @@
         "lateFee": "Caj lewat",
         "total": "Jumlah perlu dibayar",
         "payments": "Bayaran diterima",
-        "share": "Salin pautan",
         "download": "Muat turun PDF",
         "send": "Hantar ke penyewa",
-        "shareToast": "Pautan kongsi disalin (mock)",
         "downloadToast": "Akan datang — muat turun PDF tiba dalam fasa seterusnya.",
         "sentToast": "Invois dihantar ke {email}"
       }

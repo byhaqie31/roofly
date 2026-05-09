@@ -72,6 +72,7 @@
       "recordedToast": "Payment recorded",
       "dueOn": "Due {date}",
       "paidOn": "Paid {date}",
+      "late": "late",
       "filters": {
         "all": "All",
         "pending": "Pending",
@@ -80,6 +81,12 @@
         "cancelled": "Cancelled",
         "allMonths": "All months",
         "allYears": "All years",
+        "allPeriods": "All periods",
+        "period": "Filter by period",
+        "periodAria": "Filter invoices by month and year",
+        "periodAriaActive": "Period filter: {label}. Tap to change.",
+        "year": "Year",
+        "month": "Month",
         "clear": "Clear filters"
       },
       "pagination": {
@@ -128,10 +135,8 @@
         "lateFee": "Late fee",
         "total": "Total due",
         "payments": "Payments received",
-        "share": "Copy link",
         "download": "Download PDF",
         "send": "Send to tenant",
-        "shareToast": "Share link copied (mock)",
         "downloadToast": "Coming soon — PDF download arrives in the next phase.",
         "sentToast": "Invoice sent to {email}"
       }

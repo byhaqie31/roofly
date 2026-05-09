@@ -695,6 +695,35 @@ The pill in §11.10 uses the same `"Coming soon"` wording for visual consistency
 
 Code comments and dev-facing docs (PROJECT.md, MOCK-POC.md, this file) **may** still reference specific phase numbers — that information is useful for planning. The convention is strictly for end-user copy.
 
+### 11.13 Modal mobile-safe overflow
+
+A modal centered on the viewport with no max-height clips its top and bottom edges off-screen as soon as the form grows tall — the footer (Save/Cancel) vanishes, and there's no inner scroll to recover. The mobile keyboard popping up over an input makes it worse.
+
+Modal layout rules:
+
+- The dialog is a **flex column** with `max-h-[calc(100dvh-2rem)]`. Use `dvh`, not `vh` — `dvh` accounts for the mobile address bar shrinking the viewport, `vh` doesn't and overshoots.
+- **Header** is `shrink-0` with its own padding and a bottom divider.
+- **Body** is `min-h-0 flex-1 overflow-y-auto` so only the body scrolls; header and footer stay anchored.
+- **Footer** is `shrink-0 flex-wrap` with its own padding and a top divider. `flex-wrap` so multiple buttons (Delete + Cancel + Save) wrap on tiny widths instead of overflowing.
+
+The reusable component already enforces this (`components/ui/Modal.vue`). When building a modal-like surface from scratch, mirror the structure — don't put the form, header, and footer in a single `p-6` div with no max-height.
+
+Forms longer than ~5–6 fields should not live in a modal at all — convert to a dedicated detail page (see Agreements: list / `[id]` / `new` triplet) so the user gets a real scroll area, the URL is shareable, and the mobile keyboard has somewhere to push.
+
+### 11.14 Data tables → cards on mobile
+
+A horizontally-scrolling table with 6 columns is unusable on a 375px viewport — half the row is off-screen and the action button is the part that's clipped. Swap the table for a stack of cards under `<sm`, keeping the same data fetch and pagination.
+
+Pattern (see [pages/owner/payments.vue](../../frontend/app/pages/owner/payments.vue) + [components/owner/InvoiceCard.vue](../../frontend/app/components/owner/InvoiceCard.vue)):
+
+- **Same data, two presentations.** Render the table inside `hidden sm:block` and the card stack inside `sm:hidden`. Both bind to the same `pageRows` so sort/filter/pagination state stays single-source.
+- **Card structure** — status pill top-left, the most important number top-right (highlighted, `text-card-title`-sized, status-toned color for overdue/paid), primary identifier (e.g. tenant name) below, secondary identifier (invoice no) below that in muted caption, contextual lines (property, due date) with leading icons, and a footer line for the action button + paid-on stamp separated by a divider.
+- **Page size halves on mobile** — desktop ~20, mobile ~8 (or whatever fits ~3–4 finger-scrolls). Hook into `useBreakpoint().isMobile` and call `table.setPageSize()` reactively. Reset to page 0 on each switch so the user doesn't land on an empty page.
+- **Filter consolidation.** Pill rows that wrap acceptably on desktop turn into ugly multi-line stacks on mobile — convert chips to a `<Select>` dropdown, and collapse multi-field filters (like month + year) into a single popover trigger that opens a side-by-side scroll list. Keep the icon trigger compact (calendar icon + abbreviated label like "Aug · 2026") so it fits next to the status filter on one row.
+- **Tap target = the whole card.** Wrap the card surface in a `<button>` that opens the detail/view modal; the inner action button uses `e.stopPropagation()` so it doesn't bubble.
+
+The table is the truth; the cards are a presentation. Don't fork the data shape or duplicate the column definitions in two places.
+
 ---
 
 ## 12. Hard rules — do not break
