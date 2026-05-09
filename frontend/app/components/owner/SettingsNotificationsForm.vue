@@ -6,7 +6,6 @@ import type {
   OwnerAccount,
 } from "~/types/owner";
 import { useToast } from "~/composables/useToast";
-import Card from "~/components/ui/Card.vue";
 import Button from "~/components/ui/Button.vue";
 import Icon from "~/components/ui/Icon.vue";
 import Pill from "~/components/ui/Pill.vue";
@@ -48,12 +47,11 @@ const onSubmit = async () => {
 </script>
 
 <template>
-  <form class="space-y-6" @submit.prevent="onSubmit">
-    <Card padding="loose" tone="flat">
-      <header class="mb-4 flex items-center gap-3">
-        <Pill tone="draft">
-          {{ t("owner.settings.notifications.channelStatus.phase4") }}
-        </Pill>
+  <form class="space-y-8" @submit.prevent="onSubmit">
+    <section class="space-y-2">
+      <header
+        class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3"
+      >
         <div>
           <h2 class="text-card-title font-semibold text-ink">
             {{ t("owner.settings.notifications.channelTitle") }}
@@ -62,11 +60,14 @@ const onSubmit = async () => {
             {{ t("owner.settings.notifications.channelHelp") }}
           </p>
         </div>
+        <Pill tone="draft" class="self-end shrink-0 sm:self-start">
+          {{ t("owner.settings.notifications.channelStatus.comingSoon") }}
+        </Pill>
       </header>
-    </Card>
+    </section>
 
-    <Card padding="loose" tone="flat">
-      <header class="mb-4">
+    <section class="space-y-4 border-t border-line-passive pt-6">
+      <header>
         <h2 class="text-card-title font-semibold text-ink">
           {{ t("owner.settings.notifications.eventsTitle") }}
         </h2>
@@ -81,13 +82,13 @@ const onSubmit = async () => {
           :key="ev.key"
           class="flex items-center justify-between gap-4 py-3"
         >
-          <div class="flex items-center gap-3">
+          <div class="flex min-w-0 items-center gap-3">
             <span
-              class="flex h-9 w-9 items-center justify-center rounded-md bg-surface-page text-ink-muted"
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-surface-page text-ink-muted"
             >
               <Icon :name="ev.iconName" :size="16" />
             </span>
-            <div>
+            <div class="min-w-0">
               <p class="text-body text-ink">
                 {{ t(`owner.settings.notifications.events.${ev.key}.title`) }}
               </p>
@@ -96,7 +97,7 @@ const onSubmit = async () => {
               </p>
             </div>
           </div>
-          <label class="inline-flex cursor-pointer items-center">
+          <label class="inline-flex shrink-0 cursor-pointer items-center">
             <input
               v-model="events[ev.key]"
               type="checkbox"
@@ -113,7 +114,7 @@ const onSubmit = async () => {
           </label>
         </li>
       </ul>
-    </Card>
+    </section>
 
     <div class="flex justify-end">
       <Button type="submit" variant="primary" :loading="submitting">

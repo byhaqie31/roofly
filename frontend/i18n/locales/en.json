@@ -490,7 +490,7 @@
         "channelTitle": "Delivery channels",
         "channelHelp": "We'll send notifications via email and WhatsApp once Phase 4 wires up Resend + WhatsApp Cloud API. In-app notifications are always on.",
         "channelStatus": {
-          "phase4": "Phase 4"
+          "comingSoon": "Coming soon"
         },
         "eventsTitle": "What gets a notification",
         "eventsHelp": "Toggle the events you want to be told about. You can adjust per-channel rules later.",

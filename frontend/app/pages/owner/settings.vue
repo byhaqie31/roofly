@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { TabsRoot, TabsList, TabsTrigger, TabsContent } from "reka-ui";
 import Card from "~/components/ui/Card.vue";
+import Select from "~/components/ui/Select.vue";
 import SettingsProfileForm from "~/components/owner/SettingsProfileForm.vue";
 import SettingsPreferencesForm from "~/components/owner/SettingsPreferencesForm.vue";
 import SettingsNotificationsForm from "~/components/owner/SettingsNotificationsForm.vue";
@@ -16,6 +17,14 @@ useHead({ title: () => t("owner.nav.settings") });
 const account = ref<OwnerAccount | null>(null);
 const plans = ref<Plan[]>([]);
 const loading = ref(true);
+const activeTab = ref<string>("profile");
+
+const tabOptions = computed(() => [
+  { value: "profile", label: t("owner.settings.tabs.profile") },
+  { value: "preferences", label: t("owner.settings.tabs.preferences") },
+  { value: "notifications", label: t("owner.settings.tabs.notifications") },
+  { value: "plan", label: t("owner.settings.tabs.plan") },
+]);
 
 onMounted(async () => {
   try {
@@ -53,8 +62,12 @@ const tabTriggerClass =
 
     <template v-else-if="account">
       <Card padding="loose">
-        <TabsRoot default-value="profile">
-          <TabsList class="mb-6 flex flex-wrap gap-1 border-b border-line-passive">
+        <TabsRoot v-model="activeTab">
+          <!-- Mobile: dropdown picker. Desktop: tab strip. -->
+          <div class="mb-6 sm:hidden">
+            <Select v-model="activeTab" :options="tabOptions" />
+          </div>
+          <TabsList class="mb-6 hidden flex-wrap gap-1 border-b border-line-passive sm:flex">
             <TabsTrigger value="profile" :class="tabTriggerClass">
               {{ t("owner.settings.tabs.profile") }}
             </TabsTrigger>

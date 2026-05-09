@@ -490,7 +490,7 @@
         "channelTitle": "Saluran penghantaran",
         "channelHelp": "Notifikasi akan dihantar melalui e-mel dan WhatsApp setelah Fasa 4 menyambungkan Resend + WhatsApp Cloud API. Notifikasi dalam-aplikasi sentiasa aktif.",
         "channelStatus": {
-          "phase4": "Fasa 4"
+          "comingSoon": "Akan datang"
         },
         "eventsTitle": "Apa yang dapat notifikasi",
         "eventsHelp": "Togol acara yang anda mahu diberitahu. Peraturan setiap saluran boleh dilaras kemudian.",

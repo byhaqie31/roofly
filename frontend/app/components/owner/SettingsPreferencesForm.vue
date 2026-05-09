@@ -2,7 +2,6 @@
 import { ref } from "vue";
 import type { Locale, OwnerAccount, ThemePreference } from "~/types/owner";
 import { useToast } from "~/composables/useToast";
-import Card from "~/components/ui/Card.vue";
 import Button from "~/components/ui/Button.vue";
 
 const props = defineProps<{ account: OwnerAccount }>();
@@ -58,9 +57,9 @@ const onSubmit = async () => {
 </script>
 
 <template>
-  <form class="space-y-6" @submit.prevent="onSubmit">
-    <Card padding="loose" tone="flat">
-      <header class="mb-4">
+  <form class="space-y-8" @submit.prevent="onSubmit">
+    <section class="space-y-4">
+      <header>
         <h2 class="text-card-title font-semibold text-ink">
           {{ t("common.language") }}
         </h2>
@@ -73,10 +72,10 @@ const onSubmit = async () => {
         <label
           v-for="opt in localeOptions"
           :key="opt.value"
-          class="flex cursor-pointer items-center gap-3 rounded-md border border-line-passive p-3 transition hover:border-line-interactive"
+          class="flex cursor-pointer items-center gap-3 rounded-md border border-line-passive bg-surface-page p-3 transition hover:border-line-interactive"
           :class="
             localeChoice === opt.value
-              ? 'border-line-interactive bg-surface-page'
+              ? 'border-line-interactive shadow-focus'
               : ''
           "
         >
@@ -89,10 +88,10 @@ const onSubmit = async () => {
           <span class="text-body text-ink">{{ opt.label }}</span>
         </label>
       </div>
-    </Card>
+    </section>
 
-    <Card padding="loose" tone="flat">
-      <header class="mb-4">
+    <section class="space-y-4 border-t border-line-passive pt-6">
+      <header>
         <h2 class="text-card-title font-semibold text-ink">
           {{ t("common.theme") }}
         </h2>
@@ -105,10 +104,10 @@ const onSubmit = async () => {
         <label
           v-for="opt in themeOptions"
           :key="opt.value"
-          class="flex cursor-pointer flex-col gap-1 rounded-md border border-line-passive p-3 transition hover:border-line-interactive"
+          class="flex cursor-pointer flex-col gap-1 rounded-md border border-line-passive bg-surface-page p-3 transition hover:border-line-interactive"
           :class="
             themeChoice === opt.value
-              ? 'border-line-interactive bg-surface-page'
+              ? 'border-line-interactive shadow-focus'
               : ''
           "
         >
@@ -126,7 +125,7 @@ const onSubmit = async () => {
           </span>
         </label>
       </div>
-    </Card>
+    </section>
 
     <div class="flex justify-end">
       <Button type="submit" variant="primary" :loading="submitting">

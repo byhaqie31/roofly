@@ -5,7 +5,6 @@ import { toTypedSchema } from "@vee-validate/zod";
 import { ownerProfileFormSchema } from "~/schemas/owner";
 import type { OwnerAccount } from "~/types/owner";
 import { useToast } from "~/composables/useToast";
-import Card from "~/components/ui/Card.vue";
 import Input from "~/components/ui/Input.vue";
 import Button from "~/components/ui/Button.vue";
 import EmptyState from "~/components/ui/EmptyState.vue";
@@ -51,9 +50,9 @@ const onSubmit = handleSubmit(async (values) => {
 </script>
 
 <template>
-  <form class="space-y-6" @submit.prevent="onSubmit">
-    <Card padding="loose" tone="flat">
-      <header class="mb-4">
+  <form class="space-y-8" @submit.prevent="onSubmit">
+    <section class="space-y-4">
+      <header>
         <h2 class="text-card-title font-semibold text-ink">
           {{ t("owner.settings.profile.identity") }}
         </h2>
@@ -91,10 +90,10 @@ const onSubmit = handleSubmit(async (values) => {
           :error="errors.businessName"
         />
       </div>
-    </Card>
+    </section>
 
-    <Card padding="loose" tone="flat">
-      <header class="mb-4">
+    <section class="space-y-4 border-t border-line-passive pt-6">
+      <header>
         <h2 class="text-card-title font-semibold text-ink">
           {{ t("owner.settings.profile.photo") }}
         </h2>
@@ -111,10 +110,13 @@ const onSubmit = handleSubmit(async (values) => {
       <p v-else class="text-caption text-ink-muted">
         {{ t("owner.settings.profile.photoHelp") }}
       </p>
-    </Card>
+    </section>
 
-    <Card v-if="account.profile.bankAccountLast4" padding="loose">
-      <header class="mb-4">
+    <section
+      v-if="account.profile.bankAccountLast4"
+      class="space-y-4 border-t border-line-passive pt-6"
+    >
+      <header>
         <h2 class="text-card-title font-semibold text-ink">
           {{ t("owner.settings.profile.payout") }}
         </h2>
@@ -128,7 +130,7 @@ const onSubmit = handleSubmit(async (values) => {
           •••• {{ account.profile.bankAccountLast4 }}
         </span>
       </p>
-    </Card>
+    </section>
 
     <div class="flex justify-end">
       <Button type="submit" variant="primary" :loading="submitting">

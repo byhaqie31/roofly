@@ -302,37 +302,44 @@ Tailwind defaults are fine. Sidebar collapses to drawer at `md` (768px).
 
 ### 4.4 Detail-page header
 
-Resource detail pages (property, tenant, agreement, etc.) share one header pattern: a single flex row with the **title block on the left** and **resource-level actions on the right, baseline-aligned with the bottom of the title block** (i.e. on the same line as the supporting/address copy, not the eyebrow pill).
+Resource detail pages (property, tenant, agreement, etc.) share one header pattern: **resource-level actions live on the back-link row at the top**, with the title block sitting on its own below at full width. This keeps the title from competing for horizontal space with the action button on any breakpoint.
 
 ```
 ┌───────────────────────────────────────────────────────────────┐
+│ ← Back to list                                  [Delete]      │
+│                                                               │
 │ [Eyebrow pill]                                                │
-│ Resource title (display-sub)                                  │
-│ supporting line · ID · location          [Action]  [Action]   │
+│ Resource title (display-sub) — full width, never shrinks      │
+│ supporting line · ID · location                               │
 └───────────────────────────────────────────────────────────────┘
 ```
 
 ```vue
-<header class="mb-6 flex items-end justify-between gap-4">
-  <div class="min-w-0">
-    <Pill tone="neutral" class="mb-3">{{ eyebrow }}</Pill>
-    <h1 class="text-display-sub font-semibold tracking-snug text-ink">
-      {{ title }}
-    </h1>
-    <p class="mt-2 text-caption text-ink-muted">{{ supporting }}</p>
-  </div>
-  <Button variant="ghost" size="sm" class="shrink-0" @click="...">
+<div class="mb-6 flex items-center justify-between gap-2">
+  <NuxtLink to="/owner/<resource>" class="inline-flex items-center gap-1 text-caption text-ink-muted transition hover:text-ink">
+    <Icon name="ArrowLeft" :size="14" />
+    {{ $t("...detail.back") }}
+  </NuxtLink>
+  <Button v-if="resource" variant="ghost" size="sm" @click="...">
     <Icon name="Trash2" :size="14" class="mr-1" />
-    Delete
+    {{ $t("...detail.delete") }}
   </Button>
+</div>
+
+<header class="mb-6">
+  <Pill tone="neutral" class="mb-3">{{ eyebrow }}</Pill>
+  <h1 class="text-display-sub font-semibold tracking-snug text-ink">
+    {{ title }}
+  </h1>
+  <p class="mt-2 text-caption text-ink-muted">{{ supporting }}</p>
 </header>
 ```
 
 Rules:
-- `items-end` on the flex parent so actions sit next to the supporting line, not floating up to the eyebrow.
-- `min-w-0` on the title block + `shrink-0` on the action so a long title truncates instead of pushing the button out of view.
-- Use `Button size="sm" variant="ghost"` for destructive / utility actions here. Reserve `variant="primary"` for the page's main CTA, which usually lives on the *list* page (e.g. `+ Add property`), not the detail page.
-- Don't stack actions on a separate row above the content card — that introduces a stray gap and breaks the rhythm.
+- The action button is **not** baseline-aligned with the title — it lives on the back-link row above. Earlier docs of this pattern had it on the supporting-line row; that was changed because long titles forced ugly truncation, especially on mobile.
+- Use `Button size="sm" variant="ghost"` for destructive / utility actions. Reserve `variant="primary"` for the page's main CTA, which usually lives on the *list* page (e.g. `+ Add property`), not the detail page.
+- Gate the action with `v-if="resource"` so it disappears during loading / not-found states (no orphan delete button on a missing record).
+- For multiple actions, stack them in a `flex gap-2` container on the right side of the back-link row, smallest-priority leftmost, primary-destructive rightmost.
 
 ---
 
@@ -456,7 +463,149 @@ PDFs are the **only** place we deviate from cream.
 
 ---
 
-## 11. Hard rules — do not break
+## 11. Mobile patterns
+
+Living section — every design enhancement that adjusts behaviour at narrow widths gets captured here so it stays consistent across pages.
+
+**Default stance:** mobile-first. Build the narrow layout, then layer on `sm:` (640px) / `md:` (768px) overrides. Always set `min-w-0` on flex children that contain truncating text — without it, long strings push siblings out of view.
+
+### 11.1 Tabs → dropdown swap
+
+Any page using `<TabsRoot>` (property detail, tenant detail, settings, etc.) collapses the tab strip to a `<Select>` on mobile. The TabsRoot becomes controlled with `v-model`, and both the strip and the dropdown bind to the same ref. **Always use `v-model="activeTab"` — reka-ui's TabsRoot uses `modelValue`, not `value`. `v-model:value` silently does nothing.**
+
+```vue
+<script setup lang="ts">
+const activeTab = ref<string>("overview");
+const tabOptions = computed(() => [
+  { value: "overview", label: t("...tabs.overview") },
+  { value: "details",  label: t("...tabs.details") },
+  // ... filter optional tabs (e.g. Documents) here based on feature flags
+]);
+</script>
+
+<template>
+  <TabsRoot v-model="activeTab">
+    <!-- Mobile picker -->
+    <div class="mb-6 sm:hidden">
+      <Select v-model="activeTab" :options="tabOptions" />
+    </div>
+
+    <!-- Desktop strip -->
+    <TabsList class="mb-6 hidden gap-1 border-b border-line-passive sm:flex">
+      <TabsTrigger value="overview" :class="tabTriggerClass">…</TabsTrigger>
+      …
+    </TabsList>
+
+    <TabsContent value="overview">…</TabsContent>
+    …
+  </TabsRoot>
+</template>
+```
+
+Completion-indicator dots / icons stay in the desktop strip; the dropdown is label-only. Don't try to recreate the dots inside `<Select>` options.
+
+### 11.2 Card-row layout (status + main message)
+
+For card-style list rows where each item has a status pill + supporting meta + a primary identifier (e.g. dashboard "Needs attention", future activity feeds), put the **pill + meta on top**, the **main message below** in `text-body font-medium`. Same layout on mobile and desktop — no responsive switch.
+
+```vue
+<NuxtLink class="group flex items-start gap-3 rounded-sm py-3 outline-none transition hover:bg-surface-hover focus-visible:shadow-focus">
+  <div class="min-w-0 flex-1">
+    <div class="mb-1 flex items-center gap-2">
+      <Pill :tone="..." class="shrink-0">{{ statusLabel }}</Pill>
+      <span v-if="meta" class="truncate text-caption text-ink-muted">{{ meta }}</span>
+    </div>
+    <p class="truncate text-body font-medium text-ink">{{ title }}</p>
+  </div>
+  <Icon name="ArrowRight" :size="14" class="mt-1 shrink-0 text-ink-faint" />
+</NuxtLink>
+```
+
+### 11.3 Section header stacking
+
+Section headers with a primary action (e.g. `<UnitsPanel>` with **+ Add unit**) stack on mobile and inline on tablet+. Action button uses `self-start` on mobile so it doesn't stretch full-width.
+
+```vue
+<header class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+  <div>
+    <h2 class="text-card-title font-semibold text-ink">{{ title }} <span>(N)</span></h2>
+    <p class="mt-1 text-caption text-ink-muted">{{ help }}</p>
+  </div>
+  <Button variant="ghost" class="self-start" @click="onAdd">+ {{ cta }}</Button>
+</header>
+```
+
+### 11.4 Topbar mobile collapse
+
+Secondary topbar controls (theme toggle, language switcher) move into the user-avatar dropdown on mobile. Wrap them in a single `hidden md:inline-flex md:items-center md:gap-1` div in the layout, and add equivalent rows inside `UserMenu.vue` gated by `md:hidden`. Avatar + hamburger stay in the topbar at all widths.
+
+### 11.5 Page-level spacing
+
+Tighten section spacing at the narrow end:
+- `mb-8 → mb-6 sm:mb-8` between major sections
+- `gap-6 → gap-4 sm:gap-6` on stat-tile grids
+- Header `mb-8 → mb-6 sm:mb-8` for page titles
+
+Don't change `Card` padding levels — `loose / standard / compact` are intentional design tokens and apply at all widths.
+
+### 11.6 Detail-page header on mobile
+
+The §4.4 layout (action on the back-link row, title block full-width below) is mobile-first by design — title never has to compete for horizontal space with action buttons. If you add a *second* action, drop them into a `flex gap-2` container on the right of the back-link row; on very narrow widths if the back-link wraps, that's acceptable — the title underneath stays unaffected.
+
+### 11.7 Hover-only effects on touch
+
+Browsers fire `:hover` once on tap and stick on phones. For tooltips and reveal-on-hover content, also wire `@touchstart` (see [MiniAreaChart.vue](../../frontend/app/components/ui/MiniAreaChart.vue)). Don't rely on hover for any *required* affordance — touch-only users should be able to discover everything.
+
+### 11.8 Opacity-modifier gotcha
+
+Tailwind's `bg-{color}/{opacity}` syntax silently produces no CSS when the color is a CSS variable holding a hex literal (most of our `--text-*` / `--border-*` tokens are hex). Use solid-color tokens for backgrounds instead — for stepped emphasis use `bg-line-passive` → `bg-ink-muted` → `bg-ink-strong` → `bg-ink`. The exception is `--surface-hover` which is already an rgba — `bg-surface-hover` works on its own.
+
+### 11.9 Multi-section forms — sections, not nested cards
+
+For tab content with multiple sub-sections (Settings Profile / Preferences / Notifications, property-detail Ownership form, tenant-detail Personal form, etc.), use plain `<section>` blocks separated by `border-t border-line-passive pt-6` — **not** nested `<Card>` components inside the page-level Card.
+
+```vue
+<form class="space-y-8">
+  <section class="space-y-4">
+    <header>
+      <h2 class="text-card-title font-semibold text-ink">{{ sectionTitle }}</h2>
+      <p class="mt-1 text-caption text-ink-muted">{{ help }}</p>
+    </header>
+    <!-- fields / content -->
+  </section>
+
+  <section class="space-y-4 border-t border-line-passive pt-6">
+    <header>…</header>
+    <!-- … -->
+  </section>
+</form>
+```
+
+Why: Card is `bg-surface-raised`. Input is `bg-surface-page`. If you nest a Card inside the page-level Card both default to `surface-raised` → inputs lose contrast against the inner card; setting `tone="flat"` on the inner card to fix that *also* makes inputs (page-bg) blend with the inner card (page-bg). Sections sidestep the conflict — inputs sit directly on the page-level raised Card and read as cleanly inset.
+
+The same logic applies to PropertyOwnershipForm, TenantPersonalForm, and friends — that's why they were already section-based. Settings was the outlier and was migrated.
+
+### 11.10 Status pill positioning (coming-soon / phase indicators)
+
+When a section header carries a status pill ("Coming soon", "Beta", "Phase 4"), put the pill at the **top-right on desktop** and the **bottom-right on mobile** (so it never pushes the title down on narrow widths). Drives a `flex flex-col` → `sm:flex-row sm:justify-between` switch.
+
+```vue
+<header class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+  <div>
+    <h2 class="text-card-title font-semibold text-ink">{{ title }}</h2>
+    <p class="mt-1 text-caption text-ink-muted">{{ help }}</p>
+  </div>
+  <Pill tone="draft" class="self-end shrink-0 sm:self-start">
+    {{ $t("...comingSoon") }}
+  </Pill>
+</header>
+```
+
+`self-end` on mobile + `sm:self-start` on desktop pin the pill to the bottom-right and top-right respectively. `shrink-0` keeps it from squashing.
+
+---
+
+## 12. Hard rules — do not break
 
 1. Page background is **always** `#F7F4ED` (light) or `#1C1A17` (dark). Pure white only inside generated PDFs.
 2. **No box-shadow on cards.** Borders only.
