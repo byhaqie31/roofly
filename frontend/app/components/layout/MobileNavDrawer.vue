@@ -50,7 +50,7 @@ if (import.meta.client) {
     <Transition name="drawer">
       <aside
         v-if="modelValue"
-        class="md:hidden fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-surface-page border-r border-line-passive z-50 flex flex-col"
+        class="md:hidden fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-surface-raised border-r border-line-passive z-50 flex flex-col"
         role="dialog"
         aria-modal="true"
         aria-label="Navigation"

@@ -26,7 +26,7 @@ const items = computed(() => [
       :to="item.to"
       :exact-active-class="'bg-accent-soft text-accent'"
       :active-class="item.exact ? '' : 'bg-accent-soft text-accent'"
-      class="flex items-center gap-3 px-4 py-2.5 rounded-sm text-caption text-ink-strong hover:bg-[rgba(28,28,28,0.04)] focus-visible:shadow-focus transition"
+      class="flex items-center gap-3 px-4 py-2.5 rounded-sm text-caption text-ink-strong hover:bg-surface-hover focus-visible:shadow-focus transition"
     >
       <component :is="item.icon" :size="18" :stroke-width="1.5" />
       <span>{{ item.label }}</span>

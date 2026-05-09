@@ -1,40 +1,48 @@
 type Theme = "light" | "dark" | "system";
 
-const STORAGE_KEY = "roofly_theme";
+const COOKIE_KEY = "roofly_theme";
+const LEGACY_STORAGE_KEY = "roofly_theme";
 
 export const useTheme = () => {
-  const theme = useState<Theme>("roofly-theme", () => "system");
+  const theme = useCookie<Theme>(COOKIE_KEY, {
+    default: () => "system",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 365,
+  });
 
-  const applyTheme = (next: Theme) => {
-    if (!import.meta.client) return;
-    const resolved =
-      next === "system"
-        ? window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light"
-        : next;
-    document.documentElement.dataset.theme = resolved;
-  };
+  const systemDark = useState<boolean | null>("roofly-system-dark", () => null);
+
+  const resolved = computed<"light" | "dark" | undefined>(() => {
+    if (theme.value === "light") return "light";
+    if (theme.value === "dark") return "dark";
+    if (systemDark.value === null) return undefined;
+    return systemDark.value ? "dark" : "light";
+  });
+
+  useHead({
+    htmlAttrs: {
+      "data-theme": resolved as unknown as string,
+    },
+  });
 
   const setTheme = (next: Theme) => {
     theme.value = next;
-    if (import.meta.client) {
-      localStorage.setItem(STORAGE_KEY, next);
-      applyTheme(next);
-    }
   };
 
   const initTheme = () => {
     if (!import.meta.client) return;
-    const stored = (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? "system";
-    theme.value = stored;
-    applyTheme(stored);
 
-    if (stored === "system") {
-      window
-        .matchMedia("(prefers-color-scheme: dark)")
-        .addEventListener("change", () => applyTheme("system"));
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY) as Theme | null;
+    if (legacy && legacy !== theme.value) {
+      theme.value = legacy;
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
     }
+
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    systemDark.value = mq.matches;
+    mq.addEventListener("change", (e) => {
+      systemDark.value = e.matches;
+    });
   };
 
   return { theme, setTheme, initTheme };
