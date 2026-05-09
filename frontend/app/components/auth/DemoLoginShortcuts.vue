@@ -31,9 +31,9 @@ const enter = async (role: "owner" | "tenant") => {
   >
     <div class="flex items-center justify-between mb-3">
       <p class="text-micro font-medium uppercase tracking-wider text-ink-muted">
-        Demo shortcuts
+        Demo Credentials
       </p>
-      <span class="text-micro text-ink-faint">Dev only</span>
+      <span class="text-micro text-ink-faint">For demo purposes only</span>
     </div>
 
     <div class="grid grid-cols-2 gap-2">

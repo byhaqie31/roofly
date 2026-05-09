@@ -174,7 +174,98 @@ const onDownloadPdf = () => {
       </section>
 
       <section>
-        <div class="overflow-hidden rounded-lg border border-line-passive bg-surface-raised">
+        <!-- Mobile: card stack -->
+        <div class="sm:hidden">
+          <header class="mb-4">
+            <h2 class="text-card-title font-semibold text-ink">
+              {{ t("owner.reports.perProperty.title") }}
+            </h2>
+            <p class="mt-1 text-caption text-ink-muted">
+              {{ t("owner.reports.perProperty.help") }}
+            </p>
+          </header>
+          <ul class="space-y-3">
+            <li
+              v-for="row in reports.perProperty.value"
+              :key="row.property.id"
+            >
+              <NuxtLink
+                :to="`/owner/properties/${row.property.id}`"
+                class="block rounded-lg border border-line-passive bg-surface-raised p-4 outline-none transition hover:border-line-interactive focus-visible:shadow-focus"
+              >
+                <div class="min-w-0">
+                  <div class="truncate text-body font-medium text-ink">
+                    {{ row.property.name }}
+                  </div>
+                  <div class="truncate text-caption text-ink-muted">
+                    {{ t(`owner.properties.types.${row.property.type}`) }} ·
+                    {{ row.property.city }}
+                  </div>
+                </div>
+
+                <dl class="mt-3 grid grid-cols-2 gap-3">
+                  <div class="rounded-md border border-line-passive bg-surface-page p-3">
+                    <dt class="text-micro text-ink-muted">
+                      {{ t("owner.reports.perProperty.cols.units") }}
+                    </dt>
+                    <dd class="mt-1 text-body font-medium text-ink tabular-nums">
+                      {{ row.occupiedCount }}/{{ row.unitsCount }}
+                    </dd>
+                  </div>
+                  <div class="rounded-md border border-line-passive bg-surface-page p-3">
+                    <dt class="text-micro text-ink-muted">
+                      {{ t("owner.reports.perProperty.cols.occupancy") }}
+                    </dt>
+                    <dd class="mt-1 text-body font-medium text-ink tabular-nums">
+                      {{ row.occupancyPct }}%
+                    </dd>
+                  </div>
+                  <div class="rounded-md border border-line-passive bg-surface-page p-3">
+                    <dt class="text-micro text-ink-muted">
+                      {{ t("owner.reports.perProperty.cols.income") }}
+                    </dt>
+                    <dd class="mt-1 text-body font-medium text-ink tabular-nums">
+                      {{ formatRM(row.incomeForYear) }}
+                    </dd>
+                  </div>
+                  <div class="rounded-md border border-line-passive bg-surface-page p-3">
+                    <dt class="text-micro text-ink-muted">
+                      {{ t("owner.reports.perProperty.cols.outstanding") }}
+                    </dt>
+                    <dd
+                      :class="[
+                        'mt-1 text-body font-medium tabular-nums',
+                        row.outstanding > 0 ? 'text-status-overdue' : 'text-ink',
+                      ]"
+                    >
+                      {{ formatRM(row.outstanding) }}
+                    </dd>
+                  </div>
+                </dl>
+
+                <div
+                  v-if="row.gains"
+                  class="mt-3 flex items-center justify-between border-t border-line-passive pt-3"
+                >
+                  <span class="text-caption text-ink-muted">
+                    {{ t("owner.reports.perProperty.cols.netGain") }}
+                  </span>
+                  <span class="text-body font-medium text-ink tabular-nums">
+                    {{ formatRM(row.gains.net) }}
+                  </span>
+                </div>
+              </NuxtLink>
+            </li>
+          </ul>
+          <p class="mt-4 text-micro text-ink-faint">
+            {{ t("owner.reports.perProperty.disclaimer") }}
+          </p>
+        </div>
+
+        <!-- Desktop: table -->
+        <div
+          class="hidden overflow-hidden rounded-lg border border-line-passive bg-surface-raised sm:block"
+        >
           <header class="border-b border-line-passive p-6">
             <h2 class="text-card-title font-semibold text-ink">
               {{ t("owner.reports.perProperty.title") }}
