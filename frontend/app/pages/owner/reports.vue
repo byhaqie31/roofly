@@ -5,7 +5,7 @@ import EmptyState from "~/components/ui/EmptyState.vue";
 import Button from "~/components/ui/Button.vue";
 import Select from "~/components/ui/Select.vue";
 import MoneyDisplay from "~/components/ui/MoneyDisplay.vue";
-import MiniBarChart from "~/components/ui/MiniBarChart.vue";
+import MiniAreaChart from "~/components/ui/MiniAreaChart.vue";
 import Icon from "~/components/ui/Icon.vue";
 import { useReports } from "~/composables/useReports";
 import { useToast } from "~/composables/useToast";
@@ -165,7 +165,7 @@ const onDownloadPdf = () => {
               {{ t("owner.reports.monthlyBreakdown.help") }}
             </p>
           </header>
-          <MiniBarChart
+          <MiniAreaChart
             :data="reports.monthlyBreakdown.value"
             :height="120"
             :highlight-last="false"

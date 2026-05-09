@@ -55,8 +55,10 @@ const drawerOpen = ref(false);
         </div>
 
         <div class="flex items-center gap-1 ml-auto">
-          <ThemeToggle />
-          <LangSwitcher />
+          <div class="hidden md:inline-flex md:items-center md:gap-1">
+            <ThemeToggle />
+            <LangSwitcher />
+          </div>
           <UserMenu />
         </div>
       </header>

@@ -4,7 +4,7 @@ import Card from "~/components/ui/Card.vue";
 import EmptyState from "~/components/ui/EmptyState.vue";
 import Button from "~/components/ui/Button.vue";
 import MoneyDisplay from "~/components/ui/MoneyDisplay.vue";
-import MiniBarChart from "~/components/ui/MiniBarChart.vue";
+import MiniAreaChart from "~/components/ui/MiniAreaChart.vue";
 import Pill from "~/components/ui/Pill.vue";
 import Icon from "~/components/ui/Icon.vue";
 import { useDashboard, type AttentionKind } from "~/composables/useDashboard";
@@ -27,6 +27,24 @@ const outstandingCount = computed(
     ).length,
 );
 
+// Trailing-12-month summary stats for the chart card.
+const incomeTotal12mo = computed(() =>
+  dashboard.monthlyIncomeSeries.value.reduce((sum, b) => sum + b.amount, 0),
+);
+const incomeAvg12mo = computed(() => {
+  const series = dashboard.monthlyIncomeSeries.value;
+  if (series.length === 0) return 0;
+  return Math.round(incomeTotal12mo.value / series.length);
+});
+const bestMonth = computed(() => {
+  const series = dashboard.monthlyIncomeSeries.value;
+  if (series.length === 0) return null;
+  return series.reduce(
+    (best, b) => (b.amount > best.amount ? b : best),
+    series[0]!,
+  );
+});
+
 const attentionTone: Record<
   AttentionKind,
   "overdue" | "maintenance" | "draft" | "pending"
@@ -41,7 +59,7 @@ const attentionTone: Record<
 
 <template>
   <div>
-    <header class="mb-8">
+    <header class="mb-6 sm:mb-8">
       <h1 class="text-display-sub font-semibold tracking-snug">
         {{ t("owner.dashboard.title") }}
       </h1>
@@ -73,7 +91,7 @@ const attentionTone: Record<
     </Card>
 
     <template v-else>
-      <section class="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <section class="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
         <Card padding="standard">
           <p class="text-caption text-ink-muted">
             {{ t("owner.dashboard.incomeMonth") }}
@@ -127,7 +145,7 @@ const attentionTone: Record<
         </Card>
       </section>
 
-      <section class="mb-8">
+      <section class="mb-6 sm:mb-8">
         <Card padding="loose">
           <header class="mb-4 flex items-end justify-between">
             <div>
@@ -139,7 +157,41 @@ const attentionTone: Record<
               </p>
             </div>
           </header>
-          <MiniBarChart :data="dashboard.monthlyIncomeSeries.value" :height="120" />
+          <MiniAreaChart :data="dashboard.monthlyIncomeSeries.value" :height="120" />
+          <dl
+            class="mt-6 grid grid-cols-1 gap-3 border-t border-line-passive pt-4 sm:grid-cols-3"
+          >
+            <div>
+              <dt class="text-micro text-ink-faint">
+                {{ t("owner.dashboard.incomeChart.total") }}
+              </dt>
+              <dd class="mt-0.5 text-body font-semibold text-ink">
+                <MoneyDisplay :cents="incomeTotal12mo" />
+              </dd>
+            </div>
+            <div>
+              <dt class="text-micro text-ink-faint">
+                {{ t("owner.dashboard.incomeChart.average") }}
+              </dt>
+              <dd class="mt-0.5 text-body font-semibold text-ink">
+                <MoneyDisplay :cents="incomeAvg12mo" />
+              </dd>
+            </div>
+            <div>
+              <dt class="text-micro text-ink-faint">
+                {{ t("owner.dashboard.incomeChart.bestMonth") }}
+              </dt>
+              <dd class="mt-0.5 text-body font-semibold text-ink">
+                <span v-if="bestMonth && bestMonth.amount > 0">
+                  {{ bestMonth.label }}
+                  <span class="ml-1 text-caption font-normal text-ink-muted tabular-nums">
+                    <MoneyDisplay :cents="bestMonth.amount" />
+                  </span>
+                </span>
+                <span v-else class="text-ink-faint">—</span>
+              </dd>
+            </div>
+          </dl>
         </Card>
       </section>
 
@@ -164,26 +216,30 @@ const attentionTone: Record<
             >
               <NuxtLink
                 :to="item.link"
-                class="group flex items-center justify-between gap-3 py-3 outline-none transition hover:bg-surface-hover/50 focus-visible:shadow-focus"
+                class="group flex items-start gap-3 rounded-sm py-3 outline-none transition hover:bg-surface-hover focus-visible:shadow-focus"
               >
-                <div class="flex min-w-0 items-center gap-3">
-                  <Pill :tone="attentionTone[item.kind]">
-                    {{ t(`owner.dashboard.attention.kinds.${item.kind}`) }}
-                  </Pill>
-                  <span class="truncate text-body text-ink">
+                <div class="min-w-0 flex-1">
+                  <!-- Status pill + name/meta as secondary context -->
+                  <div class="mb-1 flex items-center gap-2">
+                    <Pill :tone="attentionTone[item.kind]" class="shrink-0">
+                      {{ t(`owner.dashboard.attention.kinds.${item.kind}`) }}
+                    </Pill>
+                    <span
+                      v-if="item.meta"
+                      class="truncate text-caption text-ink-muted"
+                    >
+                      {{ item.meta }}
+                    </span>
+                  </div>
+                  <!-- Main message -->
+                  <p class="truncate text-body font-medium text-ink">
                     {{ item.title }}
-                  </span>
-                  <span
-                    v-if="item.meta"
-                    class="truncate text-caption text-ink-muted"
-                  >
-                    {{ item.meta }}
-                  </span>
+                  </p>
                 </div>
                 <Icon
                   name="ArrowRight"
                   :size="14"
-                  class="shrink-0 text-ink-faint transition group-hover:text-ink-muted"
+                  class="mt-1 shrink-0 text-ink-faint transition group-hover:text-ink-muted"
                 />
               </NuxtLink>
             </li>

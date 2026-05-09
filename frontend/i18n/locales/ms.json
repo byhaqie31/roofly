@@ -303,7 +303,11 @@
       "expiringHelp": "Perjanjian aktif yang akan tamat dalam 60 hari.",
       "incomeChart": {
         "title": "Pendapatan — 12 bulan terakhir",
-        "help": "Jumlah pembayaran berjaya setiap bulan. Bar yang dipaparkan ialah bulan semasa."
+        "help": "Jumlah pembayaran berjaya setiap bulan. Bar yang dipaparkan ialah bulan semasa.",
+        "avgLabel": "purata",
+        "total": "Jumlah diterima",
+        "average": "Purata / bulan",
+        "bestMonth": "Bulan terbaik"
       },
       "attention": {
         "title": "Perlu perhatian",

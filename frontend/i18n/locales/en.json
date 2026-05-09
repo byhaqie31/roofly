@@ -303,7 +303,11 @@
       "expiringHelp": "Active agreements ending within 60 days.",
       "incomeChart": {
         "title": "Income — last 12 months",
-        "help": "Sum of successful payments per month. Highlighted bar is the current month."
+        "help": "Sum of successful payments per month. Highlighted bar is the current month.",
+        "avgLabel": "avg",
+        "total": "Total received",
+        "average": "Avg / month",
+        "bestMonth": "Best month"
       },
       "attention": {
         "title": "Needs attention",
