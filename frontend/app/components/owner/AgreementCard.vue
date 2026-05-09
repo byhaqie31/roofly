@@ -30,8 +30,8 @@ const formatDate = (iso: string) => {
 </script>
 
 <template>
-  <button
-    type="button"
+  <NuxtLink
+    :to="`/owner/agreements/${row.agreement.id}`"
     class="block w-full rounded-lg text-left outline-none transition hover:opacity-95 focus-visible:shadow-focus"
   >
     <Card padding="standard">
@@ -68,5 +68,5 @@ const formatDate = (iso: string) => {
         </span>
       </div>
     </Card>
-  </button>
+  </NuxtLink>
 </template>

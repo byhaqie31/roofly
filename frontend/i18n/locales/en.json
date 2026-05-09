@@ -177,6 +177,65 @@
         "active": "Active",
         "expired": "Expired",
         "terminated": "Terminated"
+      },
+      "detail": {
+        "back": "Back to agreements",
+        "notFound": "Agreement not found.",
+        "save": "Save changes",
+        "newSubtitle": "Set the parties, term, and rent. You can refine the rest after saving.",
+        "termsHelp": "Parties, dates, and money. Editable any time before the agreement is signed.",
+        "tabs": {
+          "overview": "Overview",
+          "terms": "Terms",
+          "documents": "Documents"
+        },
+        "overviewHelp": "What's in this agreement at a glance.",
+        "sections": {
+          "parties": "Parties",
+          "term": "Term",
+          "money": "Money"
+        },
+        "overview": {
+          "status": "Status",
+          "term": "Term length",
+          "monthlyRent": "Monthly rent",
+          "timeline": "Timeline",
+          "parties": "Parties",
+          "money": "Money",
+          "months": "{n} months",
+          "years": "{n} years",
+          "daysRemaining": "{n} days remaining",
+          "expiringIn": "Expiring in {n} days",
+          "expiredAgo": "Expired {n} days ago",
+          "startsIn": "Starts in {n} days"
+        },
+        "documents": {
+          "help": "Signed lease, addendums, inspection checklists, inventory list, and exit letters live here.",
+          "placeholderTitle": "Coming soon",
+          "placeholderHelp": "Coming soon — file upload arrives in the next phase. You'll be able to attach the signed agreement and supporting documents here.",
+          "slots": {
+            "lease": {
+              "title": "Signed lease agreement",
+              "help": "The executed PDF, signed by both parties."
+            },
+            "addendum": {
+              "title": "Addendums & amendments",
+              "help": "Renewals, rent adjustments, or any post-signing changes."
+            },
+            "inspection": {
+              "title": "Move-in inspection",
+              "help": "Condition checklist with photos at handover."
+            },
+            "inventory": {
+              "title": "Inventory list",
+              "help": "Furniture and fittings handed over with the unit."
+            },
+            "exit": {
+              "title": "Exit letter & move-out report",
+              "help": "Notice to vacate plus the move-out condition report."
+            }
+          }
+        }
       }
     },
     "tenants": {

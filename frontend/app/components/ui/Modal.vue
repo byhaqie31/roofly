@@ -34,8 +34,8 @@ defineEmits<{
       <DialogContent
         :class="[
           'fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2',
-          'w-[calc(100vw-2rem)] rounded-xl border border-line-passive bg-surface-raised shadow-modal',
-          'p-6 focus:outline-none',
+          'flex w-[calc(100vw-2rem)] max-h-[calc(100dvh-2rem)] flex-col',
+          'rounded-xl border border-line-passive bg-surface-raised shadow-modal focus:outline-none',
           size === 'sm'
             ? 'max-w-sm'
             : size === 'lg'
@@ -43,7 +43,10 @@ defineEmits<{
               : 'max-w-md',
         ]"
       >
-        <header v-if="title || description" class="mb-5 pr-8">
+        <header
+          v-if="title || description"
+          class="shrink-0 border-b border-line-passive px-6 pb-4 pt-6 pr-14"
+        >
           <DialogTitle
             v-if="title"
             class="text-card-title font-semibold tracking-snug text-ink"
@@ -65,13 +68,13 @@ defineEmits<{
           <Icon name="X" :size="18" />
         </DialogClose>
 
-        <div>
+        <div class="min-h-0 flex-1 overflow-y-auto px-6 py-5">
           <slot />
         </div>
 
         <footer
           v-if="$slots.footer"
-          class="mt-6 flex justify-end gap-3"
+          class="shrink-0 flex flex-wrap justify-end gap-3 border-t border-line-passive px-6 py-4"
         >
           <slot name="footer" />
         </footer>

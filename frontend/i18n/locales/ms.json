@@ -177,6 +177,65 @@
         "active": "Aktif",
         "expired": "Tamat tempoh",
         "terminated": "Ditamatkan"
+      },
+      "detail": {
+        "back": "Kembali ke senarai perjanjian",
+        "notFound": "Perjanjian tidak dijumpai.",
+        "save": "Simpan perubahan",
+        "newSubtitle": "Tetapkan pihak, tempoh, dan sewa. Butiran lain boleh dikemas kini selepas simpan.",
+        "termsHelp": "Pihak, tarikh, dan jumlah. Boleh diubah bila-bila masa sebelum perjanjian ditandatangani.",
+        "tabs": {
+          "overview": "Ringkasan",
+          "terms": "Terma",
+          "documents": "Dokumen"
+        },
+        "overviewHelp": "Apa yang ada dalam perjanjian ini secara ringkas.",
+        "sections": {
+          "parties": "Pihak terlibat",
+          "term": "Tempoh",
+          "money": "Jumlah"
+        },
+        "overview": {
+          "status": "Status",
+          "term": "Tempoh perjanjian",
+          "monthlyRent": "Sewa bulanan",
+          "timeline": "Garis masa",
+          "parties": "Pihak terlibat",
+          "money": "Jumlah",
+          "months": "{n} bulan",
+          "years": "{n} tahun",
+          "daysRemaining": "{n} hari lagi",
+          "expiringIn": "Tamat dalam {n} hari",
+          "expiredAgo": "Tamat tempoh {n} hari lalu",
+          "startsIn": "Mula dalam {n} hari"
+        },
+        "documents": {
+          "help": "Perjanjian sewa yang ditandatangani, addendum, senarai semak pemeriksaan, senarai inventori, dan surat keluar disimpan di sini.",
+          "placeholderTitle": "Akan datang",
+          "placeholderHelp": "Akan datang — muat naik fail tiba dalam fasa seterusnya. Anda boleh lampirkan perjanjian yang ditandatangani dan dokumen sokongan di sini.",
+          "slots": {
+            "lease": {
+              "title": "Perjanjian sewa yang ditandatangani",
+              "help": "PDF yang sudah ditandatangani oleh kedua-dua pihak."
+            },
+            "addendum": {
+              "title": "Addendum & pindaan",
+              "help": "Pembaharuan, pelarasan sewa, atau apa-apa perubahan selepas tandatangan."
+            },
+            "inspection": {
+              "title": "Pemeriksaan masuk",
+              "help": "Senarai semak keadaan unit beserta gambar semasa serahan."
+            },
+            "inventory": {
+              "title": "Senarai inventori",
+              "help": "Perabot dan kelengkapan yang diserahkan bersama unit."
+            },
+            "exit": {
+              "title": "Surat keluar & laporan keluar",
+              "help": "Notis untuk mengosongkan unit beserta laporan keadaan semasa keluar."
+            }
+          }
+        }
       }
     },
     "tenants": {

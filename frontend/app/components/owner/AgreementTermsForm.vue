@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import { agreementFormSchema } from "~/schemas/agreement";
@@ -8,32 +8,22 @@ import type { Property } from "~/types/property";
 import type { Unit } from "~/types/unit";
 import type { Tenant } from "~/types/tenant";
 import { useToast } from "~/composables/useToast";
-import Modal from "~/components/ui/Modal.vue";
 import Input from "~/components/ui/Input.vue";
 import Select from "~/components/ui/Select.vue";
 import Button from "~/components/ui/Button.vue";
 
-const props = withDefaults(
-  defineProps<{
-    open: boolean;
-    agreement?: Agreement | null;
-  }>(),
-  { agreement: null },
-);
+const props = defineProps<{
+  agreement?: Agreement | null;
+  mode: "create" | "edit";
+}>();
 
 const emit = defineEmits<{
-  "update:open": [value: boolean];
   saved: [agreement: Agreement];
-  deleted: [id: string];
 }>();
 
 const { t } = useI18n();
 const { show } = useToast();
 const submitting = ref(false);
-const deleting = ref(false);
-const confirmingDelete = ref(false);
-
-const isEditMode = computed(() => !!props.agreement);
 
 const allProperties = ref<Property[]>([]);
 const allUnits = ref<Unit[]>([]);
@@ -107,13 +97,6 @@ const statusOptions = computed(() => [
   { value: "terminated", label: t("owner.agreements.status.terminated") },
 ]);
 
-const modalTitle = computed(() => {
-  if (confirmingDelete.value) return t("owner.agreements.deleteConfirm.title");
-  return isEditMode.value
-    ? t("owner.agreements.editTitle")
-    : t("owner.agreements.addTitle");
-});
-
 const onPropertyChange = (newPropertyId: string) => {
   formPropertyId.value = newPropertyId;
   if (
@@ -125,6 +108,19 @@ const onPropertyChange = (newPropertyId: string) => {
     setFieldValue("unitId", "");
   }
 };
+
+onMounted(async () => {
+  [allProperties.value, allUnits.value, allTenants.value] = await Promise.all([
+    useProperties().list(),
+    useUnits().list(),
+    useTenants().list(),
+  ]);
+  resetForm({ values: buildInitialValues() });
+  if (props.agreement) {
+    const u = allUnits.value.find((x) => x.id === props.agreement!.unitId);
+    formPropertyId.value = u?.propertyId ?? "";
+  }
+});
 
 const onSubmit = handleSubmit(async (values) => {
   submitting.value = true;
@@ -140,11 +136,8 @@ const onSubmit = handleSubmit(async (values) => {
       rentDueDay: values.rentDueDay,
       status: values.status,
     };
-    if (isEditMode.value && props.agreement) {
-      const updated = await useAgreements().update(
-        props.agreement.id,
-        payload,
-      );
+    if (props.mode === "edit" && props.agreement) {
+      const updated = await useAgreements().update(props.agreement.id, payload);
       show(t("common.savedToast"), "success");
       emit("saved", updated);
     } else {
@@ -152,63 +145,24 @@ const onSubmit = handleSubmit(async (values) => {
       show(t("owner.agreements.createdToast"), "success");
       emit("saved", created);
     }
-    emit("update:open", false);
   } finally {
     submitting.value = false;
   }
 });
-
-const onConfirmDelete = async () => {
-  if (!props.agreement) return;
-  deleting.value = true;
-  try {
-    await useAgreements().remove(props.agreement.id);
-    show(t("owner.agreements.deletedToast"), "success");
-    emit("deleted", props.agreement.id);
-    emit("update:open", false);
-  } finally {
-    deleting.value = false;
-  }
-};
-
-watch(
-  () => props.open,
-  async (isOpen) => {
-    if (!isOpen) return;
-    confirmingDelete.value = false;
-    [allProperties.value, allUnits.value, allTenants.value] = await Promise.all(
-      [useProperties().list(), useUnits().list(), useTenants().list()],
-    );
-    resetForm({ values: buildInitialValues() });
-    if (props.agreement) {
-      const u = allUnits.value.find((x) => x.id === props.agreement!.unitId);
-      formPropertyId.value = u?.propertyId ?? "";
-    } else {
-      formPropertyId.value = "";
-    }
-  },
-);
 </script>
 
 <template>
-  <Modal
-    :open="open"
-    :title="modalTitle"
-    size="lg"
-    @update:open="emit('update:open', $event)"
-  >
-    <div v-if="confirmingDelete">
-      <p class="text-body text-ink">
-        {{ t("owner.agreements.deleteConfirm.body") }}
-      </p>
-    </div>
+  <form class="space-y-5" @submit.prevent="onSubmit">
+    <p class="text-caption text-ink-muted">
+      {{ t("owner.agreements.detail.termsHelp") }}
+    </p>
 
-    <form
-      v-else
-      id="agreement-form"
-      class="space-y-4"
-      @submit.prevent="onSubmit"
-    >
+    <section class="space-y-3">
+      <h3
+        class="text-caption font-semibold uppercase tracking-wide text-ink-muted"
+      >
+        {{ t("owner.agreements.detail.sections.parties") }}
+      </h3>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Select
           :model-value="formPropertyId"
@@ -230,7 +184,6 @@ watch(
           :error="errors.unitId"
         />
       </div>
-
       <Select
         v-model="tenantId"
         :options="tenantOptions"
@@ -238,7 +191,14 @@ watch(
         :placeholder="t('owner.agreements.placeholders.tenant')"
         :error="errors.tenantId"
       />
+    </section>
 
+    <section class="space-y-3">
+      <h3
+        class="text-caption font-semibold uppercase tracking-wide text-ink-muted"
+      >
+        {{ t("owner.agreements.detail.sections.term") }}
+      </h3>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           v-model="startDate"
@@ -253,7 +213,14 @@ watch(
           :error="errors.endDate"
         />
       </div>
+    </section>
 
+    <section class="space-y-3">
+      <h3
+        class="text-caption font-semibold uppercase tracking-wide text-ink-muted"
+      >
+        {{ t("owner.agreements.detail.sections.money") }}
+      </h3>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Input
           v-model="rentAmount"
@@ -280,7 +247,6 @@ watch(
           :error="errors.lateFee"
         />
       </div>
-
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           v-model="rentDueDay"
@@ -291,62 +257,23 @@ watch(
           :error="errors.rentDueDay"
         />
         <Select
-          v-if="isEditMode"
+          v-if="mode === 'edit'"
           v-model="status"
           :options="statusOptions"
           :label="t('owner.agreements.fields.status')"
           :error="errors.status"
         />
       </div>
-    </form>
+    </section>
 
-    <template #footer>
-      <template v-if="confirmingDelete">
-        <Button
-          variant="ghost"
-          :disabled="deleting"
-          @click="confirmingDelete = false"
-        >
-          {{ t("common.cancel") }}
-        </Button>
-        <Button
-          variant="accent"
-          :loading="deleting"
-          @click="onConfirmDelete"
-        >
-          {{ t("owner.agreements.deleteConfirm.confirm") }}
-        </Button>
-      </template>
-      <template v-else>
-        <Button
-          v-if="isEditMode"
-          variant="ghost"
-          :disabled="submitting"
-          @click="confirmingDelete = true"
-        >
-          {{ t("owner.agreements.delete") }}
-        </Button>
-        <div v-if="isEditMode" class="flex-1" />
-        <Button
-          variant="ghost"
-          :disabled="submitting"
-          @click="emit('update:open', false)"
-        >
-          {{ t("common.cancel") }}
-        </Button>
-        <Button
-          type="submit"
-          form="agreement-form"
-          variant="primary"
-          :loading="submitting"
-        >
-          {{
-            isEditMode
-              ? t("owner.agreements.save")
-              : t("owner.agreements.add")
-          }}
-        </Button>
-      </template>
-    </template>
-  </Modal>
+    <div class="flex justify-end pt-2">
+      <Button type="submit" variant="primary" :loading="submitting">
+        {{
+          mode === "edit"
+            ? t("owner.agreements.detail.save")
+            : t("owner.agreements.add")
+        }}
+      </Button>
+    </div>
+  </form>
 </template>
