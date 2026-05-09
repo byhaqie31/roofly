@@ -91,10 +91,12 @@ const tabTriggerClass =
         <Icon name="ArrowLeft" :size="14" />
         {{ t("owner.tenants.detail.back") }}
       </NuxtLink>
+      <!-- Mobile: delete pairs with the back link -->
       <Button
         v-if="tenant"
         variant="ghost"
         size="sm"
+        class="sm:hidden"
         @click="showDeleteConfirm = true"
       >
         <Icon name="Trash2" :size="14" class="mr-1" />
@@ -115,16 +117,28 @@ const tabTriggerClass =
     </Card>
 
     <template v-else>
-      <header class="mb-6">
-        <Pill :tone="statusTone(tenant.status)" class="mb-3">
-          {{ t(`owner.tenants.status.${tenant.status}`) }}
-        </Pill>
-        <h1 class="text-display-sub font-semibold tracking-snug text-ink">
-          {{ tenant.name }}
-        </h1>
-        <p class="mt-2 text-caption text-ink-muted">
-          {{ tenant.email }} · {{ tenant.phone }}
-        </p>
+      <header class="mb-6 sm:flex sm:items-end sm:justify-between sm:gap-4">
+        <div class="sm:min-w-0">
+          <Pill :tone="statusTone(tenant.status)" class="mb-3">
+            {{ t(`owner.tenants.status.${tenant.status}`) }}
+          </Pill>
+          <h1 class="text-display-sub font-semibold tracking-snug text-ink">
+            {{ tenant.name }}
+          </h1>
+          <p class="mt-2 text-caption text-ink-muted">
+            {{ tenant.email }} · {{ tenant.phone }}
+          </p>
+        </div>
+        <!-- Desktop: delete sits next to the title's supporting line -->
+        <Button
+          variant="ghost"
+          size="sm"
+          class="hidden shrink-0 sm:inline-flex"
+          @click="showDeleteConfirm = true"
+        >
+          <Icon name="Trash2" :size="14" class="mr-1" />
+          {{ t("owner.tenants.detail.delete") }}
+        </Button>
       </header>
 
       <Card padding="loose">

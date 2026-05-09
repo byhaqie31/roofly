@@ -102,10 +102,12 @@ const tabOptions = computed(() => {
         <Icon name="ArrowLeft" :size="14" />
         {{ t("owner.properties.detail.back") }}
       </NuxtLink>
+      <!-- Mobile: delete pairs with the back link -->
       <Button
         v-if="property"
         variant="ghost"
         size="sm"
+        class="sm:hidden"
         @click="showDeleteConfirm = true"
       >
         <Icon name="Trash2" :size="14" class="mr-1" />
@@ -126,17 +128,29 @@ const tabOptions = computed(() => {
     </Card>
 
     <template v-else>
-      <header class="mb-6">
-        <Pill tone="neutral" class="mb-3">
-          {{ t(`owner.properties.types.${property.type}`) }}
-        </Pill>
-        <h1 class="text-display-sub font-semibold tracking-snug text-ink">
-          {{ property.name }}
-        </h1>
-        <p class="mt-2 text-caption text-ink-muted">
-          {{ property.address }}, {{ property.city }}, {{ property.state }}
-          {{ property.postcode }}
-        </p>
+      <header class="mb-6 sm:flex sm:items-end sm:justify-between sm:gap-4">
+        <div class="sm:min-w-0">
+          <Pill tone="neutral" class="mb-3">
+            {{ t(`owner.properties.types.${property.type}`) }}
+          </Pill>
+          <h1 class="text-display-sub font-semibold tracking-snug text-ink">
+            {{ property.name }}
+          </h1>
+          <p class="mt-2 text-caption text-ink-muted">
+            {{ property.address }}, {{ property.city }}, {{ property.state }}
+            {{ property.postcode }}
+          </p>
+        </div>
+        <!-- Desktop: delete sits next to the title's supporting line -->
+        <Button
+          variant="ghost"
+          size="sm"
+          class="hidden shrink-0 sm:inline-flex"
+          @click="showDeleteConfirm = true"
+        >
+          <Icon name="Trash2" :size="14" class="mr-1" />
+          {{ t("owner.properties.detail.delete") }}
+        </Button>
       </header>
 
       <Card padding="loose">

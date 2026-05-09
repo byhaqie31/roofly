@@ -302,44 +302,68 @@ Tailwind defaults are fine. Sidebar collapses to drawer at `md` (768px).
 
 ### 4.4 Detail-page header
 
-Resource detail pages (property, tenant, agreement, etc.) share one header pattern: **resource-level actions live on the back-link row at the top**, with the title block sitting on its own below at full width. This keeps the title from competing for horizontal space with the action button on any breakpoint.
+Resource detail pages (property, tenant, agreement, etc.) share one header pattern that adapts per breakpoint:
+
+- **Desktop (`sm:` and up)** — title block on the left, resource-level action on the right, baseline-aligned with the bottom of the title block (same line as the supporting copy, not the eyebrow pill). Back link sits alone on its own row above.
+- **Mobile (`<sm`)** — back link + action share the top row; title block sits below at full width so a long name never has to compete with the action button.
 
 ```
+Desktop:
+┌───────────────────────────────────────────────────────────────┐
+│ ← Back to list                                                │
+│                                                               │
+│ [Eyebrow pill]                                                │
+│ Resource title (display-sub)                                  │
+│ supporting line · ID · location                  [Delete]     │
+└───────────────────────────────────────────────────────────────┘
+
+Mobile:
 ┌───────────────────────────────────────────────────────────────┐
 │ ← Back to list                                  [Delete]      │
 │                                                               │
 │ [Eyebrow pill]                                                │
-│ Resource title (display-sub) — full width, never shrinks      │
-│ supporting line · ID · location                               │
+│ Resource title — full width                                   │
+│ supporting line                                               │
 └───────────────────────────────────────────────────────────────┘
 ```
 
 ```vue
+<!-- Back-link row: on mobile this row also carries the action; on desktop the action moves down to the title row -->
 <div class="mb-6 flex items-center justify-between gap-2">
   <NuxtLink to="/owner/<resource>" class="inline-flex items-center gap-1 text-caption text-ink-muted transition hover:text-ink">
     <Icon name="ArrowLeft" :size="14" />
     {{ $t("...detail.back") }}
   </NuxtLink>
-  <Button v-if="resource" variant="ghost" size="sm" @click="...">
+  <!-- Mobile-only action -->
+  <Button v-if="resource" variant="ghost" size="sm" class="sm:hidden" @click="...">
     <Icon name="Trash2" :size="14" class="mr-1" />
     {{ $t("...detail.delete") }}
   </Button>
 </div>
 
-<header class="mb-6">
-  <Pill tone="neutral" class="mb-3">{{ eyebrow }}</Pill>
-  <h1 class="text-display-sub font-semibold tracking-snug text-ink">
-    {{ title }}
-  </h1>
-  <p class="mt-2 text-caption text-ink-muted">{{ supporting }}</p>
+<!-- Title block: stacks vertically on mobile, becomes a flex row with the action on desktop -->
+<header class="mb-6 sm:flex sm:items-end sm:justify-between sm:gap-4">
+  <div class="sm:min-w-0">
+    <Pill tone="neutral" class="mb-3">{{ eyebrow }}</Pill>
+    <h1 class="text-display-sub font-semibold tracking-snug text-ink">
+      {{ title }}
+    </h1>
+    <p class="mt-2 text-caption text-ink-muted">{{ supporting }}</p>
+  </div>
+  <!-- Desktop-only action -->
+  <Button v-if="resource" variant="ghost" size="sm" class="hidden shrink-0 sm:inline-flex" @click="...">
+    <Icon name="Trash2" :size="14" class="mr-1" />
+    {{ $t("...detail.delete") }}
+  </Button>
 </header>
 ```
 
 Rules:
-- The action button is **not** baseline-aligned with the title — it lives on the back-link row above. Earlier docs of this pattern had it on the supporting-line row; that was changed because long titles forced ugly truncation, especially on mobile.
-- Use `Button size="sm" variant="ghost"` for destructive / utility actions. Reserve `variant="primary"` for the page's main CTA, which usually lives on the *list* page (e.g. `+ Add property`), not the detail page.
-- Gate the action with `v-if="resource"` so it disappears during loading / not-found states (no orphan delete button on a missing record).
-- For multiple actions, stack them in a `flex gap-2` container on the right side of the back-link row, smallest-priority leftmost, primary-destructive rightmost.
+- **Render the action twice**, gated by `sm:hidden` (mobile) and `hidden sm:inline-flex` (desktop). Both bind to the same handler. Trying to position a single instance with `order` / `absolute` either wastes a row on mobile or knocks the title around on desktop.
+- Desktop: `sm:items-end` on the header so the action aligns with the supporting-line baseline, not the eyebrow pill. `sm:min-w-0` on the title block + `shrink-0` on the action keeps long titles truncating instead of pushing the button off-screen.
+- Use `Button size="sm" variant="ghost"` for destructive / utility actions here. Reserve `variant="primary"` for the page's main CTA, which usually lives on the *list* page (e.g. `+ Add property`), not the detail page.
+- Gate both buttons with `v-if="resource"` so they disappear during loading / not-found states.
+- For multiple actions, stack them in a `flex gap-2` wrapper at the action position, smallest-priority leftmost, primary-destructive rightmost.
 
 ---
 
@@ -550,7 +574,11 @@ Don't change `Card` padding levels — `loose / standard / compact` are intentio
 
 ### 11.6 Detail-page header on mobile
 
-The §4.4 layout (action on the back-link row, title block full-width below) is mobile-first by design — title never has to compete for horizontal space with action buttons. If you add a *second* action, drop them into a `flex gap-2` container on the right of the back-link row; on very narrow widths if the back-link wraps, that's acceptable — the title underneath stays unaffected.
+The §4.4 layout shifts the action button per breakpoint:
+- **Mobile**: action pairs with the back link on the top row (`sm:hidden`), title block gets full width below — title never competes for horizontal space.
+- **Desktop**: action sits at the end of the title block's row, baseline-aligned with the supporting line (`hidden sm:inline-flex`), back link is alone on its own row above.
+
+The pattern requires rendering the action twice, gated by viewport classes. Don't try to position a single instance — `order` wastes vertical space on mobile, `absolute` overlaps the title on desktop. If a *second* action joins, group them in a `flex gap-2` wrapper at the same position so both buttons travel together when the breakpoint flips.
 
 ### 11.7 Hover-only effects on touch
 
@@ -585,9 +613,9 @@ Why: Card is `bg-surface-raised`. Input is `bg-surface-page`. If you nest a Card
 
 The same logic applies to PropertyOwnershipForm, TenantPersonalForm, and friends — that's why they were already section-based. Settings was the outlier and was migrated.
 
-### 11.10 Status pill positioning (coming-soon / phase indicators)
+### 11.10 Status pill positioning (coming-soon indicators)
 
-When a section header carries a status pill ("Coming soon", "Beta", "Phase 4"), put the pill at the **top-right on desktop** and the **bottom-right on mobile** (so it never pushes the title down on narrow widths). Drives a `flex flex-col` → `sm:flex-row sm:justify-between` switch.
+When a section header carries a status pill ("Coming soon", "Beta"), put the pill at the **top-right on desktop** and the **bottom-right on mobile** (so it never pushes the title down on narrow widths). Drives a `flex flex-col` → `sm:flex-row sm:justify-between` switch.
 
 ```vue
 <header class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
@@ -602,6 +630,70 @@ When a section header carries a status pill ("Coming soon", "Beta", "Phase 4"), 
 ```
 
 `self-end` on mobile + `sm:self-start` on desktop pin the pill to the bottom-right and top-right respectively. `shrink-0` keeps it from squashing.
+
+### 11.11 Repeater rows → cards on mobile
+
+Field-array repeaters (co-owner list, future tag inputs, etc.) work as a horizontal row on desktop but break on phones — labels collide, fields wrap weirdly, action buttons end up disconnected from their row. Wrap each row in a bordered "card" on mobile only, stack the fields vertically inside it, and **pair the row's primary label with the action menu on one line** above the first input so the card doesn't waste a whole row on the ⋮ trigger.
+
+```vue
+<div
+  v-for="(field, idx) in fields"
+  :key="field.key"
+  class="rounded-md border border-line-passive p-3 sm:border-0 sm:p-0"
+>
+  <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:gap-3">
+    <!-- Primary field — manual label so we can pair it with the action -->
+    <div class="sm:min-w-[10rem] sm:flex-1">
+      <div class="mb-1.5 flex items-center justify-between gap-2">
+        <span class="text-caption font-normal text-ink-strong">{{ labelName }}</span>
+        <!-- Mobile-only action: lives next to the label -->
+        <DropdownMenuRoot>
+          <DropdownMenuTrigger as-child>
+            <button class="inline-flex h-7 w-7 items-center justify-center rounded-sm text-ink-muted hover:bg-surface-hover hover:text-ink sm:hidden">
+              <Icon name="MoreVertical" :size="16" />
+            </button>
+          </DropdownMenuTrigger>
+          …
+        </DropdownMenuRoot>
+      </div>
+      <Input v-model="..." :label="undefined" :placeholder="..." />
+    </div>
+
+    <!-- Subsequent fields keep Input's built-in label -->
+    <div class="sm:w-28">
+      <Input v-model="..." :label="labelShare" />
+    </div>
+
+    <!-- Desktop-only action at end of fields row -->
+    <DropdownMenuRoot>
+      <DropdownMenuTrigger as-child>
+        <button class="hidden h-10 w-10 items-center justify-center rounded-sm text-ink-muted hover:bg-surface-hover hover:text-ink sm:inline-flex">
+          <Icon name="MoreVertical" :size="16" />
+        </button>
+      </DropdownMenuTrigger>
+      …
+    </DropdownMenuRoot>
+  </div>
+</div>
+```
+
+Rules:
+- **Always render labels on every row** — the row-1-only column-header trick (`:label="idx === 0 ? ... : undefined"`) only works on desktop. On mobile each card is its own unit and needs its own labels.
+- **Render the action menu twice** — once mobile-only (`sm:hidden`) inside the label row, once desktop-only (`hidden sm:inline-flex`) at the end of the fields row. Both bind to the same handler / state. Trying to position a single instance via `order` / `absolute` either overlaps the inputs or wastes a full row on mobile.
+- The mobile action button is `h-7 w-7` so it sits flush with the caption-sized label without inflating the label row's height. Desktop variant stays `h-10 w-10` to align with the input.
+- For row-level actions with multiple options (set primary / remove / reorder etc.), use a reka-ui `<DropdownMenuRoot>` with `<MoreVertical>` trigger — never a row of inline buttons.
+
+### 11.12 "Coming soon" copy convention
+
+When the UI exposes a feature that ships in a later phase (file storage, billing, real notifications, etc.), do **not** mention specific phase numbers ("Phase 4", "Phase 7") in user-facing strings — they leak roadmap detail and date faster than the UI does. Instead:
+
+- **Empty-state titles / placeholder titles** → exactly `"Coming soon"`. Same wording in EN ("Coming soon") and MS ("Akan datang").
+- **Body / help text** → lead with `"Coming soon — "` then describe what arrives, ending with `"in the next phase"` (EN) or `"dalam fasa seterusnya"` (MS).
+- **Toasts** → same lead-with `"Coming soon — "` form, kept short.
+
+The pill in §11.10 uses the same `"Coming soon"` wording for visual consistency across the app.
+
+Code comments and dev-facing docs (PROJECT.md, MOCK-POC.md, this file) **may** still reference specific phase numbers — that information is useful for planning. The convention is strictly for end-user copy.
 
 ---
 

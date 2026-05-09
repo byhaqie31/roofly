@@ -132,7 +132,7 @@
         "download": "Download PDF",
         "send": "Send to tenant",
         "shareToast": "Share link copied (mock)",
-        "downloadToast": "PDF download arrives with Phase 4 file storage.",
+        "downloadToast": "Coming soon — PDF download arrives in the next phase.",
         "sentToast": "Invoice sent to {email}"
       }
     },
@@ -241,8 +241,8 @@
         "documents": {
           "title": "Documents",
           "help": "IC copy, payslip, agreement signature page, etc.",
-          "placeholderTitle": "Document upload arrives in Phase 4.",
-          "placeholderHelp": "Once file storage is wired up you can upload IC copies, payslips, and reference letters here."
+          "placeholderTitle": "Coming soon",
+          "placeholderHelp": "Document upload arrives in the next phase. You'll be able to attach IC copies, payslips, and reference letters here."
         }
       }
     },
@@ -337,7 +337,7 @@
       "csvDownload": "Download CSV",
       "csvDownloaded": "CSV downloaded",
       "pdfDownload": "Download PDF",
-      "pdfStub": "PDF export arrives in Phase 4 once file storage is wired up.",
+      "pdfStub": "Coming soon — PDF export arrives in the next phase, once file storage is wired up.",
       "monthlyBreakdown": {
         "title": "Monthly income — {year}",
         "help": "Successful payments grouped by calendar month."
@@ -443,9 +443,9 @@
         },
         "photos": {
           "title": "Photos",
-          "help": "Tenant-uploaded photos arrive in Phase 4 once file storage is wired up.",
-          "placeholderTitle": "Photo upload arrives in Phase 4",
-          "placeholderHelp": "Once file storage is wired, photos attached to the ticket appear here."
+          "help": "Coming soon — tenant-uploaded photos arrive in the next phase, once file storage is wired up.",
+          "placeholderTitle": "Coming soon",
+          "placeholderHelp": "Photos attached to the ticket arrive in the next phase, once file storage is wired."
         }
       }
     },
@@ -472,9 +472,9 @@
         },
         "emailManagedNote": "Email is managed by your account login — change it from auth settings.",
         "photo": "Profile photo",
-        "photoHelp": "Profile photos arrive in Phase 4 once file storage is wired up.",
-        "photoPlaceholderTitle": "Photo upload arrives in Phase 4",
-        "photoPlaceholderHelp": "Once file storage is wired, your profile photo will live here.",
+        "photoHelp": "Coming soon — profile photos arrive in the next phase, once file storage is wired up.",
+        "photoPlaceholderTitle": "Coming soon",
+        "photoPlaceholderHelp": "Profile photos arrive in the next phase, once file storage is wired.",
         "payout": "Payout account",
         "payoutHelp": "Where rent collections will be deposited. Bank linkage is managed via your finance settings.",
         "bankMasked": "Maybank account ending in"
@@ -488,7 +488,7 @@
       },
       "notifications": {
         "channelTitle": "Delivery channels",
-        "channelHelp": "We'll send notifications via email and WhatsApp once Phase 4 wires up Resend + WhatsApp Cloud API. In-app notifications are always on.",
+        "channelHelp": "We'll send notifications via email and WhatsApp once the next phase wires up Resend + WhatsApp Cloud API. In-app notifications are always on.",
         "channelStatus": {
           "comingSoon": "Coming soon"
         },
@@ -519,16 +519,16 @@
       },
       "plan": {
         "title": "Subscription",
-        "help": "Plans cap how many active units you can manage. Upgrade arrives in Phase 7.",
+        "help": "Plans cap how many active units you can manage. Upgrade arrives in the next phase.",
         "current": "Current",
         "free": "Free",
         "permonth": "/ month",
         "unitsCap": "Up to {n} units",
         "unitsUnlimited": "Unlimited units",
         "upgradeCta": "Upgrade",
-        "upgradeStub": "Subscriptions arrive in Phase 7. Demo only for now.",
+        "upgradeStub": "Coming soon — subscriptions arrive in the next phase. Demo only for now.",
         "youreOnThis": "You're on this plan.",
-        "disclaimer": "Pricing is illustrative. Final pricing + billing land with the Phase 7 marketing release.",
+        "disclaimer": "Pricing is illustrative. Final pricing + billing arrive in the next phase.",
         "tiers": {
           "free": {
             "name": "Free",
@@ -682,10 +682,12 @@
         "coOwnersHelp": "Joint ownership splits. Shares must sum to exactly 100%, and one co-owner must be marked primary.",
         "coOwners": {
           "primaryLabel": "Primary",
-          "primaryHint": "The primary co-owner manages this listing and receives notifications.",
           "primaryRequired": "Pick a primary co-owner",
           "cantRemovePrimary": "Make another co-owner primary before removing this one.",
-          "blockedSave": "Shares must sum to 100% with exactly one primary before saving."
+          "blockedSave": "Shares must sum to 100% with exactly one primary before saving.",
+          "actionsAria": "Co-owner actions",
+          "menuSetPrimary": "Set as primary",
+          "menuRemove": "Remove"
         },
         "acquisitionTotal": "Total acquisition cost",
         "utilitiesAnnual": "Annual recurring total",
@@ -708,8 +710,8 @@
         },
         "documents": {
           "help": "Title deeds, S&P agreement, insurance policy, tax receipts, photos.",
-          "placeholderTitle": "Document upload arrives in Phase 4.",
-          "placeholderHelp": "Once file storage is wired up you can keep title deeds, insurance policies, and tax receipts here."
+          "placeholderTitle": "Coming soon",
+          "placeholderHelp": "Document upload arrives in the next phase. You'll be able to attach title deeds, insurance policies, and tax receipts here."
         }
       }
     }

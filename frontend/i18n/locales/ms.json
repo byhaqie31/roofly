@@ -132,7 +132,7 @@
         "download": "Muat turun PDF",
         "send": "Hantar ke penyewa",
         "shareToast": "Pautan kongsi disalin (mock)",
-        "downloadToast": "Muat turun PDF tiba dengan storan fail Fasa 4.",
+        "downloadToast": "Akan datang — muat turun PDF tiba dalam fasa seterusnya.",
         "sentToast": "Invois dihantar ke {email}"
       }
     },
@@ -241,8 +241,8 @@
         "documents": {
           "title": "Dokumen",
           "help": "Salinan IC, slip gaji, helaian tandatangan perjanjian, dll.",
-          "placeholderTitle": "Muat naik dokumen tiba di Fasa 4.",
-          "placeholderHelp": "Apabila storan fail siap, anda boleh muat naik salinan IC, slip gaji, dan surat rujukan di sini."
+          "placeholderTitle": "Akan datang",
+          "placeholderHelp": "Muat naik dokumen tiba dalam fasa seterusnya. Anda boleh lampirkan salinan IC, slip gaji, dan surat rujukan di sini."
         }
       }
     },
@@ -337,7 +337,7 @@
       "csvDownload": "Muat turun CSV",
       "csvDownloaded": "CSV dimuat turun",
       "pdfDownload": "Muat turun PDF",
-      "pdfStub": "Eksport PDF tiba di Fasa 4 setelah storan fail siap.",
+      "pdfStub": "Akan datang — eksport PDF tiba dalam fasa seterusnya, setelah storan fail siap.",
       "monthlyBreakdown": {
         "title": "Pendapatan bulanan — {year}",
         "help": "Pembayaran berjaya dikelompokkan mengikut bulan kalendar."
@@ -443,9 +443,9 @@
         },
         "photos": {
           "title": "Foto",
-          "help": "Foto yang dimuat naik penyewa tiba di Fasa 4 setelah storan fail siap.",
-          "placeholderTitle": "Muat naik foto tiba di Fasa 4",
-          "placeholderHelp": "Apabila storan fail siap, foto yang dilampirkan kepada tiket akan dipaparkan di sini."
+          "help": "Akan datang — foto yang dimuat naik penyewa tiba dalam fasa seterusnya, setelah storan fail siap.",
+          "placeholderTitle": "Akan datang",
+          "placeholderHelp": "Foto yang dilampirkan kepada tiket tiba dalam fasa seterusnya, setelah storan fail siap."
         }
       }
     },
@@ -472,9 +472,9 @@
         },
         "emailManagedNote": "E-mel diuruskan oleh login akaun anda — tukar dari tetapan auth.",
         "photo": "Foto profil",
-        "photoHelp": "Foto profil tiba di Fasa 4 setelah storan fail siap.",
-        "photoPlaceholderTitle": "Muat naik foto tiba di Fasa 4",
-        "photoPlaceholderHelp": "Apabila storan fail siap, foto profil anda akan dipaparkan di sini.",
+        "photoHelp": "Akan datang — foto profil tiba dalam fasa seterusnya, setelah storan fail siap.",
+        "photoPlaceholderTitle": "Akan datang",
+        "photoPlaceholderHelp": "Foto profil tiba dalam fasa seterusnya, setelah storan fail siap.",
         "payout": "Akaun bayaran",
         "payoutHelp": "Tempat kutipan sewa akan dimasukkan. Akaun bank diuruskan melalui tetapan kewangan.",
         "bankMasked": "Akaun Maybank berakhir dengan"
@@ -488,7 +488,7 @@
       },
       "notifications": {
         "channelTitle": "Saluran penghantaran",
-        "channelHelp": "Notifikasi akan dihantar melalui e-mel dan WhatsApp setelah Fasa 4 menyambungkan Resend + WhatsApp Cloud API. Notifikasi dalam-aplikasi sentiasa aktif.",
+        "channelHelp": "Notifikasi akan dihantar melalui e-mel dan WhatsApp setelah fasa seterusnya menyambungkan Resend + WhatsApp Cloud API. Notifikasi dalam-aplikasi sentiasa aktif.",
         "channelStatus": {
           "comingSoon": "Akan datang"
         },
@@ -519,16 +519,16 @@
       },
       "plan": {
         "title": "Langganan",
-        "help": "Pelan menentukan had unit aktif yang boleh anda urus. Naik taraf tiba di Fasa 7.",
+        "help": "Pelan menentukan had unit aktif yang boleh anda urus. Naik taraf tiba dalam fasa seterusnya.",
         "current": "Semasa",
         "free": "Percuma",
         "permonth": "/ bulan",
         "unitsCap": "Sehingga {n} unit",
         "unitsUnlimited": "Unit tanpa had",
         "upgradeCta": "Naik taraf",
-        "upgradeStub": "Langganan tiba di Fasa 7. Demo sahaja buat masa ini.",
+        "upgradeStub": "Akan datang — langganan tiba dalam fasa seterusnya. Demo sahaja buat masa ini.",
         "youreOnThis": "Anda berada pada pelan ini.",
-        "disclaimer": "Harga adalah ilustrasi. Harga muktamad + bil tiba dengan pelancaran Fasa 7.",
+        "disclaimer": "Harga adalah ilustrasi. Harga muktamad + bil tiba dalam fasa seterusnya.",
         "tiers": {
           "free": {
             "name": "Percuma",
@@ -682,10 +682,12 @@
         "coOwnersHelp": "Pemilikan bersama. Bahagian mesti berjumlah tepat 100%, dan satu pemilik mesti ditandakan utama.",
         "coOwners": {
           "primaryLabel": "Utama",
-          "primaryHint": "Pemilik utama menguruskan senarai ini dan menerima notifikasi.",
           "primaryRequired": "Pilih pemilik utama",
           "cantRemovePrimary": "Tetapkan pemilik utama yang lain sebelum mengeluarkan ini.",
-          "blockedSave": "Bahagian mesti berjumlah 100% dengan satu pemilik utama sebelum simpan."
+          "blockedSave": "Bahagian mesti berjumlah 100% dengan satu pemilik utama sebelum simpan.",
+          "actionsAria": "Tindakan pemilik bersama",
+          "menuSetPrimary": "Tetapkan sebagai utama",
+          "menuRemove": "Buang"
         },
         "acquisitionTotal": "Jumlah kos pembelian",
         "utilitiesAnnual": "Jumlah berulang tahunan",
@@ -708,8 +710,8 @@
         },
         "documents": {
           "help": "Geran hak milik, perjanjian S&P, polisi insurans, resit cukai, gambar.",
-          "placeholderTitle": "Muat naik dokumen tiba di Fasa 4.",
-          "placeholderHelp": "Apabila storan fail siap, anda boleh simpan geran, polisi insurans, dan resit cukai di sini."
+          "placeholderTitle": "Akan datang",
+          "placeholderHelp": "Muat naik dokumen tiba dalam fasa seterusnya. Anda boleh lampirkan geran, polisi insurans, dan resit cukai di sini."
         }
       }
     }
