@@ -86,12 +86,23 @@ services:
       - NODE_ENV=production
       - HOST=0.0.0.0
       - PORT=3000
-      # App environment identifier — drives all UI feature flags via useEnv().
-      # Values: "demo" | "uat" | "production". Demo container = "demo".
-      - NUXT_PUBLIC_APP_ENV=demo
-      # Demo also keeps using mock data permanently (curated client-pitch
-      # scenarios). Real prod will set NUXT_PUBLIC_USE_MOCK=false.
-      - NUXT_PUBLIC_USE_MOCK=true
-      # Floating feedback widget on demo.roofly.my opens this URL in a new tab.
-      # Replace with your Google Form URL before redeploying.
-      - NUXT_PUBLIC_DEMO_FEEDBACK_URL=
+      # Per-environment values come from each VPS clone's local .env (gitignored).
+      # Defaults are production-safe so a fresh clone with no .env serves prod
+      # behavior — never accidentally leaks demo widgets to real customers.
+      # See .env.example for what to set per environment (demo / uat / production).
+      - NUXT_PUBLIC_APP_ENV=${NUXT_PUBLIC_APP_ENV:-production}
+      - NUXT_PUBLIC_USE_MOCK=${NUXT_PUBLIC_USE_MOCK:-false}
+      - NUXT_PUBLIC_DEMO_FEEDBACK_URL=${NUXT_PUBLIC_DEMO_FEEDBACK_URL:-}
+    networks:
+      - roofly
+
+volumes:
+  mysql_data:
+  redis_data:
+  rabbitmq_data:
+  frontend_node_modules:
+  frontend_nuxt:
+
+networks:
+  roofly:
+    driver: bridge
