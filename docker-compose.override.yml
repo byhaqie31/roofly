@@ -1,0 +1,27 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Roofly — local development overrides.
+#
+# Auto-loaded by `docker compose up` (Docker Compose's override convention).
+# GHA bypasses this file on the VPS by invoking `docker compose -f docker-compose.yml up`.
+#
+# This switches the build to the `dev` target (Nuxt dev server with HMR) and
+# bind-mounts the host's frontend source so file changes hot-reload without
+# rebuilding the image.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  frontend:
+    build:
+      target: dev
+    volumes:
+      - ./frontend:/app
+      # Keep container's node_modules and .nuxt isolated from the host so the
+      # Linux container deps don't collide with the macOS host install.
+      - frontend_node_modules:/app/node_modules
+      - frontend_nuxt:/app/.nuxt
+    environment:
+      - NODE_ENV=development
+
+volumes:
+  frontend_node_modules:
+  frontend_nuxt:

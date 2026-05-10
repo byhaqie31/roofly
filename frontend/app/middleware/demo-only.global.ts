@@ -1,29 +1,47 @@
 /**
  * Per-environment route gate driven by useEnv().
  *
- * - On demo.roofly.my (isDemo): redirect "/" → "/demo" so visitors land on the
- *   curated demo entry. Other routes (/owner/*, /tenant/*, /auth/*) stay
- *   reachable so the body of the demo = the real app rendered with mock data.
+ * Routing matrix:
  *
- * - On uat.roofly.my and roofly.my (!isDemo): /demo/* returns 404. The demo
- *   landing must never appear in non-demo environments — clients shouldn't see
- *   demo widgets/copy on real prod.
+ * Path        | demo subdomain          | uat / prod (unauthenticated) | uat / prod (authenticated)
+ * ------------|-------------------------|------------------------------|---------------------------
+ * /           | redirect → /demo        | redirect → /coming-soon       | falls through (auth-based)
+ * /demo/*     | render                  | 404                          | 404
+ * /coming-soon| redirect → /demo        | render                       | render
+ * everything  | render                  | render                       | render
  *
- * Global middleware so it runs for every navigation, including the initial SSR
- * render. Naming `.global.ts` is the Nuxt convention for auto-registration.
+ * Why:
+ *  - Demo subdomain: clients land directly on the curated demo, never see the
+ *    pre-launch marketing page.
+ *  - uat/prod: pre-launch state — root URL shows the marketing/coming-soon page.
+ *    Once the product launches, swap this to redirect to /auth/login (or just
+ *    delete this branch and let pages/index.vue handle auth-based routing).
+ *  - Authenticated users on uat/prod skip /coming-soon — they're either testers
+ *    or real customers and should land in their dashboard via pages/index.vue.
  */
 export default defineNuxtRouteMiddleware((to) => {
-  const { isDemo, redirectRootToDemo } = useEnv();
+  const { isDemo } = useEnv();
   const isDemoRoute = to.path === "/demo" || to.path.startsWith("/demo/");
+  const isComingSoon = to.path === "/coming-soon";
 
-  if (isDemo && to.path === "/" && redirectRootToDemo) {
-    return navigateTo("/demo", { redirectCode: 302 });
+  if (isDemo) {
+    // Demo subdomain — /coming-soon doesn't apply here; bounce to /demo
+    if (to.path === "/" || isComingSoon) {
+      return navigateTo("/demo", { redirectCode: 302 });
+    }
+    return;
   }
 
-  if (!isDemo && isDemoRoute) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: "Page not found",
-    });
+  // uat / prod from here onwards
+  if (isDemoRoute) {
+    throw createError({ statusCode: 404, statusMessage: "Page not found" });
+  }
+
+  if (to.path === "/") {
+    const auth = useAuthStore();
+    if (!auth.isAuthenticated) {
+      return navigateTo("/coming-soon", { redirectCode: 302 });
+    }
+    // Authenticated → falls through to pages/index.vue (role-based redirect)
   }
 });

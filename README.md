@@ -166,9 +166,25 @@ FRONTEND_PORT=3002
 
 See [.env.example](.env.example) for the full list with comments.
 
+### Compose files (local dev vs prod deploy)
+
+Two compose files govern the build:
+
+| File | Purpose | When loaded |
+|---|---|---|
+| [docker-compose.yml](docker-compose.yml) | Production-shaped: `runner` Dockerfile target, no bind mounts, just env-driven runtime | Always (base file) |
+| [docker-compose.override.yml](docker-compose.override.yml) | Dev overrides: `dev` target (HMR), bind-mounts source over `/app`, `NODE_ENV=development` | Auto-loaded by `docker compose up` |
+
+So:
+
+- **Local dev** (your Mac): `docker compose up -d --build` → loads both files → dev mode with HMR
+- **VPS prod** (GHA workflow): `docker compose -f docker-compose.yml up -d --build` → bypasses override → prod runtime
+
+The same `frontend/Dockerfile` serves both contexts via multi-stage targets (`deps` → `dev` / `builder` → `runner`).
+
 ### Auto-deploy
 
-Pushes to a branch trigger [.github/workflows/deploy.yml](.github/workflows/deploy.yml), which SSHes into the VPS, pulls the matching clone, and runs `docker compose up -d --build`. Required GitHub Secrets: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`.
+Pushes to `demo-roofly`, `UAT`, or `main` trigger [.github/workflows/deploy.yml](.github/workflows/deploy.yml). The workflow detects the branch, SSHes into the VPS, pulls the matching clone, and runs the prod-only compose. Required GitHub Secrets: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`.
 
 ---
 

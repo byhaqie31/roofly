@@ -130,6 +130,31 @@
       "invoiceTimeLabel": "untuk hantar invois pertama kepada penyewa"
     }
   },
+  "marketing": {
+    "hero": {
+      "eyebrow": "Akan datang",
+      "headlineLead": "Pengurusan hartanah,",
+      "headlineAccent": "direka semula.",
+      "subhead": "Rumah moden untuk tuan rumah Malaysia dan penyewa mereka. Hartanah, perjanjian, pembayaran, penyelenggaraan — akhirnya, semuanya di satu tempat.",
+      "ctaPrimary": "Beritahu saya",
+      "ctaSecondary": "Tonton demo"
+    },
+    "usps": {
+      "eyebrow": "Yang akan datang",
+      "title": "Sembilan cara Roofly bantu anda.",
+      "subtitle": "Direka khusus untuk realiti sewa Malaysia — FPX, WhatsApp, BM, CKHT, dan tuan rumah dengan 1–20 unit."
+    },
+    "emailCapture": {
+      "title": "Jadi yang pertama tahu.",
+      "subtitle": "Kami akan hantar satu emel apabila dilancarkan. Tiada spam.",
+      "placeholder": "emel{'@'}anda.com",
+      "submit": "Beritahu saya",
+      "success": "Terima kasih! Kami akan beritahu apabila dilancarkan.",
+      "invalid": "Sila masukkan alamat emel yang sah.",
+      "submitError": "Gagal hubungi servis senarai tunggu. Sila cuba lagi.",
+      "submitting": "Menghantar…"
+    }
+  },
   "validation": {
     "required": "Ruangan ini wajib diisi",
     "email": "Sila masukkan alamat emel yang sah",

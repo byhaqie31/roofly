@@ -130,6 +130,31 @@
       "invoiceTimeLabel": "to send a tenant their first invoice"
     }
   },
+  "marketing": {
+    "hero": {
+      "eyebrow": "Coming soon",
+      "headlineLead": "Property management,",
+      "headlineAccent": "reimagined.",
+      "subhead": "The modern home for Malaysian landlords and their tenants. Properties, agreements, payments, maintenance — finally, all in one place.",
+      "ctaPrimary": "Get notified",
+      "ctaSecondary": "Watch the demo"
+    },
+    "usps": {
+      "eyebrow": "What's coming",
+      "title": "Nine ways Roofly works for you.",
+      "subtitle": "Built ground-up for Malaysian rental life — FPX, WhatsApp, BM, RPGT, and the realities of 1–20 unit landlords."
+    },
+    "emailCapture": {
+      "title": "Be first to know.",
+      "subtitle": "We'll send one email when we launch. No spam, ever.",
+      "placeholder": "your{'@'}email.com",
+      "submit": "Notify me",
+      "success": "Thanks! We'll let you know when we go live.",
+      "invalid": "Please enter a valid email address.",
+      "submitError": "Couldn't reach the waitlist service. Please try again.",
+      "submitting": "Sending…"
+    }
+  },
   "validation": {
     "required": "This field is required",
     "email": "Enter a valid email address",
