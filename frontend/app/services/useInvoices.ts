@@ -42,7 +42,7 @@ const hydrate = (inv: Invoice): InvoiceWithRefs => {
 };
 
 export const useInvoices = () => {
-  const { public: { useMock } } = useRuntimeConfig();
+  const { useMock } = useEnv();
 
   const list = async (): Promise<Invoice[]> => {
     if (useMock) return structuredClone(invoicesMock);

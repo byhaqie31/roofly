@@ -1,19 +1,33 @@
-# Roofly demo — production stack for demo.roofly.my.
-# Frontend-only (Phase 1.1). Reverse-proxied by Nginx on the VPS at host port 3001.
+# ─────────────────────────────────────────────────────────────────────────────
+# Roofly — production-shaped frontend stack.
+#
+# This is the BASE compose file. On the VPS, GHA invokes:
+#   docker compose -f docker-compose.yml up -d --build
+#
+# Locally, `docker compose up` auto-loads docker-compose.override.yml on top,
+# which switches to the dev build target and mounts source for HMR.
+#
+# Per-environment values come from each VPS clone's local `.env` (gitignored).
+# Defaults are production-safe — a fresh clone with no .env serves prod
+# behaviour and never accidentally leaks demo widgets to real customers.
+# See .env.example for what to set per environment (demo / uat / production).
+# ─────────────────────────────────────────────────────────────────────────────
 
 services:
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: demo-roofly
+      target: runner
+    container_name: ${COMPOSE_PROJECT_NAME:-roofly}-frontend
     restart: unless-stopped
     ports:
-      - "3001:3000"
+      - "${FRONTEND_PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
       - HOST=0.0.0.0
       - PORT=3000
-      # Show owner/tenant quick-login shortcuts on demo.roofly.my login page.
-      # Real prod (when main deploys) will not set this and shortcuts stay hidden.
-      - NUXT_PUBLIC_DEMO_MODE=true
+      - NUXT_PUBLIC_APP_ENV=${NUXT_PUBLIC_APP_ENV:-production}
+      - NUXT_PUBLIC_USE_MOCK=${NUXT_PUBLIC_USE_MOCK:-false}
+      - NUXT_PUBLIC_DEMO_FEEDBACK_URL=${NUXT_PUBLIC_DEMO_FEEDBACK_URL:-}
+      - NUXT_PUBLIC_WAITLIST_ACCESS_KEY=${NUXT_PUBLIC_WAITLIST_ACCESS_KEY:-}

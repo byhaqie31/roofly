@@ -43,7 +43,7 @@ const hydrate = (t: Ticket): TicketWithRefs => {
 };
 
 export const useTickets = () => {
-  const { public: { useMock } } = useRuntimeConfig();
+  const { useMock } = useEnv();
 
   const list = async (): Promise<Ticket[]> => {
     if (useMock) return structuredClone(ticketsMock);

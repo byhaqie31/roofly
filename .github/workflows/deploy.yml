@@ -1,9 +1,23 @@
-name: Deploy demo.roofly.my to Hostinger VPS
+name: Deploy roofly to Hostinger VPS
+
+# One workflow handles all three environments. The branch determines:
+#   demo-roofly → ~/roofly-demo  → demo.roofly.my  (host port 3001)
+#   UAT         → ~/roofly-uat   → uat.roofly.my   (host port 3004)
+#   main        → ~/roofly       → roofly.my       (host port 3002)
+# Note: 3003 is taken by axelnova-frontend on this VPS — UAT uses 3004 instead.
+#
+# Per-clone .env files on the VPS supply NUXT_PUBLIC_APP_ENV, NUXT_PUBLIC_USE_MOCK,
+# NUXT_PUBLIC_DEMO_FEEDBACK_URL, NUXT_PUBLIC_WAITLIST_ACCESS_KEY, etc. The
+# workflow doesn't bake env-specific values — it just pulls + rebuilds.
+#
+# Required GitHub secrets: SSH_HOST, SSH_USER, SSH_PRIVATE_KEY.
 
 on:
   push:
     branches:
       - demo-roofly
+      - UAT
+      - main
 
 jobs:
   deploy:
@@ -18,17 +32,53 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd ~/roofly-demo
-            git pull origin demo-roofly
-            docker compose up -d --build
+            set -e
 
-            # Verify app is responding
+            BRANCH="${{ github.ref_name }}"
+
+            # Branch → VPS clone path + host port for healthcheck.
+            case "$BRANCH" in
+              demo-roofly)
+                DEPLOY_PATH="$HOME/roofly-demo"
+                HEALTH_PORT=3001
+                ;;
+              UAT)
+                DEPLOY_PATH="$HOME/roofly-uat"
+                HEALTH_PORT=3004
+                ;;
+              main)
+                DEPLOY_PATH="$HOME/roofly"
+                HEALTH_PORT=3002
+                ;;
+              *)
+                echo "Unknown branch: $BRANCH"
+                exit 1
+                ;;
+            esac
+
+            if [ ! -d "$DEPLOY_PATH" ]; then
+              echo "Clone path $DEPLOY_PATH does not exist on VPS."
+              echo "Bootstrap this environment first — see README §Multi-environment deployment."
+              exit 1
+            fi
+
+            echo "==> Deploying $BRANCH → $DEPLOY_PATH (host port $HEALTH_PORT)"
+            cd "$DEPLOY_PATH"
+
+            git pull origin "$BRANCH"
+
+            # -f docker-compose.yml bypasses docker-compose.override.yml (which
+            # is for local dev only — switches to dev target with bind mounts).
+            docker compose -f docker-compose.yml up -d --build
+
+            echo "==> Waiting for app to respond on port $HEALTH_PORT..."
             sleep 5
-            if curl -sf http://localhost:3001 > /dev/null; then
-              echo "App is running"
+            if curl -sf "http://localhost:$HEALTH_PORT" > /dev/null; then
+              echo "✓ App is running"
             else
-              echo "WARNING: App may not be responding"
-              docker logs demo-roofly --tail 30
+              echo "⚠ App may not be responding — recent logs:"
+              docker compose -f docker-compose.yml logs --tail 30
+              exit 1
             fi
 
             docker image prune -f

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import Toaster from "~/components/ui/Toaster.vue";
+import FloatingFeedback from "~/components/demo/FloatingFeedback.vue";
+
+const { showFloatingFeedback } = useEnv();
 </script>
 
 <template>
@@ -9,5 +12,6 @@ import Toaster from "~/components/ui/Toaster.vue";
       <NuxtPage />
     </NuxtLayout>
     <Toaster />
+    <FloatingFeedback v-if="showFloatingFeedback" />
   </div>
 </template>

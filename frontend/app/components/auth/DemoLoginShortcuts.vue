@@ -18,9 +18,10 @@ import Button from "~/components/ui/Button.vue";
 const TENANT_ENABLED = false;
 
 const auth = useAuthStore();
+const { t } = useI18n();
 const loadingRole = ref<"owner" | "tenant" | null>(null);
-const config = useRuntimeConfig();
-const showShortcuts = import.meta.dev || config.public.demoMode;
+const { showDemoShortcuts } = useEnv();
+const showShortcuts = import.meta.dev || showDemoShortcuts;
 
 const enter = async (role: "owner" | "tenant") => {
   loadingRole.value = role;
@@ -34,13 +35,15 @@ const enter = async (role: "owner" | "tenant") => {
   <section
     v-if="showShortcuts"
     class="mt-8 pt-6 border-t border-line-passive"
-    aria-label="Demo shortcuts"
+    :aria-label="t('demo.shortcuts.label')"
   >
     <div class="flex items-center justify-between mb-3">
       <p class="text-micro font-medium uppercase tracking-wider text-ink-muted">
-        Demo Credentials
+        {{ t("demo.shortcuts.label") }}
       </p>
-      <span class="text-micro text-ink-faint">For demo purposes only</span>
+      <span class="text-micro text-ink-faint">
+        {{ t("demo.shortcuts.eyebrow") }}
+      </span>
     </div>
 
     <div class="grid grid-cols-2 gap-2">
@@ -52,7 +55,7 @@ const enter = async (role: "owner" | "tenant") => {
         @click="enter('owner')"
       >
         <Building2 :size="16" :stroke-width="1.5" />
-        Continue as owner
+        {{ t("demo.shortcuts.continueAsOwner") }}
       </Button>
 
       <Button
@@ -64,23 +67,23 @@ const enter = async (role: "owner" | "tenant") => {
         @click="enter('tenant')"
       >
         <DoorOpen :size="16" :stroke-width="1.5" />
-        Continue as tenant
+        {{ t("demo.shortcuts.continueAsTenant") }}
       </Button>
 
       <button
         v-else
         type="button"
         aria-disabled="true"
-        aria-label="Tenant login — coming soon"
+        :aria-label="`${t('demo.shortcuts.continueAsTenant')} — ${t('demo.shortcuts.comingSoon')}`"
         tabindex="-1"
         class="flex flex-col items-center justify-center gap-0.5 rounded-sm border border-dashed border-line-passive bg-transparent px-3 py-1.5 text-caption text-ink-muted outline-none cursor-not-allowed transition"
       >
         <span class="inline-flex items-center gap-2">
           <DoorOpen :size="16" :stroke-width="1.5" />
-          Continue as tenant
+          {{ t("demo.shortcuts.continueAsTenant") }}
         </span>
         <span class="text-micro text-ink-faint">
-          Coming soon
+          {{ t("demo.shortcuts.comingSoon") }}
         </span>
       </button>
     </div>
