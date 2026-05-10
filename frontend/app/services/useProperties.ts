@@ -6,7 +6,7 @@ import type {
 import { propertiesMock } from "~/mocks/properties";
 
 export const useProperties = () => {
-  const { public: { useMock } } = useRuntimeConfig();
+  const { useMock } = useEnv();
 
   const list = async (): Promise<Property[]> => {
     if (useMock) return structuredClone(propertiesMock);

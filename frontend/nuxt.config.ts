@@ -30,10 +30,21 @@ export default defineNuxtConfig({
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
         { name: "description", content: "Rent management, simplified." },
+        // Tints mobile browser chrome (Safari iOS tab, Android address bar).
+        // Matches site.webmanifest theme_color.
+        { name: "theme-color", content: "#ffffff" },
       ],
       link: [
-        { rel: "icon", type: "image/png", href: "/home.png" },
-        { rel: "apple-touch-icon", href: "/home.png" },
+        // Modern browsers — sharpest at any size, scales as a vector.
+        { rel: "icon", type: "image/svg+xml", href: "/favicon/favicon.svg" },
+        // Fallback for browsers that don't render SVG favicons.
+        { rel: "icon", type: "image/x-icon", href: "/favicon/favicon.ico" },
+        // Legacy PNG fallback for older browsers / bookmarks.
+        { rel: "icon", type: "image/png", sizes: "96x96", href: "/favicon/favicon-96x96.png" },
+        // iOS home-screen icon (apple-touch-icon is 180x180).
+        { rel: "apple-touch-icon", href: "/favicon/apple-touch-icon.png" },
+        // PWA manifest — covers Android home-screen + Chrome install prompt.
+        { rel: "manifest", href: "/favicon/site.webmanifest" },
       ],
     },
   },
@@ -65,8 +76,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE ?? "http://localhost:8000/api",
-      // Single source of truth for mock-vs-API toggle. Phase 2 default: true.
-      // Flip per-environment via NUXT_PUBLIC_USE_MOCK=false once each backend endpoint lands.
+      // Single source of truth for mock-vs-API toggle. Read inside composables
+      // via `useEnv().useMock` (which derives from appEnv). Flip per-environment
+      // via NUXT_PUBLIC_USE_MOCK=false once each backend endpoint lands.
       useMock: process.env.NUXT_PUBLIC_USE_MOCK !== "false",
       features: {
         // Documents tabs render a "coming in Phase 4" placeholder by default —
@@ -74,6 +86,12 @@ export default defineNuxtConfig({
         // NUXT_PUBLIC_FEATURE_DOCUMENTS=false to hide the placeholder if needed.
         documents: process.env.NUXT_PUBLIC_FEATURE_DOCUMENTS !== "false",
       },
+      // App environment identifier — drives all UI feature flags via useEnv().
+      // Values: "demo" | "uat" | "production". Defaults to production when unset.
+      appEnv: process.env.NUXT_PUBLIC_APP_ENV ?? "production",
+      // Demo subdomain's floating feedback widget opens this URL in a new tab.
+      // Set per-env in docker-compose; empty string hides the widget.
+      demoFeedbackUrl: process.env.NUXT_PUBLIC_DEMO_FEEDBACK_URL ?? "",
     },
   },
 

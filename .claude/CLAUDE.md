@@ -79,7 +79,8 @@ frontend/app/
 ## Locked-in conventions
 
 - **Money is integer sen everywhere.** Format only at the render edge via `useMoney().formatRM` or `<MoneyDisplay>`. Never store formatted strings.
-- **Mock toggle is single source of truth.** All services read `useRuntimeConfig().public.useMock` inside the composable — never module-level constants. Flip per-environment via `NUXT_PUBLIC_USE_MOCK=false`.
+- **Mock toggle is single source of truth.** All services read `useEnv().useMock` inside the composable — never module-level constants. Flip per-environment via `NUXT_PUBLIC_USE_MOCK=false`. Demo (`NUXT_PUBLIC_APP_ENV=demo`) always uses mocks regardless of the flag, because `useEnv` derives `useMock = isDemo || config.public.useMock`. See `composables/useEnv.ts`.
+- **Per-environment behaviour goes through `useEnv()`.** One env var (`NUXT_PUBLIC_APP_ENV` = `"demo" | "uat" | "production"`) drives all UI feature flags (`isDemo`, `showDemoShortcuts`, `showFloatingFeedback`, `showEnvBanner`, `redirectRootToDemo`, etc.). Components ask for derived flags by name, not for the raw env. Add new env-driven features as one new derived field in `composables/useEnv.ts`, not a new env var per feature.
 - **Documents tab + tenant photos + reports PDF are gated** by `runtimeConfig.public.features.documents`. Currently default-on so demos signal Phase-4 file storage is coming; flip semantics will switch to gating real storage when it lands.
 - **Field tiers** (Properties, Tenants): Tier 1 captured in the create modal; Tier 2/3 edited on the detail page. JSON sub-objects (`ownership`, `utilities`, `personal`, `emergencyContact`) on the model map 1:1 to detail-page tabs and to backend JSON columns.
 - **Co-owners are a separate `property_co_owners` table** on the backend (DB-enforced sum=100 + exactly-one `is_primary`). On the frontend they're a top-level `Property.coOwners[]` with the same invariants validated by Zod.

@@ -19,7 +19,8 @@ const TENANT_ENABLED = false;
 
 const auth = useAuthStore();
 const loadingRole = ref<"owner" | "tenant" | null>(null);
-const isDev = import.meta.dev;
+const { showDemoShortcuts } = useEnv();
+const showShortcuts = import.meta.dev || showDemoShortcuts;
 
 const enter = async (role: "owner" | "tenant") => {
   loadingRole.value = role;
