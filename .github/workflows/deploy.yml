@@ -2,8 +2,9 @@ name: Deploy roofly to Hostinger VPS
 
 # One workflow handles all three environments. The branch determines:
 #   demo-roofly → ~/roofly-demo  → demo.roofly.my  (host port 3001)
-#   UAT         → ~/roofly-uat   → uat.roofly.my   (host port 3003)
+#   UAT         → ~/roofly-uat   → uat.roofly.my   (host port 3004)
 #   main        → ~/roofly       → roofly.my       (host port 3002)
+# Note: 3003 is taken by axelnova-frontend on this VPS — UAT uses 3004 instead.
 #
 # Per-clone .env files on the VPS supply NUXT_PUBLIC_APP_ENV, NUXT_PUBLIC_USE_MOCK,
 # NUXT_PUBLIC_DEMO_FEEDBACK_URL, NUXT_PUBLIC_WAITLIST_ACCESS_KEY, etc. The
@@ -43,7 +44,7 @@ jobs:
                 ;;
               UAT)
                 DEPLOY_PATH="$HOME/roofly-uat"
-                HEALTH_PORT=3003
+                HEALTH_PORT=3004
                 ;;
               main)
                 DEPLOY_PATH="$HOME/roofly"
