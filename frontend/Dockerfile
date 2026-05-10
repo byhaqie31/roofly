@@ -8,9 +8,13 @@ WORKDIR /app
 # Compatibility for some native modules on alpine
 RUN apk add --no-cache libc6-compat
 
-# Install deps first (cached layer)
+# Install deps first (cached layer).
+# Using `npm install` instead of `npm ci` so the container can resolve
+# platform-specific optionalDependencies (esbuild has separate variants per
+# CPU/OS — strict ci breaks when the host that generated the lockfile is on
+# a different architecture from the container).
 COPY package.json package-lock.json* ./
-RUN npm ci --no-audit --no-fund
+RUN npm install --no-audit --no-fund
 
 # App source (overridden by bind mount in dev)
 COPY . .

@@ -18,58 +18,36 @@ interface UspItem {
   subtitle: string;
 }
 
-// 9 USPs, paginated 3 per page = 3 pages of rotation.
-const usps: UspItem[] = [
-  {
-    icon: TrendingUp,
-    title: "Rent collection on autopilot",
-    subtitle: "FPX integration via Billplz — tenants pay, you track.",
-  },
-  {
-    icon: Smartphone,
-    title: "Tenants pay in two taps",
-    subtitle: "Mobile-first checkout, no app to install.",
-  },
-  {
-    icon: MessageCircle,
-    title: "WhatsApp reminders that work",
-    subtitle: "Late notices land where Malaysians actually read.",
-  },
-  {
-    icon: KanbanSquare,
-    title: "Maintenance, Kanban-style",
-    subtitle: "Tickets flow from new → in-progress → resolved.",
-  },
-  {
-    icon: Languages,
-    title: "Bilingual end-to-end",
-    subtitle: "Bahasa Melayu and English, switchable per user.",
-  },
-  {
-    icon: FileSignature,
-    title: "Signed agreements in seconds",
-    subtitle: "Generate, send, sign — no more Word templates.",
-  },
-  {
-    icon: BarChart3,
-    title: "Reports your accountant loves",
-    subtitle: "Income, RPGT, deductions — exportable CSV/PDF.",
-  },
-  {
-    icon: MapPin,
-    title: "Built for Malaysian landlords",
-    subtitle: "FPX, RPGT, BM, RM — not a US tool with a KL skin.",
-  },
-  {
-    icon: Users,
-    title: "Co-owner splits made simple",
-    subtitle: "Multiple owners on one property? Track shares automatically.",
-  },
-];
+const { t } = useI18n();
+
+// Icon + i18n key pairs. Translations live in i18n/locales/*.json under
+// `demo.usps.<key>.{title,subtitle}`. Keep the order — it's the rotation order.
+const uspKeys = [
+  { icon: TrendingUp,   key: "rentCollection" },
+  { icon: Smartphone,   key: "tenantsPay" },
+  { icon: MessageCircle, key: "whatsapp" },
+  { icon: KanbanSquare, key: "maintenance" },
+  { icon: Languages,    key: "bilingual" },
+  { icon: FileSignature, key: "agreements" },
+  { icon: BarChart3,    key: "reports" },
+  { icon: MapPin,       key: "malaysian" },
+  { icon: Users,        key: "coOwners" },
+] as const;
+
+// Computed so the strings re-evaluate when locale changes.
+const usps = computed<UspItem[]>(() =>
+  uspKeys.map((u) => ({
+    icon: u.icon,
+    title: t(`demo.usps.${u.key}.title`),
+    subtitle: t(`demo.usps.${u.key}.subtitle`),
+  })),
+);
 
 const PAGE_SIZE = 3;
 const ROTATION_MS = 7000;
-const pageCount = Math.ceil(usps.length / PAGE_SIZE);
+// uspKeys.length is static (9), so derive pageCount from it instead of the
+// reactive `usps` ref to avoid pulling on a computed for a constant.
+const pageCount = Math.ceil(uspKeys.length / PAGE_SIZE);
 
 const pageIndex = ref(0);
 const isPaused = ref(false);
@@ -88,7 +66,10 @@ onUnmounted(() => {
 });
 
 const visibleUsps = computed(() =>
-  usps.slice(pageIndex.value * PAGE_SIZE, pageIndex.value * PAGE_SIZE + PAGE_SIZE),
+  usps.value.slice(
+    pageIndex.value * PAGE_SIZE,
+    pageIndex.value * PAGE_SIZE + PAGE_SIZE,
+  ),
 );
 </script>
 

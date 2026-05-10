@@ -7,19 +7,19 @@ interface AudienceFace {
   description: string;
 }
 
-const owner: AudienceFace = {
-  titleLead: "Owners get one dashboard",
-  titleAccent: "for everything.",
-  description:
-    "Track tenants, generate agreements, and collect rent — built for Malaysian landlords with 1–20 units.",
-};
+const { t } = useI18n();
 
-const tenant: AudienceFace = {
-  titleLead: "Tenants pay rent",
-  titleAccent: "in two taps.",
-  description:
-    "View your agreement, pay via FPX with no app to install, and get WhatsApp updates when something changes.",
-};
+const owner = computed<AudienceFace>(() => ({
+  titleLead: t("demo.audience.owner.titleLead"),
+  titleAccent: t("demo.audience.owner.titleAccent"),
+  description: t("demo.audience.owner.description"),
+}));
+
+const tenant = computed<AudienceFace>(() => ({
+  titleLead: t("demo.audience.tenant.titleLead"),
+  titleAccent: t("demo.audience.tenant.titleAccent"),
+  description: t("demo.audience.tenant.description"),
+}));
 
 const FLIP_MS = 4500;
 

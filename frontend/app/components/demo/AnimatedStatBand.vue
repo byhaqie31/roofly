@@ -5,14 +5,16 @@ interface Stat {
   label: string;
 }
 
-const stats: Stat[] = [
-  { value: 8, suffix: "h", label: "saved per month, per property" },
-  { value: 98, suffix: "%", label: "on-time rent with WhatsApp reminders" },
-  { value: 5, suffix: "min", label: "to send a tenant their first invoice" },
-];
+const { t } = useI18n();
+
+const stats = computed<Stat[]>(() => [
+  { value: 8, suffix: "h", label: t("demo.stats.timeSavedLabel") },
+  { value: 98, suffix: "%", label: t("demo.stats.onTimeRentLabel") },
+  { value: 5, suffix: "min", label: t("demo.stats.invoiceTimeLabel") },
+]);
 
 const root = ref<HTMLElement | null>(null);
-const animatedValues = ref<number[]>(stats.map(() => 0));
+const animatedValues = ref<number[]>(stats.value.map(() => 0));
 let observer: IntersectionObserver | null = null;
 let hasAnimated = false;
 
@@ -20,7 +22,7 @@ const animate = () => {
   if (hasAnimated) return;
   hasAnimated = true;
 
-  stats.forEach((stat, i) => {
+  stats.value.forEach((stat, i) => {
     const start = performance.now();
     const duration = 1200;
     const step = (now: number) => {
