@@ -43,6 +43,7 @@
   "auth": {
     "login": "Log in",
     "logout": "Log out",
+    "exitDemo": "Exit demo",
     "register": "Sign up",
     "email": "Email address",
     "password": "Password",

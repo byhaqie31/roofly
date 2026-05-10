@@ -43,6 +43,7 @@
   "auth": {
     "login": "Log masuk",
     "logout": "Log keluar",
+    "exitDemo": "Keluar demo",
     "register": "Daftar",
     "email": "Alamat emel",
     "password": "Kata laluan",

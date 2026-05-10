@@ -1,82 +1,23 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Roofly — local development stack.
+# Roofly — frontend stack (Phase 2: mock-first, no backend yet).
 #
-# Phase 1.1: data services only (mysql, redis, rabbitmq).
-# Backend (php-fpm) and frontend (node) services land in their respective
-# install commits, alongside their Dockerfiles.
+# MySQL / Redis / RabbitMQ services land back when Phase 3 (Laravel backend)
+# starts. For now the frontend runs against typed mocks via NUXT_PUBLIC_USE_MOCK.
 #
 # Usage:
-#   cp .env.example .env
-#   docker compose up -d
+#   cp .env.example .env       # set per-environment values
+#   docker compose up -d --build
 # ─────────────────────────────────────────────────────────────────────────────
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: roofly-mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    ports:
-      - "${MYSQL_PORT}:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - roofly
-
-  redis:
-    image: redis:7-alpine
-    container_name: roofly-redis
-    restart: unless-stopped
-    command: ["redis-server", "--appendonly", "yes"]
-    ports:
-      - "${REDIS_PORT}:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - roofly
-
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    container_name: roofly-rabbitmq
-    restart: unless-stopped
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
-    ports:
-      - "${RABBITMQ_PORT}:5672"
-      - "${RABBITMQ_MGMT_PORT}:15672"
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - roofly
-
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: roofly-frontend
+    container_name: ${COMPOSE_PROJECT_NAME:-roofly}-frontend
     restart: unless-stopped
     ports:
-      - "${FRONTEND_PORT}:3000"
+      - "${FRONTEND_PORT:-3000}:3000"
     volumes:
       - ./frontend:/app
       # Keep container's node_modules and .nuxt isolated from host
@@ -93,16 +34,7 @@ services:
       - NUXT_PUBLIC_APP_ENV=${NUXT_PUBLIC_APP_ENV:-production}
       - NUXT_PUBLIC_USE_MOCK=${NUXT_PUBLIC_USE_MOCK:-false}
       - NUXT_PUBLIC_DEMO_FEEDBACK_URL=${NUXT_PUBLIC_DEMO_FEEDBACK_URL:-}
-    networks:
-      - roofly
 
 volumes:
-  mysql_data:
-  redis_data:
-  rabbitmq_data:
   frontend_node_modules:
   frontend_nuxt:
-
-networks:
-  roofly:
-    driver: bridge
