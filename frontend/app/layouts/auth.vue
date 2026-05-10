@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { House, Eye, Zap, ShieldCheck } from "lucide-vue-next";
+import { House } from "lucide-vue-next";
 import LangSwitcher from "~/components/topbar/LangSwitcher.vue";
+import RotatingUspCard from "~/components/demo/RotatingUspCard.vue";
+import AnimatedStatBand from "~/components/demo/AnimatedStatBand.vue";
+import AudienceFlipCard from "~/components/demo/AudienceFlipCard.vue";
 
 const { t } = useI18n();
-
-const pillars = computed(() => [
-  { icon: Eye, label: t("common.marketing.pillarVisibility") },
-  { icon: Zap, label: t("common.marketing.pillarAutomation") },
-  { icon: ShieldCheck, label: t("common.marketing.pillarTrust") },
-]);
 </script>
 
 <template>
@@ -39,51 +36,18 @@ const pillars = computed(() => [
         <span>Roofly.my</span>
       </NuxtLink>
 
-      <!-- Center: editorial headline + sub -->
-      <div class="relative max-w-[36rem]">
-        <h1
-          class="text-display-section lg:text-display-hero font-semibold tracking-tight leading-[1.05]"
-          style="color: #f7f4ed"
-        >
-          <span class="block">{{ t("common.marketing.headlineLead") }}</span>
-          <span class="block" style="color: #e76a3f">
-            {{ t("common.marketing.headlineAccent") }}
-          </span>
-        </h1>
-        <p
-          class="mt-6 text-body-lg max-w-[34rem]"
-          style="color: rgba(247, 244, 237, 0.88)"
-        >
-          {{ t("common.marketing.subhead") }}
-        </p>
+      <!-- Center: audience-flipping headline + description.
+           Auto-flips every 4.5s between owner and tenant value props with a
+           vertical slide. Hover to pause. Replaces the old static H1+subhead. -->
+      <div class="relative">
+        <AudienceFlipCard />
       </div>
 
-      <!-- Bottom: pillars + footer -->
+      <!-- Bottom: marketing block + footer. Rotating USP deck + animated
+           stat band — same on demo, uat, and prod. -->
       <div class="relative">
-        <ul class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-10">
-          <li
-            v-for="(p, i) in pillars"
-            :key="i"
-            class="flex items-center gap-3"
-          >
-            <span
-              class="inline-flex items-center justify-center w-9 h-9 rounded-pill shrink-0"
-              style="
-                background: rgba(231, 106, 63, 0.16);
-                color: #e76a3f;
-                box-shadow: inset 0 0 0 1px rgba(231, 106, 63, 0.18);
-              "
-            >
-              <component :is="p.icon" :size="18" :stroke-width="1.75" />
-            </span>
-            <span
-              class="text-caption leading-snug flex-1"
-              style="color: rgba(247, 244, 237, 0.95)"
-            >
-              {{ p.label }}
-            </span>
-          </li>
-        </ul>
+        <RotatingUspCard class="mb-8" />
+        <AnimatedStatBand class="mb-10" />
         <p
           class="text-micro"
           style="color: rgba(247, 244, 237, 0.6)"

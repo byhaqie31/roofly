@@ -1,5 +1,5 @@
 /**
- * Money formatting per UI-Standards.md § 3.6.
+ * Money formatting per docs/frontend/UI-STANDARDS.md § 3.6.
  * Always cents in, formatted RM string out.
  */
 export const useMoney = () => {

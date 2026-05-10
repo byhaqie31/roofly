@@ -12,7 +12,23 @@
     },
     "save": "Save",
     "cancel": "Cancel",
+    "close": "Close",
     "delete": "Delete",
+    "savedToast": "Saved",
+    "months": {
+      "jan": "January",
+      "feb": "February",
+      "mar": "March",
+      "apr": "April",
+      "may": "May",
+      "jun": "June",
+      "jul": "July",
+      "aug": "August",
+      "sep": "September",
+      "oct": "October",
+      "nov": "November",
+      "dec": "December"
+    },
     "back": "Back",
     "next": "Next",
     "submit": "Submit",
@@ -27,6 +43,7 @@
   "auth": {
     "login": "Log in",
     "logout": "Log out",
+    "exitDemo": "Exit demo",
     "register": "Sign up",
     "email": "Email address",
     "password": "Password",
@@ -41,6 +58,103 @@
     "registerTitle": "Start with Roofly",
     "registerSubtitle": "Create an owner account to manage your rentals."
   },
+  "demo": {
+    "shortcuts": {
+      "label": "Demo credentials",
+      "eyebrow": "For demo purposes only",
+      "continueAsOwner": "Continue as owner",
+      "continueAsTenant": "Continue as tenant",
+      "comingSoon": "Coming soon"
+    },
+    "landing": {
+      "pageTitle": "Demo · Roofly.my",
+      "eyebrow": "Demo environment",
+      "title": "Welcome to the Roofly demo",
+      "subtitle": "Pick a role to start exploring. All data shown is sample data — nothing you do here is saved.",
+      "footerPrefix": "Want the real thing? Visit",
+      "footerSuffix": "when we launch."
+    },
+    "audience": {
+      "owner": {
+        "titleLead": "Owners get one dashboard",
+        "titleAccent": "for everything.",
+        "description": "Track tenants, generate agreements, and collect rent — built for Malaysian landlords with 1–20 units."
+      },
+      "tenant": {
+        "titleLead": "Tenants pay rent",
+        "titleAccent": "in two taps.",
+        "description": "View your agreement, pay via FPX with no app to install, and get WhatsApp updates when something changes."
+      }
+    },
+    "usps": {
+      "rentCollection": {
+        "title": "Rent collection on autopilot",
+        "subtitle": "FPX integration via Billplz — tenants pay, you track."
+      },
+      "tenantsPay": {
+        "title": "Tenants pay in two taps",
+        "subtitle": "Mobile-first checkout, no app to install."
+      },
+      "whatsapp": {
+        "title": "WhatsApp reminders that work",
+        "subtitle": "Late notices land where Malaysians actually read."
+      },
+      "maintenance": {
+        "title": "Maintenance, Kanban-style",
+        "subtitle": "Tickets flow from new → in-progress → resolved."
+      },
+      "bilingual": {
+        "title": "Bilingual end-to-end",
+        "subtitle": "Bahasa Melayu and English, switchable per user."
+      },
+      "agreements": {
+        "title": "Signed agreements in seconds",
+        "subtitle": "Generate, send, sign — no more Word templates."
+      },
+      "reports": {
+        "title": "Reports your accountant loves",
+        "subtitle": "Income, RPGT, deductions — exportable CSV/PDF."
+      },
+      "malaysian": {
+        "title": "Built for Malaysian landlords",
+        "subtitle": "FPX, RPGT, BM, RM — not a US tool with a KL skin."
+      },
+      "coOwners": {
+        "title": "Co-owner splits made simple",
+        "subtitle": "Multiple owners on one property? Track shares automatically."
+      }
+    },
+    "stats": {
+      "timeSavedLabel": "saved per month, per property",
+      "onTimeRentLabel": "on-time rent with WhatsApp reminders",
+      "invoiceTimeLabel": "to send a tenant their first invoice"
+    }
+  },
+  "marketing": {
+    "hero": {
+      "eyebrow": "Coming soon",
+      "headlineLead": "Property management,",
+      "headlineAccent": "reimagined.",
+      "subhead": "The modern home for Malaysian landlords and their tenants. Properties, agreements, payments, maintenance — finally, all in one place.",
+      "ctaPrimary": "Get notified",
+      "ctaSecondary": "Watch the demo"
+    },
+    "usps": {
+      "eyebrow": "What's coming",
+      "title": "Nine ways Roofly works for you.",
+      "subtitle": "Built ground-up for Malaysian rental life — FPX, WhatsApp, BM, RPGT, and the realities of 1–20 unit landlords."
+    },
+    "emailCapture": {
+      "title": "Be first to know.",
+      "subtitle": "We'll send one email when we launch. No spam, ever.",
+      "placeholder": "your{'@'}email.com",
+      "submit": "Notify me",
+      "success": "Thanks! We'll let you know when we go live.",
+      "invalid": "Please enter a valid email address.",
+      "submitError": "Couldn't reach the waitlist service. Please try again.",
+      "submitting": "Sending…"
+    }
+  },
   "validation": {
     "required": "This field is required",
     "email": "Enter a valid email address",
@@ -48,6 +162,286 @@
     "phoneMy": "Enter a valid Malaysian phone number"
   },
   "owner": {
+    "payments": {
+      "emptyTitle": "No invoices yet.",
+      "emptyDescription": "Invoices appear once an agreement is active. They're generated monthly based on the rent due day.",
+      "emptyFilter": "No invoices match this filter.",
+      "recordCta": "Record payment",
+      "recordedToast": "Payment recorded",
+      "dueOn": "Due {date}",
+      "paidOn": "Paid {date}",
+      "late": "late",
+      "filters": {
+        "all": "All",
+        "pending": "Pending",
+        "overdue": "Overdue",
+        "paid": "Paid",
+        "cancelled": "Cancelled",
+        "allMonths": "All months",
+        "allYears": "All years",
+        "allPeriods": "All periods",
+        "period": "Filter by period",
+        "periodAria": "Filter invoices by month and year",
+        "periodAriaActive": "Period filter: {label}. Tap to change.",
+        "year": "Year",
+        "month": "Month",
+        "clear": "Clear filters"
+      },
+      "pagination": {
+        "showing": "Showing {from}–{to} of {total}",
+        "prev": "Previous",
+        "next": "Next",
+        "page": "Page {current} of {total}"
+      },
+      "columns": {
+        "invoice": "Invoice",
+        "tenant": "Tenant",
+        "due": "Due date",
+        "amount": "Amount",
+        "status": "Status",
+        "action": "Action"
+      },
+      "status": {
+        "pending": "Pending",
+        "paid": "Paid",
+        "overdue": "Overdue",
+        "cancelled": "Cancelled"
+      },
+      "methods": {
+        "fpx": "FPX",
+        "card": "Card",
+        "cash": "Cash",
+        "transfer": "Bank transfer"
+      },
+      "fields": {
+        "amount": "Amount (RM)",
+        "method": "Payment method",
+        "paidAt": "Paid on",
+        "reference": "Reference"
+      },
+      "placeholders": {
+        "reference": "Optional transaction ref"
+      },
+      "recordModal": {
+        "title": "Record payment"
+      },
+      "viewModal": {
+        "period": "Billing period",
+        "billTo": "Bill to",
+        "property": "Property",
+        "rent": "Rent",
+        "lateFee": "Late fee",
+        "total": "Total due",
+        "payments": "Payments received",
+        "download": "Download PDF",
+        "send": "Send to tenant",
+        "downloadToast": "Coming soon — PDF download arrives in the next phase.",
+        "sentToast": "Invoice sent to {email}"
+      }
+    },
+    "agreements": {
+      "addCta": "Add agreement",
+      "addTitle": "Add agreement",
+      "editTitle": "Edit agreement",
+      "save": "Save",
+      "add": "Add agreement",
+      "delete": "Delete agreement",
+      "createdToast": "Agreement created",
+      "deletedToast": "Agreement deleted",
+      "emptyTitle": "No agreements yet.",
+      "emptyDescription": "Create an agreement once you have a tenant assigned to a unit.",
+      "unknownTenant": "Unknown tenant",
+      "dueOn": "Due day {day}",
+      "deleteConfirm": {
+        "title": "Delete this agreement?",
+        "body": "This will permanently remove the agreement and any attached invoices. This cannot be undone.",
+        "confirm": "Yes, delete"
+      },
+      "fields": {
+        "property": "Property",
+        "unit": "Unit",
+        "tenant": "Tenant",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "rentAmount": "Monthly rent (RM)",
+        "depositAmount": "Security deposit (RM)",
+        "lateFee": "Late fee (RM)",
+        "rentDueDay": "Rent due day (1–28)",
+        "status": "Status"
+      },
+      "placeholders": {
+        "property": "Choose property",
+        "unit": "Choose unit",
+        "unitDisabled": "Pick a property first",
+        "tenant": "Choose tenant"
+      },
+      "status": {
+        "draft": "Draft",
+        "active": "Active",
+        "expired": "Expired",
+        "terminated": "Terminated"
+      },
+      "detail": {
+        "back": "Back to agreements",
+        "notFound": "Agreement not found.",
+        "save": "Save changes",
+        "newSubtitle": "Set the parties, term, and rent. You can refine the rest after saving.",
+        "termsHelp": "Parties, dates, and money. Editable any time before the agreement is signed.",
+        "tabs": {
+          "overview": "Overview",
+          "terms": "Terms",
+          "documents": "Documents"
+        },
+        "overviewHelp": "What's in this agreement at a glance.",
+        "sections": {
+          "parties": "Parties",
+          "term": "Term",
+          "money": "Money"
+        },
+        "overview": {
+          "status": "Status",
+          "term": "Term length",
+          "monthlyRent": "Monthly rent",
+          "timeline": "Timeline",
+          "parties": "Parties",
+          "money": "Money",
+          "months": "{n} months",
+          "years": "{n} years",
+          "daysRemaining": "{n} days remaining",
+          "expiringIn": "Expiring in {n} days",
+          "expiredAgo": "Expired {n} days ago",
+          "startsIn": "Starts in {n} days"
+        },
+        "documents": {
+          "help": "Signed lease, addendums, inspection checklists, inventory list, and exit letters live here.",
+          "placeholderTitle": "Coming soon",
+          "placeholderHelp": "Coming soon — file upload arrives in the next phase. You'll be able to attach the signed agreement and supporting documents here.",
+          "slots": {
+            "lease": {
+              "title": "Signed lease agreement",
+              "help": "The executed PDF, signed by both parties."
+            },
+            "addendum": {
+              "title": "Addendums & amendments",
+              "help": "Renewals, rent adjustments, or any post-signing changes."
+            },
+            "inspection": {
+              "title": "Move-in inspection",
+              "help": "Condition checklist with photos at handover."
+            },
+            "inventory": {
+              "title": "Inventory list",
+              "help": "Furniture and fittings handed over with the unit."
+            },
+            "exit": {
+              "title": "Exit letter & move-out report",
+              "help": "Notice to vacate plus the move-out condition report."
+            }
+          }
+        }
+      }
+    },
+    "tenants": {
+      "inviteCta": "Invite tenant",
+      "inviteTitle": "Invite tenant",
+      "inviteHelp": "We'll record this contact. Magic-link invites land when authentication ships.",
+      "editTitle": "Edit tenant",
+      "save": "Save",
+      "delete": "Remove tenant",
+      "invitedToast": "Tenant invited",
+      "deletedToast": "Tenant removed",
+      "emptyTitle": "No tenants yet.",
+      "emptyDescription": "Tenants appear here once you invite them. Each tenant attaches to a unit via an agreement.",
+      "deleteConfirm": {
+        "title": "Remove this tenant?",
+        "body": "This will remove {name} and any pending invite. Existing agreements stay on record.",
+        "confirm": "Yes, remove"
+      },
+      "fields": {
+        "name": "Full name",
+        "email": "Email",
+        "phone": "Phone",
+        "status": "Status",
+        "icNumber": "MyKad / IC number",
+        "dateOfBirth": "Date of birth",
+        "occupation": "Occupation",
+        "employer": "Employer",
+        "monthlyIncome": "Monthly income (RM)",
+        "nationality": "Nationality",
+        "emergencyName": "Contact name",
+        "emergencyPhone": "Contact phone",
+        "relationship": "Relationship"
+      },
+      "placeholders": {
+        "name": "e.g. Aminah Binti Yusof",
+        "email": "Their email address",
+        "phone": "+60 12-345 6789",
+        "icNumber": "880314-14-5687",
+        "nationality": "e.g. Malaysian",
+        "emergencyName": "Person we can call if there's an issue",
+        "relationship": "e.g. Spouse, Parent, Sibling"
+      },
+      "status": {
+        "invited": "Invited",
+        "active": "Active",
+        "notice_given": "Notice given",
+        "moved_out": "Moved out"
+      },
+      "detail": {
+        "back": "Back to tenants",
+        "notFound": "Tenant not found.",
+        "save": "Save changes",
+        "delete": "Remove tenant",
+        "tabs": {
+          "identity": "Identity",
+          "personal": "Personal",
+          "emergency": "Emergency contact"
+        },
+        "identityHelp": "How we contact this tenant. Status reflects their current relationship with you.",
+        "personalHelp": "Profile and verification details. Only you see this; the tenant manages their own account.",
+        "emergencyHelp": "Who to reach if you can't get hold of the tenant — illness, lockouts, late-night issues.",
+        "documents": {
+          "title": "Documents",
+          "help": "IC copy, payslip, agreement signature page, etc.",
+          "placeholderTitle": "Coming soon",
+          "placeholderHelp": "Document upload arrives in the next phase. You'll be able to attach IC copies, payslips, and reference letters here."
+        }
+      }
+    },
+    "units": {
+      "sectionTitle": "Units",
+      "sectionHelp": "Each property has at least one unit. Tenants and agreements attach to units.",
+      "addCta": "Add unit",
+      "addTitle": "Add unit",
+      "editTitle": "Edit unit",
+      "save": "Save",
+      "add": "Add unit",
+      "delete": "Delete unit",
+      "createdToast": "Unit added",
+      "deletedToast": "Unit deleted",
+      "emptyTitle": "No units yet.",
+      "emptyHelp": "Add your first unit to start tracking tenants and agreements.",
+      "deleteConfirm": {
+        "title": "Delete this unit?",
+        "body": "This will remove \"{label}\" and any attached records. This cannot be undone.",
+        "confirm": "Yes, delete"
+      },
+      "fields": {
+        "label": "Label",
+        "status": "Status",
+        "bedrooms": "Bedrooms",
+        "bathrooms": "Bathrooms",
+        "sqft": "Sqft"
+      },
+      "placeholders": {
+        "label": "e.g. Master room, Whole unit, Ground floor shop"
+      },
+      "status": {
+        "vacant": "Vacant",
+        "occupied": "Occupied",
+        "maintenance": "Maintenance"
+      }
+    },
     "nav": {
       "dashboard": "Dashboard",
       "properties": "Properties",
@@ -60,14 +454,427 @@
     },
     "dashboard": {
       "title": "Dashboard",
+      "subtitle": "Snapshot of how your portfolio is doing right now.",
       "incomeMonth": "Income this month",
+      "incomeMonthHelp": "Successful payments received in the current calendar month.",
       "occupancy": "Occupancy",
+      "occupancyHelp": "{occupied} of {total} units occupied",
       "outstanding": "Outstanding rent",
+      "outstandingHelp": "{count} unpaid invoices (pending + overdue, including late fees)",
       "expiringAgreements": "Expiring soon",
+      "expiringHelp": "Active agreements ending within 60 days.",
+      "incomeChart": {
+        "title": "Income — last 12 months",
+        "help": "Sum of successful payments per month. Highlighted bar is the current month.",
+        "avgLabel": "avg",
+        "total": "Total received",
+        "average": "Avg / month",
+        "bestMonth": "Best month"
+      },
+      "attention": {
+        "title": "Needs attention",
+        "help": "Things to act on this week.",
+        "empty": "Nothing needs your attention. Nice work.",
+        "kinds": {
+          "overdue": "Overdue",
+          "expiring": "Expiring",
+          "notice_given": "Notice given",
+          "ticket_new": "New ticket",
+          "ticket_reopened": "Reopened"
+        }
+      },
       "emptyState": {
         "title": "Add your first property",
         "description": "Properties hold the units you rent out. Start with one and we'll guide you from there.",
         "cta": "Add property"
+      }
+    },
+    "reports": {
+      "subtitle": "Year-over-year income, outstanding rent, and capital position by property.",
+      "yearLabel": "Year",
+      "totalIncome": "Income for {year}",
+      "totalIncomeHelp": "Sum of successful payments received in {year}.",
+      "totalOutstanding": "Outstanding rent",
+      "totalOutstandingHelp": "Unpaid invoices due in this year (pending + overdue, with late fees).",
+      "csvDownload": "Download CSV",
+      "csvDownloaded": "CSV downloaded",
+      "pdfDownload": "Download PDF",
+      "pdfStub": "Coming soon — PDF export arrives in the next phase, once file storage is wired up.",
+      "monthlyBreakdown": {
+        "title": "Monthly income — {year}",
+        "help": "Successful payments grouped by calendar month."
+      },
+      "perProperty": {
+        "title": "Per-property breakdown",
+        "help": "Income, outstanding rent, occupancy, and net capital position for each property.",
+        "disclaimer": "Net gain uses the resident-individual RPGT estimate. Estimate only, not tax advice.",
+        "cols": {
+          "name": "Property",
+          "units": "Units",
+          "occupancy": "Occupancy",
+          "income": "Income",
+          "outstanding": "Outstanding",
+          "netGain": "Net gain (RPGT)"
+        }
+      },
+      "csv": {
+        "property": "Property",
+        "type": "Type",
+        "city": "City",
+        "units": "Units",
+        "occupied": "Occupied",
+        "occupancy": "Occupancy %",
+        "income": "Income (RM)",
+        "outstanding": "Outstanding (RM)",
+        "netGain": "Net gain RM (RPGT estimate)"
+      },
+      "empty": {
+        "title": "Reports unlock with activity",
+        "description": "Once you have agreements and payments, this is where annual income, occupancy, and tax reports live."
+      }
+    },
+    "tickets": {
+      "subtitle": "Issues reported by tenants or logged by you. Drag context with you when you click into a ticket.",
+      "createCta": "Log ticket",
+      "columnEmpty": "Nothing here.",
+      "byOwner": "You",
+      "empty": {
+        "title": "No tickets yet",
+        "description": "Log a ticket on a unit's behalf, or wait for tenants to report issues from their app."
+      },
+      "status": {
+        "new": "New",
+        "in_progress": "In progress",
+        "resolved": "Resolved",
+        "reopened": "Reopened"
+      },
+      "category": {
+        "plumbing": "Plumbing",
+        "electrical": "Electrical",
+        "appliance": "Appliance",
+        "structural": "Structural",
+        "pest": "Pest",
+        "other": "Other"
+      },
+      "priority": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "urgent": "Urgent"
+      },
+      "create": {
+        "title": "Log a ticket",
+        "description": "Capture an issue against a unit. You can attribute it to yourself or a tenant.",
+        "submit": "Log ticket",
+        "createdToast": "Ticket logged",
+        "reporterOwner": "Me (owner)",
+        "fields": {
+          "unit": "Unit",
+          "reporter": "Logged by",
+          "category": "Category",
+          "priority": "Priority",
+          "title": "Summary",
+          "description": "Details"
+        },
+        "placeholders": {
+          "unit": "Pick a unit",
+          "title": "e.g. Kitchen tap dripping",
+          "description": "What's happening, what's been tried, when it started…"
+        }
+      },
+      "detail": {
+        "back": "Back to maintenance",
+        "notFound": "Ticket not found.",
+        "description": "Description",
+        "comments": "Comments",
+        "addComment": "Add a comment",
+        "postComment": "Post comment",
+        "commentPlaceholder": "Update for the tenant or note for yourself…",
+        "commentToast": "Comment added",
+        "noComments": "No comments yet.",
+        "tenant": "Tenant",
+        "statusActions": "Status",
+        "statusHelp": "Move this ticket forward.",
+        "statusToast": "Marked {status}",
+        "noTransitions": "No transitions available from this state.",
+        "transitions": {
+          "new": "Move back to New",
+          "in_progress": "Mark in progress",
+          "resolved": "Mark resolved",
+          "reopened": "Reopen"
+        },
+        "photos": {
+          "title": "Photos",
+          "help": "Coming soon — tenant-uploaded photos arrive in the next phase, once file storage is wired up.",
+          "placeholderTitle": "Coming soon",
+          "placeholderHelp": "Photos attached to the ticket arrive in the next phase, once file storage is wired."
+        }
+      }
+    },
+    "settings": {
+      "subtitle": "Profile, preferences, notifications, and plan.",
+      "save": "Save changes",
+      "tabs": {
+        "profile": "Profile",
+        "preferences": "Preferences",
+        "notifications": "Notifications",
+        "plan": "Plan"
+      },
+      "profile": {
+        "identity": "Identity",
+        "identityHelp": "How tenants and the system know you.",
+        "fields": {
+          "name": "Full name",
+          "email": "Email",
+          "phone": "Phone",
+          "businessName": "Business name (optional)"
+        },
+        "placeholders": {
+          "businessName": "e.g. Aminah Properties"
+        },
+        "emailManagedNote": "Email is managed by your account login — change it from auth settings.",
+        "photo": "Profile photo",
+        "photoHelp": "Coming soon — profile photos arrive in the next phase, once file storage is wired up.",
+        "photoPlaceholderTitle": "Coming soon",
+        "photoPlaceholderHelp": "Profile photos arrive in the next phase, once file storage is wired.",
+        "payout": "Payout account",
+        "payoutHelp": "Where rent collections will be deposited. Bank linkage is managed via your finance settings.",
+        "bankMasked": "Maybank account ending in"
+      },
+      "preferences": {
+        "languageHelp": "Affects every label, date format, and translated message in the app.",
+        "themeHelp": "Pick a fixed theme or follow your operating system.",
+        "themeLightHelp": "Always use the light token set.",
+        "themeDarkHelp": "Always use the dark token set.",
+        "themeSystemHelp": "Follow your OS preference."
+      },
+      "notifications": {
+        "channelTitle": "Delivery channels",
+        "channelHelp": "We'll send notifications via email and WhatsApp once the next phase wires up Resend + WhatsApp Cloud API. In-app notifications are always on.",
+        "channelStatus": {
+          "comingSoon": "Coming soon"
+        },
+        "eventsTitle": "What gets a notification",
+        "eventsHelp": "Toggle the events you want to be told about. You can adjust per-channel rules later.",
+        "events": {
+          "rent_reminder": {
+            "title": "Rent reminders",
+            "help": "7d / 3d / 1d before each invoice is due, plus an alert when an invoice goes overdue."
+          },
+          "agreement_expiry": {
+            "title": "Agreement expiry alerts",
+            "help": "60d / 30d / 7d before any active agreement reaches its end date."
+          },
+          "payment_received": {
+            "title": "Payment received",
+            "help": "Confirmation each time a tenant pays an invoice — useful as a manual cross-check."
+          },
+          "ticket_update": {
+            "title": "Maintenance ticket updates",
+            "help": "When tenants log a new ticket, comment on one, or status changes."
+          },
+          "invite_accepted": {
+            "title": "Tenant invite accepted",
+            "help": "When a tenant accepts your magic-link invite and links to a unit."
+          }
+        }
+      },
+      "plan": {
+        "title": "Subscription",
+        "help": "Plans cap how many active units you can manage. Upgrade arrives in the next phase.",
+        "current": "Current",
+        "free": "Free",
+        "permonth": "/ month",
+        "unitsCap": "Up to {n} units",
+        "unitsUnlimited": "Unlimited units",
+        "upgradeCta": "Upgrade",
+        "upgradeStub": "Coming soon — subscriptions arrive in the next phase. Demo only for now.",
+        "youreOnThis": "You're on this plan.",
+        "disclaimer": "Pricing is illustrative. Final pricing + billing arrive in the next phase.",
+        "tiers": {
+          "free": {
+            "name": "Free",
+            "description": "For single-property owners testing the waters."
+          },
+          "starter": {
+            "name": "Starter",
+            "description": "For small landlords with a handful of units."
+          },
+          "pro": {
+            "name": "Pro",
+            "description": "For growing portfolios with reporting needs."
+          },
+          "business": {
+            "name": "Business",
+            "description": "For agents and multi-org operators."
+          }
+        }
+      }
+    },
+    "properties": {
+      "addCta": "Add property",
+      "addModal": {
+        "title": "Add property",
+        "description": "Capture the basics now — you can fill in unit and ownership details after.",
+        "submit": "Add property",
+        "createdToast": "Property added",
+        "fields": {
+          "name": "Property name",
+          "type": "Type",
+          "address": "Address",
+          "city": "City",
+          "state": "State",
+          "postcode": "Postcode"
+        },
+        "placeholders": {
+          "name": "e.g. Suria KLCC #12-3A",
+          "address": "Street address",
+          "state": "Choose state",
+          "postcode": "5-digit"
+        }
+      },
+      "types": {
+        "condo": "Condominium",
+        "landed": "Landed",
+        "shoplot": "Shoplot",
+        "room": "Room"
+      },
+      "detail": {
+        "back": "Back to properties",
+        "notFound": "Property not found.",
+        "save": "Save changes",
+        "saved": "Saved",
+        "delete": "Delete property",
+        "deletedToast": "Property deleted",
+        "deleteConfirm": {
+          "title": "Delete this property?",
+          "body": "This will remove {name} and any attached records. This cannot be undone.",
+          "confirm": "Yes, delete"
+        },
+        "tabs": {
+          "overview": "Overview",
+          "details": "Details",
+          "ownership": "Ownership",
+          "utilities": "Utilities",
+          "documents": "Documents"
+        },
+        "overviewHelp": "What's happening with this property right now.",
+        "detailsHelp": "Identity, location, and physical specs. Edit anytime.",
+        "ownershipHelp": "Who owns it, what it cost, what it's worth, and what's owed.",
+        "utilitiesHelp": "Recurring fees and service-account numbers — what it costs to run.",
+        "sections": {
+          "identity": "Identity",
+          "location": "Location",
+          "specifications": "Specifications",
+          "title": "Title information",
+          "acquisition": "Acquisition",
+          "valuation": "Valuation",
+          "mortgage": "Mortgage",
+          "coOwners": "Co-owners",
+          "recurringFees": "Recurring fees",
+          "serviceAccounts": "Service accounts"
+        },
+        "fields": {
+          "internalLabel": "Internal label",
+          "notes": "Notes",
+          "yearBuilt": "Year built",
+          "builtUpSqft": "Built-up area (sqft)",
+          "landSqft": "Land area (sqft)",
+          "bedrooms": "Bedrooms",
+          "bathrooms": "Bathrooms",
+          "parkingLots": "Parking lots",
+          "furnishing": "Furnishing",
+          "titleType": "Title type",
+          "titleNumber": "Title number",
+          "lotNumber": "Lot number",
+          "tenureExpiry": "Lease expires",
+          "strataTitle": "Strata title",
+          "masterTitle": "Master title",
+          "purchaseDate": "Purchase date",
+          "purchasePrice": "Purchase price (RM)",
+          "stampDuty": "Stamp duty (RM)",
+          "legalFees": "Legal fees (RM)",
+          "currentMarketValue": "Current market value (RM)",
+          "lastValuedAt": "Last valued",
+          "valuationSource": "Valuation source",
+          "mortgageBank": "Bank",
+          "loanAmount": "Loan amount (RM)",
+          "outstandingBalance": "Outstanding balance (RM)",
+          "monthlyInstalment": "Monthly instalment (RM)",
+          "tenureYears": "Tenure (years)",
+          "maturityDate": "Maturity date",
+          "interestRatePct": "Interest rate (%)",
+          "coOwnerName": "Co-owner",
+          "coOwnerSharePct": "Share (%)",
+          "monthlyMaintenanceFee": "Maintenance fee / month (RM)",
+          "sinkingFund": "Sinking fund / month (RM)",
+          "quitRentAnnual": "Quit rent / year (RM)",
+          "assessmentRateAnnual": "Assessment / year (RM)",
+          "buildingInsuranceAnnual": "Building insurance / year (RM)",
+          "tnbAccountNo": "TNB account no.",
+          "waterAccountNo": "Water account no.",
+          "indahWaterAccountNo": "Indah Water account no.",
+          "internetAccountNo": "Internet account no.",
+          "managementCorpName": "Management corp",
+          "managementCorpPhone": "Management phone"
+        },
+        "placeholders": {
+          "internalLabel": "Optional short reference",
+          "notes": "Anything else worth remembering about this property",
+          "titleNumber": "PN 12345 / Geran 67890",
+          "mortgageBank": "e.g. Maybank, CIMB",
+          "coOwnerName": "Co-owner name"
+        },
+        "furnishingOptions": {
+          "unfurnished": "Unfurnished",
+          "partial": "Partial",
+          "fully": "Fully furnished"
+        },
+        "titleTypeOptions": {
+          "freehold": "Freehold",
+          "leasehold": "Leasehold"
+        },
+        "valuationSources": {
+          "bank": "Bank valuation",
+          "agent": "Agent estimate",
+          "self": "Self-estimate"
+        },
+        "addCoOwner": "Add co-owner",
+        "shareSum": "Total: {pct}%",
+        "coOwnersHelp": "Joint ownership splits. Shares must sum to exactly 100%, and one co-owner must be marked primary.",
+        "coOwners": {
+          "primaryLabel": "Primary",
+          "primaryRequired": "Pick a primary co-owner",
+          "cantRemovePrimary": "Make another co-owner primary before removing this one.",
+          "blockedSave": "Shares must sum to 100% with exactly one primary before saving.",
+          "actionsAria": "Co-owner actions",
+          "menuSetPrimary": "Set as primary",
+          "menuRemove": "Remove"
+        },
+        "acquisitionTotal": "Total acquisition cost",
+        "utilitiesAnnual": "Annual recurring total",
+        "utilitiesMonthly": "Monthly equivalent",
+        "gainsSnapshot": "Capital gains snapshot",
+        "gains": {
+          "gain": "Gross gain",
+          "rpgt": "Estimated RPGT",
+          "net": "Net proceeds",
+          "cost": "Acquisition cost",
+          "disclaimer": "Estimate only — assumes resident-individual filing; non-citizens, foreigners, and companies have different rates. Disposal-side costs (agent commission, sale legal fees) and renovation expenses are not factored in. Not tax advice."
+        },
+        "overview": {
+          "totalUnits": "Units",
+          "occupied": "Occupied",
+          "activeAgreements": "Active agreements",
+          "monthlyIncome": "Monthly income",
+          "activeTenants": "Active tenants",
+          "noActive": "No active agreements on this property yet."
+        },
+        "documents": {
+          "help": "Title deeds, S&P agreement, insurance policy, tax receipts, photos.",
+          "placeholderTitle": "Coming soon",
+          "placeholderHelp": "Document upload arrives in the next phase. You'll be able to attach title deeds, insurance policies, and tax receipts here."
+        }
       }
     }
   },
