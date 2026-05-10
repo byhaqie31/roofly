@@ -8,7 +8,7 @@ import type {
 import { ownerAccountMock, plansMock } from "~/mocks/owner";
 
 export const useOwnerSettings = () => {
-  const { public: { useMock } } = useRuntimeConfig();
+  const { useMock } = useEnv();
 
   const get = async (): Promise<OwnerAccount> => {
     if (useMock) return structuredClone(ownerAccountMock);

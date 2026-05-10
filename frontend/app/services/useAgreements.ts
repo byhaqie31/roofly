@@ -33,7 +33,7 @@ const hydrate = (a: Agreement): AgreementWithRefs => {
 };
 
 export const useAgreements = () => {
-  const { public: { useMock } } = useRuntimeConfig();
+  const { useMock } = useEnv();
 
   const list = async (): Promise<Agreement[]> => {
     if (useMock) return structuredClone(agreementsMock);

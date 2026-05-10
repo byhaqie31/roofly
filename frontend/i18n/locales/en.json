@@ -43,6 +43,7 @@
   "auth": {
     "login": "Log in",
     "logout": "Log out",
+    "exitDemo": "Exit demo",
     "register": "Sign up",
     "email": "Email address",
     "password": "Password",
@@ -56,6 +57,103 @@
     "loginSubtitle": "Log in to manage your properties.",
     "registerTitle": "Start with Roofly",
     "registerSubtitle": "Create an owner account to manage your rentals."
+  },
+  "demo": {
+    "shortcuts": {
+      "label": "Demo credentials",
+      "eyebrow": "For demo purposes only",
+      "continueAsOwner": "Continue as owner",
+      "continueAsTenant": "Continue as tenant",
+      "comingSoon": "Coming soon"
+    },
+    "landing": {
+      "pageTitle": "Demo · Roofly.my",
+      "eyebrow": "Demo environment",
+      "title": "Welcome to the Roofly demo",
+      "subtitle": "Pick a role to start exploring. All data shown is sample data — nothing you do here is saved.",
+      "footerPrefix": "Want the real thing? Visit",
+      "footerSuffix": "when we launch."
+    },
+    "audience": {
+      "owner": {
+        "titleLead": "Owners get one dashboard",
+        "titleAccent": "for everything.",
+        "description": "Track tenants, generate agreements, and collect rent — built for Malaysian landlords with 1–20 units."
+      },
+      "tenant": {
+        "titleLead": "Tenants pay rent",
+        "titleAccent": "in two taps.",
+        "description": "View your agreement, pay via FPX with no app to install, and get WhatsApp updates when something changes."
+      }
+    },
+    "usps": {
+      "rentCollection": {
+        "title": "Rent collection on autopilot",
+        "subtitle": "FPX integration via Billplz — tenants pay, you track."
+      },
+      "tenantsPay": {
+        "title": "Tenants pay in two taps",
+        "subtitle": "Mobile-first checkout, no app to install."
+      },
+      "whatsapp": {
+        "title": "WhatsApp reminders that work",
+        "subtitle": "Late notices land where Malaysians actually read."
+      },
+      "maintenance": {
+        "title": "Maintenance, Kanban-style",
+        "subtitle": "Tickets flow from new → in-progress → resolved."
+      },
+      "bilingual": {
+        "title": "Bilingual end-to-end",
+        "subtitle": "Bahasa Melayu and English, switchable per user."
+      },
+      "agreements": {
+        "title": "Signed agreements in seconds",
+        "subtitle": "Generate, send, sign — no more Word templates."
+      },
+      "reports": {
+        "title": "Reports your accountant loves",
+        "subtitle": "Income, RPGT, deductions — exportable CSV/PDF."
+      },
+      "malaysian": {
+        "title": "Built for Malaysian landlords",
+        "subtitle": "FPX, RPGT, BM, RM — not a US tool with a KL skin."
+      },
+      "coOwners": {
+        "title": "Co-owner splits made simple",
+        "subtitle": "Multiple owners on one property? Track shares automatically."
+      }
+    },
+    "stats": {
+      "timeSavedLabel": "saved per month, per property",
+      "onTimeRentLabel": "on-time rent with WhatsApp reminders",
+      "invoiceTimeLabel": "to send a tenant their first invoice"
+    }
+  },
+  "marketing": {
+    "hero": {
+      "eyebrow": "Coming soon",
+      "headlineLead": "Property management,",
+      "headlineAccent": "reimagined.",
+      "subhead": "The modern home for Malaysian landlords and their tenants. Properties, agreements, payments, maintenance — finally, all in one place.",
+      "ctaPrimary": "Get notified",
+      "ctaSecondary": "Watch the demo"
+    },
+    "usps": {
+      "eyebrow": "What's coming",
+      "title": "Nine ways Roofly works for you.",
+      "subtitle": "Built ground-up for Malaysian rental life — FPX, WhatsApp, BM, RPGT, and the realities of 1–20 unit landlords."
+    },
+    "emailCapture": {
+      "title": "Be first to know.",
+      "subtitle": "We'll send one email when we launch. No spam, ever.",
+      "placeholder": "your{'@'}email.com",
+      "submit": "Notify me",
+      "success": "Thanks! We'll let you know when we go live.",
+      "invalid": "Please enter a valid email address.",
+      "submitError": "Couldn't reach the waitlist service. Please try again.",
+      "submitting": "Sending…"
+    }
   },
   "validation": {
     "required": "This field is required",

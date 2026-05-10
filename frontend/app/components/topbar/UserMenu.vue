@@ -5,11 +5,18 @@ import { computed, ref } from "vue";
 const auth = useAuthStore();
 const { t, locale, setLocale } = useI18n();
 const { theme, setTheme } = useTheme();
+const { isDemo } = useEnv();
 const open = ref(false);
+
+// In demo mode, "logout" reads as "exit demo" and returns to /demo so the
+// next visitor lands on the curated demo entry, not the auth/login page.
+const logoutLabel = computed(() =>
+  isDemo ? t("auth.exitDemo") : t("auth.logout"),
+);
 
 const onLogout = async () => {
   await auth.logout();
-  await navigateTo("/auth/login");
+  await navigateTo(isDemo ? "/demo" : "/auth/login");
 };
 
 const initials = computed(() => {
@@ -103,7 +110,7 @@ const toggleLocale = async () => {
           @click="onLogout"
         >
           <LogOut :size="16" :stroke-width="1.5" />
-          {{ $t("auth.logout") }}
+          {{ logoutLabel }}
         </button>
       </div>
     </Transition>

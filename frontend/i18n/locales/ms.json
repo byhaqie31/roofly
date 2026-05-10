@@ -43,6 +43,7 @@
   "auth": {
     "login": "Log masuk",
     "logout": "Log keluar",
+    "exitDemo": "Keluar demo",
     "register": "Daftar",
     "email": "Alamat emel",
     "password": "Kata laluan",
@@ -56,6 +57,103 @@
     "loginSubtitle": "Log masuk untuk uruskan hartanah anda.",
     "registerTitle": "Mula dengan Roofly",
     "registerSubtitle": "Cipta akaun pemilik untuk urus penyewaan."
+  },
+  "demo": {
+    "shortcuts": {
+      "label": "Akaun demo",
+      "eyebrow": "Untuk tujuan demo sahaja",
+      "continueAsOwner": "Teruskan sebagai pemilik",
+      "continueAsTenant": "Teruskan sebagai penyewa",
+      "comingSoon": "Akan datang"
+    },
+    "landing": {
+      "pageTitle": "Demo · Roofly.my",
+      "eyebrow": "Persekitaran demo",
+      "title": "Selamat datang ke demo Roofly",
+      "subtitle": "Pilih peranan untuk mula meneroka. Semua data yang ditunjukkan adalah contoh — tiada apa yang anda lakukan di sini akan disimpan.",
+      "footerPrefix": "Mahukan versi sebenar? Lawati",
+      "footerSuffix": "apabila kami melancarkan."
+    },
+    "audience": {
+      "owner": {
+        "titleLead": "Pemilik dapat satu papan pemuka",
+        "titleAccent": "untuk semuanya.",
+        "description": "Pantau penyewa, hasilkan perjanjian, dan kutip sewa — direka untuk tuan rumah Malaysia dengan 1–20 unit."
+      },
+      "tenant": {
+        "titleLead": "Penyewa bayar sewa",
+        "titleAccent": "dengan dua sentuhan.",
+        "description": "Lihat perjanjian anda, bayar melalui FPX tanpa perlu aplikasi, dan dapatkan kemas kini WhatsApp apabila berlaku perubahan."
+      }
+    },
+    "usps": {
+      "rentCollection": {
+        "title": "Kutipan sewa secara automatik",
+        "subtitle": "Integrasi FPX melalui Billplz — penyewa bayar, anda pantau."
+      },
+      "tenantsPay": {
+        "title": "Penyewa bayar dengan dua sentuhan",
+        "subtitle": "Pembayaran mesra mudah alih, tiada aplikasi diperlukan."
+      },
+      "whatsapp": {
+        "title": "Peringatan WhatsApp yang berkesan",
+        "subtitle": "Notis lewat sampai di tempat orang Malaysia benar-benar baca."
+      },
+      "maintenance": {
+        "title": "Penyelenggaraan gaya Kanban",
+        "subtitle": "Tiket bergerak dari baru → dalam progres → selesai."
+      },
+      "bilingual": {
+        "title": "Dwibahasa sepenuhnya",
+        "subtitle": "Bahasa Melayu dan English, boleh tukar mengikut pengguna."
+      },
+      "agreements": {
+        "title": "Perjanjian ditandatangan dalam saat",
+        "subtitle": "Hasilkan, hantar, tandatangan — tiada lagi templat Word."
+      },
+      "reports": {
+        "title": "Laporan kegemaran akauntan anda",
+        "subtitle": "Pendapatan, CKHT, potongan — boleh eksport CSV/PDF."
+      },
+      "malaysian": {
+        "title": "Direka untuk tuan rumah Malaysia",
+        "subtitle": "FPX, CKHT, BM, RM — bukan alat US berbalut KL."
+      },
+      "coOwners": {
+        "title": "Pembahagian pemilik bersama dipermudah",
+        "subtitle": "Berbilang pemilik satu hartanah? Pantau bahagian secara automatik."
+      }
+    },
+    "stats": {
+      "timeSavedLabel": "dijimatkan sebulan, setiap hartanah",
+      "onTimeRentLabel": "sewa tepat masa dengan peringatan WhatsApp",
+      "invoiceTimeLabel": "untuk hantar invois pertama kepada penyewa"
+    }
+  },
+  "marketing": {
+    "hero": {
+      "eyebrow": "Akan datang",
+      "headlineLead": "Pengurusan hartanah,",
+      "headlineAccent": "direka semula.",
+      "subhead": "Rumah moden untuk tuan rumah Malaysia dan penyewa mereka. Hartanah, perjanjian, pembayaran, penyelenggaraan — akhirnya, semuanya di satu tempat.",
+      "ctaPrimary": "Beritahu saya",
+      "ctaSecondary": "Tonton demo"
+    },
+    "usps": {
+      "eyebrow": "Yang akan datang",
+      "title": "Sembilan cara Roofly bantu anda.",
+      "subtitle": "Direka khusus untuk realiti sewa Malaysia — FPX, WhatsApp, BM, CKHT, dan tuan rumah dengan 1–20 unit."
+    },
+    "emailCapture": {
+      "title": "Jadi yang pertama tahu.",
+      "subtitle": "Kami akan hantar satu emel apabila dilancarkan. Tiada spam.",
+      "placeholder": "emel{'@'}anda.com",
+      "submit": "Beritahu saya",
+      "success": "Terima kasih! Kami akan beritahu apabila dilancarkan.",
+      "invalid": "Sila masukkan alamat emel yang sah.",
+      "submitError": "Gagal hubungi servis senarai tunggu. Sila cuba lagi.",
+      "submitting": "Menghantar…"
+    }
   },
   "validation": {
     "required": "Ruangan ini wajib diisi",

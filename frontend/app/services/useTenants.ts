@@ -2,7 +2,7 @@ import type { Tenant, TenantInput, TenantUpdate } from "~/types/tenant";
 import { tenantsMock } from "~/mocks/tenants";
 
 export const useTenants = () => {
-  const { public: { useMock } } = useRuntimeConfig();
+  const { useMock } = useEnv();
 
   const list = async (): Promise<Tenant[]> => {
     if (useMock) return structuredClone(tenantsMock);

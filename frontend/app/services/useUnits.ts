@@ -2,7 +2,7 @@ import type { Unit, UnitInput, UnitUpdate } from "~/types/unit";
 import { unitsMock } from "~/mocks/units";
 
 export const useUnits = () => {
-  const { public: { useMock } } = useRuntimeConfig();
+  const { useMock } = useEnv();
 
   const list = async (): Promise<Unit[]> => {
     if (useMock) return structuredClone(unitsMock);
