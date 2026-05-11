@@ -66,6 +66,45 @@
       "continueAsTenant": "Continue as tenant",
       "comingSoon": "Coming soon"
     },
+<<<<<<< HEAD
+    "tour": {
+      "ctaLabel": "Take a tour",
+      "next": "Next",
+      "prev": "Back",
+      "done": "Got it",
+      "steps": {
+        "welcome": {
+          "title": "Welcome to your demo dashboard",
+          "description": "A quick six-step walkthrough of the owner shell. Re-run it anytime from the top right."
+        },
+        "sidebar": {
+          "title": "Your portal in one column",
+          "description": "Properties, tenants, agreements, payments, maintenance, reports — every tool lives here."
+        },
+        "mobileMenu": {
+          "title": "All your tools, one tap away",
+          "description": "Tap the menu to open the navigation drawer — properties, tenants, agreements, payments, maintenance, and reports all live there."
+        },
+        "stats": {
+          "title": "Key metrics at a glance",
+          "description": "Monthly income, occupancy, outstanding rent, and expiring agreements. They refresh as you operate."
+        },
+        "incomeChart": {
+          "title": "Twelve months of income",
+          "description": "Spot seasonality, dips, and your best month. Grab the raw CSV from the Reports tab."
+        },
+        "attention": {
+          "title": "Things that need you today",
+          "description": "Overdue invoices, expiring agreements, fresh maintenance tickets — prioritised so you can clear them in one pass."
+        },
+        "feedback": {
+          "title": "Tell us what you think",
+          "description": "Done exploring? Tap here anytime to share feedback — what worked, what didn't, what's missing. It opens a short form in a new tab."
+        }
+      }
+    },
+=======
+>>>>>>> origin/main
     "landing": {
       "pageTitle": "Demo · Roofly.my",
       "eyebrow": "Demo environment",
@@ -137,7 +176,11 @@
       "headlineAccent": "reimagined.",
       "subhead": "The modern home for Malaysian landlords and their tenants. Properties, agreements, payments, maintenance — finally, all in one place.",
       "ctaPrimary": "Get notified",
+<<<<<<< HEAD
+      "ctaSecondary": "Explore demo"
+=======
       "ctaSecondary": "Watch the demo"
+>>>>>>> origin/main
     },
     "usps": {
       "eyebrow": "What's coming",
