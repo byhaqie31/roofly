@@ -7,8 +7,8 @@
       "headlineAccent": "lebih mudah.",
       "subhead": "Pantau penyewa, hasilkan perjanjian, dan kutip sewa — direka untuk tuan rumah Malaysia dengan 1–20 unit.",
       "pillarVisibility": "Lihat semua sekali pandang",
-      "pillarAutomation": "Sistem buat kerja kejar, bukan anda",
-      "pillarTrust": "Setiap transaksi direkodkan"
+      "pillarAutomation": "Sistem yang kejar bayaran, bukan anda",
+      "pillarTrust": "Setiap transaksi ada rekod"
     },
     "save": "Simpan",
     "cancel": "Batal",
@@ -73,53 +73,53 @@
       "done": "Faham",
       "steps": {
         "welcome": {
-          "title": "Selamat datang ke dashboard demo",
-          "description": "Tour ringkas enam langkah untuk shell pemilik. Boleh main semula bila-bila masa dari kanan atas."
+          "title": "Selamat datang ke Halaman Utama Demo",
+          "description": "Tour ringkas enam langkah untuk paparan pemilik. Boleh main semula bila-bila masa dari bahagian kanan atas."
         },
         "sidebar": {
           "title": "Portal anda dalam satu kolum",
-          "description": "Hartanah, penyewa, perjanjian, pembayaran, penyelenggaraan, laporan — semua di sini."
+          "description": "Hartanah, penyewa, perjanjian, pembayaran, penyelenggaraan, laporan — semuanya di sini."
         },
         "mobileMenu": {
           "title": "Semua alat, satu sentuhan",
-          "description": "Tekan menu untuk buka laci navigasi — hartanah, penyewa, perjanjian, pembayaran, penyelenggaraan, dan laporan semua ada di situ."
+          "description": "Tekan menu untuk buka navigasi — hartanah, penyewa, perjanjian, pembayaran, penyelenggaraan, dan laporan semuanya ada di situ."
         },
         "stats": {
           "title": "Metrik utama sekilas pandang",
-          "description": "Pendapatan bulanan, kadar penghunian, tunggakan, dan perjanjian akan tamat. Dikemaskini langsung."
+          "description": "Pendapatan bulanan, kadar penghunian, sewa tertunggak, dan perjanjian akan tamat. Dikemas kini secara automatik."
         },
         "incomeChart": {
-          "title": "Dua belas bulan pendapatan",
-          "description": "Lihat trend, kemerosotan, dan bulan terbaik. Muat turun CSV mentah dari tab Laporan."
+          "title": "Pendapatan selama dua belas bulan",
+          "description": "Lihat trend, penurunan, dan bulan terbaik. Muat turun CSV mentah dari tab Laporan."
         },
         "attention": {
-          "title": "Perkara perlu tindakan hari ini",
-          "description": "Invois lewat, perjanjian akan tamat, tiket penyelenggaraan baru — disusun mengikut keutamaan untuk diselesaikan sekali gus."
+          "title": "Perkara yang perlu tindakan hari ini",
+          "description": "Invois tertunggak, perjanjian akan tamat, aduan penyelenggaraan baharu — disusun mengikut keutamaan supaya mudah diselesaikan sekali gus."
         },
         "feedback": {
           "title": "Kongsikan pendapat anda",
-          "description": "Habis meneroka? Tekan di sini bila-bila masa untuk beri maklum balas — apa yang berkesan, apa yang tidak, apa yang kurang. Borang ringkas akan dibuka di tab baharu."
+          "description": "Selesai meneroka? Tekan di sini bila-bila masa untuk beri maklum balas — apa yang berkesan, apa yang tidak, dan apa yang masih kurang. Borang ringkas akan dibuka di tab baharu."
         }
       }
     },
     "landing": {
       "pageTitle": "Demo · Roofly.my",
-      "eyebrow": "Persekitaran demo",
-      "title": "Selamat datang ke demo Roofly",
-      "subtitle": "Pilih peranan untuk mula meneroka. Semua data yang ditunjukkan adalah contoh — tiada apa yang anda lakukan di sini akan disimpan.",
-      "footerPrefix": "Mahukan versi sebenar? Lawati",
-      "footerSuffix": "apabila kami melancarkan."
+      "eyebrow": "Mode Demonstari",
+      "title": "Selamat datang ke demo Roofly.my",
+      "subtitle": "Pilih peranan untuk mula meneroka. Semua data yang ditunjukkan adalah contoh sahaja. Setiap perubahan yang anda lakukan di sini tidak akan disimpan.",
+      "footerPrefix": "Mahukan versi sebenar? Layari",
+      "footerSuffix": "dan nantikan emel notifikasi pelancaran kami."
     },
     "audience": {
       "owner": {
-        "titleLead": "Pemilik dapat satu papan pemuka",
+        "titleLead": "Pemilik dapat satu halaman peribadi",
         "titleAccent": "untuk semuanya.",
         "description": "Pantau penyewa, hasilkan perjanjian, dan kutip sewa — direka untuk tuan rumah Malaysia dengan 1–20 unit."
       },
       "tenant": {
         "titleLead": "Penyewa bayar sewa",
-        "titleAccent": "dengan dua sentuhan.",
-        "description": "Lihat perjanjian anda, bayar melalui FPX tanpa perlu aplikasi, dan dapatkan kemas kini WhatsApp apabila berlaku perubahan."
+        "titleAccent": "dengan dua kali tekan sahaja.",
+        "description": "Lihat perjanjian anda, bayar melalui FPX tanpa perlu pasang aplikasi, dan dapatkan kemas kini WhatsApp apabila ada perubahan."
       }
     },
     "usps": {
@@ -128,7 +128,7 @@
         "subtitle": "Integrasi FPX melalui Billplz — penyewa bayar, anda pantau."
       },
       "tenantsPay": {
-        "title": "Penyewa bayar dengan dua sentuhan",
+        "title": "Penyewa bayar dengan dua kali tekan sahaja",
         "subtitle": "Pembayaran mesra mudah alih, tiada aplikasi diperlukan."
       },
       "whatsapp": {
@@ -137,27 +137,27 @@
       },
       "maintenance": {
         "title": "Penyelenggaraan gaya Kanban",
-        "subtitle": "Tiket bergerak dari baru → dalam progres → selesai."
+        "subtitle": "Aduan bergerak dari Baru → Sedang diproses → Selesai."
       },
       "bilingual": {
         "title": "Dwibahasa sepenuhnya",
-        "subtitle": "Bahasa Melayu dan English, boleh tukar mengikut pengguna."
+        "subtitle": "Bahasa Melayu dan Inggeris, boleh ditukar mengikut keselesaan pengguna."
       },
       "agreements": {
-        "title": "Perjanjian ditandatangan dalam saat",
+        "title": "Perjanjian ditandatangani dalam beberapa saat",
         "subtitle": "Hasilkan, hantar, tandatangan — tiada lagi templat Word."
       },
       "reports": {
-        "title": "Laporan kegemaran akauntan anda",
-        "subtitle": "Pendapatan, CKHT, potongan — boleh eksport CSV/PDF."
+        "title": "Laporan yang akauntan anda suka",
+        "subtitle": "Pendapatan, RPGT, potongan — boleh eksport CSV/PDF."
       },
       "malaysian": {
         "title": "Direka untuk tuan rumah Malaysia",
-        "subtitle": "FPX, CKHT, BM, RM — bukan alat US berbalut KL."
+        "subtitle": "FPX, RPGT, BM, RM — bukan sistem luar yang sekadar disesuaikan untuk Malaysia."
       },
       "coOwners": {
         "title": "Pembahagian pemilik bersama dipermudah",
-        "subtitle": "Berbilang pemilik satu hartanah? Pantau bahagian secara automatik."
+        "subtitle": "Lebih daripada seorang pemilik untuk satu hartanah? Pantau pembahagian secara automatik."
       }
     },
     "stats": {
@@ -178,7 +178,7 @@
     "usps": {
       "eyebrow": "Yang akan datang",
       "title": "Sembilan cara Roofly bantu anda.",
-      "subtitle": "Direka khusus untuk realiti sewa Malaysia — FPX, WhatsApp, BM, CKHT, dan tuan rumah dengan 1–20 unit."
+      "subtitle": "Direka khusus untuk realiti sewa rumah di Malaysia — FPX, WhatsApp, BM, RPGT, dan tuan rumah dengan 1–20 unit."
     },
     "emailCapture": {
       "title": "Jadi yang pertama tahu.",
@@ -200,16 +200,16 @@
   "owner": {
     "payments": {
       "emptyTitle": "Belum ada invois.",
-      "emptyDescription": "Invois akan muncul setelah perjanjian aktif. Dijana bulanan mengikut hari sewa.",
+      "emptyDescription": "Invois akan muncul setelah perjanjian aktif. Invois dijana setiap bulan mengikut hari bayaran sewa.",
       "emptyFilter": "Tiada invois sepadan dengan penapis ini.",
       "recordCta": "Rekod pembayaran",
-      "recordedToast": "Pembayaran direkod",
-      "dueOn": "Tarikh tamat {date}",
-      "paidOn": "Dibayar {date}",
+      "recordedToast": "Pembayaran direkodkan",
+      "dueOn": "Perlu dibayar pada {date}",
+      "paidOn": "Dibayar pada {date}",
       "late": "lewat",
       "filters": {
         "all": "Semua",
-        "pending": "Tertangguh",
+        "pending": "Belum dibayar",
         "overdue": "Tertunggak",
         "paid": "Telah dibayar",
         "cancelled": "Dibatalkan",
@@ -232,13 +232,13 @@
       "columns": {
         "invoice": "Invois",
         "tenant": "Penyewa",
-        "due": "Tarikh tamat",
+        "due": "Tarikh akhir bayaran",
         "amount": "Jumlah",
         "status": "Status",
         "action": "Tindakan"
       },
       "status": {
-        "pending": "Tertangguh",
+        "pending": "Belum dibayar",
         "paid": "Telah dibayar",
         "overdue": "Tertunggak",
         "cancelled": "Dibatalkan"
@@ -270,9 +270,9 @@
         "total": "Jumlah perlu dibayar",
         "payments": "Bayaran diterima",
         "download": "Muat turun PDF",
-        "send": "Hantar ke penyewa",
+        "send": "Hantar kepada penyewa",
         "downloadToast": "Akan datang — muat turun PDF tiba dalam fasa seterusnya.",
-        "sentToast": "Invois dihantar ke {email}"
+        "sentToast": "Invois dihantar kepada {email}"
       }
     },
     "agreements": {
@@ -287,10 +287,10 @@
       "emptyTitle": "Belum ada perjanjian.",
       "emptyDescription": "Cipta perjanjian setelah penyewa ditetapkan kepada satu unit.",
       "unknownTenant": "Penyewa tidak diketahui",
-      "dueOn": "Hari ke-{day}",
+      "dueOn": "Hari bayaran ke-{day}",
       "deleteConfirm": {
         "title": "Padam perjanjian ini?",
-        "body": "Tindakan ini akan memadam perjanjian dan invois berkaitan secara kekal. Tidak boleh dibatalkan.",
+        "body": "Tindakan ini akan memadam perjanjian dan invois berkaitan secara kekal. Tindakan ini tidak boleh dibatalkan.",
         "confirm": "Ya, padam"
       },
       "fields": {
@@ -302,7 +302,7 @@
         "rentAmount": "Sewa bulanan (RM)",
         "depositAmount": "Deposit jaminan (RM)",
         "lateFee": "Caj lewat (RM)",
-        "rentDueDay": "Hari sewa perlu dibayar (1–28)",
+        "rentDueDay": "Hari bayaran sewa (1–28)",
         "status": "Status"
       },
       "placeholders": {
@@ -321,14 +321,14 @@
         "back": "Kembali ke senarai perjanjian",
         "notFound": "Perjanjian tidak dijumpai.",
         "save": "Simpan perubahan",
-        "newSubtitle": "Tetapkan pihak, tempoh, dan sewa. Butiran lain boleh dikemas kini selepas simpan.",
-        "termsHelp": "Pihak, tarikh, dan jumlah. Boleh diubah bila-bila masa sebelum perjanjian ditandatangani.",
+        "newSubtitle": "Tetapkan pihak terlibat, tempoh, dan sewa. Butiran lain boleh dikemas kini selepas simpan.",
+        "termsHelp": "Pihak terlibat, tarikh, dan jumlah bayaran. Boleh diubah bila-bila masa sebelum perjanjian ditandatangani.",
         "tabs": {
           "overview": "Ringkasan",
           "terms": "Terma",
           "documents": "Dokumen"
         },
-        "overviewHelp": "Apa yang ada dalam perjanjian ini secara ringkas.",
+        "overviewHelp": "Ringkasan perkara penting dalam perjanjian ini.",
         "sections": {
           "parties": "Pihak terlibat",
           "term": "Tempoh",
@@ -380,17 +380,17 @@
     "tenants": {
       "inviteCta": "Jemput penyewa",
       "inviteTitle": "Jemput penyewa",
-      "inviteHelp": "Maklumat ini akan direkodkan. Jemputan magic-link akan aktif apabila pengesahan akaun siap.",
+      "inviteHelp": "Maklumat ini akan direkodkan. Jemputan melalui pautan khas akan aktif apabila pengesahan akaun siap.",
       "editTitle": "Edit penyewa",
       "save": "Simpan",
       "delete": "Buang penyewa",
       "invitedToast": "Penyewa dijemput",
       "deletedToast": "Penyewa dibuang",
       "emptyTitle": "Belum ada penyewa.",
-      "emptyDescription": "Penyewa akan muncul di sini setelah anda menjemput mereka. Setiap penyewa dilampirkan kepada unit melalui perjanjian.",
+      "emptyDescription": "Penyewa akan muncul di sini setelah anda menjemput mereka. Setiap penyewa dikaitkan kepada unit melalui perjanjian.",
       "deleteConfirm": {
         "title": "Buang penyewa ini?",
-        "body": "Tindakan ini akan membuang {name} dan jemputan tertangguh. Perjanjian sedia ada kekal direkod.",
+        "body": "Tindakan ini akan membuang {name} dan jemputan yang belum diterima. Perjanjian sedia ada kekal direkodkan.",
         "confirm": "Ya, buang"
       },
       "fields": {
@@ -398,7 +398,7 @@
         "email": "Emel",
         "phone": "Telefon",
         "status": "Status",
-        "icNumber": "No. MyKad",
+        "icNumber": "No. MyKad / IC",
         "dateOfBirth": "Tarikh lahir",
         "occupation": "Pekerjaan",
         "employer": "Majikan",
@@ -415,7 +415,7 @@
         "icNumber": "880314-14-5687",
         "nationality": "cth. Warganegara Malaysia",
         "emergencyName": "Orang yang boleh dihubungi jika perlu",
-        "relationship": "cth. Pasangan, Ibu bapa, Adik-beradik"
+        "relationship": "cth. Pasangan, ibu bapa, adik-beradik"
       },
       "status": {
         "invited": "Dijemput",
@@ -433,12 +433,12 @@
           "personal": "Peribadi",
           "emergency": "Hubungan kecemasan"
         },
-        "identityHelp": "Cara untuk hubungi penyewa. Status menunjukkan keadaan terkini.",
-        "personalHelp": "Profil dan butiran pengesahan. Hanya anda boleh lihat; penyewa uruskan akaun mereka sendiri.",
-        "emergencyHelp": "Siapa untuk dihubungi jika tidak dapat hubungi penyewa — kecemasan, terkunci, isu tengah malam.",
+        "identityHelp": "Cara untuk menghubungi penyewa ini. Status menunjukkan hubungan semasa penyewa dengan anda.",
+        "personalHelp": "Profil dan butiran pengesahan. Hanya anda boleh lihat; penyewa menguruskan akaun mereka sendiri.",
+        "emergencyHelp": "Orang untuk dihubungi jika anda tidak dapat menghubungi penyewa — kecemasan, terkunci, atau isu lewat malam.",
         "documents": {
           "title": "Dokumen",
-          "help": "Salinan IC, slip gaji, helaian tandatangan perjanjian, dll.",
+          "help": "Salinan IC, slip gaji, helaian tandatangan perjanjian, dan lain-lain.",
           "placeholderTitle": "Akan datang",
           "placeholderHelp": "Muat naik dokumen tiba dalam fasa seterusnya. Anda boleh lampirkan salinan IC, slip gaji, dan surat rujukan di sini."
         }
@@ -446,7 +446,7 @@
     },
     "units": {
       "sectionTitle": "Unit",
-      "sectionHelp": "Setiap hartanah perlu ada sekurang-kurangnya satu unit. Penyewa dan perjanjian dilampirkan kepada unit.",
+      "sectionHelp": "Setiap hartanah perlu ada sekurang-kurangnya satu unit. Penyewa dan perjanjian dikaitkan kepada unit.",
       "addCta": "Tambah unit",
       "addTitle": "Tambah unit",
       "editTitle": "Edit unit",
@@ -459,7 +459,7 @@
       "emptyHelp": "Tambah unit pertama untuk mula merekod penyewa dan perjanjian.",
       "deleteConfirm": {
         "title": "Padam unit ini?",
-        "body": "Tindakan ini akan memadam \"{label}\" dan rekod berkaitan. Tidak boleh dibatalkan.",
+        "body": "Tindakan ini akan memadam \"{label}\" dan rekod berkaitan. Tindakan ini tidak boleh dibatalkan.",
         "confirm": "Ya, padam"
       },
       "fields": {
@@ -467,19 +467,19 @@
         "status": "Status",
         "bedrooms": "Bilik tidur",
         "bathrooms": "Bilik air",
-        "sqft": "Keluasan (kp)"
+        "sqft": "Keluasan (kaki persegi)"
       },
       "placeholders": {
-        "label": "cth. Bilik utama, Seluruh unit, Tingkat bawah kedai"
+        "label": "cth. Bilik utama, seluruh unit, kedai tingkat bawah"
       },
       "status": {
-        "vacant": "Kosong",
-        "occupied": "Berpenghuni",
+        "vacant": "Belum disewa",
+        "occupied": "Sedang disewa",
         "maintenance": "Penyelenggaraan"
       }
     },
     "nav": {
-      "dashboard": "Papan pemuka",
+      "dashboard": "Halaman Utama",
       "properties": "Hartanah",
       "tenants": "Penyewa",
       "agreements": "Perjanjian",
@@ -489,19 +489,19 @@
       "settings": "Tetapan"
     },
     "dashboard": {
-      "title": "Papan pemuka",
-      "subtitle": "Gambaran ringkas portfolio anda buat masa kini.",
+      "title": "Halaman Utama",
+      "subtitle": "Gambaran ringkas portfolio anda buat masa ini.",
       "incomeMonth": "Pendapatan bulan ini",
       "incomeMonthHelp": "Pembayaran berjaya yang diterima dalam bulan kalendar semasa.",
       "occupancy": "Kadar penghunian",
-      "occupancyHelp": "{occupied} daripada {total} unit dihuni",
+      "occupancyHelp": "{occupied} daripada {total} unit sedang disewa",
       "outstanding": "Sewa tertunggak",
-      "outstandingHelp": "{count} invois belum dibayar (tertunda + tertunggak, termasuk denda lewat)",
+      "outstandingHelp": "{count} invois belum dibayar (belum dibayar + tertunggak, termasuk caj lewat)",
       "expiringAgreements": "Akan tamat",
       "expiringHelp": "Perjanjian aktif yang akan tamat dalam 60 hari.",
       "incomeChart": {
         "title": "Pendapatan — 12 bulan terakhir",
-        "help": "Jumlah pembayaran berjaya setiap bulan. Bar yang dipaparkan ialah bulan semasa.",
+        "help": "Jumlah pembayaran berjaya setiap bulan. Bar yang ditandakan ialah bulan semasa.",
         "avgLabel": "purata",
         "total": "Jumlah diterima",
         "average": "Purata / bulan",
@@ -515,13 +515,13 @@
           "overdue": "Tertunggak",
           "expiring": "Akan tamat",
           "notice_given": "Notis diberi",
-          "ticket_new": "Tiket baru",
+          "ticket_new": "Aduan baharu",
           "ticket_reopened": "Dibuka semula"
         }
       },
       "emptyState": {
         "title": "Tambah hartanah pertama",
-        "description": "Hartanah mengandungi unit yang anda sewakan. Mula dengan satu dan kami akan bantu seterusnya.",
+        "description": "Hartanah mengandungi unit yang anda sewakan. Mula dengan satu dan kami akan bantu langkah seterusnya.",
         "cta": "Tambah hartanah"
       }
     },
@@ -531,7 +531,7 @@
       "totalIncome": "Pendapatan untuk {year}",
       "totalIncomeHelp": "Jumlah pembayaran berjaya yang diterima dalam {year}.",
       "totalOutstanding": "Sewa tertunggak",
-      "totalOutstandingHelp": "Invois belum dibayar yang tarikh akhirnya dalam tahun ini (tertunda + tertunggak, dengan denda lewat).",
+      "totalOutstandingHelp": "Invois belum dibayar yang tarikh akhirnya dalam tahun ini (belum dibayar + tertunggak, termasuk caj lewat).",
       "csvDownload": "Muat turun CSV",
       "csvDownloaded": "CSV dimuat turun",
       "pdfDownload": "Muat turun PDF",
@@ -558,7 +558,7 @@
         "type": "Jenis",
         "city": "Bandar",
         "units": "Unit",
-        "occupied": "Dihuni",
+        "occupied": "Disewa",
         "occupancy": "Kadar penghunian %",
         "income": "Pendapatan (RM)",
         "outstanding": "Tertunggak (RM)",
@@ -570,17 +570,17 @@
       }
     },
     "tickets": {
-      "subtitle": "Isu dilapor oleh penyewa atau dilog oleh anda. Konteks dibawa bersama apabila anda klik ke dalam tiket.",
-      "createCta": "Log tiket",
+      "subtitle": "Isu yang dilaporkan oleh penyewa atau direkodkan oleh anda. Semua maklumat berkaitan tersedia apabila anda membuka aduan.",
+      "createCta": "Rekod aduan",
       "columnEmpty": "Tiada apa-apa di sini.",
       "byOwner": "Anda",
       "empty": {
-        "title": "Tiada tiket lagi",
-        "description": "Log tiket bagi pihak unit, atau tunggu penyewa melaporkan isu dari aplikasi mereka."
+        "title": "Tiada aduan lagi",
+        "description": "Rekod aduan bagi pihak unit, atau tunggu penyewa melaporkan isu melalui aplikasi mereka."
       },
       "status": {
-        "new": "Baru",
-        "in_progress": "Dalam proses",
+        "new": "Baharu",
+        "in_progress": "Sedang diproses",
         "resolved": "Selesai",
         "reopened": "Dibuka semula"
       },
@@ -596,17 +596,17 @@
         "low": "Rendah",
         "medium": "Sederhana",
         "high": "Tinggi",
-        "urgent": "Kritikal"
+        "urgent": "Segera"
       },
       "create": {
-        "title": "Log tiket",
-        "description": "Rekodkan isu pada unit. Anda boleh kaitkan kepada diri sendiri atau penyewa.",
-        "submit": "Log tiket",
-        "createdToast": "Tiket dilog",
+        "title": "Rekod aduan",
+        "description": "Rekodkan isu pada unit. Anda boleh kaitkan aduan kepada diri sendiri atau penyewa.",
+        "submit": "Rekod aduan",
+        "createdToast": "Aduan direkodkan",
         "reporterOwner": "Saya (pemilik)",
         "fields": {
           "unit": "Unit",
-          "reporter": "Dilog oleh",
+          "reporter": "Direkodkan oleh",
           "category": "Kategori",
           "priority": "Keutamaan",
           "title": "Ringkasan",
@@ -619,8 +619,8 @@
         }
       },
       "detail": {
-        "back": "Kembali ke senarai tiket",
-        "notFound": "Tiket tidak dijumpai.",
+        "back": "Kembali ke senarai penyelenggaraan",
+        "notFound": "Aduan tidak dijumpai.",
         "description": "Penerangan",
         "comments": "Komen",
         "addComment": "Tambah komen",
@@ -630,12 +630,12 @@
         "noComments": "Tiada komen lagi.",
         "tenant": "Penyewa",
         "statusActions": "Status",
-        "statusHelp": "Gerakkan tiket ini ke status seterusnya.",
-        "statusToast": "Ditandakan {status}",
-        "noTransitions": "Tiada peralihan dari keadaan ini.",
+        "statusHelp": "Gerakkan aduan ini ke status seterusnya.",
+        "statusToast": "Ditandakan sebagai {status}",
+        "noTransitions": "Tiada peralihan daripada status ini.",
         "transitions": {
-          "new": "Kembalikan ke Baru",
-          "in_progress": "Tandakan dalam proses",
+          "new": "Kembalikan kepada Baharu",
+          "in_progress": "Tandakan sedang diproses",
           "resolved": "Tandakan selesai",
           "reopened": "Buka semula"
         },
@@ -643,7 +643,7 @@
           "title": "Foto",
           "help": "Akan datang — foto yang dimuat naik penyewa tiba dalam fasa seterusnya, setelah storan fail siap.",
           "placeholderTitle": "Akan datang",
-          "placeholderHelp": "Foto yang dilampirkan kepada tiket tiba dalam fasa seterusnya, setelah storan fail siap."
+          "placeholderHelp": "Foto yang dilampirkan kepada aduan tiba dalam fasa seterusnya, setelah storan fail siap."
         }
       }
     },
@@ -668,7 +668,7 @@
         "placeholders": {
           "businessName": "cth. Aminah Properties"
         },
-        "emailManagedNote": "E-mel diuruskan oleh login akaun anda — tukar dari tetapan auth.",
+        "emailManagedNote": "E-mel diuruskan melalui log masuk akaun anda — tukar dari tetapan pengesahan.",
         "photo": "Foto profil",
         "photoHelp": "Akan datang — foto profil tiba dalam fasa seterusnya, setelah storan fail siap.",
         "photoPlaceholderTitle": "Akan datang",
@@ -680,22 +680,22 @@
       "preferences": {
         "languageHelp": "Mempengaruhi setiap label, format tarikh, dan mesej terjemahan dalam aplikasi.",
         "themeHelp": "Pilih tema tetap atau ikut sistem operasi anda.",
-        "themeLightHelp": "Sentiasa gunakan set token cerah.",
-        "themeDarkHelp": "Sentiasa gunakan set token gelap.",
-        "themeSystemHelp": "Ikut keutamaan OS anda."
+        "themeLightHelp": "Sentiasa gunakan tema cerah.",
+        "themeDarkHelp": "Sentiasa gunakan tema gelap.",
+        "themeSystemHelp": "Ikut keutamaan sistem operasi anda."
       },
       "notifications": {
         "channelTitle": "Saluran penghantaran",
-        "channelHelp": "Notifikasi akan dihantar melalui e-mel dan WhatsApp setelah fasa seterusnya menyambungkan Resend + WhatsApp Cloud API. Notifikasi dalam-aplikasi sentiasa aktif.",
+        "channelHelp": "Notifikasi akan dihantar melalui e-mel dan WhatsApp setelah fasa seterusnya menyambungkan Resend + WhatsApp Cloud API. Notifikasi dalam aplikasi sentiasa aktif.",
         "channelStatus": {
           "comingSoon": "Akan datang"
         },
-        "eventsTitle": "Apa yang dapat notifikasi",
+        "eventsTitle": "Notifikasi yang diterima",
         "eventsHelp": "Togol acara yang anda mahu diberitahu. Peraturan setiap saluran boleh dilaras kemudian.",
         "events": {
           "rent_reminder": {
             "title": "Peringatan sewa",
-            "help": "7h / 3h / 1h sebelum invois jatuh tempo, dan amaran apabila invois tertunggak."
+            "help": "7h / 3h / 1h sebelum invois sampai tarikh akhir, dan amaran apabila invois tertunggak."
           },
           "agreement_expiry": {
             "title": "Amaran tamat perjanjian",
@@ -706,8 +706,8 @@
             "help": "Pengesahan setiap kali penyewa membayar invois — berguna sebagai semakan manual."
           },
           "ticket_update": {
-            "title": "Kemaskini tiket penyelenggaraan",
-            "help": "Apabila penyewa log tiket baru, beri komen, atau status berubah."
+            "title": "Kemas kini aduan penyelenggaraan",
+            "help": "Apabila penyewa merekod aduan baharu, memberi komen, atau status berubah."
           },
           "invite_accepted": {
             "title": "Jemputan penyewa diterima",
@@ -726,11 +726,11 @@
         "upgradeCta": "Naik taraf",
         "upgradeStub": "Akan datang — langganan tiba dalam fasa seterusnya. Demo sahaja buat masa ini.",
         "youreOnThis": "Anda berada pada pelan ini.",
-        "disclaimer": "Harga adalah ilustrasi. Harga muktamad + bil tiba dalam fasa seterusnya.",
+        "disclaimer": "Harga adalah ilustrasi. Harga muktamad dan bil tiba dalam fasa seterusnya.",
         "tiers": {
           "free": {
             "name": "Percuma",
-            "description": "Untuk pemilik hartanah tunggal yang baru bermula."
+            "description": "Untuk pemilik satu hartanah yang baru bermula."
           },
           "starter": {
             "name": "Pemula",
@@ -738,11 +738,11 @@
           },
           "pro": {
             "name": "Pro",
-            "description": "Untuk portfolio yang sedang berkembang dengan keperluan laporan."
+            "description": "Untuk portfolio yang sedang berkembang dan memerlukan laporan."
           },
           "business": {
             "name": "Perniagaan",
-            "description": "Untuk ejen dan operator pelbagai-organisasi."
+            "description": "Untuk ejen dan pengendali pelbagai organisasi."
           }
         }
       }
@@ -766,13 +766,13 @@
           "name": "cth. Suria KLCC #12-3A",
           "address": "Alamat jalan",
           "state": "Pilih negeri",
-          "postcode": "5-digit"
+          "postcode": "5 digit"
         }
       },
       "types": {
         "condo": "Kondominium",
-        "landed": "Tanah",
-        "shoplot": "Lot kedai",
+        "landed": "Rumah landed",
+        "shoplot": "Rumah kedai",
         "room": "Bilik"
       },
       "detail": {
@@ -784,7 +784,7 @@
         "deletedToast": "Hartanah dipadam",
         "deleteConfirm": {
           "title": "Padam hartanah ini?",
-          "body": "Tindakan ini akan memadam {name} dan rekod berkaitan. Tidak boleh dibatalkan.",
+          "body": "Tindakan ini akan memadam {name} dan rekod berkaitan. Tindakan ini tidak boleh dibatalkan.",
           "confirm": "Ya, padam"
         },
         "tabs": {
@@ -797,7 +797,7 @@
         "overviewHelp": "Apa yang sedang berlaku dengan hartanah ini sekarang.",
         "detailsHelp": "Identiti, lokasi, dan spesifikasi fizikal. Boleh diubah bila-bila masa.",
         "ownershipHelp": "Siapa pemilik, kos asal, nilai semasa, dan baki hutang.",
-        "utilitiesHelp": "Yuran berulang dan nombor akaun perkhidmatan — kos operasi.",
+        "utilitiesHelp": "Yuran berulang dan nombor akaun perkhidmatan — kos untuk mengurus hartanah ini.",
         "sections": {
           "identity": "Identiti",
           "location": "Lokasi",
@@ -814,13 +814,13 @@
           "internalLabel": "Label dalaman",
           "notes": "Catatan",
           "yearBuilt": "Tahun dibina",
-          "builtUpSqft": "Keluasan binaan (kp)",
-          "landSqft": "Keluasan tanah (kp)",
+          "builtUpSqft": "Keluasan binaan (kaki persegi)",
+          "landSqft": "Keluasan tanah (kaki persegi)",
           "bedrooms": "Bilik tidur",
           "bathrooms": "Bilik air",
           "parkingLots": "Tempat letak kereta",
           "furnishing": "Perabot",
-          "titleType": "Jenis hak milik",
+          "titleType": "Jenis pegangan",
           "titleNumber": "Nombor hak milik",
           "lotNumber": "Nombor lot",
           "tenureExpiry": "Tarikh tamat pajakan",
@@ -831,19 +831,19 @@
           "stampDuty": "Duti setem (RM)",
           "legalFees": "Yuran guaman (RM)",
           "currentMarketValue": "Nilai pasaran semasa (RM)",
-          "lastValuedAt": "Tarikh penilaian",
+          "lastValuedAt": "Tarikh penilaian terakhir",
           "valuationSource": "Sumber penilaian",
           "mortgageBank": "Bank",
           "loanAmount": "Jumlah pinjaman (RM)",
           "outstandingBalance": "Baki belum dijelaskan (RM)",
           "monthlyInstalment": "Ansuran bulanan (RM)",
-          "tenureYears": "Tempoh (tahun)",
+          "tenureYears": "Tempoh pinjaman (tahun)",
           "maturityDate": "Tarikh matang",
           "interestRatePct": "Kadar faedah (%)",
           "coOwnerName": "Pemilik bersama",
           "coOwnerSharePct": "Bahagian (%)",
           "monthlyMaintenanceFee": "Yuran penyelenggaraan / bulan (RM)",
-          "sinkingFund": "Kumpulan wang penampan / bulan (RM)",
+          "sinkingFund": "Sinking fund / bulan (RM)",
           "quitRentAnnual": "Cukai tanah / tahun (RM)",
           "assessmentRateAnnual": "Cukai pintu / tahun (RM)",
           "buildingInsuranceAnnual": "Insurans bangunan / tahun (RM)",
@@ -856,7 +856,7 @@
         },
         "placeholders": {
           "internalLabel": "Rujukan ringkas (pilihan)",
-          "notes": "Apa-apa lagi yang patut diingat",
+          "notes": "Apa-apa lagi yang patut diingat tentang hartanah ini",
           "titleNumber": "PN 12345 / Geran 67890",
           "mortgageBank": "cth. Maybank, CIMB",
           "coOwnerName": "Nama pemilik bersama"
@@ -868,7 +868,7 @@
         },
         "titleTypeOptions": {
           "freehold": "Pegangan bebas",
-          "leasehold": "Pajakan"
+          "leasehold": "Pegangan pajakan"
         },
         "valuationSources": {
           "bank": "Penilaian bank",
@@ -877,11 +877,11 @@
         },
         "addCoOwner": "Tambah pemilik",
         "shareSum": "Jumlah: {pct}%",
-        "coOwnersHelp": "Pemilikan bersama. Bahagian mesti berjumlah tepat 100%, dan satu pemilik mesti ditandakan utama.",
+        "coOwnersHelp": "Pecahan pemilikan bersama. Jumlah bahagian mesti tepat 100%, dan satu pemilik mesti ditandakan sebagai utama.",
         "coOwners": {
           "primaryLabel": "Utama",
           "primaryRequired": "Pilih pemilik utama",
-          "cantRemovePrimary": "Tetapkan pemilik utama yang lain sebelum mengeluarkan ini.",
+          "cantRemovePrimary": "Tetapkan pemilik utama yang lain sebelum membuang pemilik ini.",
           "blockedSave": "Bahagian mesti berjumlah 100% dengan satu pemilik utama sebelum simpan.",
           "actionsAria": "Tindakan pemilik bersama",
           "menuSetPrimary": "Tetapkan sebagai utama",
@@ -894,13 +894,13 @@
         "gains": {
           "gain": "Keuntungan kasar",
           "rpgt": "Anggaran RPGT",
-          "net": "Hasil bersih",
+          "net": "Hasil bersih anggaran",
           "cost": "Kos pembelian",
-          "disclaimer": "Anggaran sahaja — andaian individu pemastautin; bukan warganegara, warga asing, dan syarikat dikenakan kadar berbeza. Kos jualan (komisen agen, yuran guaman jualan) dan perbelanjaan ubahsuai tidak diambil kira. Bukan nasihat cukai."
+          "disclaimer": "Anggaran sahaja — berdasarkan andaian individu pemastautin. Bukan warganegara, warga asing, dan syarikat mungkin dikenakan kadar berbeza. Kos jualan seperti komisen ejen, yuran guaman jualan, dan kos ubah suai tidak diambil kira. Ini bukan nasihat cukai."
         },
         "overview": {
           "totalUnits": "Unit",
-          "occupied": "Berpenghuni",
+          "occupied": "Sedang disewa",
           "activeAgreements": "Perjanjian aktif",
           "monthlyIncome": "Pendapatan bulanan",
           "activeTenants": "Penyewa aktif",

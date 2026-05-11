@@ -105,10 +105,10 @@
     "landing": {
       "pageTitle": "Demo · Roofly.my",
       "eyebrow": "Demo environment",
-      "title": "Welcome to the Roofly demo",
+      "title": "Welcome to the Roofly.my",
       "subtitle": "Pick a role to start exploring. All data shown is sample data — nothing you do here is saved.",
       "footerPrefix": "Want the real thing? Visit",
-      "footerSuffix": "when we launch."
+      "footerSuffix": "when we launch and wait for our launch notification email."
     },
     "audience": {
       "owner": {
