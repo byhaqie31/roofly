@@ -3,24 +3,43 @@
  *
  * Routing matrix:
  *
+<<<<<<< HEAD
+ * Path        | demo subdomain          | uat (unauth)              | uat (auth)                    | production (unauth) | production (auth)
+ * ------------|-------------------------|---------------------------|-------------------------------|---------------------|---------------------
+ * /           | redirect → /demo        | redirect → /coming-soon   | falls through (auth-based)    | redirect → /coming-soon | falls through
+ * /demo/*     | render                  | render (testers preview)  | render                        | 404                 | 404
+ * /coming-soon| redirect → /demo        | render                    | render                        | render              | render
+ * everything  | render                  | render                    | render                        | render              | render
+=======
  * Path        | demo subdomain          | uat / prod (unauthenticated) | uat / prod (authenticated)
  * ------------|-------------------------|------------------------------|---------------------------
  * /           | redirect → /demo        | redirect → /coming-soon       | falls through (auth-based)
  * /demo/*     | render                  | 404                          | 404
  * /coming-soon| redirect → /demo        | render                       | render
  * everything  | render                  | render                       | render
+>>>>>>> origin/main
  *
  * Why:
  *  - Demo subdomain: clients land directly on the curated demo, never see the
  *    pre-launch marketing page.
+<<<<<<< HEAD
+ *  - UAT: testers / stakeholders can preview /demo by URL, but root still shows
+ *    the marketing page so it behaves like prod for the unauth flow.
+ *  - Production: /demo is hidden so real customers never stumble onto it.
+=======
  *  - uat/prod: pre-launch state — root URL shows the marketing/coming-soon page.
  *    Once the product launches, swap this to redirect to /auth/login (or just
  *    delete this branch and let pages/index.vue handle auth-based routing).
+>>>>>>> origin/main
  *  - Authenticated users on uat/prod skip /coming-soon — they're either testers
  *    or real customers and should land in their dashboard via pages/index.vue.
  */
 export default defineNuxtRouteMiddleware((to) => {
+<<<<<<< HEAD
+  const { isDemo, isProduction } = useEnv();
+=======
   const { isDemo } = useEnv();
+>>>>>>> origin/main
   const isDemoRoute = to.path === "/demo" || to.path.startsWith("/demo/");
   const isComingSoon = to.path === "/coming-soon";
 
@@ -33,7 +52,11 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   // uat / prod from here onwards
+<<<<<<< HEAD
+  if (isDemoRoute && isProduction) {
+=======
   if (isDemoRoute) {
+>>>>>>> origin/main
     throw createError({ statusCode: 404, statusMessage: "Page not found" });
   }
 

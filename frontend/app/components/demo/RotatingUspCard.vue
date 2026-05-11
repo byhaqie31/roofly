@@ -91,7 +91,7 @@ const visibleUsps = computed(() =>
         <article
           v-for="usp in visibleUsps"
           :key="usp.title"
-          class="relative rounded-lg p-4 overflow-hidden"
+          class="relative rounded-lg p-4 overflow-hidden min-h-[180px]"
           style="
             background: rgba(247, 244, 237, 0.04);
             border: 1px solid rgba(247, 244, 237, 0.1);

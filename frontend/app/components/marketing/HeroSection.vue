@@ -60,10 +60,10 @@ const onPrimaryCta = () => emit("scroll-to-capture");
       {{ t("marketing.hero.subhead") }}
     </p>
 
-    <div class="mt-10 flex flex-col sm:flex-row items-center gap-3">
+    <div class="mt-10 w-full max-w-md sm:max-w-none sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
       <button
         type="button"
-        class="inline-flex items-center gap-2 px-6 py-3 rounded-pill text-body font-semibold transition-all hover:scale-[1.02] active:scale-100"
+        class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-pill text-body font-semibold transition-all hover:scale-[1.02] active:scale-100"
         style="background-color: #e76a3f; color: #1c1a17"
         @click="onPrimaryCta"
       >
@@ -75,7 +75,7 @@ const onPrimaryCta = () => emit("scroll-to-capture");
         href="https://demo.roofly.my"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center gap-2 px-6 py-3 rounded-pill text-body font-medium transition-all hover:opacity-100"
+        class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-pill text-body font-medium transition-all hover:opacity-100"
         style="
           color: rgba(247, 244, 237, 0.85);
           box-shadow: inset 0 0 0 1px rgba(247, 244, 237, 0.2);

@@ -41,30 +41,37 @@ const palette = computed(() =>
     class="relative z-10 px-6 lg:px-12 py-8 mt-16 border-t"
     :style="{ borderColor: palette.border }"
   >
-    <p
-      class="text-micro text-center"
+    <div
+      class="text-micro text-center flex flex-col items-center gap-1.5 md:flex-row md:flex-wrap md:justify-center md:gap-x-2 md:gap-y-1.5"
       :style="{ color: palette.text }"
     >
-      © {{ year }} Roofly.my · Designed and developed with care and love by
-      <a
-        href="https://baihaqie.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="font-medium underline underline-offset-2 hover:opacity-80 transition-opacity"
-        :style="{ color: palette.link }"
-      >
-        Qie
-      </a>
-      · One of the greatest projects of
-      <a
-        href="https://axelnovaventures.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="font-medium underline underline-offset-2 hover:opacity-80 transition-opacity"
-        :style="{ color: palette.link }"
-      >
-        Axel Nova Ventures
-      </a>
-    </p>
+      <span>© {{ year }} Roofly.my</span>
+      <span aria-hidden="true" class="hidden md:inline">·</span>
+      <span>
+        Designed and developed with care and love by
+        <a
+          href="https://baihaqie.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-medium underline underline-offset-2 hover:opacity-80 transition-opacity"
+          :style="{ color: palette.link }"
+        >
+          Qie
+        </a>
+      </span>
+      <span aria-hidden="true" class="hidden md:inline">·</span>
+      <span>
+        One of the greatest projects of
+        <a
+          href="https://axelnovaventures.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-medium underline underline-offset-2 hover:opacity-80 transition-opacity"
+          :style="{ color: palette.link }"
+        >
+          Axel Nova Ventures
+        </a>
+      </span>
+    </div>
   </footer>
 </template>
