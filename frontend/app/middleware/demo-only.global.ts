@@ -3,24 +3,24 @@
  *
  * Routing matrix:
  *
- * Path        | demo subdomain          | uat / prod (unauthenticated) | uat / prod (authenticated)
- * ------------|-------------------------|------------------------------|---------------------------
- * /           | redirect → /demo        | redirect → /coming-soon       | falls through (auth-based)
- * /demo/*     | render                  | 404                          | 404
- * /coming-soon| redirect → /demo        | render                       | render
- * everything  | render                  | render                       | render
+ * Path        | demo subdomain          | uat (unauth)              | uat (auth)                    | production (unauth) | production (auth)
+ * ------------|-------------------------|---------------------------|-------------------------------|---------------------|---------------------
+ * /           | redirect → /demo        | redirect → /coming-soon   | falls through (auth-based)    | redirect → /coming-soon | falls through
+ * /demo/*     | render                  | render (testers preview)  | render                        | 404                 | 404
+ * /coming-soon| redirect → /demo        | render                    | render                        | render              | render
+ * everything  | render                  | render                    | render                        | render              | render
  *
  * Why:
  *  - Demo subdomain: clients land directly on the curated demo, never see the
  *    pre-launch marketing page.
- *  - uat/prod: pre-launch state — root URL shows the marketing/coming-soon page.
- *    Once the product launches, swap this to redirect to /auth/login (or just
- *    delete this branch and let pages/index.vue handle auth-based routing).
+ *  - UAT: testers / stakeholders can preview /demo by URL, but root still shows
+ *    the marketing page so it behaves like prod for the unauth flow.
+ *  - Production: /demo is hidden so real customers never stumble onto it.
  *  - Authenticated users on uat/prod skip /coming-soon — they're either testers
  *    or real customers and should land in their dashboard via pages/index.vue.
  */
 export default defineNuxtRouteMiddleware((to) => {
-  const { isDemo } = useEnv();
+  const { isDemo, isProduction } = useEnv();
   const isDemoRoute = to.path === "/demo" || to.path.startsWith("/demo/");
   const isComingSoon = to.path === "/coming-soon";
 
@@ -33,7 +33,7 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   // uat / prod from here onwards
-  if (isDemoRoute) {
+  if (isDemoRoute && isProduction) {
     throw createError({ statusCode: 404, statusMessage: "Page not found" });
   }
 

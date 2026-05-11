@@ -302,15 +302,6 @@ Tailwind defaults are fine. Sidebar collapses to drawer at `md` (768px).
 
 ### 4.4 Detail-page header
 
-<<<<<<< HEAD
-Resource detail pages (property, tenant, agreement, etc.) share one header pattern: a single flex row with the **title block on the left** and **resource-level actions on the right, baseline-aligned with the bottom of the title block** (i.e. on the same line as the supporting/address copy, not the eyebrow pill).
-
-```
-┌───────────────────────────────────────────────────────────────┐
-│ [Eyebrow pill]                                                │
-│ Resource title (display-sub)                                  │
-│ supporting line · ID · location          [Action]  [Action]   │
-=======
 Resource detail pages (property, tenant, agreement, etc.) share one header pattern that adapts per breakpoint:
 
 - **Desktop (`sm:` and up)** — title block on the left, resource-level action on the right, baseline-aligned with the bottom of the title block (same line as the supporting copy, not the eyebrow pill). Back link sits alone on its own row above.
@@ -333,15 +324,10 @@ Mobile:
 │ [Eyebrow pill]                                                │
 │ Resource title — full width                                   │
 │ supporting line                                               │
->>>>>>> 207df866d64c49e3bd853678b573f0023eb84e20
 └───────────────────────────────────────────────────────────────┘
 ```
 
 ```vue
-<<<<<<< HEAD
-<header class="mb-6 flex items-end justify-between gap-4">
-  <div class="min-w-0">
-=======
 <!-- Back-link row: on mobile this row also carries the action; on desktop the action moves down to the title row -->
 <div class="mb-6 flex items-center justify-between gap-2">
   <NuxtLink to="/owner/<resource>" class="inline-flex items-center gap-1 text-caption text-ink-muted transition hover:text-ink">
@@ -358,40 +344,26 @@ Mobile:
 <!-- Title block: stacks vertically on mobile, becomes a flex row with the action on desktop -->
 <header class="mb-6 sm:flex sm:items-end sm:justify-between sm:gap-4">
   <div class="sm:min-w-0">
->>>>>>> 207df866d64c49e3bd853678b573f0023eb84e20
     <Pill tone="neutral" class="mb-3">{{ eyebrow }}</Pill>
     <h1 class="text-display-sub font-semibold tracking-snug text-ink">
       {{ title }}
     </h1>
     <p class="mt-2 text-caption text-ink-muted">{{ supporting }}</p>
   </div>
-<<<<<<< HEAD
-  <Button variant="ghost" size="sm" class="shrink-0" @click="...">
-    <Icon name="Trash2" :size="14" class="mr-1" />
-    Delete
-=======
   <!-- Desktop-only action -->
   <Button v-if="resource" variant="ghost" size="sm" class="hidden shrink-0 sm:inline-flex" @click="...">
     <Icon name="Trash2" :size="14" class="mr-1" />
     {{ $t("...detail.delete") }}
->>>>>>> 207df866d64c49e3bd853678b573f0023eb84e20
   </Button>
 </header>
 ```
 
 Rules:
-<<<<<<< HEAD
-- `items-end` on the flex parent so actions sit next to the supporting line, not floating up to the eyebrow.
-- `min-w-0` on the title block + `shrink-0` on the action so a long title truncates instead of pushing the button out of view.
-- Use `Button size="sm" variant="ghost"` for destructive / utility actions here. Reserve `variant="primary"` for the page's main CTA, which usually lives on the *list* page (e.g. `+ Add property`), not the detail page.
-- Don't stack actions on a separate row above the content card — that introduces a stray gap and breaks the rhythm.
-=======
 - **Render the action twice**, gated by `sm:hidden` (mobile) and `hidden sm:inline-flex` (desktop). Both bind to the same handler. Trying to position a single instance with `order` / `absolute` either wastes a row on mobile or knocks the title around on desktop.
 - Desktop: `sm:items-end` on the header so the action aligns with the supporting-line baseline, not the eyebrow pill. `sm:min-w-0` on the title block + `shrink-0` on the action keeps long titles truncating instead of pushing the button off-screen.
 - Use `Button size="sm" variant="ghost"` for destructive / utility actions here. Reserve `variant="primary"` for the page's main CTA, which usually lives on the *list* page (e.g. `+ Add property`), not the detail page.
 - Gate both buttons with `v-if="resource"` so they disappear during loading / not-found states.
 - For multiple actions, stack them in a `flex gap-2` wrapper at the action position, smallest-priority leftmost, primary-destructive rightmost.
->>>>>>> 207df866d64c49e3bd853678b573f0023eb84e20
 
 ---
 
@@ -515,9 +487,6 @@ PDFs are the **only** place we deviate from cream.
 
 ---
 
-<<<<<<< HEAD
-## 11. Hard rules — do not break
-=======
 ## 11. Mobile patterns
 
 Living section — every design enhancement that adjusts behaviour at narrow widths gets captured here so it stays consistent across pages.
@@ -758,7 +727,6 @@ The table is the truth; the cards are a presentation. Don't fork the data shape 
 ---
 
 ## 12. Hard rules — do not break
->>>>>>> 207df866d64c49e3bd853678b573f0023eb84e20
 
 1. Page background is **always** `#F7F4ED` (light) or `#1C1A17` (dark). Pure white only inside generated PDFs.
 2. **No box-shadow on cards.** Borders only.

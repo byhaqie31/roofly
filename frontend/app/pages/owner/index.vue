@@ -15,7 +15,12 @@ const { t } = useI18n();
 useHead({ title: () => t("owner.dashboard.title") });
 
 const dashboard = useDashboard();
-onMounted(() => dashboard.load());
+const demoTour = useDemoTour();
+onMounted(async () => {
+  await dashboard.load();
+  // Auto-start the product tour once per browser on demo. No-op elsewhere.
+  demoTour.maybeAutoStart();
+});
 
 const occupiedCount = computed(
   () => dashboard.units.value.filter((u) => u.status === "occupied").length,
@@ -91,7 +96,7 @@ const attentionTone: Record<
     </Card>
 
     <template v-else>
-      <section class="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+      <section data-tour="stats" class="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-6 2xl:grid-cols-4">
         <Card padding="standard">
           <p class="text-caption text-ink-muted">
             {{ t("owner.dashboard.incomeMonth") }}
@@ -145,7 +150,7 @@ const attentionTone: Record<
         </Card>
       </section>
 
-      <section class="mb-6 sm:mb-8">
+      <section data-tour="income-chart" class="mb-6 sm:mb-8">
         <Card padding="loose">
           <header class="mb-4 flex items-end justify-between">
             <div>
@@ -195,7 +200,7 @@ const attentionTone: Record<
         </Card>
       </section>
 
-      <section>
+      <section data-tour="attention">
         <Card padding="loose">
           <header class="mb-4">
             <h2 class="text-card-title font-semibold text-ink">

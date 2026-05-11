@@ -1,0 +1,144 @@
+/**
+ * Roofly skin for driver.js popovers.
+ *
+ * Loaded lazily by useDemoTour() (after driver's own driver.css) so it never
+ * touches non-demo bundles. Targets `.driver-popover.roofly-tour` so it can
+ * coexist with any future tour using the default skin.
+ *
+ * All colours come from the live design tokens, so light/dark theme switches
+ * are picked up automatically.
+ */
+
+.driver-popover.roofly-tour {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.04),
+    0 12px 32px -8px rgba(28, 26, 23, 0.18),
+    inset 0 0 0 1px var(--accent-soft);
+  padding: 18px 18px 14px;
+  max-width: 360px;
+  font-family: inherit;
+}
+
+.driver-popover.roofly-tour .driver-popover-title {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+  padding-right: 24px; /* leave room for the close button */
+}
+
+.driver-popover.roofly-tour .driver-popover-description {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.driver-popover.roofly-tour .driver-popover-close-btn {
+  color: var(--text-faint);
+  font-size: 18px;
+  font-weight: 400;
+  width: 24px;
+  height: 24px;
+  top: 12px;
+  right: 12px;
+  transition: color 0.15s ease;
+}
+.driver-popover.roofly-tour .driver-popover-close-btn:hover {
+  color: var(--accent);
+  background: transparent;
+}
+
+.driver-popover.roofly-tour .driver-popover-footer {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.driver-popover.roofly-tour .driver-popover-progress-text {
+  color: var(--text-faint);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.driver-popover.roofly-tour .driver-popover-navigation-btns {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.driver-popover.roofly-tour .driver-popover-prev-btn,
+.driver-popover.roofly-tour .driver-popover-next-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  text-shadow: none;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.driver-popover.roofly-tour .driver-popover-prev-btn:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+.driver-popover.roofly-tour .driver-popover-next-btn {
+  background: var(--accent);
+  color: var(--surface-on-dark);
+  border-color: var(--accent);
+}
+.driver-popover.roofly-tour .driver-popover-next-btn:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* Arrow tints — driver.js draws triangles via border-color on the side. */
+.driver-popover.roofly-tour .driver-popover-arrow-side-top {
+  border-top-color: var(--surface-raised);
+}
+.driver-popover.roofly-tour .driver-popover-arrow-side-right {
+  border-right-color: var(--surface-raised);
+}
+.driver-popover.roofly-tour .driver-popover-arrow-side-bottom {
+  border-bottom-color: var(--surface-raised);
+}
+.driver-popover.roofly-tour .driver-popover-arrow-side-left {
+  border-left-color: var(--surface-raised);
+}
+
+/* Spotlight intentionally has no extra ring — driver.js's overlay cutout
+ * + the popover anchor is enough; an accent halo on top read as visual
+ * noise against already-styled cards. */
+
+/* Mobile / very narrow viewports — popover needs to fit edge-to-edge with
+ * a small breathing margin, and the type scales down a notch so it isn't
+ * cramped against the smaller width. Targets the breakpoint where the
+ * mobile step set kicks in (matchMedia max-width: 767px). */
+@media (max-width: 480px) {
+  .driver-popover.roofly-tour {
+    max-width: calc(100vw - 24px);
+    padding: 14px 14px 12px;
+  }
+  .driver-popover.roofly-tour .driver-popover-title {
+    font-size: 14px;
+  }
+  .driver-popover.roofly-tour .driver-popover-description {
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+  .driver-popover.roofly-tour .driver-popover-prev-btn,
+  .driver-popover.roofly-tour .driver-popover-next-btn {
+    padding: 6px 12px;
+  }
+}

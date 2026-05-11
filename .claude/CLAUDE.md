@@ -78,6 +78,7 @@ frontend/app/
 
 ## Locked-in conventions
 
+- **Git flow: feature → `UAT` → `main`. Never feature → `main`.** All `gh pr create` calls in this repo use `--base UAT`. The only `--base main` PR is a release promotion with `--head UAT`. Enforced by [.github/workflows/guard-main.yml](.github/workflows/guard-main.yml) (required check on `protect-main`). Full rules in [docs/global/BRANCH-PROTECTION.md](docs/global/BRANCH-PROTECTION.md).
 - **Money is integer sen everywhere.** Format only at the render edge via `useMoney().formatRM` or `<MoneyDisplay>`. Never store formatted strings.
 - **Mock toggle is single source of truth.** All services read `useEnv().useMock` inside the composable — never module-level constants. Flip per-environment via `NUXT_PUBLIC_USE_MOCK=false`. Demo (`NUXT_PUBLIC_APP_ENV=demo`) always uses mocks regardless of the flag, because `useEnv` derives `useMock = isDemo || config.public.useMock`. See `composables/useEnv.ts`.
 - **Per-environment behaviour goes through `useEnv()`.** One env var (`NUXT_PUBLIC_APP_ENV` = `"demo" | "uat" | "production"`) drives all UI feature flags (`isDemo`, `showDemoShortcuts`, `showFloatingFeedback`, `showEnvBanner`, `redirectRootToDemo`, etc.). Components ask for derived flags by name, not for the raw env. Add new env-driven features as one new derived field in `composables/useEnv.ts`, not a new env var per feature.
