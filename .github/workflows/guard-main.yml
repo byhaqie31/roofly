@@ -1,0 +1,15 @@
+name: guard-main
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  only-from-uat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reject non-UAT head
+        if: github.head_ref != 'UAT'
+        run: |
+          echo "::error::PRs into main must come from UAT (got: ${{ github.head_ref }}). See docs/global/BRANCH-PROTECTION.md."
+          exit 1
