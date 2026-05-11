@@ -66,7 +66,6 @@
       "continueAsTenant": "Continue as tenant",
       "comingSoon": "Coming soon"
     },
-<<<<<<< HEAD
     "tour": {
       "ctaLabel": "Take a tour",
       "next": "Next",
@@ -103,8 +102,6 @@
         }
       }
     },
-=======
->>>>>>> origin/main
     "landing": {
       "pageTitle": "Demo · Roofly.my",
       "eyebrow": "Demo environment",
@@ -176,11 +173,7 @@
       "headlineAccent": "reimagined.",
       "subhead": "The modern home for Malaysian landlords and their tenants. Properties, agreements, payments, maintenance — finally, all in one place.",
       "ctaPrimary": "Get notified",
-<<<<<<< HEAD
       "ctaSecondary": "Explore demo"
-=======
-      "ctaSecondary": "Watch the demo"
->>>>>>> origin/main
     },
     "usps": {
       "eyebrow": "What's coming",
