@@ -66,6 +66,7 @@
       "continueAsTenant": "Teruskan sebagai penyewa",
       "comingSoon": "Akan datang"
     },
+<<<<<<< HEAD
     "tour": {
       "ctaLabel": "Mulakan tour",
       "next": "Seterusnya",
@@ -102,6 +103,8 @@
         }
       }
     },
+=======
+>>>>>>> origin/main
     "landing": {
       "pageTitle": "Demo · Roofly.my",
       "eyebrow": "Persekitaran demo",
@@ -173,7 +176,11 @@
       "headlineAccent": "direka semula.",
       "subhead": "Rumah moden untuk tuan rumah Malaysia dan penyewa mereka. Hartanah, perjanjian, pembayaran, penyelenggaraan — akhirnya, semuanya di satu tempat.",
       "ctaPrimary": "Beritahu saya",
+<<<<<<< HEAD
       "ctaSecondary": "Terokai demo"
+=======
+      "ctaSecondary": "Tonton demo"
+>>>>>>> origin/main
     },
     "usps": {
       "eyebrow": "Yang akan datang",
