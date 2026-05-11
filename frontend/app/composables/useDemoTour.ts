@@ -86,6 +86,16 @@ export const useDemoTour = () => {
   const start = async () => {
     if (!import.meta.client) return;
 
+    // Tour anchors all live on /owner. If the trigger is fired from another
+    // page in the owner shell (Payments, Tenants, …), bounce back first so
+    // every step has a real DOM target to attach to.
+    const route = useRoute();
+    if (route.path !== "/owner") {
+      await navigateTo("/owner");
+      // Wait for the dashboard to mount + paint before driver.js measures.
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    }
+
     // Lazy-load runtime + base styles + Roofly skin so prod/uat bundles stay clean.
     const [{ driver }] = await Promise.all([
       import("driver.js"),
