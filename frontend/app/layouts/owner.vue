@@ -6,14 +6,17 @@ import ThemeToggle from "~/components/topbar/ThemeToggle.vue";
 import LangSwitcher from "~/components/topbar/LangSwitcher.vue";
 import UserMenu from "~/components/topbar/UserMenu.vue";
 import MobileNavDrawer from "~/components/layout/MobileNavDrawer.vue";
+import DemoTourButton from "~/components/demo/DemoTourButton.vue";
 
 const drawerOpen = ref(false);
+const { isDemo } = useEnv();
 </script>
 
 <template>
   <div class="min-h-dvh bg-surface-page text-ink flex">
     <!-- Desktop sidebar -->
     <aside
+      data-tour="sidebar"
       class="hidden md:flex w-64 shrink-0 flex-col border-r border-line-passive px-3 py-4"
     >
       <NuxtLink
@@ -39,6 +42,7 @@ const drawerOpen = ref(false);
         <div class="flex items-center gap-2 md:hidden">
           <button
             type="button"
+            data-tour="mobile-menu"
             class="inline-flex items-center justify-center w-9 h-9 rounded-sm text-ink-strong hover:bg-[rgba(28,28,28,0.04)] focus-visible:shadow-focus transition"
             aria-label="Open menu"
             @click="drawerOpen = true"
@@ -54,7 +58,8 @@ const drawerOpen = ref(false);
           </NuxtLink>
         </div>
 
-        <div class="flex items-center gap-1 ml-auto">
+        <div class="flex items-center gap-2 ml-auto">
+          <DemoTourButton v-if="isDemo" />
           <div class="hidden md:inline-flex md:items-center md:gap-1">
             <ThemeToggle />
             <LangSwitcher />

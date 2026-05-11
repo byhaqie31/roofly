@@ -66,6 +66,42 @@
       "continueAsTenant": "Teruskan sebagai penyewa",
       "comingSoon": "Akan datang"
     },
+    "tour": {
+      "ctaLabel": "Mulakan tour",
+      "next": "Seterusnya",
+      "prev": "Kembali",
+      "done": "Faham",
+      "steps": {
+        "welcome": {
+          "title": "Selamat datang ke dashboard demo",
+          "description": "Tour ringkas enam langkah untuk shell pemilik. Boleh main semula bila-bila masa dari kanan atas."
+        },
+        "sidebar": {
+          "title": "Portal anda dalam satu kolum",
+          "description": "Hartanah, penyewa, perjanjian, pembayaran, penyelenggaraan, laporan — semua di sini."
+        },
+        "mobileMenu": {
+          "title": "Semua alat, satu sentuhan",
+          "description": "Tekan menu untuk buka laci navigasi — hartanah, penyewa, perjanjian, pembayaran, penyelenggaraan, dan laporan semua ada di situ."
+        },
+        "stats": {
+          "title": "Metrik utama sekilas pandang",
+          "description": "Pendapatan bulanan, kadar penghunian, tunggakan, dan perjanjian akan tamat. Dikemaskini langsung."
+        },
+        "incomeChart": {
+          "title": "Dua belas bulan pendapatan",
+          "description": "Lihat trend, kemerosotan, dan bulan terbaik. Muat turun CSV mentah dari tab Laporan."
+        },
+        "attention": {
+          "title": "Perkara perlu tindakan hari ini",
+          "description": "Invois lewat, perjanjian akan tamat, tiket penyelenggaraan baru — disusun mengikut keutamaan untuk diselesaikan sekali gus."
+        },
+        "feedback": {
+          "title": "Kongsikan pendapat anda",
+          "description": "Habis meneroka? Tekan di sini bila-bila masa untuk beri maklum balas — apa yang berkesan, apa yang tidak, apa yang kurang. Borang ringkas akan dibuka di tab baharu."
+        }
+      }
+    },
     "landing": {
       "pageTitle": "Demo · Roofly.my",
       "eyebrow": "Persekitaran demo",
