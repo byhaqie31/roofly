@@ -1,0 +1,38 @@
+# Keep the build context lean — only what the prod image actually needs.
+
+# VCS / CI
+.git
+.gitignore
+.github
+
+# Local-only stacks and configs
+docker-compose.dev.yml
+Dockerfile.dev
+.env
+.env.example
+.env.*
+
+# Non-app folders
+backend
+docs
+
+# Top-level docs
+README.md
+*.md
+
+# Frontend build artifacts and deps (rebuilt inside the image)
+frontend/node_modules
+frontend/.nuxt
+frontend/.output
+frontend/dist
+frontend/.cache
+frontend/Dockerfile.dev
+
+# Editor / OS noise
+.vscode
+.idea
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
