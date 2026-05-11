@@ -104,11 +104,11 @@
     },
     "landing": {
       "pageTitle": "Demo · Roofly.my",
-      "eyebrow": "Persekitaran demo",
-      "title": "Selamat datang ke demo Roofly",
-      "subtitle": "Pilih peranan untuk mula meneroka. Semua data yang ditunjukkan adalah contoh — tiada apa yang anda lakukan di sini akan disimpan.",
-      "footerPrefix": "Mahukan versi sebenar? Lawati",
-      "footerSuffix": "apabila kami melancarkan."
+      "eyebrow": "Mode Demonstari",
+      "title": "Selamat datang ke demo Roofly.my",
+      "subtitle": "Pilih peranan untuk mula meneroka. Semua data yang ditunjukkan adalah contoh. Setiap perubahan yang anda lakukan di sini tidak akan disimpan.",
+      "footerPrefix": "Mahukan versi sebenar? Layari",
+      "footerSuffix": "apabila kami melancarkan kelak."
     },
     "audience": {
       "owner": {
@@ -118,7 +118,7 @@
       },
       "tenant": {
         "titleLead": "Penyewa bayar sewa",
-        "titleAccent": "dengan dua sentuhan.",
+        "titleAccent": "dengan dua kali tekan sahaja.",
         "description": "Lihat perjanjian anda, bayar melalui FPX tanpa perlu pasang aplikasi, dan dapatkan kemas kini WhatsApp apabila ada perubahan."
       }
     },
@@ -128,7 +128,7 @@
         "subtitle": "Integrasi FPX melalui Billplz — penyewa bayar, anda pantau."
       },
       "tenantsPay": {
-        "title": "Penyewa bayar dengan dua sentuhan",
+        "title": "Penyewa bayar dengan dua kali tekan sahaja",
         "subtitle": "Pembayaran mesra mudah alih, tiada aplikasi diperlukan."
       },
       "whatsapp": {
