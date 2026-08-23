@@ -18,6 +18,9 @@ Quick orientation for any new Claude Code session in this repo. Read this before
 | [docs/frontend/MOCK-POC.md](docs/frontend/MOCK-POC.md) | The frontend mock-first plan, entity-by-entity. Section per surface (Properties, Tenants, Payments, Maintenance, Dashboard & Reports, Settings) with types, mocks, services, and **brief** schema impact for the future backend. **Frontend-first by intent — keep schema-impact subsections forward-looking, not exhaustive.** |
 | [docs/frontend/UI-STANDARDS.md](docs/frontend/UI-STANDARDS.md) | Design tokens, components, layout, dark mode, mobile patterns. Section 11 (Mobile patterns) is a living section — add new responsive guidelines there. |
 | [docs/global/BRANCH-PROTECTION.md](docs/global/BRANCH-PROTECTION.md) | Git workflow / merge rules. |
+| [docs/backend/API-SPEC.md](docs/backend/API-SPEC.md) | Backend contract per shell → module → endpoint (middleware, request rules, response shapes, audit actions, stubs). Update whenever `routes/api.php`, a FormRequest, or a Resource changes. |
+| [docs/frontend/API-MAP.md](docs/frontend/API-MAP.md) | Per shell → page → service method → endpoint, with the demo-adapter equivalent. Update with every new contract method. |
+
 
 If a question is answered by one of these, defer to that doc and don't re-derive.
 
