@@ -86,7 +86,9 @@
       "eyebrow": "For demo purposes only",
       "continueAsOwner": "Continue as owner",
       "continueAsTenant": "Continue as tenant",
-      "comingSoon": "Coming soon"
+      "comingSoon": "Coming soon",
+      "tryFirst": "Want to try it first?",
+      "exploreDemo": "Explore the demo"
     },
     "tour": {
       "ctaLabel": "Take a tour",

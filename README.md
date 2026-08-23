@@ -182,6 +182,16 @@ So:
 
 The same `frontend/Dockerfile` serves both contexts via multi-stage targets (`deps` → `dev` / `builder` → `runner`).
 
+### Production go-live checklist (first backend deploy + admin back office)
+
+Merging `UAT → main` ships the full stack (Laravel API, MySQL, Redis, RabbitMQ, queue-worker, scheduler) to `~/roofly`, not just the marketing page. `roofly.my/` keeps redirecting unauthenticated visitors to `/coming-soon` (see `frontend/app/middleware/env.global.ts`) — the admin back office at `admin.roofly.my` is what you use to watch the funnel. Before merging:
+
+1. **`~/roofly/.env`** — in addition to the frontend vars above: `APP_KEY` (`php artisan key:generate --show`), `APP_URL=https://roofly.my`, DB/Redis/RabbitMQ credentials, `SANCTUM_STATEFUL_DOMAINS=roofly.my,admin.roofly.my`, `SESSION_DOMAIN=.roofly.my`, `NUXT_PUBLIC_WAITLIST_ACCESS_KEY` (Web3Forms). Leave `NUXT_PUBLIC_FEATURE_ADMIN` and `NUXT_PUBLIC_TRACKING` unset (both default on).
+2. **DNS + Nginx** — add `admin.roofly.my` in Cloudflare pointing at the VPS and an Nginx site for it that `proxy_pass`es to the same `localhost:3002` as `roofly.my`. The app is one build; `env.global.ts` sends `/` → `/admin` on the `admin.` host.
+3. **Migrate, never demo-seed** — after the first deploy: `docker compose -f docker-compose.yml exec backend php artisan migrate --force` then `php artisan db:seed --class=AdminPermissionSeeder --force`. **Do not** run `DemoSeeder` / `AnalyticsDemoSeeder` in production (the latter refuses anyway).
+4. **First admin** — `docker compose -f docker-compose.yml exec backend php artisan admin:create --email=you@roofly.my --name="Your Name"` prints a one-time generated password. Sign in at `https://admin.roofly.my`, then invite further admins from Settings → Admins.
+5. **Verify** — `curl -I https://roofly.my` → `302 /coming-soon`; `docker compose -f docker-compose.yml ps` shows backend/queue-worker/scheduler healthy (the deploy healthcheck only probes the frontend port); paste `https://roofly.my` into WhatsApp/Slack to confirm the OG card, or check it with Facebook's Sharing Debugger. Page views start landing in Admin → Analytics within a minute.
+
 ### Auto-deploy
 
 Pushes to `demo-roofly`, `UAT`, or `main` trigger [.github/workflows/deploy.yml](.github/workflows/deploy.yml). The workflow detects the branch, SSHes into the VPS, pulls the matching clone, and runs the prod-only compose. Required GitHub Secrets: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`.

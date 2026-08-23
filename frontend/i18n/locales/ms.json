@@ -71,7 +71,9 @@
       "eyebrow": "Untuk tujuan demo sahaja",
       "continueAsOwner": "Teruskan sebagai pemilik",
       "continueAsTenant": "Teruskan sebagai penyewa",
-      "comingSoon": "Akan datang"
+      "comingSoon": "Akan datang",
+      "tryFirst": "Nak cuba dulu?",
+      "exploreDemo": "Terokai demo"
     },
     "tour": {
       "ctaLabel": "Mulakan tour",
