@@ -106,6 +106,8 @@ Each status color has a paired `-soft` variant at 8% opacity for pill background
 
 Both `:root` (default) and `[data-theme="light"]` (explicit override) carry the light values; `[data-theme="dark"]` carries the lifted ones. Keep the semantic mapping identical across themes — only the perceptual lightness changes.
 
+**Admin shell accent:** `--admin-accent` (#2f4f6b light / #7fa6c9 dark) + `--admin-accent-soft`. Used only in `layouts/admin.vue`, `layouts/auth-admin.vue` and `components/admin/*` for active nav, wordmark and primary emphasis. Never in owner/tenant surfaces. Everything else in the admin (pills, buttons, cards) uses the shared tokens.
+
 ### 1.6 Shadows
 
 ```css
@@ -723,6 +725,18 @@ Pattern (see [pages/owner/payments.vue](../../frontend/app/pages/owner/payments.
 - **Tap target = the whole card.** Wrap the card surface in a `<button>` that opens the detail/view modal; the inner action button uses `e.stopPropagation()` so it doesn't bubble.
 
 The table is the truth; the cards are a presentation. Don't fork the data shape or duplicate the column definitions in two places.
+
+### 11.15 Admin data tables
+
+Every admin list page (Owners, Tenants, Audit) follows the same shell so the desktop/mobile split and pagination don't get re-invented per page. See [components/admin/DataTableShell.vue](../../frontend/app/components/admin/DataTableShell.vue) + [pages/admin/owners/index.vue](../../frontend/app/pages/admin/owners/index.vue).
+
+- **`DataTableShell` owns loading / empty / table-vs-cards / pagination footer.** It renders a `#table` slot inside `hidden sm:block` and a `#cards` slot inside `sm:hidden` — same split as § 11.14, but centralized in one component instead of repeated per page. Loading and empty states are handled once, inside the shell.
+- **TanStack table from `sm:` up**, card rows under `sm` — same underlying `result.data`, no forked fetch.
+- **Table rows are keyboard-accessible**, not just clickable `<div>`s: `<tr tabindex="0" role="link" @click="open(row)" @keydown.enter.prevent="open(row)" @keydown.space.prevent="open(row)">`. Card rows use a real `<button type="button">` wrapping the card content instead.
+- **Server-side pagination footer** — `DataTableShell` takes `page` / `last-page` / `total` and emits `update:page`; it doesn't do client-side slicing. The page owns the `page` ref and re-fetches on change.
+- **Filters live in a card above the shell**, laid out `grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5` — search input spans `lg:col-span-2`, the rest are one filter control per column. A "Clear filters" ghost button appears only when a filter is active.
+- **Filter watchers reset page OR load — never both** (double-fetch otherwise): `watch([...filters], () => { if (page.value !== 1) page.value = 1; else load(); })` paired with a separate `watch(page, load)`. Resetting `page` to 1 triggers the `page` watcher, which loads; if `page` was already 1, the filter watcher loads directly. Text search debounces (~300ms) before applying the same reset-or-load logic.
+- **Filter state round-trips through the URL** (`router.replace({ query })`) so a reload or shared link preserves search/filters/page — omit defaults (`page: 1`, unchecked booleans) from the query string to keep URLs clean.
 
 ---
 

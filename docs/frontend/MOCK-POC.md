@@ -847,3 +847,33 @@ The tenant-facing app reuses the owner entities and services rather than introdu
 **Surfaces** (`pages/tenant/`): Home (rent-due hero + stats + open-issues), Agreement (read-only summary + Phase-4 documents card, reuses owner `AgreementDocumentsPanel`), Payments (invoice cards + `PayInvoiceModal` simulating an FPX pay→paid round-trip via the existing `recordPayment`), Issues (list + detail with comment thread, `ReportIssueModal` filing against the tenant's own unit; **status stays owner-controlled** — tenants comment but don't transition), Profile (view + single-form edit of identity / personal / emergency, writing through `useTenants().update`).
 
 **Schema impact:** none beyond the owner entities. The backend adds tenant-scoped `/me/agreement`, `/me/invoices`, `/me/tickets` read endpoints (server already knows the caller), plus a real rent-payment flow behind `PayInvoiceModal` (currently a mocked FPX success). Profile edits hit the same tenant `PATCH` as the owner-side tenant detail.
+
+---
+
+## 14. Admin back office (SP1)
+
+A third shell alongside owner/tenant — Roofly staff, not customers. Gated by `useEnv().features.admin`, always off in demo, separate `/admin/login` auth. Own demo data (`app/demo/data/admin.ts`) and own contracts/services (`services/contracts/admin/`, `services/api/admin/`, `demo/services/admin/`), not a reuse of the owner/tenant entities — admin reads are cross-tenant summaries, never the full owner/tenant records.
+
+**Five surfaces:**
+- **Dashboard** (`pages/admin/index.vue`) — platform-wide stat tiles + an attention list (over-cap owners, overdue-heavy owners, etc.), via `useAdminDashboardData`.
+- **Owners** (`pages/admin/owners/index.vue` + `[id].vue`) — searchable/filterable list + detail (properties, tenants, warn/suspend actions).
+- **Tenants** (`pages/admin/tenants/index.vue` + `[id].vue`) — searchable/filterable list + detail.
+- **Settings → Admins** (`pages/admin/settings.vue`) — invite/edit admin users, assign permissions from the fixed `AdminPermissions` catalogue (13 keys, incl. an Operations preset).
+- **Audit** (`pages/admin/audit.vue`) — paginated, filterable log of admin actions.
+
+**Types** (`app/types/admin.ts` — link, not duplicated here):
+- `AdminOwner` / `AdminOwnerCounts` — summary-only (property/unit/tenant/agreement/invoice/ticket counts), never money, never the owner's full property/tenant graph.
+- `AdminTenant`
+- `AdminPropertySummary`
+- `AdminUser` / `AdminPermission` (mirrors backend `App\Support\AdminPermissions::ALL`) / `PermissionCatalogue`
+- `AuditEntry`
+- `Paginated<T>` — the shared `{ data, meta: { page, perPage, total, lastPage } }` envelope every admin list endpoint returns.
+
+**Schema impact:**
+- `users` table gains admin-only columns: `is_super_admin`, `suspended_at`, `suspension_reason`, `last_active_at`, `first_login_at`, `disabled_at`.
+- New `admin_invites` table (`user_id`, `token_hash`, `expires_at`, `accepted_at` — no email, no permissions snapshot; consumed by `/admin/auth/accept-invite`).
+- Spatie `permissions` seeded from `App\Support\AdminPermissions` (13 keys), via `AdminPermissionSeeder`; an admin's permission set is direct Spatie permission assignments (`syncPermissions`), not roles, and not a JSON column.
+- `ActivityLog` entries written by `App\Services\AuditLogger` use `log_name = admin` — the Audit surface reads this log, it isn't a bespoke table.
+- Admin API Resources are key-set-pinned by `AdminResourcesTest` (backend) — summaries only, see CLAUDE.md's "Admin sees summaries only" convention.
+
+**Future-phase hooks (not built yet, noted so SP1 doesn't box them out):** owner-warning delivery channels beyond mail (`App\Notifications\OwnerWarning::via` returns `['mail']` only in SP1 — SP2 may add whatsapp/sms, configurable per owner or per template); a `settings.flags` permission already exists in the catalogue for a future admin-controlled feature-flag surface; `owners.plan` / subscription management is stubbed as a permission key ahead of the Phase 7 subscriptions work in § 9.5.
