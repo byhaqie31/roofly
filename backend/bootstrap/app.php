@@ -15,7 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
         $middleware->alias([
-            'role' => \App\Http\Middleware\EnsureRole::class,
+            'role'          => \App\Http\Middleware\EnsureRole::class,
+            'touch-active'  => \App\Http\Middleware\TouchLastActive::class,
+            'not-suspended' => \App\Http\Middleware\EnsureNotSuspended::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

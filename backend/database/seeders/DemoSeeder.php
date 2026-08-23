@@ -11,6 +11,7 @@ use App\Models\Ticket;
 use App\Models\TicketComment;
 use App\Models\Unit;
 use App\Models\User;
+use App\Support\AdminPermissions;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +37,10 @@ class DemoSeeder extends Seeder
 {
     // ── Owner ───────────────────────────────────────────────────────────────
     private const OWNER_ID = '00000000-0000-4000-8000-000000000001';
+
+    // ── Admins (spec § 9) ──────────────────────────────────────────────────
+    private const ADMIN_SUPER = '00000000-0000-4000-8000-000000000901';
+    private const ADMIN_OPS = '00000000-0000-4000-8000-000000000902';
 
     // ── Tenants (tenants.ts) ────────────────────────────────────────────────
     private const TENANT_AMINAH = '00000000-0000-4000-8000-000000000101';
@@ -100,6 +105,8 @@ class DemoSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function (): void {
+            $this->call(AdminPermissionSeeder::class);
+            $this->seedAdmins();
             $this->seedOwner();
             $tenants = $this->seedTenants();
             $this->seedProperties();
@@ -143,6 +150,33 @@ class DemoSeeder extends Seeder
                 ],
             ],
         ]);
+    }
+
+    // ── Admins ──────────────────────────────────────────────────────────────
+
+    private function seedAdmins(): void
+    {
+        $super = User::updateOrCreate(['id' => self::ADMIN_SUPER], [
+            'name' => 'Baihaqie (super-admin)',
+            'email' => 'admin@roofly.my',
+            'phone' => null,
+            'role' => 'admin',
+            'is_super_admin' => true,
+            'password' => Hash::make('password'),
+            'first_login_at' => Carbon::parse('2026-08-01T01:00:00Z'),
+        ]);
+        $super->syncPermissions([]); // super-admin bypasses checks; no rows needed
+
+        $ops = User::updateOrCreate(['id' => self::ADMIN_OPS], [
+            'name' => 'Ops Admin',
+            'email' => 'ops@roofly.my',
+            'phone' => null,
+            'role' => 'admin',
+            'is_super_admin' => false,
+            'password' => Hash::make('password'),
+            'first_login_at' => Carbon::parse('2026-08-02T01:00:00Z'),
+        ]);
+        $ops->syncPermissions(AdminPermissions::operationsPreset());
     }
 
     // ── Tenants (tenants.ts tenantsMock) ─────────────────────────────────────

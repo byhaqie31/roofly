@@ -16,7 +16,7 @@ class AuthContractTest extends TestCase
     {
         Sanctum::actingAs(User::factory()->owner()->create());
         $res = $this->getJson('/api/auth/me')->assertOk();
-        $this->assertSame(['id', 'name', 'email', 'phone', 'role'], array_keys($res->json()));
+        $this->assertSame(['id', 'name', 'email', 'phone', 'role', 'permissions', 'isSuperAdmin'], array_keys($res->json()));
         $this->assertSame('owner', $res->json('role'));
     }
 
@@ -25,7 +25,7 @@ class AuthContractTest extends TestCase
         User::factory()->owner()->create(['email' => 'a@b.my', 'password' => Hash::make('secret123')]);
         $res = $this->postJson('/api/auth/login', ['email' => 'a@b.my', 'password' => 'secret123'])->assertOk();
         $this->assertSame(['user', 'token'], array_keys($res->json()));
-        $this->assertSame(['id', 'name', 'email', 'phone', 'role'], array_keys($res->json('user')));
+        $this->assertSame(['id', 'name', 'email', 'phone', 'role', 'permissions', 'isSuperAdmin'], array_keys($res->json('user')));
     }
 
     public function test_register_creates_owner(): void

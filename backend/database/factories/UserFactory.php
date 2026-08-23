@@ -22,6 +22,7 @@ class UserFactory extends Factory
             'email'              => fake()->unique()->safeEmail(),
             'phone'              => '+60 1' . fake()->numerify('# ### ####'),
             'role'               => UserRole::OWNER,
+            'is_super_admin'     => false,
             'email_verified_at'  => now(),
             'password'           => static::$password ??= Hash::make('password'),
             'remember_token'     => Str::random(10),
@@ -50,5 +51,20 @@ class UserFactory extends Factory
     public function unverified(): static
     {
         return $this->state(fn () => ['email_verified_at' => null]);
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn () => ['role' => UserRole::ADMIN, 'is_super_admin' => false]);
+    }
+
+    public function superAdmin(): static
+    {
+        return $this->state(fn () => ['role' => UserRole::ADMIN, 'is_super_admin' => true]);
+    }
+
+    public function suspended(string $reason = 'Unpaid subscription'): static
+    {
+        return $this->state(fn () => ['suspended_at' => now(), 'suspension_reason' => $reason]);
     }
 }

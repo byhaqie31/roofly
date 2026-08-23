@@ -26,6 +26,14 @@ class DemoSeederTest extends TestCase
         $this->assertSame(1, User::where('role', 'owner')->count());
         $this->assertSame(5, User::where('role', 'tenant')->count()); // tenants.ts: 5 records
         $this->assertTrue(User::where('email', 'like', '%aminah%')->orWhere('name', 'like', '%Aminah%')->exists());
+        $this->assertSame(2, User::where('role', 'admin')->count());
+        $super = User::where('email', 'admin@roofly.my')->first();
+        $this->assertTrue($super->is_super_admin);
+        $ops = User::where('email', 'ops@roofly.my')->first();
+        $this->assertFalse($ops->is_super_admin);
+        $this->assertTrue($ops->hasPermissionTo('owners.suspend'));
+        $this->assertFalse($ops->hasPermissionTo('admins.manage'));
+        $this->assertSame(13, \Spatie\Permission\Models\Permission::count());
         $this->assertSame(5, Property::count());   // properties.ts: 5 records
         $this->assertSame(8, Unit::count());        // units.ts: 8 records
         $this->assertSame(7, PropertyCoOwner::count()); // properties.ts coOwners across all 5 properties

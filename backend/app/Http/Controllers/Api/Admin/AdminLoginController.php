@@ -1,16 +1,17 @@
 <?php
-
-namespace App\Http\Controllers\Api\Auth;
+// backend/app/Http/Controllers/Api/Admin/AdminLoginController.php
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AuthUserResource;
+use App\Services\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class LoginController extends Controller
+class AdminLoginController extends Controller
 {
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, AuditLogger $audit): JsonResponse
     {
         $credentials = $request->validate([
             'email'    => 'required|email',
@@ -22,10 +23,7 @@ class LoginController extends Controller
         }
 
         $user = Auth::user();
-
-        // Admins use the Admin Portal (POST /api/admin/auth/login); the
-        // customer form is never a back door into the back office.
-        if ($user->isAdmin()) {
+        if (! $user->isAdmin() || $user->isDisabled()) {
             Auth::guard('web')->logout();
             if ($request->hasSession()) {
                 $request->session()->invalidate();
@@ -38,23 +36,8 @@ class LoginController extends Controller
             $user->forceFill(['first_login_at' => now()])->saveQuietly();
         }
 
-        $token = $user->createToken('api')->plainTextToken;
+        $audit->record(AuditLogger::ADMIN_LOGIN, $user);
 
-        return response()->json([
-            'user'  => (new AuthUserResource($user))->resolve(),
-            'token' => $token,
-        ]);
-    }
-
-    public function destroy(Request $request): JsonResponse
-    {
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json(null, 204);
-    }
-
-    public function show(Request $request): JsonResponse
-    {
-        return response()->json(new AuthUserResource($request->user()));
+        return response()->json(['user' => (new AuthUserResource($user))->resolve()]);
     }
 }

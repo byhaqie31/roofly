@@ -7,7 +7,9 @@ use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -30,6 +32,12 @@ class User extends Authenticatable
         'invited_at',
         'status',
         'invited_by',
+        'is_super_admin',
+        'suspended_at',
+        'suspension_reason',
+        'last_active_at',
+        'first_login_at',
+        'disabled_at',
         'business_name',
         'bank_account_last4',
         'photo_path',
@@ -52,6 +60,11 @@ class User extends Authenticatable
             'plan_tier'                => PlanTier::class,
             'email_verified_at'        => 'datetime',
             'invited_at'               => 'datetime',
+            'is_super_admin'           => 'boolean',
+            'suspended_at'             => 'datetime',
+            'last_active_at'           => 'datetime',
+            'first_login_at'           => 'datetime',
+            'disabled_at'              => 'datetime',
             'password'                 => 'hashed',
             'owner_preferences'        => 'array',
             'notification_preferences' => 'array',
@@ -62,7 +75,8 @@ class User extends Authenticatable
 
     public function getActivitylogOptions(): LogOptions
     {
-        return LogOptions::defaults()->logFillable()->logOnlyDirty();
+        return LogOptions::defaults()->logFillable()->logOnlyDirty()
+            ->logExcept(['last_active_at', 'first_login_at']);
     }
 
     // ── Relationships ─────────────────────────────────────────────────────────
@@ -72,9 +86,19 @@ class User extends Authenticatable
         return $this->hasMany(Property::class, 'owner_id');
     }
 
+    public function ownedUnits(): HasManyThrough
+    {
+        return $this->hasManyThrough(Unit::class, Property::class, 'owner_id', 'property_id');
+    }
+
     public function invitedTenants(): HasMany
     {
         return $this->hasMany(User::class, 'invited_by');
+    }
+
+    public function inviter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'invited_by');
     }
 
     public function coOwnerships(): HasMany
@@ -102,6 +126,11 @@ class User extends Authenticatable
         return $this->hasMany(TicketComment::class, 'author_id');
     }
 
+    public function adminInvites(): HasMany
+    {
+        return $this->hasMany(AdminInvite::class, 'user_id');
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     public function isOwner(): bool
@@ -117,5 +146,15 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === UserRole::ADMIN;
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
+    }
+
+    public function isDisabled(): bool
+    {
+        return $this->disabled_at !== null;
     }
 }
