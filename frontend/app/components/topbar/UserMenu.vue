@@ -15,8 +15,9 @@ const logoutLabel = computed(() =>
 );
 
 const onLogout = async () => {
+  const wasAdmin = auth.isAdmin;
   await auth.logout();
-  await navigateTo(isDemo ? "/demo" : "/auth/login");
+  await navigateTo(wasAdmin ? "/admin/login" : isDemo ? "/demo" : "/auth/login");
 };
 
 const initials = computed(() => {

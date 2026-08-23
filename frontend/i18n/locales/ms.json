@@ -58,7 +58,27 @@
     "loginSubtitle": "Log masuk untuk uruskan hartanah anda.",
     "registerTitle": "Mula dengan Roofly",
     "registerSubtitle": "Cipta akaun pemilik untuk urus penyewaan.",
-    "invalidCredentials": "E-mel atau kata laluan tidak sah."
+    "invalidCredentials": "E-mel atau kata laluan tidak sah.",
+    "admin": {
+      "title": "Portal admin",
+      "subtitle": "Log masuk dengan akaun pasukan Roofly anda.",
+      "login": "Log masuk",
+      "acceptTitle": "Tetapkan kata laluan anda",
+      "acceptSubtitle": "Pilih kata laluan untuk melengkapkan akaun admin anda.",
+      "newPassword": "Kata laluan baharu",
+      "confirmPassword": "Sahkan kata laluan",
+      "passwordMismatch": "Kata laluan tidak sepadan.",
+      "passwordTooShort": "Gunakan sekurang-kurangnya 8 aksara.",
+      "inviteInvalid": "Pautan jemputan ini tidak sah atau telah tamat tempoh.",
+      "accept": "Tetapkan kata laluan dan log masuk",
+      "notCustomer": "Bukan ahli pasukan Roofly?",
+      "customerLogin": "Ke log masuk pelanggan"
+    }
+  },
+  "suspended": {
+    "title": "Akaun digantung",
+    "body": "Akaun Roofly anda telah digantung. Penyewa anda masih boleh log masuk dan membayar seperti biasa.",
+    "contact": "Hubungi sokongan untuk memulihkan akses"
   },
   "demo": {
     "shortcuts": {
@@ -1131,6 +1151,288 @@
       },
       "placeholders": {
         "icNumber": "YYMMDD-PB-####"
+      }
+    }
+  },
+  "admin": {
+    "nav": {
+      "badge": "Admin",
+      "dashboard": "Papan pemuka",
+      "owners": "Pemilik",
+      "tenants": "Penyewa",
+      "audit": "Log audit",
+      "settings": "Tetapan"
+    },
+    "common": {
+      "search": "Cari",
+      "filters": "Penapis",
+      "clearFilters": "Kosongkan penapis",
+      "all": "Semua",
+      "pageOf": "Halaman {page} daripada {lastPage} · {total} jumlah",
+      "noResults": "Tiada hasil",
+      "noResultsHelp": "Cuba carian lain atau kosongkan penapis.",
+      "back": "Kembali ke senarai",
+      "notFound": "Tidak dijumpai",
+      "lastActive": "Aktif terakhir",
+      "never": "Tidak pernah",
+      "signedUp": "Mendaftar",
+      "reason": "Sebab",
+      "confirm": "Sahkan",
+      "actions": "Tindakan",
+      "exportCsv": "Eksport CSV",
+      "unlimited": "Tanpa had"
+    },
+    "status": {
+      "owner": {
+        "active": "Aktif",
+        "suspended": "Digantung"
+      },
+      "tenant": {
+        "invited": "Dijemput",
+        "active": "Aktif",
+        "notice_given": "Notis diberi",
+        "moved_out": "Berpindah keluar"
+      },
+      "admin": {
+        "invited": "Dijemput",
+        "active": "Aktif",
+        "disabled": "Dinyahaktifkan"
+      }
+    },
+    "plan": {
+      "free": "Percuma",
+      "starter": "Starter",
+      "pro": "Pro",
+      "business": "Business"
+    },
+    "dashboard": {
+      "title": "Papan pemuka platform",
+      "subtitle": "Prestasi Roofly merentas semua pemilik.",
+      "tiles": {
+        "owners": "Pemilik",
+        "ownersHelp": "{active} aktif · {suspended} digantung",
+        "tenants": "Penyewa",
+        "tenantsHelp": "{pending} jemputan belum diterima",
+        "properties": "Hartanah",
+        "propertiesHelp": "Merentas semua pemilik",
+        "units": "Kadar penghunian",
+        "unitsHelp": "{total} unit",
+        "agreements": "Perjanjian aktif",
+        "agreementsHelp": "{expiring} tamat dalam 30 hari"
+      },
+      "charts": {
+        "signups": "Pendaftaran pemilik — 12 bulan",
+        "invoicesPaid": "Invois dibayar — 12 bulan",
+        "acceptance": "Kadar penerimaan jemputan"
+      },
+      "attention": {
+        "title": "Perlu perhatian",
+        "help": "Pemilik untuk disemak minggu ini.",
+        "empty": "Tiada yang perlu perhatian buat masa ini.",
+        "kinds": {
+          "over_cap": "Melebihi had pelan",
+          "overdue_3plus": "3+ tertunggak",
+          "invite_stale_7d": "Jemputan lama",
+          "no_property_7d": "Belum ada hartanah",
+          "suspended": "Digantung"
+        }
+      }
+    },
+    "owners": {
+      "title": "Pemilik",
+      "subtitle": "Setiap tuan rumah di platform — ringkasan sahaja.",
+      "searchPlaceholder": "Cari nama, emel atau perniagaan",
+      "filters": {
+        "overCap": "Melebihi had",
+        "overdue": "Ada tertunggak"
+      },
+      "columns": {
+        "owner": "Pemilik",
+        "plan": "Pelan",
+        "units": "Unit guna / had",
+        "properties": "Hartanah",
+        "tenants": "Penyewa",
+        "overdue": "Tertunggak",
+        "status": "Status"
+      },
+      "detail": {
+        "tabs": {
+          "overview": "Gambaran",
+          "properties": "Hartanah",
+          "tenants": "Penyewa",
+          "history": "Sejarah"
+        },
+        "actions": {
+          "warn": "Hantar amaran",
+          "suspend": "Gantung",
+          "unsuspend": "Pulihkan"
+        },
+        "suspendedSince": "Digantung sejak {date}",
+        "plan": "Pelan",
+        "unitsUsed": "unit digunakan",
+        "overCap": "Melebihi had pelan — naik taraf atau beri amaran.",
+        "counts": "Sekilas pandang",
+        "countLabels": {
+          "properties": "Hartanah",
+          "units": "Unit",
+          "unitsOccupied": "Dihuni",
+          "tenants": "Penyewa",
+          "agreementsActive": "Perjanjian aktif",
+          "agreementsExpiring30d": "Tamat 30 hari",
+          "invoicesOverdue": "Invois tertunggak",
+          "ticketsOpen": "Tiket terbuka"
+        },
+        "noProperties": "Belum ada hartanah",
+        "noTenants": "Belum ada penyewa",
+        "occupied": "dihuni",
+        "warn": {
+          "title": "Hantar amaran pembayaran",
+          "description": "Emel notis kepada {name} melalui saluran yang diaktifkan.",
+          "template": "Templat",
+          "templates": {
+            "payment_overdue": "Bayaran langganan tertunggak"
+          },
+          "suspendOn": "Gantung pada",
+          "extraLine": "Baris tambahan (pilihan)",
+          "extraLinePlaceholder": "cth. Balas emel ini jika anda perlukan bantuan.",
+          "preview": "Pratonton",
+          "channels": "Dihantar melalui emel. WhatsApp dan SMS menyusul bersama saluran sokongan.",
+          "send": "Hantar amaran",
+          "sentToast": "Amaran dihantar",
+          "dateFuture": "Pilih tarikh selepas hari ini."
+        },
+        "suspend": {
+          "title": "Gantung pemilik",
+          "description": "{name} akan hilang akses ke Roofly sehingga dipulihkan. Penyewa mereka tidak terjejas.",
+          "help": "Sekurang-kurangnya 10 aksara. Sebab direkodkan dalam log audit, tidak ditunjukkan kepada pemilik.",
+          "reasonMin": "Berikan sebab sekurang-kurangnya 10 aksara.",
+          "cta": "Gantung",
+          "doneToast": "Pemilik digantung"
+        },
+        "unsuspend": {
+          "title": "Pulihkan pemilik",
+          "description": "Pulihkan akses {name} ke Roofly.",
+          "help": "Pemilik boleh log masuk semula serta-merta.",
+          "cta": "Pulihkan",
+          "doneToast": "Pemilik dipulihkan"
+        }
+      }
+    },
+    "audit": {
+      "title": "Log audit",
+      "subtitleAll": "Setiap tindakan admin di platform, terbaharu dahulu.",
+      "subtitleOwn": "Tindakan anda sendiri, terbaharu dahulu. Minta audit.view daripada super-admin untuk melihat semua.",
+      "filters": {
+        "action": "Tindakan",
+        "actorId": "ID pelaku",
+        "subjectId": "ID subjek",
+        "from": "Dari",
+        "to": "Hingga"
+      },
+      "details": "Tunjukkan butiran",
+      "actions": {
+        "admin": {
+          "login": "Admin log masuk",
+          "invite_sent": "Admin dijemput",
+          "invite_accepted": "Jemputan diterima",
+          "permissions_changed": "Kebenaran diubah",
+          "disabled": "Admin dinyahaktifkan",
+          "enabled": "Admin diaktifkan"
+        },
+        "owner": {
+          "warned": "Amaran dihantar",
+          "suspended": "Pemilik digantung",
+          "unsuspended": "Pemilik dipulihkan",
+          "signup": "Pemilik mendaftar"
+        },
+        "tenant": {
+          "invite_resent": "Jemputan penyewa dihantar semula"
+        }
+      }
+    },
+    "tenants": {
+      "title": "Penyewa",
+      "subtitle": "Setiap penyewa merentas semua pemilik — identiti dan penempatan sahaja.",
+      "searchPlaceholder": "Cari nama, emel atau telefon",
+      "filteredByOwner": "Ditapis mengikut pemilik",
+      "resendInvite": "Hantar semula jemputan",
+      "resendToast": "Jemputan dihantar semula",
+      "columns": {
+        "tenant": "Penyewa",
+        "phone": "Telefon",
+        "status": "Status",
+        "owner": "Pemilik",
+        "propertyUnit": "Hartanah / unit",
+        "invited": "Dijemput",
+        "accepted": "Diterima"
+      },
+      "detail": {
+        "placement": "Penempatan",
+        "history": "Sejarah",
+        "noHistory": "Belum ada tindakan admin ke atas penyewa ini.",
+        "privacy": "Butiran peribadi, dokumen dan pembayaran tidak pernah ditunjukkan di sini."
+      }
+    },
+    "settings": {
+      "title": "Tetapan",
+      "subtitle": "Siapa dalam pasukan boleh buat apa.",
+      "tabs": {
+        "admins": "Admin"
+      },
+      "noAccess": "Tiada akses",
+      "noAccessHelp": "Minta kebenaran admins.manage daripada super-admin.",
+      "admins": {
+        "help": "Admin log masuk di portal admin. Admin baharu menerima pautan emel untuk menetapkan kata laluan.",
+        "create": "Jemput admin",
+        "createTitle": "Jemput admin",
+        "editTitle": "Sunting admin",
+        "permissions": "Kebenaran",
+        "applyPreset": "Guna pratetap Operasi",
+        "sendInvite": "Hantar jemputan",
+        "superAdmin": "Super-admin",
+        "superAdminHelp": "melangkaui semua kebenaran",
+        "permissionCount": "{n} kebenaran",
+        "edit": "Sunting",
+        "resend": "Hantar semula jemputan",
+        "disable": "Nyahaktifkan",
+        "enable": "Aktifkan",
+        "you": "(anda)",
+        "invitedToast": "Jemputan dihantar",
+        "updatedToast": "Admin dikemas kini",
+        "resentToast": "Jemputan dihantar semula",
+        "keys": {
+          "dashboard": {
+            "view": "Lihat papan pemuka platform"
+          },
+          "owners": {
+            "view": "Lihat pemilik",
+            "warn": "Hantar amaran pembayaran",
+            "suspend": "Gantung / pulihkan pemilik",
+            "plan": "Tukar pelan pemilik"
+          },
+          "tenants": {
+            "view": "Lihat penyewa"
+          },
+          "support": {
+            "manage": "Urus peti masuk sokongan"
+          },
+          "broadcast": {
+            "send": "Hantar siaran"
+          },
+          "settings": {
+            "channels": "Urus penyedia saluran",
+            "flags": "Urus bendera ciri"
+          },
+          "admins": {
+            "manage": "Urus admin"
+          },
+          "audit": {
+            "view": "Lihat log audit penuh"
+          },
+          "users": {
+            "delete": "Padam / tanpa nama pengguna"
+          }
+        }
       }
     }
   }

@@ -1,5 +1,6 @@
-import type { AuthUser, UserRole } from "~/types/auth";
+import type { AuthUser } from "~/types/auth";
 import type { AuthAdapter } from "~/services/contracts/auth";
+import { ADMIN_PERMISSIONS, type AdminPermission } from "~/types/admin";
 
 /**
  * Demo auth. No backend: the email prefix decides the role, and the user is
@@ -38,28 +39,58 @@ const restore = (): AuthUser | null => {
   }
 };
 
-const roleFor = (email: string): UserRole =>
-  email.startsWith("tenant")
-    ? "tenant"
-    : email.startsWith("admin")
-      ? "admin"
-      : "owner";
+export const DEMO_SUPER_ADMIN_ID = "a-super";
+export const DEMO_OPS_ADMIN_ID = "a-ops";
 
-const userFor = (email: string, role: UserRole): AuthUser =>
-  role === "tenant"
+/** Operations preset — mirrors backend AdminPermissions::operationsPreset(). */
+export const DEMO_OPS_PRESET: AdminPermission[] = [
+  "dashboard.view", "owners.view", "tenants.view", "owners.warn",
+  "owners.suspend", "support.manage", "broadcast.send",
+];
+
+const isAdminEmail = (email: string) =>
+  email.startsWith("admin") || email.startsWith("ops");
+
+const customerUserFor = (email: string): AuthUser =>
+  email.startsWith("tenant")
     ? {
         id: DEMO_TENANT_ID,
         name: "Aminah Binti Yusof",
         email,
         phone: "+60 12-345 6789",
-        role,
+        role: "tenant",
+        permissions: [],
+        isSuperAdmin: false,
       }
     : {
-        id: role === "admin" ? "stub-admin" : DEMO_OWNER_ID,
-        name: role === "admin" ? "Admin" : "Cik Aminah",
+        id: DEMO_OWNER_ID,
+        name: "Cik Aminah",
         email,
         phone: null,
-        role,
+        role: "owner",
+        permissions: [],
+        isSuperAdmin: false,
+      };
+
+const adminUserFor = (email: string): AuthUser =>
+  email.startsWith("admin")
+    ? {
+        id: DEMO_SUPER_ADMIN_ID,
+        name: "Baihaqie (super-admin)",
+        email,
+        phone: null,
+        role: "admin",
+        permissions: [...ADMIN_PERMISSIONS],
+        isSuperAdmin: true,
+      }
+    : {
+        id: DEMO_OPS_ADMIN_ID,
+        name: "Ops Admin",
+        email,
+        phone: null,
+        role: "admin",
+        permissions: DEMO_OPS_PRESET,
+        isSuperAdmin: false,
       };
 
 const delay = () => new Promise((r) => setTimeout(r, 300));
@@ -67,7 +98,9 @@ const delay = () => new Promise((r) => setTimeout(r, 300));
 export const demoAuth: AuthAdapter = {
   async login(email) {
     await delay();
-    const user = userFor(email, roleFor(email));
+    // The customer form is never a back door into the admin (spec § 4).
+    if (isAdminEmail(email)) throw new Error("Invalid credentials");
+    const user = customerUserFor(email);
     persist(user);
     return user;
   },
@@ -80,6 +113,8 @@ export const demoAuth: AuthAdapter = {
       email: payload.email,
       phone: payload.phone,
       role: "owner",
+      permissions: [],
+      isSuperAdmin: false,
     };
     persist(user);
     return user;
@@ -91,5 +126,20 @@ export const demoAuth: AuthAdapter = {
 
   async fetchMe() {
     return restore();
+  },
+
+  async loginAdmin(email) {
+    await delay();
+    if (!isAdminEmail(email)) throw new Error("Invalid credentials");
+    const user = adminUserFor(email);
+    persist(user);
+    return user;
+  },
+
+  async acceptAdminInvite(_token) {
+    await delay();
+    const user = adminUserFor("ops@roofly.my");
+    persist(user);
+    return user;
   },
 };

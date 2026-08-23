@@ -44,4 +44,24 @@ export const apiAuth: AuthAdapter = {
       return null;
     }
   },
+
+  async loginAdmin(email, password) {
+    const { request } = useApi();
+    await request("/../sanctum/csrf-cookie");
+    const res = await request<{ user: AuthUser }>("/admin/auth/login", {
+      method: "POST",
+      body: { email, password },
+    });
+    return res.user;
+  },
+
+  async acceptAdminInvite(token, password) {
+    const { request } = useApi();
+    await request("/../sanctum/csrf-cookie");
+    const res = await request<{ user: AuthUser }>("/admin/auth/accept-invite", {
+      method: "POST",
+      body: { token, password, password_confirmation: password },
+    });
+    return res.user;
+  },
 };

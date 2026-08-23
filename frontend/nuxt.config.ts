@@ -85,6 +85,9 @@ export default defineNuxtConfig({
         // owners see during demos that file uploads are on the way. Set
         // NUXT_PUBLIC_FEATURE_DOCUMENTS=false to hide the placeholder if needed.
         documents: process.env.NUXT_PUBLIC_FEATURE_DOCUMENTS !== "false",
+        // Admin back office (spec 2026-08-23). Default on for uat/prod; useEnv()
+        // forces it off in demo regardless of this value.
+        admin: process.env.NUXT_PUBLIC_FEATURE_ADMIN !== "false",
       },
       // App environment identifier — drives all UI feature flags via useEnv().
       // Values: "demo" | "uat" | "production". Defaults to production when unset.

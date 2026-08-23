@@ -7,17 +7,24 @@ interface AreaDatum {
   amount: number;     // sen
 }
 
+const { formatRM } = useMoney();
+
 const props = withDefaults(
   defineProps<{
     data: AreaDatum[];
     height?: number;        // pixels
     highlightLast?: boolean;
     showAverageLine?: boolean;
+    /** Value formatter — defaults to RM (sen). Admin charts pass a count/percent formatter. */
+    format?: (n: number) => string;
   }>(),
   { height: 120, highlightLast: true, showAverageLine: true },
 );
 
-const { formatRM } = useMoney();
+// Not a defineProps default on purpose: the SFC compiler hoists defineProps,
+// so a default may not reference the locally destructured `formatRM`.
+const format = (n: number) => (props.format ?? formatRM)(n);
+
 const hoverIdx = ref<number | null>(null);
 
 // Internal SVG units. preserveAspectRatio="none" lets it stretch to width;
@@ -104,7 +111,7 @@ const pctY = (p: Point) => (p.y / SVG_H.value) * 100;
       class="relative w-full"
       :style="{ height: `${height}px` }"
       role="img"
-      :aria-label="`Area chart, ${data.length} buckets, max ${formatRM(max)}`"
+      :aria-label="`Area chart, ${data.length} buckets, max ${format(max)}`"
       @mouseleave="hoverIdx = null"
     >
       <!-- The chart itself -->
@@ -184,7 +191,7 @@ const pctY = (p: Point) => (p.y / SVG_H.value) * 100;
         class="pointer-events-none absolute -translate-x-1/2 -translate-y-[140%] whitespace-nowrap rounded-xs bg-ink px-1.5 py-0.5 text-micro font-medium text-surface-raised tabular-nums"
         :style="{ left: `${pctX(lastPoint)}%`, top: `${pctY(lastPoint)}%` }"
       >
-        {{ formatRM(lastPoint.amount) }}
+        {{ format(lastPoint.amount) }}
       </span>
 
       <!-- Hover tooltip -->
@@ -193,7 +200,7 @@ const pctY = (p: Point) => (p.y / SVG_H.value) * 100;
         class="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-[140%] whitespace-nowrap rounded-xs border border-line-passive bg-surface-raised px-2 py-1 text-micro text-ink shadow-modal tabular-nums"
         :style="{ left: `${pctX(hoverPoint)}%`, top: `${pctY(hoverPoint)}%` }"
       >
-        {{ hoverPoint.label }} · {{ formatRM(hoverPoint.amount) }}
+        {{ hoverPoint.label }} · {{ format(hoverPoint.amount) }}
       </span>
 
       <!-- Hover hit columns (transparent) -->

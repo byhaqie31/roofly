@@ -44,6 +44,10 @@ export default {
           hover: "var(--accent-hover)",
           soft: "var(--accent-soft)",
         },
+        admin: {
+          DEFAULT: "var(--admin-accent)",
+          soft: "var(--admin-accent-soft)",
+        },
         status: {
           vacant: "var(--status-vacant)",
           "vacant-soft": "var(--status-vacant-soft)",

@@ -29,6 +29,10 @@
   --accent-hover: #7a2f17;
   --accent-soft: rgba(153, 60, 29, 0.18);
 
+  /* Admin shell accent — steel blue, so the back office never reads as the customer app */
+  --admin-accent: #2f4f6b;
+  --admin-accent-soft: rgba(47, 79, 107, 0.14);
+
   /* Status — unit */
   --status-vacant: #5f5f5d;
   --status-vacant-soft: rgba(95, 95, 93, 0.08);
@@ -103,6 +107,9 @@
   --accent-hover: #d55d32;
   --accent-soft: rgba(196, 77, 38, 0.20);
 
+  --admin-accent: #7fa6c9;
+  --admin-accent-soft: rgba(127, 166, 201, 0.22);
+
   /* Status — unit (dark) */
   --status-vacant: #a8a5a1;
   --status-vacant-soft: rgba(168, 165, 161, 0.18);
@@ -168,6 +175,9 @@
   --accent: #993c1d;
   --accent-hover: #7a2f17;
   --accent-soft: rgba(153, 60, 29, 0.18);
+
+  --admin-accent: #2f4f6b;
+  --admin-accent-soft: rgba(47, 79, 107, 0.14);
 
   /* Status — unit (light) */
   --status-vacant: #5f5f5d;

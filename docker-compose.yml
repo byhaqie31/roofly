@@ -32,12 +32,13 @@ services:
       - NUXT_PUBLIC_USE_MOCK=${NUXT_PUBLIC_USE_MOCK:-false}
       - NUXT_PUBLIC_DEMO_FEEDBACK_URL=${NUXT_PUBLIC_DEMO_FEEDBACK_URL:-}
       - NUXT_PUBLIC_WAITLIST_ACCESS_KEY=${NUXT_PUBLIC_WAITLIST_ACCESS_KEY:-}
+      - NUXT_PUBLIC_FEATURE_ADMIN=${NUXT_PUBLIC_FEATURE_ADMIN:-true} # admin back office; demo forces off regardless
     depends_on:
       - backend
     networks:
       - roofly
 
-  # ── Backend API (Laravel 11 + PHP-FPM) ────────────────────────────────────
+  # ── Backend API (Laravel 13 + PHP-FPM) ────────────────────────────────────
   backend:
     build:
       context: ./backend

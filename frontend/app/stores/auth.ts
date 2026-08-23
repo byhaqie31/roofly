@@ -49,6 +49,24 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
+    async loginAdmin(email: string, password: string) {
+      this.loading = true;
+      try {
+        this.user = await adapter().loginAdmin(email, password);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async acceptAdminInvite(token: string, password: string) {
+      this.loading = true;
+      try {
+        this.user = await adapter().acceptAdminInvite(token, password);
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async logout() {
       await adapter().logout();
       this.user = null;

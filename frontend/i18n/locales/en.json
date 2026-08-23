@@ -58,7 +58,27 @@
     "loginSubtitle": "Log in to manage your properties.",
     "registerTitle": "Start with Roofly",
     "registerSubtitle": "Create an owner account to manage your rentals.",
-    "invalidCredentials": "Invalid email or password."
+    "invalidCredentials": "Invalid email or password.",
+    "admin": {
+      "title": "Admin portal",
+      "subtitle": "Sign in with your Roofly team account.",
+      "login": "Sign in",
+      "acceptTitle": "Set your password",
+      "acceptSubtitle": "Choose a password to finish setting up your admin account.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "passwordMismatch": "Passwords do not match.",
+      "passwordTooShort": "Use at least 8 characters.",
+      "inviteInvalid": "This invite link is invalid or has expired.",
+      "accept": "Set password and sign in",
+      "notCustomer": "Not a Roofly team member?",
+      "customerLogin": "Go to the customer login"
+    }
+  },
+  "suspended": {
+    "title": "Account suspended",
+    "body": "Your Roofly account has been suspended. Your tenants can still sign in and pay as usual.",
+    "contact": "Contact support to restore access"
   },
   "demo": {
     "shortcuts": {
@@ -1131,6 +1151,288 @@
       },
       "placeholders": {
         "icNumber": "YYMMDD-PB-####"
+      }
+    }
+  },
+  "admin": {
+    "nav": {
+      "badge": "Admin",
+      "dashboard": "Dashboard",
+      "owners": "Owners",
+      "tenants": "Tenants",
+      "audit": "Audit log",
+      "settings": "Settings"
+    },
+    "common": {
+      "search": "Search",
+      "filters": "Filters",
+      "clearFilters": "Clear filters",
+      "all": "All",
+      "pageOf": "Page {page} of {lastPage} · {total} total",
+      "noResults": "No results",
+      "noResultsHelp": "Try a different search or clear the filters.",
+      "back": "Back to list",
+      "notFound": "Not found",
+      "lastActive": "Last active",
+      "never": "Never",
+      "signedUp": "Signed up",
+      "reason": "Reason",
+      "confirm": "Confirm",
+      "actions": "Actions",
+      "exportCsv": "Export CSV",
+      "unlimited": "Unlimited"
+    },
+    "status": {
+      "owner": {
+        "active": "Active",
+        "suspended": "Suspended"
+      },
+      "tenant": {
+        "invited": "Invited",
+        "active": "Active",
+        "notice_given": "Notice given",
+        "moved_out": "Moved out"
+      },
+      "admin": {
+        "invited": "Invited",
+        "active": "Active",
+        "disabled": "Disabled"
+      }
+    },
+    "plan": {
+      "free": "Free",
+      "starter": "Starter",
+      "pro": "Pro",
+      "business": "Business"
+    },
+    "dashboard": {
+      "title": "Platform dashboard",
+      "subtitle": "How Roofly is doing across every owner.",
+      "tiles": {
+        "owners": "Owners",
+        "ownersHelp": "{active} active · {suspended} suspended",
+        "tenants": "Tenants",
+        "tenantsHelp": "{pending} invites pending",
+        "properties": "Properties",
+        "propertiesHelp": "Across every owner",
+        "units": "Occupancy",
+        "unitsHelp": "{total} units",
+        "agreements": "Active agreements",
+        "agreementsHelp": "{expiring} ending within 30 days"
+      },
+      "charts": {
+        "signups": "Owner sign-ups — 12 months",
+        "invoicesPaid": "Invoices paid — 12 months",
+        "acceptance": "Invite acceptance rate"
+      },
+      "attention": {
+        "title": "Needs attention",
+        "help": "Owners to look at this week.",
+        "empty": "Nothing needs attention right now.",
+        "kinds": {
+          "over_cap": "Over plan cap",
+          "overdue_3plus": "3+ overdue",
+          "invite_stale_7d": "Stale invite",
+          "no_property_7d": "No property yet",
+          "suspended": "Suspended"
+        }
+      }
+    },
+    "owners": {
+      "title": "Owners",
+      "subtitle": "Every landlord on the platform — summaries only.",
+      "searchPlaceholder": "Search name, email or business",
+      "filters": {
+        "overCap": "Over cap",
+        "overdue": "Has overdue"
+      },
+      "columns": {
+        "owner": "Owner",
+        "plan": "Plan",
+        "units": "Units used / cap",
+        "properties": "Properties",
+        "tenants": "Tenants",
+        "overdue": "Overdue",
+        "status": "Status"
+      },
+      "detail": {
+        "tabs": {
+          "overview": "Overview",
+          "properties": "Properties",
+          "tenants": "Tenants",
+          "history": "History"
+        },
+        "actions": {
+          "warn": "Send warning",
+          "suspend": "Suspend",
+          "unsuspend": "Unsuspend"
+        },
+        "suspendedSince": "Suspended since {date}",
+        "plan": "Plan",
+        "unitsUsed": "units used",
+        "overCap": "Over the plan cap — upgrade or warn.",
+        "counts": "At a glance",
+        "countLabels": {
+          "properties": "Properties",
+          "units": "Units",
+          "unitsOccupied": "Occupied",
+          "tenants": "Tenants",
+          "agreementsActive": "Active agreements",
+          "agreementsExpiring30d": "Expiring 30d",
+          "invoicesOverdue": "Overdue invoices",
+          "ticketsOpen": "Open tickets"
+        },
+        "noProperties": "No properties yet",
+        "noTenants": "No tenants yet",
+        "occupied": "occupied",
+        "warn": {
+          "title": "Send payment warning",
+          "description": "Email {name} a notice on their enabled channels.",
+          "template": "Template",
+          "templates": {
+            "payment_overdue": "Subscription payment overdue"
+          },
+          "suspendOn": "Suspend on",
+          "extraLine": "Extra line (optional)",
+          "extraLinePlaceholder": "e.g. Reply to this email if you need help.",
+          "preview": "Preview",
+          "channels": "Sent by email. WhatsApp and SMS arrive with support channels.",
+          "send": "Send warning",
+          "sentToast": "Warning sent",
+          "dateFuture": "Pick a date after today."
+        },
+        "suspend": {
+          "title": "Suspend owner",
+          "description": "{name} will lose access to Roofly until unsuspended. Their tenants are unaffected.",
+          "help": "At least 10 characters. The reason is recorded in the audit log, not shown to the owner.",
+          "reasonMin": "Give a reason of at least 10 characters.",
+          "cta": "Suspend",
+          "doneToast": "Owner suspended"
+        },
+        "unsuspend": {
+          "title": "Unsuspend owner",
+          "description": "Restore {name}'s access to Roofly.",
+          "help": "The owner can sign in again immediately.",
+          "cta": "Unsuspend",
+          "doneToast": "Owner unsuspended"
+        }
+      }
+    },
+    "audit": {
+      "title": "Audit log",
+      "subtitleAll": "Every admin action on the platform, newest first.",
+      "subtitleOwn": "Your own actions, newest first. Ask a super-admin for audit.view to see everyone's.",
+      "filters": {
+        "action": "Action",
+        "actorId": "Actor id",
+        "subjectId": "Subject id",
+        "from": "From",
+        "to": "To"
+      },
+      "details": "Show details",
+      "actions": {
+        "admin": {
+          "login": "Admin signed in",
+          "invite_sent": "Admin invited",
+          "invite_accepted": "Invite accepted",
+          "permissions_changed": "Permissions changed",
+          "disabled": "Admin disabled",
+          "enabled": "Admin enabled"
+        },
+        "owner": {
+          "warned": "Warning sent",
+          "suspended": "Owner suspended",
+          "unsuspended": "Owner unsuspended",
+          "signup": "Owner signed up"
+        },
+        "tenant": {
+          "invite_resent": "Tenant invite resent"
+        }
+      }
+    },
+    "tenants": {
+      "title": "Tenants",
+      "subtitle": "Every tenant across every owner — identity and placement only.",
+      "searchPlaceholder": "Search name, email or phone",
+      "filteredByOwner": "Filtered by owner",
+      "resendInvite": "Resend invite",
+      "resendToast": "Invite resent",
+      "columns": {
+        "tenant": "Tenant",
+        "phone": "Phone",
+        "status": "Status",
+        "owner": "Owner",
+        "propertyUnit": "Property / unit",
+        "invited": "Invited",
+        "accepted": "Accepted"
+      },
+      "detail": {
+        "placement": "Placement",
+        "history": "History",
+        "noHistory": "No admin actions on this tenant yet.",
+        "privacy": "Personal details, documents and payments are never shown here."
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Who on the team can do what.",
+      "tabs": {
+        "admins": "Admins"
+      },
+      "noAccess": "No access",
+      "noAccessHelp": "Ask a super-admin for the admins.manage permission.",
+      "admins": {
+        "help": "Admins sign in at the admin portal. New admins get an email link to set their password.",
+        "create": "Invite admin",
+        "createTitle": "Invite an admin",
+        "editTitle": "Edit admin",
+        "permissions": "Permissions",
+        "applyPreset": "Use Operations preset",
+        "sendInvite": "Send invite",
+        "superAdmin": "Super-admin",
+        "superAdminHelp": "bypasses every permission",
+        "permissionCount": "{n} permissions",
+        "edit": "Edit",
+        "resend": "Resend invite",
+        "disable": "Disable",
+        "enable": "Enable",
+        "you": "(you)",
+        "invitedToast": "Invite sent",
+        "updatedToast": "Admin updated",
+        "resentToast": "Invite resent",
+        "keys": {
+          "dashboard": {
+            "view": "View platform dashboard"
+          },
+          "owners": {
+            "view": "View owners",
+            "warn": "Send payment warnings",
+            "suspend": "Suspend / unsuspend owners",
+            "plan": "Change owner plans"
+          },
+          "tenants": {
+            "view": "View tenants"
+          },
+          "support": {
+            "manage": "Manage support inbox"
+          },
+          "broadcast": {
+            "send": "Send broadcasts"
+          },
+          "settings": {
+            "channels": "Manage channel providers",
+            "flags": "Manage feature flags"
+          },
+          "admins": {
+            "manage": "Manage admins"
+          },
+          "audit": {
+            "view": "View full audit log"
+          },
+          "users": {
+            "delete": "Delete / anonymise users"
+          }
+        }
       }
     }
   }
