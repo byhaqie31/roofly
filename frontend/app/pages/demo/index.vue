@@ -12,8 +12,12 @@ const TENANT_ENABLED = true;
 
 const auth = useAuthStore();
 const loadingRole = ref<"owner" | "tenant" | null>(null);
+const { track } = useTrack();
+
+onMounted(() => track("demo_enter", { role: "landing" }));
 
 const enter = async (role: "owner" | "tenant") => {
+  track("demo_enter", { role });
   loadingRole.value = role;
   await auth.login(`${role}@roofly.my`, "password");
   await navigateTo(role === "owner" ? "/owner" : "/tenant");

@@ -1160,6 +1160,7 @@
       "dashboard": "Dashboard",
       "owners": "Owners",
       "tenants": "Tenants",
+      "analytics": "Analytics",
       "audit": "Audit log",
       "settings": "Settings"
     },
@@ -1349,6 +1350,9 @@
         },
         "tenant": {
           "invite_resent": "Tenant invite resent"
+        },
+        "analytics": {
+          "exported": "Leads exported"
         }
       }
     },
@@ -1374,6 +1378,19 @@
         "noHistory": "No admin actions on this tenant yet.",
         "privacy": "Personal details, documents and payments are never shown here."
       }
+    },
+    "analytics": {
+      "title": "Analytics",
+      "subtitle": "Who looks at roofly.my, who tries the demo, who leaves an email, who signs up.",
+      "range": { "label": "Range", "d7": "Last 7 days", "d30": "Last 30 days", "d90": "Last 90 days", "custom": "Custom", "from": "From", "to": "To", "invalid": "Pick a start date on or before the end date, at most 366 days apart." },
+      "tiles": { "views": "Page views", "visitors": "Visitors", "visitorsHelp": "{n} new", "demo": "Demo entries", "leads": "Leads", "registrations": "Registrations", "conversion": "Conversion", "conversionHelp": "Registrations ÷ visitors" },
+      "charts": { "views": "Page views per day", "registrations": "Registrations per day" },
+      "funnel": { "title": "Funnel", "visitors": "Visitors", "demo": "Tried the demo", "leads": "Left an email", "registered": "Registered", "pctOfPrevious": "{pct}% of previous" },
+      "topPages": "Top pages", "referrers": "Top referrers", "direct": "Direct / unknown",
+      "leads": { "title": "Leads", "searchPlaceholder": "Search email", "columns": { "email": "Email", "source": "Source", "firstSeen": "First seen", "lastSeen": "Last seen", "views": "Views", "demo": "Demo", "converted": "Converted" }, "filters": { "converted": "Converted only" }, "empty": "No leads yet", "emptyHelp": "Leads appear when someone joins the waitlist or registers." },
+      "sources": { "waitlist": "Waitlist", "demo": "Demo", "register": "Registered" },
+      "events": { "page_view": "Page view", "demo_enter": "Entered demo", "demo_feedback_click": "Clicked feedback", "waitlist_signup": "Joined waitlist", "register": "Registered" },
+      "drawer": { "title": "Lead", "recent": "Recent activity", "noEvents": "No events recorded for this lead." }
     },
     "settings": {
       "title": "Settings",
@@ -1414,6 +1431,9 @@
           },
           "tenants": {
             "view": "View tenants"
+          },
+          "analytics": {
+            "view": "View analytics"
           },
           "support": {
             "manage": "Manage support inbox"

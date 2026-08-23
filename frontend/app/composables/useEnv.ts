@@ -52,6 +52,10 @@ export const useEnv = () => {
       admin: !isDemo && config.public.features.admin,
     },
 
+    // Marketing/analytics tracking — off in demo (useMock) and when the
+    // runtime flag is explicitly disabled. See composables/useTrack.ts.
+    trackingEnabled: !(isDemo || config.public.useMock) && config.public.tracking !== false,
+
     // UI feature flags
     showDemoShortcuts: isDemo,
     showFloatingFeedback: isDemo && Boolean(config.public.demoFeedbackUrl),

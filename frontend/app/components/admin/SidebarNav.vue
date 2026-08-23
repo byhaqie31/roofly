@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LayoutDashboard, Building2, Users, ScrollText, Settings } from "lucide-vue-next";
+import { LayoutDashboard, Building2, Users, ChartBar, ScrollText, Settings } from "lucide-vue-next";
 import type { AdminPermission } from "~/types/admin";
 
 const { t } = useI18n();
@@ -13,6 +13,7 @@ const items = computed<Item[]>(() =>
       { to: "/admin", label: t("admin.nav.dashboard"), icon: LayoutDashboard, exact: true, needs: "dashboard.view" },
       { to: "/admin/owners", label: t("admin.nav.owners"), icon: Building2, needs: "owners.view" },
       { to: "/admin/tenants", label: t("admin.nav.tenants"), icon: Users, needs: "tenants.view" },
+      { to: "/admin/analytics", label: t("admin.nav.analytics"), icon: ChartBar, needs: "analytics.view" },
       { to: "/admin/audit", label: t("admin.nav.audit"), icon: ScrollText },
       { to: "/admin/settings", label: t("admin.nav.settings"), icon: Settings, needs: "admins.manage" },
     ] as Item[]

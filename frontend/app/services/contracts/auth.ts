@@ -5,6 +5,7 @@ export interface RegisterPayload {
   email: string;
   phone: string;
   password: string;
+  visitorId?: string;
 }
 
 export interface AuthAdapter {

@@ -4,6 +4,7 @@ export const ADMIN_PERMISSIONS = [
   "dashboard.view",
   "owners.view",
   "tenants.view",
+  "analytics.view",
   "owners.warn",
   "owners.suspend",
   "owners.plan",
@@ -126,12 +127,13 @@ export type AuditAction =
   | "owner.suspended"
   | "owner.unsuspended"
   | "tenant.invite_resent"
+  | "analytics.exported"
   | "owner.signup"; // synthesised in owner history only
 
 export const AUDIT_ACTIONS: AuditAction[] = [
   "admin.login", "admin.invite_sent", "admin.invite_accepted", "admin.permissions_changed",
   "admin.disabled", "admin.enabled", "owner.warned", "owner.suspended", "owner.unsuspended",
-  "tenant.invite_resent",
+  "tenant.invite_resent", "analytics.exported",
 ];
 
 export interface AuditEntry {

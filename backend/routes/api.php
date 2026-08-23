@@ -24,6 +24,9 @@ Route::prefix('auth')->group(function () {
     Route::get('magic-link/{token}', [\App\Http\Controllers\Api\Auth\MagicLinkController::class, 'authenticate']);
 });
 
+// ── Public: analytics beacon (spec: admin analytics § 3) ─────────────────────
+Route::post('track', [\App\Http\Controllers\Api\TrackController::class, 'store'])->middleware('throttle:track');
+
 // ── Public: Admin Portal auth (spec § 4) ─────────────────────────────────────
 Route::prefix('admin/auth')->group(function () {
     Route::post('login',         [\App\Http\Controllers\Api\Admin\AdminLoginController::class, 'store']);
@@ -153,6 +156,14 @@ Route::middleware(['auth:sanctum', 'touch-active'])->group(function () {
         $Audit = \App\Http\Controllers\Api\Admin\AuditController::class;
         Route::get('audit',            [$Audit, 'index']);   // audit.view → all, else own (in controller)
         Route::get('audit/export.csv', [$Audit, 'export'])->middleware('can:' . $P::AUDIT_VIEW);
+
+        $Analytics = \App\Http\Controllers\Api\Admin\AnalyticsController::class;
+        Route::middleware('can:' . $P::ANALYTICS_VIEW)->group(function () use ($Analytics) {
+            Route::get('analytics/overview', [$Analytics, 'overview']);
+            Route::get('analytics/leads',            [$Analytics, 'leads']);
+            Route::get('analytics/leads/export.csv', [$Analytics, 'export']);   // before {lead}
+            Route::get('analytics/leads/{lead}',     [$Analytics, 'lead']);
+        });
     });
 
     // ── Billplz webhook (no role guard — validated by X-Signature) ────────────

@@ -12,6 +12,7 @@ final class AdminPermissions
     public const DASHBOARD_VIEW    = 'dashboard.view';
     public const OWNERS_VIEW       = 'owners.view';
     public const TENANTS_VIEW      = 'tenants.view';
+    public const ANALYTICS_VIEW    = 'analytics.view';
     public const OWNERS_WARN       = 'owners.warn';
     public const OWNERS_SUSPEND    = 'owners.suspend';
     public const OWNERS_PLAN       = 'owners.plan';
@@ -30,6 +31,7 @@ final class AdminPermissions
         self::DASHBOARD_VIEW    => ['preset' => true],
         self::OWNERS_VIEW       => ['preset' => true],
         self::TENANTS_VIEW      => ['preset' => true],
+        self::ANALYTICS_VIEW    => ['preset' => true],
         self::OWNERS_WARN       => ['preset' => true],
         self::OWNERS_SUSPEND    => ['preset' => true],
         self::OWNERS_PLAN       => ['preset' => false],

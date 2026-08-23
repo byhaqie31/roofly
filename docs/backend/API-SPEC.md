@@ -2,7 +2,7 @@
 
 First-cut reference for the Laravel API — organised per shell → per module → per endpoint. Accuracy over prose: every field/rule below was read from `backend/routes/api.php`, the controllers, FormRequests, and Resources, not invented. Cross-link: [docs/frontend/API-MAP.md](../frontend/API-MAP.md) — how the frontend consumes this contract, per page.
 
-Route count documented: **85** (source of truth: `.superpowers/sdd/2026-08-23-admin-backoffice-foundation/routes.txt`).
+Route count documented: **90** (85 admin-backoffice-foundation baseline + `POST /track` + 4 `/admin/analytics/*` from `.superpowers/sdd/2026-08-23-admin-analytics/`).
 
 ---
 
@@ -13,6 +13,7 @@ Route count documented: **85** (source of truth: `.superpowers/sdd/2026-08-23-ad
 - **Response envelope** — `JsonResource::withoutWrapping()` is called once in `AppServiceProvider` (`app/Providers/AppServiceProvider.php:25`), so single-resource responses are the bare object (no `{data: …}` wrapper) and collection responses are a bare array — **except** endpoints that paginate, which return `{data: [...], meta: {page, perPage, total, lastPage}}` explicitly in the controller (admin audit, admin owners, admin tenants).
 - **Auth** — Sanctum. The owner/tenant surface uses `POST /api/auth/login` which returns a Bearer token (`createToken('api')->plainTextToken`) alongside the user; the admin portal (`POST /api/admin/auth/login`) uses session/cookie auth (`Auth::attempt` + `Auth::guard('web')`), no token in the response. Both surfaces sit behind `auth:sanctum`. `GET /sanctum/csrf-cookie` is Laravel Sanctum's standard cookie-auth bootstrap route (not custom, not in `routes/api.php` — provided by the Sanctum package) and is needed before any cookie-session (admin/SPA) write.
 - **Route middleware stack**, read left→right as applied: `api` (route prefix) → `Authenticate:sanctum` (all protected routes) → `TouchLastActive` (aliased `touch-active`, 10-minute-throttled `last_active_at` heartbeat write, `app/Http/Middleware/TouchLastActive.php`) → role guard (`role:owner`, `role:tenant`, `role:admin` — `App\Http\Middleware\EnsureRole`, compares `$user->role->value` to the route's string arg, `abort(403)` on mismatch, **plain Laravel `{message}` body, no `code`**) → `not-suspended` (owner shell only — `App\Http\Middleware\EnsureNotSuspended`, 403 with `{code:"account_suspended", message}` if `owner.suspended_at` is set) → `can:<permission>` (admin shell only — Laravel's built-in Gate middleware against Spatie permission names defined in `App\Support\AdminPermissions`).
+- **Trusted proxies** — `bootstrap/app.php` calls `$middleware->trustProxies(at: '*')`, since nginx/Cloudflare sit in front of every environment. Without this, the client IP used for per-IP throttling (`throttle:track`) and the analytics `ip_hash` would be the proxy's address instead of the real client's.
 - **Error shapes**:
   - `401` — `{"message": "..."}` (unauthenticated, or login/admin-login with bad credentials — both return `401 {"message": "Invalid credentials."}` rather than 422, and an admin who successfully authenticates via the *customer* `/api/auth/login` form is logged out and also gets this 401 — admins are only allowed in through `/api/admin/auth/login`).
   - `403` — bare `{"message": "..."}` from `abort_if`/`abort_unless` ownership checks (e.g. "you don't own this property") and from `EnsureRole`; **`{"code": "account_suspended", "message": "..."}`** specifically from `EnsureNotSuspended`.
@@ -38,6 +39,12 @@ No auth required except where noted. Base path `/api`.
 | GET | `/auth/magic-link/{token}` | `api` | path: `token` | `501 {message: "Magic link feature coming in Phase 2."}` | **Stub.** `TODO Phase 2`: verify signed token, issue Sanctum token. |
 | POST | `/admin/auth/login` | `api` | body: `email` (required, email), `password` (required, string) | `200` `{user: AuthUserResource}` (no token — cookie session) | `401` on bad credentials, or if the resolved user isn't `role: admin` or is disabled (session torn down either way). Sets `first_login_at` if unset. Logs `admin.login` (`AuditLogger::ADMIN_LOGIN`). |
 | POST | `/admin/auth/accept-invite` | `api` | body: `token` (required, string), `password` (required, string≥8, `confirmed`) | `200` `{user: AuthUserResource}` | Looks up `AdminInvite` by `sha256(token)`; `422 {errors:{token:[...]}}` if missing/expired/used/target user not an admin/target disabled. Sets the user's password, `first_login_at`, marks the invite `accepted_at`, logs the caller in (`web` guard), logs `admin.invite_accepted`. |
+
+### Analytics beacon
+
+| Method | Path | Middleware | Request | Response | Notes |
+|---|---|---|---|---|---|
+| POST | `/track` | `api`, `throttle:track` (120/min/IP) | body (`TrackRequest`): `visitorId` (required, uuid), `event` (required, one of `App\Models\AnalyticsEvent::EVENTS`: `page_view\|demo_enter\|demo_feedback_click\|waitlist_signup\|register`), `path` (nullable, ≤255), `referrer` (nullable, ≤255), `utm` (nullable, array of `source\|medium\|campaign`, each ≤100), `props` (nullable, array, JSON-encoded size ≤2048 bytes; `props.email` nullable email≤255, `props.userId` nullable uuid, `props.role` nullable ≤20), `at` (nullable, date) | `204` on success, `422` on validation failure | Guest, no auth. **Exempted from CSRF** (`bootstrap/app.php`'s `validateCsrfTokens(except: ['api/track'])`) — as a `sendBeacon`/`fetch` call from a marketing page, it can be treated as a "stateful" frontend request by Sanctum without a matching CSRF token, which would otherwise 419. `App\Services\AnalyticsRecorder::record()` writes an `AnalyticsEvent` row (IP salted-hashed via `hash('sha256', ip.config('app.key'))`, never stored raw) and upserts a `Lead` by email when `props.email` is present. **`props.userId` is never trusted for conversion** — only the server's own `AnalyticsRecorder::linkRegistration()` (called from the trusted `/auth/register` flow with the authenticated user's own id) may set `Lead.converted_user_id`. |
 
 ### Common protected (any authenticated role)
 
@@ -178,7 +185,7 @@ Every write listed here is recorded via `AuditLogger` (`log_name: admin`). Permi
 
 | Method | Path | `can:` | Request | Response | Notes |
 |---|---|---|---|---|---|
-| GET | `/admin/permissions` | `admins.manage` | — | `200` `{permissions: [{key, preset}] (13 rows), preset: string[] (keys where preset=true)}` | The fixed catalogue — `dashboard.view, owners.view, tenants.view, owners.warn, owners.suspend, owners.plan, support.manage, broadcast.send, settings.channels, settings.flags, admins.manage, audit.view, users.delete`. "Operations preset" = 7 of the 13 (excludes `owners.plan`, `settings.channels`, `settings.flags`, `admins.manage`, `audit.view`, `users.delete`). |
+| GET | `/admin/permissions` | `admins.manage` | — | `200` `{permissions: [{key, preset}] (14 rows), preset: string[] (keys where preset=true)}` | The fixed catalogue — `dashboard.view, owners.view, tenants.view, analytics.view, owners.warn, owners.suspend, owners.plan, support.manage, broadcast.send, settings.channels, settings.flags, admins.manage, audit.view, users.delete`. "Operations preset" = 8 of the 14 (excludes `owners.plan`, `settings.channels`, `settings.flags`, `admins.manage`, `audit.view`, `users.delete`). |
 | GET | `/admin/dashboard` | `dashboard.view` | — | `200` inline JSON: `{tiles:{owners:{total,active,suspended}, tenants:{total,invitedPending}, properties, units:{total,occupiedPct}, agreementsActive, agreementsExpiring30d, supportOpen:0 /*SP2*/}, series:{months[12], ownerSignups[12], invoicesIssued[12], invoicesPaid[12], inviteAcceptanceRate[12]}, attention:[{kind, ownerId, ownerName, meta, link}]}` | Platform-wide, counts only — never a money amount. `attention.kind` ∈ `over_cap \| overdue_3plus \| invite_stale_7d \| no_property_7d \| suspended`. `supportOpen` is hardcoded `0`, deferred to a later phase (support tickets don't exist yet). Must be kept in lock-step with `frontend/app/demo/services/admin/dashboard.ts` (mock mirror) by hand — no shared source. |
 
 ### Owners
@@ -193,6 +200,17 @@ Every write listed here is recorded via `AuditLogger` (`log_name: admin`). Permi
 | POST | `/admin/owners/{owner}/warn` | `owners.warn` | body (`WarnOwnerRequest`): `template` (required, one of `App\Notifications\OwnerWarning::TEMPLATES`), `suspendOn` (required, `Y-m-d`, must be after today), `extraLine` (nullable, ≤500) | `204` | Sends an `OwnerWarning` notification — **mail only in SP1** (`via()` returns `['mail']`; queued, so the `queue-worker` container must be running; SP2 adds WhatsApp/SMS channels without touching callers) — and logs `owner.warned` with the composed warning text in `after`. |
 | POST | `/admin/owners/{owner}/suspend` | `owners.suspend` | body (`SuspendOwnerRequest`): `reason` (required, string, 10–1000 chars) | `200` `AdminOwnerResource` | `409` if already suspended. Sets `suspended_at`, `suspension_reason`. Logs `owner.suspended` with the reason. This flips `not-suspended` for the owner shell going forward. |
 | POST | `/admin/owners/{owner}/unsuspend` | `owners.suspend` | — | `200` `AdminOwnerResource` | `409` if not suspended. Logs `owner.unsuspended`. |
+
+### Analytics
+
+Read-only platform analytics (marketing-site funnel + leads). Counts only — never money, never PII beyond a lead's email.
+
+| Method | Path | `can:` | Request | Response | Notes |
+|---|---|---|---|---|---|
+| GET | `/admin/analytics/overview` | `analytics.view` | query (`AnalyticsRangeRequest`): `from`/`to` (nullable, `Y-m-d`, `to` defaults to now, `from` defaults to `to - 29 days`; range capped at 366 days, else `422`) | `200` `{range:{from, to, days}, tiles:{views, visitors, newVisitors, demoEntries, leads, registrations, conversionPct}, series:{days[], views[], visitors[], leads[], registrations[]}, funnel:{visitors, demo, leads, registered}, topPages:[{path, views}] (top 10), referrers:[{referrer, visitors}] (top 10, `null` referrer bucketed as `"direct"`)}` | Bucketing/aggregation is done in PHP over the range's rows (same style as the owner dashboard) — fine at this scale, not SQL-side. `conversionPct` = `round(registrations / visitors * 100)`, `0` if no visitors. |
+| GET | `/admin/analytics/leads` | `analytics.view` | query: `q` (email like-search), `source` (`waitlist\|demo\|register`), `converted` (bool), `page`, `perPage` (default 20, clamped `min(100, max(1, n))`) | `200` `{data: AdminLeadResource[], meta:{page, perPage, total, lastPage}}` | Ordered `last_seen_at desc, id asc`. Each row decorated with `pageViews`/`demoEntered` from the lead's `visitor_id` events (one query each per page, not per row). |
+| GET | `/admin/analytics/leads/export.csv` | `analytics.view` | same filters as `leads` (minus pagination) | `200` streamed `text/csv; charset=UTF-8`, filename `roofly-leads-{Ymd-His}.csv` | Columns: `email, source, firstSeenAt, lastSeenAt, pageViews, demoEntered, convertedOwnerName`. Streams in chunks of 500. Logs `analytics.exported` (`AuditLogger::ANALYTICS_EXPORTED`) with the applied filters in `after`. Route is registered **before** `leads/{lead}` so `export.csv` isn't swallowed by the wildcard. |
+| GET | `/admin/analytics/leads/{lead}` | `analytics.view` | — | `200` `AdminLeadResource` `+ {events: LeadEventResource[]}` (latest 20 by `created_at`, only if the lead has a `visitor_id`) | Same per-lead decoration as the list. |
 
 ### Tenants
 
@@ -246,11 +264,13 @@ Key lists below are read directly from each `toArray()`. `?` marks a value that 
 - **`TicketResource`** — `id, unitId, reporterId, reporterRole?, category?, priority?, title, description, status?, createdAt?, updatedAt?, resolvedAt?`
 - **`TicketWithRefsResource`** — `{ticket, unit?, property?, reporter: TenantResource? (null for owner-reported tickets), comments: TicketCommentResource[] (sorted by created_at)}`
 - **`UnitResource`** — `id, propertyId, label, bedrooms?, bathrooms?, sqft?, status?, createdAt?`
+- **`Admin\AdminLeadResource`** — `id, email, source ("waitlist"|"demo"|"register"), firstSeenAt, lastSeenAt, pageViews: int, demoEntered: bool, convertedUserId?, convertedOwnerName?` (`pageViews`/`demoEntered` are controller-set attributes, not model columns — see the Analytics endpoints above)
 - **`Admin\AdminOwnerResource`** — `id, name, email, phone?, businessName?, planTier ("free" default), unitsUsed, unitsCap (int? — null = unlimited), status ("active"|"suspended"), suspendedAt?, suspensionReason?, createdAt?, lastActiveAt?, counts:{properties, units, unitsOccupied, tenants, agreementsActive, agreementsExpiring30d, invoicesOverdue, ticketsOpen}`
 - **`Admin\AdminPropertySummaryResource`** — `id, name, address:{line, postcode, city, state}, type?, unitsTotal, unitsOccupied, createdAt?`
 - **`Admin\AdminTenantResource`** — `id, name, email, phone?, status, ownerId?, ownerName?, propertyName?, unitLabel?, invitedAt?, acceptedAt?, createdAt?` (`ownerId`/`ownerName` prefer the direct inviter, fall back to the most-relevant agreement's property owner)
 - **`Admin\AdminUserResource`** — `id, name, email, permissions: string[], isSuperAdmin: bool, status ("disabled"|"invited"|"active"), lastActiveAt?, createdAt?`
 - **`Admin\AuditEntryResource`** — `id (string), action, actorId?, actorName?, subjectType? (lowercased class basename, e.g. "user"), subjectId?, subjectName? (only populated when subject is a User), before: object, after: object, reason?, ip?, createdAt?`
+- **`Admin\LeadEventResource`** — `id, event, path?, props: object, createdAt?` (`props.email`, if present, is redacted to the lead's own email via `LeadEventResource::forLead($lead->email)` — never surfaces a different email another visitor on the same device may have typed)
 
 ---
 

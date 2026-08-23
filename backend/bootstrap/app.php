@@ -19,6 +19,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'touch-active'  => \App\Http\Middleware\TouchLastActive::class,
             'not-suspended' => \App\Http\Middleware\EnsureNotSuspended::class,
         ]);
+        // /api/track is a public beacon (sendBeacon/fetch from marketing pages, no session
+        // cookie round-trip guaranteed) — exempt it from CSRF so cross-origin beacons aren't
+        // rejected with 419.
+        $middleware->validateCsrfTokens(except: ['api/track']);
+        // nginx/Cloudflare sit in front of every environment; trust all proxies so the
+        // client IP (used for per-IP throttling and analytics ip_hash) is read from
+        // X-Forwarded-For rather than the proxy's own address.
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

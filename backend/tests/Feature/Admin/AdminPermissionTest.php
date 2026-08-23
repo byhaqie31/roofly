@@ -21,11 +21,12 @@ class AdminPermissionTest extends TestCase
 
     public function test_seeder_creates_all_keys_and_is_idempotent(): void
     {
-        $this->assertSame(13, \Spatie\Permission\Models\Permission::count());
+        $this->assertSame(14, \Spatie\Permission\Models\Permission::count());
         $this->seed(AdminPermissionSeeder::class);
-        $this->assertSame(13, \Spatie\Permission\Models\Permission::count());
+        $this->assertSame(14, \Spatie\Permission\Models\Permission::count());
         $this->assertContains('owners.view', AdminPermissions::operationsPreset());
         $this->assertNotContains('admins.manage', AdminPermissions::operationsPreset());
+        $this->assertContains('analytics.view', AdminPermissions::operationsPreset());
     }
 
     public function test_permissions_endpoint_requires_admins_manage(): void
@@ -43,7 +44,7 @@ class AdminPermissionTest extends TestCase
         $res = $this->getJson('/api/admin/permissions')->assertOk();
         $this->assertSame(['permissions', 'preset'], array_keys($res->json()));
         $this->assertSame(['key', 'preset'], array_keys($res->json('permissions.0')));
-        $this->assertCount(13, $res->json('permissions'));
+        $this->assertCount(14, $res->json('permissions'));
     }
 
     public function test_super_admin_bypasses_every_check(): void

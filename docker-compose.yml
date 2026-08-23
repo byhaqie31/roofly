@@ -33,6 +33,7 @@ services:
       - NUXT_PUBLIC_DEMO_FEEDBACK_URL=${NUXT_PUBLIC_DEMO_FEEDBACK_URL:-}
       - NUXT_PUBLIC_WAITLIST_ACCESS_KEY=${NUXT_PUBLIC_WAITLIST_ACCESS_KEY:-}
       - NUXT_PUBLIC_FEATURE_ADMIN=${NUXT_PUBLIC_FEATURE_ADMIN:-true} # admin back office; demo forces off regardless
+      - NUXT_PUBLIC_TRACKING=${NUXT_PUBLIC_TRACKING:-true} # marketing-site analytics beacon; demo is always a no-op
     depends_on:
       - backend
     networks:

@@ -44,7 +44,7 @@ export const DEMO_OPS_ADMIN_ID = "a-ops";
 
 /** Operations preset — mirrors backend AdminPermissions::operationsPreset(). */
 export const DEMO_OPS_PRESET: AdminPermission[] = [
-  "dashboard.view", "owners.view", "tenants.view", "owners.warn",
+  "dashboard.view", "owners.view", "tenants.view", "analytics.view", "owners.warn",
   "owners.suspend", "support.manage", "broadcast.send",
 ];
 

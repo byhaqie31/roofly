@@ -4,6 +4,7 @@ import { Mail, Bell, CheckCircle2, Loader2 } from "lucide-vue-next";
 const { t } = useI18n();
 const config = useRuntimeConfig();
 const accessKey = config.public.waitlistAccessKey as string;
+const { track } = useTrack();
 
 const email = ref("");
 const submitted = ref(false);
@@ -46,6 +47,7 @@ const onSubmit = async () => {
 
     if (res.ok && body.success) {
       submitted.value = true;
+      track("waitlist_signup", { email: email.value.trim() });
     } else {
       error.value = body.message || t("marketing.emailCapture.submitError");
     }

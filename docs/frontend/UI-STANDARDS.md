@@ -738,6 +738,14 @@ Every admin list page (Owners, Tenants, Audit) follows the same shell so the des
 - **Filter watchers reset page OR load — never both** (double-fetch otherwise): `watch([...filters], () => { if (page.value !== 1) page.value = 1; else load(); })` paired with a separate `watch(page, load)`. Resetting `page` to 1 triggers the `page` watcher, which loads; if `page` was already 1, the filter watcher loads directly. Text search debounces (~300ms) before applying the same reset-or-load logic.
 - **Filter state round-trips through the URL** (`router.replace({ query })`) so a reload or shared link preserves search/filters/page — omit defaults (`page: 1`, unchecked booleans) from the query string to keep URLs clean.
 
+### 11.16 Funnel strip
+
+A conversion funnel (visitors → demo → leads → registered) is a row of step tiles, not a chart — each step needs its own count plus how much of the previous step it kept. See [components/admin/FunnelStrip.vue](../../frontend/app/components/admin/FunnelStrip.vue) + [pages/admin/analytics.vue](../../frontend/app/pages/admin/analytics.vue).
+
+- **4-up desktop, 2-up mobile** — `grid grid-cols-2 gap-4 lg:grid-cols-4`. Steps wrap two-per-row under `lg`, one row of four from `lg:` up. No horizontal scroll — a funnel with a handful of steps always fits by wrapping, unlike a data table.
+- **Step % sits under the count, not beside it** — each tile stacks label (`text-caption text-ink-muted`), count (`text-display-sub font-semibold tabular-nums`), then the percent-of-previous line (`text-micro text-ink-faint`) below. The first step's percent is always 100 (nothing to compare against); every later step is `round(count / previousStep.count * 100)`, `0` if the previous step was `0`.
+- **Steps are plain `Card padding="standard"` tiles**, same visual weight as `StatTile` elsewhere on the page — a funnel isn't a special widget, it's stat tiles with one extra derived line.
+
 ---
 
 ## 12. Hard rules — do not break

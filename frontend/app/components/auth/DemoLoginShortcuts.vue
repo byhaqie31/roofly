@@ -22,8 +22,10 @@ const { t } = useI18n();
 const loadingRole = ref<"owner" | "tenant" | null>(null);
 const { showDemoShortcuts } = useEnv();
 const showShortcuts = import.meta.dev || showDemoShortcuts;
+const { track } = useTrack();
 
 const enter = async (role: "owner" | "tenant") => {
+  track("demo_enter", { role });
   loadingRole.value = role;
   await auth.login(`${role}@roofly.my`, "password");
   await navigateTo(role === "owner" ? "/owner" : "/tenant");

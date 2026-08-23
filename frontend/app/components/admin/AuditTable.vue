@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Pill from "~/components/ui/Pill.vue";
+import { formatAdminDateTime } from "~/utils/adminDate";
 import type { AuditAction, AuditEntry } from "~/types/admin";
 
 withDefaults(defineProps<{ entries: AuditEntry[]; showActor?: boolean }>(), { showActor: true });
@@ -19,10 +20,11 @@ const TONE: Record<AuditAction, Tone> = {
   "owner.suspended": "terminated",
   "owner.unsuspended": "active",
   "tenant.invite_resent": "neutral",
+  "analytics.exported": "neutral",
   "owner.signup": "draft",
 };
 
-const fmt = (iso: string) => new Date(iso).toLocaleString("en-MY", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+const fmt = formatAdminDateTime;
 const hasDiff = (e: AuditEntry) => Object.keys(e.before).length > 0 || Object.keys(e.after).length > 0;
 </script>
 

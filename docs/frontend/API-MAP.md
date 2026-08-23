@@ -37,6 +37,7 @@ How the Nuxt frontend consumes the Laravel API, organised per shell → per page
 | `AdminAdminsService` | `useAdminAdmins()` | `demo/services/admin/admins.ts` | `services/api/admin/admins.ts` |
 | `AdminAuditService` | `useAdminAudit()` | `demo/services/admin/audit.ts` | `services/api/admin/audit.ts` |
 | `AdminDashboardService` | `useAdminDashboard()` | `demo/services/admin/dashboard.ts` | `services/api/admin/dashboard.ts` |
+| `AdminAnalyticsService` | `useAdminAnalytics()` | `demo/services/admin/analytics.ts` | `services/api/admin/analytics.ts` |
 
 `services/api/admin/query.ts` (`cleanQuery`) strips `undefined`/`""`/`false` query params and coerces `true` → `1` before every admin list/audit/export call — shared by all three paginated admin API adapters.
 
@@ -102,6 +103,7 @@ Every layout's route guard depends on `auth.fetchMe()` (`AuthAdapter.fetchMe`) h
 | Admin login | `/admin/login` | see Public/Auth above | | |
 | Accept invite | `/admin/accept-invite` | see Public/Auth above | | |
 | Dashboard | `/admin` (`pages/admin/index.vue`) | `useAdminDashboardData()` composable → `useAdminDashboard().getDashboard()`; gates tile links with `useAdminPermissions().can(key)` | `GET /admin/dashboard` | `demo/services/admin/dashboard.ts` computes the same `{tiles, series, attention}` from `adminOwnersMock/adminTenantsMock/adminPropertiesMock`, **except** `invoicesIssued`/`invoicesPaid` in the series, which are synthetic hand-picked numbers (`18 + i*2`, `14 + i*2 - (i%3)`) — the demo has no platform-wide invoice dataset to derive them from, called out in the file's own comment. |
+| Analytics | `/admin/analytics` | `useAdminAnalytics().overview(range)`, `.leads(query)` (`q, source, converted, page, perPage`, range preset (`d7\|d30\|d90\|custom`) + filters synced to the URL query string), `LeadDrawer` → `.lead(id)`, export button → `.exportCsv({...leadsQuery, page: undefined})`, gated by `can("analytics.view")` | `GET /admin/analytics/overview?from&to`; `GET /admin/analytics/leads?...`; `GET /admin/analytics/leads/{id}`; `GET /admin/analytics/leads/export.csv?...` | `demo/services/admin/analytics.ts` computes the same `{tiles, series, funnel, topPages, referrers}` shape from `demo/data/analytics.ts` (`leadsMock`/`analyticsEventsMock`, 90 days deterministic), filters/paginates `leadsMock` in memory with the shared `paginate()` helper, and builds the export CSV client-side via `utils/csv.ts` rather than a server stream. Components: `FunnelStrip` (visitors→demo→leads→registered), `SourcePill`, `EventList` (in `LeadDrawer`), `LeadDrawer` itself. |
 | Owners list | `/admin/owners` | `useAdminOwners().list(query)` (`q, plan, status, overdue, overCap, page, perPage`, synced to the URL query string) | `GET /admin/owners?...` (via `cleanQuery`) | `demo/services/admin/owners.ts` filters/sorts `adminOwnersMock` in memory, paginates with the shared `paginate()` helper. |
 | Owner detail | `/admin/owners/[id]` | `useAdminOwners().get(id)`, `.history(id)`, lazy-loaded `.properties(id)`/`.tenants(id)` per tab; `WarnOwnerModal` → `.warn(id, input)`; `SuspendOwnerModal` → `.suspend(id, reason)` / `.unsuspend(id)`; resend button → `useAdminTenants().resendInvite(tenantId)` then re-fetches `.tenants(id)` | `GET /admin/owners/{id}`; `GET /admin/owners/{id}/history`; `GET /admin/owners/{id}/properties`; `GET /admin/owners/{id}/tenants`; `POST /admin/owners/{id}/warn`; `POST /admin/owners/{id}/suspend`; `POST /admin/owners/{id}/unsuspend`; `POST /admin/tenants/{id}/resend-invite` | Every write pushes a synthetic entry via `pushAudit()` into `auditMock` (demo's own audit trail — not connected to any real logging system), mirroring the backend's `AuditLogger`. |
 | Tenants list | `/admin/tenants` | `useAdminTenants().list(query)` (`q, status, ownerId, page, perPage`, URL-synced) | `GET /admin/tenants?...` | Demo filters `adminTenantsMock` in memory. |
@@ -110,6 +112,22 @@ Every layout's route guard depends on `auth.fetchMe()` (`AuthAdapter.fetchMe`) h
 | Settings (admins) | `/admin/settings` | `useAdminAdmins().permissions()` + `.list()` (parallel on load); `AdminFormModal` → `.create(input)`; toggle → `.update(id, {disabled})`; resend → `.resendInvite(id)`; gated throughout by `useAdminPermissions().can("admins.manage")`/`isSuperAdmin` | `GET /admin/permissions`; `GET /admin/admins`; `POST /admin/admins`; `PATCH /admin/admins/{id}`; `POST /admin/admins/{id}/resend-invite` | Demo enforces the same "can't disable yourself" / "can't drop the last enabled super-admin" business rules client-side (mirrors the backend `AdminUserController@update` checks) by throwing `Error`s the modal surfaces as toasts. |
 
 `useAdminPermissions().can(key)` is a **UI-only** gate (hide/disable controls) — the real enforcement is server-side `can:` middleware; this mirrors the doc note in `docs/backend/API-SPEC.md`'s Conventions section that permission checks must not be trusted client-side alone.
+
+---
+
+## Tracking
+
+The `POST /track` beacon (see `docs/backend/API-SPEC.md` § Shell 1 — Analytics beacon) is fired from `composables/useTrack.ts`, selecting `demoTrack`/`apiTrack` (`~/demo/track.ts` / `~/services/api/track.ts`) via `useEnv().useMock`, same selector pattern as every other adapter pair.
+
+- **Gate** — `track()` is a no-op unless `env.trackingEnabled` (`composables/useEnv.ts`: `!(isDemo || config.public.useMock) && config.public.tracking !== false`, driven by `NUXT_PUBLIC_TRACKING`) **and** the current path matches `isTrackedPath()` (`/`, or a `TRACKED_PREFIXES` prefix: `/coming-soon`, `/demo`, `/auth`) **and** `import.meta.client`. `demoTrack.send()` is always a hard no-op regardless of the gate, so `demo-roofly` never produces `/api/track` traffic even if the gate were somehow bypassed. The entire body of `track()` is wrapped in try/catch — analytics must never break a page.
+- **Identity** — `visitorId` is a `crypto.randomUUID()` persisted to `localStorage["roofly_vid"]`; first-touch UTM params (`utm_source/medium/campaign`) are captured once from the landing URL into `localStorage["roofly_utm"]` and reused on every subsequent event.
+- **Events fired** (`TRACK_EVENTS` in `types/analytics.ts`) and call sites:
+  - `page_view` — `plugins/track.client.ts`, `router.afterEach`, on every client-side navigation to a tracked path.
+  - `demo_enter` — `components/auth/DemoLoginShortcuts.vue` (`enter()`, with `{role}`), `pages/demo/index.vue` (`onMounted` with `{role:"landing"}`, and again in `enter()` before `auth.login`).
+  - `demo_feedback_click` — wired on `components/demo/FloatingFeedback.vue`'s `@click`, but **reserved/not captured today**: the widget only renders in demo (`showFloatingFeedback` = demo-only), where `trackingEnabled` is always false, so this event never actually reaches `/api/track`.
+  - `waitlist_signup` — `components/marketing/EmailCapture.vue`, on a successful Web3Forms submit, with `{email}`.
+  - `register` — `pages/auth/register.vue`, after `auth.register()` resolves and before `navigateTo`, with `{email, userId}`. This is the only client-supplied `props.userId`; the backend's `AnalyticsRecorder` never trusts it for conversion (see the API-SPEC beacon note) — conversion is only ever written server-side via `linkRegistration()`.
+- **Local opt-out** — set `NUXT_PUBLIC_TRACKING=false` to disable beacons in any non-demo build without touching code (verifiable via DevTools Network: zero `/api/track` requests).
 
 ---
 

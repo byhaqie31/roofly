@@ -10,6 +10,8 @@ useHead({ title: () => t("auth.register") });
 
 const { toFieldErrors } = useApiError();
 const auth = useAuthStore();
+const env = useEnv();
+const { track, visitorId } = useTrack();
 const name = ref("");
 const email = ref("");
 const phone = ref("");
@@ -32,7 +34,9 @@ const onSubmit = async () => {
       email: email.value,
       phone: phone.value,
       password: password.value,
+      visitorId: env.trackingEnabled ? visitorId() : undefined,
     });
+    track("register", { email: email.value, userId: auth.user?.id ?? "" });
     await navigateTo("/owner");
   } catch (err) {
     const fieldErrors = toFieldErrors(err);

@@ -24,13 +24,14 @@ class AuditLogger
     public const OWNER_SUSPENDED           = 'owner.suspended';
     public const OWNER_UNSUSPENDED         = 'owner.unsuspended';
     public const TENANT_INVITE_RESENT      = 'tenant.invite_resent';
+    public const ANALYTICS_EXPORTED        = 'analytics.exported';
 
     /** Every SP1 action, for validation of the audit filter. */
     public const ACTIONS = [
         self::ADMIN_LOGIN, self::ADMIN_INVITE_SENT, self::ADMIN_INVITE_ACCEPTED,
         self::ADMIN_PERMISSIONS_CHANGED, self::ADMIN_DISABLED, self::ADMIN_ENABLED,
         self::OWNER_WARNED, self::OWNER_SUSPENDED, self::OWNER_UNSUSPENDED,
-        self::TENANT_INVITE_RESENT,
+        self::TENANT_INVITE_RESENT, self::ANALYTICS_EXPORTED,
     ];
 
     public function record(

@@ -3,8 +3,11 @@
 namespace App\Providers;
 
 use App\Models\User;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,5 +32,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user) {
             return ($user instanceof User && $user->is_super_admin) ? true : null;
         });
+
+        RateLimiter::for('track', fn (Request $request) => Limit::perMinute(120)->by('track:' . $request->ip()));
     }
 }

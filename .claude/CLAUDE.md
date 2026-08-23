@@ -57,7 +57,9 @@ If a question is answered by one of these, defer to that doc and don't re-derive
 
 **Backend** — Laravel 13, contract-aligned to the frontend types (Phase 1), owner shell wired to it with Sanctum cookie auth, CSRF/401/422 handling, and a global auth/role route guard (Phase 2). `DemoSeeder` mirrors the frontend demo data. Tenant shell is wired end-to-end too: reads via `/me/agreement|invoices|tickets`, writes via `payForTenant`, `createForTenant`, `addCommentForTenant`, `getProfile`/`updateProfile` (`/me/*`), all in both adapters. Tenant email is read-only on the profile (login identity).
 
-**Admin shell — complete in mock + API form (5 surfaces):** Dashboard ([pages/admin/index.vue](frontend/app/pages/admin/index.vue)) — stat tiles + attention list. Owners ([pages/admin/owners/](frontend/app/pages/admin/owners/)) — list + detail (summary counts only, never money). Tenants ([pages/admin/tenants/](frontend/app/pages/admin/tenants/)) — list + detail. Settings → Admins ([pages/admin/settings.vue](frontend/app/pages/admin/settings.vue)) — invite/edit admin users against `App\Support\AdminPermissions` (13 keys + an Operations preset). Audit ([pages/admin/audit.vue](frontend/app/pages/admin/audit.vue)) — reads `AuditLogger`-written ActivityLog entries (`log_name = admin`). Auth is separate from owner/tenant: `/admin/login` + `/admin/accept-invite`, backed by `layouts/admin.vue` + `layouts/auth-admin.vue`. Gated by `useEnv().features.admin` (env `NUXT_PUBLIC_FEATURE_ADMIN`) — always off in demo, so `demo-roofly` never shows it. Demo admin logins: `admin@roofly.my` (super-admin, all permissions) / `ops@roofly.my` (Operations preset), both password `password`.
+**Admin shell — complete in mock + API form (6 surfaces):** Dashboard ([pages/admin/index.vue](frontend/app/pages/admin/index.vue)) — stat tiles + attention list. Owners ([pages/admin/owners/](frontend/app/pages/admin/owners/)) — list + detail (summary counts only, never money). Tenants ([pages/admin/tenants/](frontend/app/pages/admin/tenants/)) — list + detail. Analytics ([pages/admin/analytics.vue](frontend/app/pages/admin/analytics.vue)) — marketing-site funnel (visitors → demo → leads → registered) + daily views/registrations charts + top pages/referrers + a searchable/filterable leads table with CSV export and a per-lead event-history drawer; reads the `analytics_events`/`leads` tables the public `POST /track` beacon writes to. Settings → Admins ([pages/admin/settings.vue](frontend/app/pages/admin/settings.vue)) — invite/edit admin users against `App\Support\AdminPermissions` (14 keys + an Operations preset). Audit ([pages/admin/audit.vue](frontend/app/pages/admin/audit.vue)) — reads `AuditLogger`-written ActivityLog entries (`log_name = admin`). Auth is separate from owner/tenant: `/admin/login` + `/admin/accept-invite`, backed by `layouts/admin.vue` + `layouts/auth-admin.vue`. Gated by `useEnv().features.admin` (env `NUXT_PUBLIC_FEATURE_ADMIN`) — always off in demo, so `demo-roofly` never shows it. Demo admin logins: `admin@roofly.my` (super-admin, all permissions) / `ops@roofly.my` (Operations preset), both password `password`.
+
+**Tracking** — `composables/useTrack.ts` fires a `POST /track` beacon (guest, `throttle:track`) on tracked marketing/auth paths only (`/`, `/coming-soon`, `/demo`, `/auth/*`). **Tracking calls never belong inside `/owner`, `/tenant`, or `/admin` pages/components** — those are authenticated product surfaces, not the marketing funnel the beacon measures; `plugins/track.client.ts` and the five explicit call sites (waitlist signup, demo entry, feedback click, register) are the only places `useTrack()`/`track()` should ever be called. Gated by `useEnv().trackingEnabled` (env `NUXT_PUBLIC_TRACKING`, default on) — always `false` in demo, so `demo-roofly` never generates `/api/track` rows even though `AnalyticsDemoSeeder` gives the admin page 90 days of seeded story data (40 leads, 8 converted to real property-less owner users `lead05@example.com`…, password `password`; refuses to run in production).
 
 ---
 
@@ -69,25 +71,28 @@ frontend/app/
 ├── schemas/       # Zod (vee-validate) — shared between create modals & edit forms
 ├── demo/          # demo-only — NEVER imports useApi
 │   ├── auth.ts    #   demoAuth (localStorage session, email prefix → role), DEMO_TENANT_ID
-│   ├── data/      #   in-memory seed arrays (propertiesMock, unitsMock, …), admin.ts
-│   └── services/  #   demoX: XService — one per entity + dashboard, admin/ subfolder
+│   ├── data/      #   in-memory seed arrays (propertiesMock, unitsMock, …), admin.ts, analytics.ts
+│   ├── services/  #   demoX: XService — one per entity + dashboard, admin/ subfolder (incl. admin/analytics.ts)
+│   └── track.ts   #   demoTrack: TrackAdapter — hard no-op, demo-roofly must generate zero /api/track rows
 ├── services/
-│   ├── contracts/ # XService interfaces + *WithRefs types (both adapters implement these); admin/ subfolder
-│   ├── api/       # apiX: XService — Laravel calls via useApi(); NEVER imports ~/demo; admin/ subfolder (+ query.ts helper)
-│   └── useX.ts    # auto-imported selector: useEnv().useMock ? demoX : apiX (+ type re-exports)
-├── composables/   # useDashboard, useReports, useTheme, useToast, useMoney, useApi, useApiError, useAdminPermissions, useAdminDashboardData
+│   ├── contracts/ # XService interfaces + *WithRefs types (both adapters implement these); admin/ subfolder (incl. analytics.ts)
+│   ├── api/       # apiX: XService — Laravel calls via useApi(); NEVER imports ~/demo; admin/ subfolder (+ query.ts helper); track.ts (sendBeacon/$fetch)
+│   └── useX.ts    # auto-imported selector: useEnv().useMock ? demoX : apiX (+ type re-exports); useAdminAnalytics.ts
+├── composables/   # useDashboard, useReports, useTheme, useToast, useMoney, useApi, useApiError, useAdminPermissions,
+│                  # useAdminDashboardData, useTrack (visitorId + first-touch UTM, gated by trackingEnabled + isTrackedPath)
 ├── components/
 │   ├── ui/        # Card, Pill, Button, Input, Select, Modal, Icon, MoneyDisplay,
 │   │              # MiniAreaChart, EmptyState, Toaster
 │   ├── owner/     # owner-specific (PropertyCard, TenantInviteModal, TicketCard, etc.)
 │   ├── tenant/    # tenant-specific (sidebar nav, etc.)
-│   ├── admin/     # admin-specific (SidebarNav, StatTile, DataTableShell, AuditTable, WarnOwnerModal, SuspendOwnerModal, AdminFormModal, etc.)
+│   ├── admin/     # admin-specific (SidebarNav, StatTile, DataTableShell, AuditTable, WarnOwnerModal, SuspendOwnerModal,
+│   │              # AdminFormModal, SourcePill, FunnelStrip, EventList, LeadDrawer, etc.)
 │   ├── topbar/    # ThemeToggle, LangSwitcher, UserMenu
 │   └── layout/    # MobileNavDrawer
 ├── pages/         # routing (Nuxt file-based)
 ├── layouts/       # owner.vue, tenant.vue, admin.vue, auth.vue, auth-admin.vue, default.vue
 ├── stores/        # auth.ts (Pinia; delegates to demoAuth / apiAuth)
-├── plugins/       # theme.ts, auth-restore.client.ts
+├── plugins/       # theme.ts, auth-restore.client.ts, track.client.ts (page_view on tracked-path navigation)
 ├── middleware/    # env.global.ts (renamed from the old demo-only middleware — now also drives the admin-host redirect), auth.global.ts
 └── utils/         # rpgt.ts, propertyCompletion.ts, csv.ts, warningText.ts
 ```

@@ -114,6 +114,7 @@ class DemoSeeder extends Seeder
             $agreements = $this->seedAgreements($tenants);
             $this->seedInvoicesAndPayments($agreements);
             $this->seedTicketsAndComments();
+            $this->call(AnalyticsDemoSeeder::class);
         });
     }
 
