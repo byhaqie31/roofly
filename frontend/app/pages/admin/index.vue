@@ -5,19 +5,23 @@ import MiniAreaChart from "~/components/ui/MiniAreaChart.vue";
 import StatTile from "~/components/admin/StatTile.vue";
 import AttentionList from "~/components/admin/AttentionList.vue";
 
+import NoAccess from "~/components/admin/NoAccess.vue";
+
 definePageMeta({ layout: "admin" });
+const { can } = useAdminPermissions();
 const { t } = useI18n();
 useHead({ title: () => t("admin.dashboard.title") });
 
 const dash = useAdminDashboardData();
-onMounted(dash.load);
+onMounted(() => { if (can("dashboard.view")) dash.load(); });
 
 const count = (n: number) => String(n);
 const pct = (n: number) => `${n}%`;
 </script>
 
 <template>
-  <div>
+  <NoAccess v-if="!can('dashboard.view')" permission="dashboard.view" />
+  <div v-else>
     <header class="mb-6 sm:mb-8">
       <h1 class="text-display-sub font-semibold tracking-snug">{{ t("admin.dashboard.title") }}</h1>
       <p class="mt-2 text-caption text-ink-muted">{{ t("admin.dashboard.subtitle") }}</p>

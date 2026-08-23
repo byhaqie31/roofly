@@ -66,6 +66,14 @@ services:
       - RABBITMQ_USER=${RABBITMQ_USER:-roofly}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret}
       - SANCTUM_STATEFUL_DOMAINS=${SANCTUM_STATEFUL_DOMAINS:-localhost:3000}
+      - MAIL_MAILER=${MAIL_MAILER:-log}
+      - MAIL_HOST=${MAIL_HOST:-}
+      - MAIL_PORT=${MAIL_PORT:-2525}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_ENCRYPTION=${MAIL_ENCRYPTION:-tls}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@roofly.my}
+      - MAIL_FROM_NAME=${MAIL_FROM_NAME:-Roofly.my}
     depends_on:
       db:
         condition: service_healthy
@@ -115,6 +123,14 @@ services:
       - RABBITMQ_PORT=5672
       - RABBITMQ_USER=${RABBITMQ_USER:-roofly}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-secret}
+      - MAIL_MAILER=${MAIL_MAILER:-log}
+      - MAIL_HOST=${MAIL_HOST:-}
+      - MAIL_PORT=${MAIL_PORT:-2525}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_ENCRYPTION=${MAIL_ENCRYPTION:-tls}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@roofly.my}
+      - MAIL_FROM_NAME=${MAIL_FROM_NAME:-Roofly.my}
     depends_on:
       - backend
       - rabbitmq

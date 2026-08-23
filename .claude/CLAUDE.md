@@ -104,7 +104,7 @@ frontend/app/
 - **Field tiers** (Properties, Tenants): Tier 1 captured in the create modal; Tier 2/3 edited on the detail page. JSON sub-objects (`ownership`, `utilities`, `personal`, `emergencyContact`) on the model map 1:1 to detail-page tabs and to backend JSON columns.
 - **Co-owners are a separate `property_co_owners` table** on the backend (DB-enforced sum=100 + exactly-one `is_primary`). On the frontend they're a top-level `Property.coOwners[]` with the same invariants validated by Zod.
 - **MalaysianState enum from day one** — never `state: string`.
-- **Sentence case** in all strings, BM and EN. Two font weights only (400 / 600). See [UI-STANDARDS.md § 12](docs/frontend/UI-STANDARDS.md).
+- **Sentence case** in all strings, BM and EN. **Exception: the admin shell is English-only** — `admin.*` and `auth.admin.*` keys live in `en.json` only, `layouts/admin.vue` / `auth-admin.vue` pin the locale to `en` and hide the language switcher. Two font weights only (400 / 600). See [UI-STANDARDS.md § 12](docs/frontend/UI-STANDARDS.md).
 - **i18n: never put a literal `@` in a translation value** — vue-i18n treats it as a linked-message marker and crashes the compiler. Avoid or escape with `{'@'}`.
 - **Admin sees summaries only** — `AdminResourcesTest` (backend) pins the key sets on every admin API Resource. Widen deliberately, never by adding a field to a Resource without updating that test first (money and PII stay out of admin owner/tenant list+detail responses).
 

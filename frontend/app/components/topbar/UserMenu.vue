@@ -2,6 +2,8 @@
 import { LogOut, Sun, Moon, Monitor, Languages } from "lucide-vue-next";
 import { computed, ref } from "vue";
 
+withDefaults(defineProps<{ showLocale?: boolean }>(), { showLocale: true });
+
 const auth = useAuthStore();
 const { t, locale, setLocale } = useI18n();
 const { theme, setTheme } = useTheme();
@@ -95,6 +97,7 @@ const toggleLocale = async () => {
           <button
             type="button"
             class="flex w-full items-center justify-between gap-2 px-3 py-2 rounded-sm text-caption text-ink-strong hover:bg-[rgba(28,28,28,0.04)] focus-visible:shadow-focus transition"
+            v-if="showLocale"
             @click="toggleLocale"
           >
             <span class="inline-flex items-center gap-2">

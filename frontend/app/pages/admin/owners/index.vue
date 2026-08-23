@@ -9,7 +9,10 @@ import DataTableShell from "~/components/admin/DataTableShell.vue";
 import OwnerStatusPill from "~/components/admin/OwnerStatusPill.vue";
 import type { AdminOwner, OwnerListQuery, OwnerStatus, Paginated, PlanTier } from "~/types/admin";
 
+import NoAccess from "~/components/admin/NoAccess.vue";
+
 definePageMeta({ layout: "admin" });
+const { can } = useAdminPermissions();
 const { t } = useI18n();
 useHead({ title: () => t("admin.nav.owners") });
 
@@ -54,7 +57,7 @@ const load = async () => {
     loading.value = false;
   }
 };
-onMounted(load);
+onMounted(() => { if (can("owners.view")) load(); });
 watch([plan, status, overCap, overdue], () => {
   if (page.value !== 1) page.value = 1; // watch(page) will load
   else load();
@@ -112,7 +115,8 @@ const table = useVueTable({
 </script>
 
 <template>
-  <div>
+  <NoAccess v-if="!can('owners.view')" permission="owners.view" />
+  <div v-else>
     <header class="mb-6 sm:mb-8">
       <h1 class="text-display-sub font-semibold tracking-snug">{{ t("admin.owners.title") }}</h1>
       <p class="mt-2 text-caption text-ink-muted">{{ t("admin.owners.subtitle") }}</p>

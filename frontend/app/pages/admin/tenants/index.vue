@@ -9,7 +9,10 @@ import Pill from "~/components/ui/Pill.vue";
 import DataTableShell from "~/components/admin/DataTableShell.vue";
 import type { AdminTenant, Paginated, TenantListQuery, TenantStatus } from "~/types/admin";
 
+import NoAccess from "~/components/admin/NoAccess.vue";
+
 definePageMeta({ layout: "admin" });
+const { can } = useAdminPermissions();
 const { t } = useI18n();
 useHead({ title: () => t("admin.nav.tenants") });
 
@@ -48,7 +51,7 @@ const load = async () => {
     loading.value = false;
   }
 };
-onMounted(load);
+onMounted(() => { if (can("tenants.view")) load(); });
 watch([status, ownerId], () => {
   if (page.value !== 1) page.value = 1; // watch(page) will load
   else load();
@@ -97,7 +100,8 @@ const table = useVueTable({
 </script>
 
 <template>
-  <div>
+  <NoAccess v-if="!can('tenants.view')" permission="tenants.view" />
+  <div v-else>
     <header class="mb-6 sm:mb-8">
       <h1 class="text-display-sub font-semibold tracking-snug">{{ t("admin.tenants.title") }}</h1>
       <p class="mt-2 text-caption text-ink-muted">{{ t("admin.tenants.subtitle") }}</p>

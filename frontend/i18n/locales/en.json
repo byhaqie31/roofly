@@ -1180,7 +1180,9 @@
       "confirm": "Confirm",
       "actions": "Actions",
       "exportCsv": "Export CSV",
-      "unlimited": "Unlimited"
+      "unlimited": "Unlimited",
+      "noAccess": "No access",
+      "noAccessHelp": "You need the {permission} permission to view this page. Ask a super-admin to grant it."
     },
     "status": {
       "owner": {

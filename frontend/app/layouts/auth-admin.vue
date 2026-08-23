@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ShieldCheck } from "lucide-vue-next";
-import LangSwitcher from "~/components/topbar/LangSwitcher.vue";
+import { onMounted } from "vue";
 
 const { t } = useI18n();
+// Admin is English-only (internal ops tool): pin the locale and hide the switcher.
+const { locale, setLocale } = useI18n();
+onMounted(() => { if (locale.value !== "en") setLocale("en"); });
 </script>
 
 <template>
@@ -16,7 +19,6 @@ const { t } = useI18n();
         <ShieldCheck :size="22" :stroke-width="1.75" style="color: #7fa6c9" />
         <span>Roofly.my · {{ t("auth.admin.title") }}</span>
       </NuxtLink>
-      <div data-theme="dark"><LangSwitcher /></div>
     </header>
 
     <main class="flex-1 flex items-center justify-center px-6 py-10">

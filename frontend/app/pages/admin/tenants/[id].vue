@@ -7,7 +7,10 @@ import Pill from "~/components/ui/Pill.vue";
 import AuditTable from "~/components/admin/AuditTable.vue";
 import type { AdminTenant, AuditEntry, TenantStatus } from "~/types/admin";
 
+import NoAccess from "~/components/admin/NoAccess.vue";
+
 definePageMeta({ layout: "admin" });
+const { can } = useAdminPermissions();
 const { t } = useI18n();
 const route = useRoute();
 const { show } = useToast();
@@ -24,7 +27,7 @@ const load = async () => {
   tenant.value = await useAdminTenants().get(id);
   history.value = (await useAdminAudit().list({ subjectType: "user", subjectId: id, perPage: 50 })).data;
 };
-onMounted(async () => { try { await load(); } finally { loading.value = false; } });
+onMounted(async () => { if (!can("tenants.view")) return; try { await load(); } finally { loading.value = false; } });
 
 const tone = (s: TenantStatus) => (s === "invited" ? "draft" : s === "active" ? "active" : s === "notice_given" ? "maintenance" : "expired");
 const fmtDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("en-MY", { day: "2-digit", month: "short", year: "numeric" }) : "—");
@@ -38,7 +41,8 @@ const resend = async () => {
 </script>
 
 <template>
-  <div>
+  <NoAccess v-if="!can('tenants.view')" permission="tenants.view" />
+  <div v-else>
     <NuxtLink to="/admin/tenants" class="mb-6 inline-flex items-center gap-1 text-caption text-ink-muted transition hover:text-ink"><Icon name="ArrowLeft" :size="14" />{{ t("admin.common.back") }}</NuxtLink>
     <Card v-if="loading" padding="loose"><p class="text-center text-body text-ink-muted">{{ t("common.loading") }}</p></Card>
     <Card v-else-if="!tenant" padding="loose"><p class="text-center text-body text-ink-muted">{{ t("admin.common.notFound") }}</p></Card>

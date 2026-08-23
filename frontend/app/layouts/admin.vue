@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { ShieldCheck, Menu } from "lucide-vue-next";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import AdminSidebarNav from "~/components/admin/SidebarNav.vue";
 import ThemeToggle from "~/components/topbar/ThemeToggle.vue";
-import LangSwitcher from "~/components/topbar/LangSwitcher.vue";
 import UserMenu from "~/components/topbar/UserMenu.vue";
 import MobileNavDrawer from "~/components/layout/MobileNavDrawer.vue";
 
 const drawerOpen = ref(false);
 const { t } = useI18n();
+// Admin is English-only (internal ops tool): pin the locale and hide the switcher.
+const { locale, setLocale } = useI18n();
+onMounted(() => { if (locale.value !== "en") setLocale("en"); });
 </script>
 
 <template>
@@ -45,9 +47,8 @@ const { t } = useI18n();
         <div class="flex items-center gap-2 ml-auto">
           <div class="hidden md:inline-flex md:items-center md:gap-1">
             <ThemeToggle />
-            <LangSwitcher />
           </div>
-          <UserMenu />
+          <UserMenu :show-locale="false" />
         </div>
       </header>
       <main class="flex-1 px-4 md:px-6 py-8 overflow-auto">

@@ -13,6 +13,8 @@ import SuspendOwnerModal from "~/components/admin/SuspendOwnerModal.vue";
 import AuditTable from "~/components/admin/AuditTable.vue";
 import type { AdminOwner, AdminPropertySummary, AdminTenant, AuditEntry, TenantStatus } from "~/types/admin";
 
+import NoAccess from "~/components/admin/NoAccess.vue";
+
 definePageMeta({ layout: "admin" });
 const { t } = useI18n();
 const route = useRoute();
@@ -32,6 +34,7 @@ const showSuspend = ref(false);
 useHead({ title: () => owner.value?.name ?? t("admin.nav.owners") });
 
 onMounted(async () => {
+  if (!can("owners.view")) return;
   try { owner.value = await useAdminOwners().get(id); } finally { loading.value = false; }
 });
 
@@ -82,7 +85,8 @@ const countKeys = ["properties", "units", "unitsOccupied", "tenants", "agreement
 </script>
 
 <template>
-  <div>
+  <NoAccess v-if="!can('owners.view')" permission="owners.view" />
+  <div v-else>
     <NuxtLink to="/admin/owners" class="mb-6 inline-flex items-center gap-1 text-caption text-ink-muted transition hover:text-ink">
       <Icon name="ArrowLeft" :size="14" />{{ t("admin.common.back") }}
     </NuxtLink>
