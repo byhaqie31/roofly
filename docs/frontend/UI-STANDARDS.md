@@ -691,7 +691,7 @@ When the UI exposes a feature that ships in a later phase (file storage, billing
 
 - **Empty-state titles / placeholder titles** → exactly `"Coming soon"`. Same wording in EN ("Coming soon") and MS ("Akan datang").
 - **Body / help text** → lead with `"Coming soon — "` then describe what arrives, ending with `"in the next phase"` (EN) or `"dalam fasa seterusnya"` (MS).
-- **Toasts** → same lead-with `"Coming soon — "` form, kept short.
+- **Toasts** → same lead-with `"Coming soon — "` form, kept short. Toasts render **top-centre** (`top-20`, horizontally centred), **filled** (solid `bg-status-active` / `bg-status-overdue` / `bg-surface-dark` with white/on-dark text + a leading icon), and wiggle once on entry (`toast-wiggle` keyframes in `ui/Toaster.vue`, disabled under reduced-motion). Never the soft/transparent variants — they're too easy to miss.
 
 The pill in §11.10 uses the same `"Coming soon"` wording for visual consistency across the app.
 
