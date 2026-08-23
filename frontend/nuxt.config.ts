@@ -3,6 +3,14 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
 
+  // Admin is client-rendered. The session is restored by a client-only plugin, so an SSR
+  // pass has no user and every admin page would server-render <NoAccess>'s Card — Vue then
+  // hydrates the real page *into* that Card's <div> (same tag, mismatched classes), leaving
+  // the whole page wrapped in a stray raised panel. There is no anonymous SSR value here.
+  routeRules: {
+    "/admin/**": { ssr: false },
+  },
+
   modules: [
     "@nuxtjs/tailwindcss",
     "@pinia/nuxt",

@@ -740,13 +740,17 @@ Every admin list page (Owners, Tenants, Audit) follows the same shell so the des
 
 ### 11.16 Funnel strip
 
-A conversion funnel (visitors → demo → leads → registered) is a row of step tiles, not a chart — each step needs its own count plus how much of the previous step it kept. See [components/admin/FunnelStrip.vue](../../frontend/app/components/admin/FunnelStrip.vue) + [pages/admin/analytics.vue](../../frontend/app/pages/admin/analytics.vue).
+- **One `Card padding="loose"`, four columns** — `grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4`. Steps wrap two-per-row under `lg`, one row of four from `lg:` up. No horizontal scroll.
+- **Each step is label → count → share bar → step %.** Label `text-caption text-ink-muted`, count `text-display-sub font-semibold tabular-nums`, then a `h-2 rounded-pill bg-line-passive` track whose `bg-ink` fill is the step's share of the *top* step (so bars shrink left-to-right like a real funnel; non-zero counts get a 1.5% minimum so they stay visible), then the percent-of-previous line (`text-micro text-ink-muted`). The first step says "Top of funnel" instead of 100%.
+- **Don't render the funnel as four `StatTile` clones** — when the same counts already sit in the tile row above, identical tiles read as a duplicate, not a funnel. The proportional bar is what makes it one.
 
-- **4-up desktop, 2-up mobile** — `grid grid-cols-2 gap-4 lg:grid-cols-4`. Steps wrap two-per-row under `lg`, one row of four from `lg:` up. No horizontal scroll — a funnel with a handful of steps always fits by wrapping, unlike a data table.
-- **Step % sits under the count, not beside it** — each tile stacks label (`text-caption text-ink-muted`), count (`text-display-sub font-semibold tabular-nums`), then the percent-of-previous line (`text-micro text-ink-faint`) below. The first step's percent is always 100 (nothing to compare against); every later step is `round(count / previousStep.count * 100)`, `0` if the previous step was `0`.
-- **Steps are plain `Card padding="standard"` tiles**, same visual weight as `StatTile` elsewhere on the page — a funnel isn't a special widget, it's stat tiles with one extra derived line.
+### 11.17 Charts: x-axis ticks and label collisions
 
----
+- **`MiniAreaChart` prints one label per point only while the series is short** (≤ `maxTicks`, default 12 — the owner 12-month charts). Longer daily series get evenly spaced ticks, first and last always shown, absolutely positioned at the point's x with the first left-anchored and the last right-anchored so nothing clips at the card edge. Admin daily charts pass `:max-ticks="6"`.
+- **The tick budget is width-aware** — roughly one label per 70px, measured with a `ResizeObserver`, so a 30-day series shows ~4 ticks in a mobile card and 6 on desktop without a breakpoint.
+- **Sparse integer counts use `variant="bars"`** (registrations per day), continuous series use the default area. Bars sit in column centres with a surface gap; zero-days render as a faint 1-unit stub so the day is still visibly "there".
+- **Avg label lives at the left end of the average line; the latest-value badge at the right** — they can no longer collide. Badges and tooltips hug the edge when within 10% of either end.
+- **Share lists (top pages / referrers)** — each row is name + `count · pct%` on one line, then a `h-1 rounded-pill` track whose fill is relative to the top row (first row spans the track; the rest read proportionally). `pct` is the share of the range total.
 
 ## 12. Hard rules — do not break
 

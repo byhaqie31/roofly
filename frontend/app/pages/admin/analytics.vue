@@ -120,6 +120,23 @@ const funnelSteps = computed(() => {
 
 const referrerLabel = (referrer: string) => (referrer === "direct" ? t("admin.analytics.direct") : referrer);
 
+// Share bars: `pct` is the share of the range total, `bar` is relative to the top row
+// so the first bar always spans the full track and the rest read proportionally.
+const withShare = <T,>(rows: T[], value: (r: T) => number, total: number) => {
+  const top = Math.max(1, ...rows.map(value));
+  return rows.map((r) => ({
+    ...r,
+    pct: total > 0 ? Math.round((value(r) / total) * 100) : 0,
+    bar: (value(r) / top) * 100,
+  }));
+};
+const topPages = computed(() =>
+  overview.value ? withShare(overview.value.topPages, (p) => p.views, overview.value.tiles.views) : [],
+);
+const referrers = computed(() =>
+  overview.value ? withShare(overview.value.referrers, (r) => r.visitors, overview.value.tiles.visitors) : [],
+);
+
 // ── Leads ──────────────────────────────────────────────────────────────
 const q = ref(String(route.query.q ?? ""));
 const source = ref<LeadSource | "all">((route.query.source as LeadSource) ?? "all");
@@ -275,26 +292,27 @@ const exportCsv = async () => {
 <template>
   <NoAccess v-if="!can('analytics.view')" permission="analytics.view" />
   <div v-else>
-    <header class="mb-6 sm:mb-8">
-      <h1 class="text-display-sub font-semibold tracking-snug">{{ t("admin.analytics.title") }}</h1>
-      <p class="mt-2 text-caption text-ink-muted">{{ t("admin.analytics.subtitle") }}</p>
-    </header>
-
-    <Card padding="compact" class="mb-4 sm:mb-6">
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <Select v-model="preset" :options="presetOptions" :label="t('admin.analytics.range.label')" />
-        <Input v-if="preset === 'custom'" v-model="from" type="date" :label="t('admin.analytics.range.from')" />
-        <Input v-if="preset === 'custom'" v-model="to" type="date" :label="t('admin.analytics.range.to')" />
+    <header class="mb-6 flex flex-col gap-4 sm:mb-8 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <h1 class="text-display-sub font-semibold tracking-snug">{{ t("admin.analytics.title") }}</h1>
+        <p class="mt-2 text-caption text-ink-muted">{{ t("admin.analytics.subtitle") }}</p>
       </div>
-      <p v-if="rangeError" class="mt-3 text-caption text-accent" role="alert">{{ rangeError }}</p>
-    </Card>
+      <div class="flex flex-col gap-2 lg:items-end">
+        <div class="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:items-end">
+          <Select v-model="preset" :options="presetOptions" :label="t('admin.analytics.range.label')" class="sm:w-44" />
+          <Input v-if="preset === 'custom'" v-model="from" type="date" :label="t('admin.analytics.range.from')" class="sm:w-44" />
+          <Input v-if="preset === 'custom'" v-model="to" type="date" :label="t('admin.analytics.range.to')" class="sm:w-44" />
+        </div>
+        <p v-if="rangeError" class="text-caption text-accent" role="alert">{{ rangeError }}</p>
+      </div>
+    </header>
 
     <Card v-if="loading" padding="loose" class="mb-6 sm:mb-8">
       <p class="text-center text-body text-ink-muted">{{ t("common.loading") }}</p>
     </Card>
 
     <template v-else-if="overview">
-      <section class="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3 2xl:grid-cols-6">
+      <section class="mb-8 grid grid-cols-2 gap-4 sm:mb-10 sm:gap-6 lg:grid-cols-3 xl:grid-cols-6">
         <StatTile :label="t('admin.analytics.tiles.views')" :value="overview.tiles.views" />
         <StatTile
           :label="t('admin.analytics.tiles.visitors')"
@@ -311,40 +329,61 @@ const exportCsv = async () => {
         />
       </section>
 
-      <section class="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:gap-6 lg:grid-cols-2">
-        <Card padding="loose">
-          <h2 class="text-card-title font-semibold text-ink">{{ t("admin.analytics.charts.views") }}</h2>
-          <MiniAreaChart class="mt-4" :data="viewsSeries" :height="120" :format="count" :show-average-line="true" />
-        </Card>
-        <Card padding="loose">
-          <h2 class="text-card-title font-semibold text-ink">{{ t("admin.analytics.charts.registrations") }}</h2>
-          <MiniAreaChart class="mt-4" :data="registrationsSeries" :height="120" :format="count" :show-average-line="true" />
-        </Card>
+      <section class="mb-8 sm:mb-10">
+        <header class="mb-4">
+          <h2 class="text-card-title font-semibold text-ink">{{ t("admin.analytics.charts.title") }}</h2>
+          <p class="mt-1 text-caption text-ink-muted">{{ t("admin.analytics.charts.help") }}</p>
+        </header>
+        <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
+          <Card padding="loose">
+            <h3 class="text-body font-semibold text-ink">{{ t("admin.analytics.charts.views") }}</h3>
+            <MiniAreaChart class="mt-5" :data="viewsSeries" :height="140" :format="count" :show-average-line="true" :max-ticks="6" />
+          </Card>
+          <Card padding="loose">
+            <h3 class="text-body font-semibold text-ink">{{ t("admin.analytics.charts.registrations") }}</h3>
+            <MiniAreaChart class="mt-5" :data="registrationsSeries" :height="140" :format="count" :show-average-line="false" variant="bars" :max-ticks="6" />
+          </Card>
+        </div>
       </section>
 
-      <section class="mb-6 sm:mb-8">
-        <h2 class="mb-3 text-card-title font-semibold text-ink">{{ t("admin.analytics.funnel.title") }}</h2>
+      <section class="mb-8 sm:mb-10">
+        <header class="mb-4">
+          <h2 class="text-card-title font-semibold text-ink">{{ t("admin.analytics.funnel.title") }}</h2>
+          <p class="mt-1 text-caption text-ink-muted">{{ t("admin.analytics.funnel.help") }}</p>
+        </header>
         <FunnelStrip :steps="funnelSteps" />
       </section>
 
-      <section class="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:gap-6 lg:grid-cols-2">
+      <section class="mb-8 grid grid-cols-1 gap-4 sm:mb-10 sm:gap-6 lg:grid-cols-2">
         <Card padding="loose">
           <h2 class="text-card-title font-semibold text-ink">{{ t("admin.analytics.topPages") }}</h2>
-          <ul class="mt-4 space-y-2">
-            <li v-for="p in overview.topPages" :key="p.path" class="flex items-center justify-between gap-3 text-caption">
-              <span class="truncate text-ink">{{ p.path }}</span>
-              <span class="tabular-nums text-ink-muted">{{ p.views }}</span>
+          <p class="mt-1 text-caption text-ink-muted">{{ t("admin.analytics.topPagesHelp") }}</p>
+          <ol class="mt-5 space-y-3">
+            <li v-for="p in topPages" :key="p.path" class="text-caption">
+              <div class="flex items-baseline justify-between gap-3">
+                <span class="truncate text-ink">{{ p.path }}</span>
+                <span class="shrink-0 tabular-nums text-ink-muted">{{ p.views }} <span class="text-ink-faint">· {{ p.pct }}%</span></span>
+              </div>
+              <div class="mt-1.5 h-1 w-full overflow-hidden rounded-pill bg-line-passive" aria-hidden="true">
+                <div class="h-full rounded-pill bg-ink" :style="{ width: `${p.bar}%` }" />
+              </div>
             </li>
-          </ul>
+          </ol>
         </Card>
         <Card padding="loose">
           <h2 class="text-card-title font-semibold text-ink">{{ t("admin.analytics.referrers") }}</h2>
-          <ul class="mt-4 space-y-2">
-            <li v-for="r in overview.referrers" :key="r.referrer" class="flex items-center justify-between gap-3 text-caption">
-              <span class="truncate text-ink">{{ referrerLabel(r.referrer) }}</span>
-              <span class="tabular-nums text-ink-muted">{{ r.visitors }}</span>
+          <p class="mt-1 text-caption text-ink-muted">{{ t("admin.analytics.referrersHelp") }}</p>
+          <ol class="mt-5 space-y-3">
+            <li v-for="r in referrers" :key="r.referrer" class="text-caption">
+              <div class="flex items-baseline justify-between gap-3">
+                <span class="truncate text-ink">{{ referrerLabel(r.referrer) }}</span>
+                <span class="shrink-0 tabular-nums text-ink-muted">{{ r.visitors }} <span class="text-ink-faint">· {{ r.pct }}%</span></span>
+              </div>
+              <div class="mt-1.5 h-1 w-full overflow-hidden rounded-pill bg-line-passive" aria-hidden="true">
+                <div class="h-full rounded-pill bg-ink" :style="{ width: `${r.bar}%` }" />
+              </div>
             </li>
-          </ul>
+          </ol>
         </Card>
       </section>
     </template>
