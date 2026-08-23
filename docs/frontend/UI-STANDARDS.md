@@ -752,6 +752,13 @@ Every admin list page (Owners, Tenants, Audit) follows the same shell so the des
 - **Avg label lives at the left end of the average line; the latest-value badge at the right** — they can no longer collide. Badges and tooltips hug the edge when within 10% of either end.
 - **Share lists (top pages / referrers)** — each row is name + `count · pct%` on one line, then a `h-1 rounded-pill` track whose fill is relative to the top row (first row spans the track; the rest read proportionally). `pct` is the share of the range total.
 
+### 11.x Marketing motion (GSAP)
+
+- GSAP (`gsap` 3.x) is used **only on the marketing surface** (`/coming-soon`, `layouts/marketing.vue` descendants). Product shells keep CSS transitions.
+- All marketing motion goes through `composables/useHeroMotion.ts` — `enter` (staggered entrance via `[data-enter]` targets), `drift` (Ken-Burns on the hero backdrop), `rotateWords` (brand-word flip on the headline accent, words from `marketing.hero.headlineWords[]` per locale, `words[0]` rendered server-side so first paint is never blank), `revealOnScroll` (IntersectionObserver + one-shot fade-up for card grids), `hoverExpand` (card lift + grow, `[data-watermark]` icon swell, `[data-body]` brighten; binds only on `(hover: hover) and (pointer: fine)` so touch is untouched).
+- Every helper collapses to an instant state under `prefers-reduced-motion: reduce`. Content must never be gated on an animation finishing.
+- Hero backdrop lives at `public/marketing/hero-skyline.svg` (self-drawn Malaysian residential skyline). Keep a `#1c1a17` top/bottom gradient overlay on top of any replacement image so the headline stays AA.
+
 ## 12. Hard rules — do not break
 
 1. Page background is **always** `#F7F4ED` (light) or `#1C1A17` (dark). Pure white only inside generated PDFs.

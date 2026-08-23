@@ -218,10 +218,15 @@
     "hero": {
       "eyebrow": "Coming soon",
       "headlineLead": "Property management,",
-      "headlineAccent": "reimagined.",
+      "headlineWords": [
+        "reimagined.",
+        "simplified.",
+        "automated."
+      ],
       "subhead": "The modern home for Malaysian landlords and their tenants. Properties, agreements, payments, maintenance — finally, all in one place.",
       "ctaPrimary": "Get notified",
-      "ctaSecondary": "Explore demo"
+      "ctaSecondary": "Explore demo",
+      "ctaSecondaryBadge": "Try me"
     },
     "usps": {
       "eyebrow": "What's coming",
@@ -1382,15 +1387,82 @@
     "analytics": {
       "title": "Analytics",
       "subtitle": "Who looks at roofly.my, who tries the demo, who leaves an email, who signs up.",
-      "range": { "label": "Range", "d7": "Last 7 days", "d30": "Last 30 days", "d90": "Last 90 days", "custom": "Custom", "from": "From", "to": "To", "invalid": "Pick a start date on or before the end date, at most 366 days apart." },
-      "tiles": { "views": "Page views", "visitors": "Visitors", "visitorsHelp": "{n} new", "demo": "Demo entries", "leads": "Leads", "registrations": "Registrations", "conversion": "Conversion", "conversionHelp": "Registrations ÷ visitors" },
-      "charts": { "title": "Traffic", "help": "Daily page views and sign-ups across the range.", "views": "Page views per day", "registrations": "Registrations per day" },
-      "funnel": { "title": "Funnel", "help": "Each step as a share of the one before it.", "top": "Top of funnel", "visitors": "Visitors", "demo": "Tried the demo", "leads": "Left an email", "registered": "Registered", "pctOfPrevious": "{pct}% of previous" },
-      "topPages": "Top pages", "topPagesHelp": "Share of page views", "referrers": "Top referrers", "referrersHelp": "Share of visitors", "direct": "Direct / unknown",
-      "leads": { "title": "Leads", "searchPlaceholder": "Search email", "columns": { "email": "Email", "source": "Source", "firstSeen": "First seen", "lastSeen": "Last seen", "views": "Views", "demo": "Demo", "converted": "Converted" }, "filters": { "converted": "Converted only" }, "empty": "No leads yet", "emptyHelp": "Leads appear when someone joins the waitlist or registers." },
-      "sources": { "waitlist": "Waitlist", "demo": "Demo", "register": "Registered" },
-      "events": { "page_view": "Page view", "demo_enter": "Entered demo", "demo_feedback_click": "Clicked feedback", "waitlist_signup": "Joined waitlist", "register": "Registered" },
-      "drawer": { "title": "Lead", "recent": "Recent activity", "noEvents": "No events recorded for this lead." }
+      "range": {
+        "label": "Range",
+        "d7": "Last 7 days",
+        "d30": "Last 30 days",
+        "d90": "Last 90 days",
+        "custom": "Custom",
+        "from": "From",
+        "to": "To",
+        "invalid": "Pick a start date on or before the end date, at most 366 days apart."
+      },
+      "tiles": {
+        "views": "Page views",
+        "visitors": "Visitors",
+        "visitorsHelp": "{n} new",
+        "demo": "Demo entries",
+        "leads": "Leads",
+        "registrations": "Registrations",
+        "conversion": "Conversion",
+        "conversionHelp": "Registrations ÷ visitors"
+      },
+      "charts": {
+        "title": "Traffic",
+        "help": "Daily page views and sign-ups across the range.",
+        "views": "Page views per day",
+        "registrations": "Registrations per day"
+      },
+      "funnel": {
+        "title": "Funnel",
+        "help": "Each step as a share of the one before it.",
+        "top": "Top of funnel",
+        "visitors": "Visitors",
+        "demo": "Tried the demo",
+        "leads": "Left an email",
+        "registered": "Registered",
+        "pctOfPrevious": "{pct}% of previous"
+      },
+      "topPages": "Top pages",
+      "topPagesHelp": "Share of page views",
+      "referrers": "Top referrers",
+      "referrersHelp": "Share of visitors",
+      "direct": "Direct / unknown",
+      "leads": {
+        "title": "Leads",
+        "searchPlaceholder": "Search email",
+        "columns": {
+          "email": "Email",
+          "source": "Source",
+          "firstSeen": "First seen",
+          "lastSeen": "Last seen",
+          "views": "Views",
+          "demo": "Demo",
+          "converted": "Converted"
+        },
+        "filters": {
+          "converted": "Converted only"
+        },
+        "empty": "No leads yet",
+        "emptyHelp": "Leads appear when someone joins the waitlist or registers."
+      },
+      "sources": {
+        "waitlist": "Waitlist",
+        "demo": "Demo",
+        "register": "Registered"
+      },
+      "events": {
+        "page_view": "Page view",
+        "demo_enter": "Entered demo",
+        "demo_feedback_click": "Clicked feedback",
+        "waitlist_signup": "Joined waitlist",
+        "register": "Registered"
+      },
+      "drawer": {
+        "title": "Lead",
+        "recent": "Recent activity",
+        "noEvents": "No events recorded for this lead."
+      }
     },
     "settings": {
       "title": "Settings",

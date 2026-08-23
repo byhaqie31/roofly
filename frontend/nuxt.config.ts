@@ -111,6 +111,9 @@ export default defineNuxtConfig({
       // Marketing/analytics tracking (spec 2026-08-23). Default on for
       // uat/prod; useEnv() forces it off in demo (useMock) regardless.
       tracking: process.env.NUXT_PUBLIC_TRACKING !== "false",
+      // Canonical origin for absolute URLs in social meta (og:image must be
+      // absolute). Override per env: https://uat.roofly.my, https://demo.roofly.my.
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL ?? "https://roofly.my",
     },
   },
 

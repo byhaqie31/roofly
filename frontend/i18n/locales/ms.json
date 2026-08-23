@@ -203,10 +203,15 @@
     "hero": {
       "eyebrow": "Akan datang",
       "headlineLead": "Pengurusan hartanah,",
-      "headlineAccent": "direka semula.",
+      "headlineWords": [
+        "direka semula.",
+        "dipermudah.",
+        "diautomasi."
+      ],
       "subhead": "Rumah moden untuk tuan rumah Malaysia dan penyewa mereka. Hartanah, perjanjian, pembayaran, penyelenggaraan — akhirnya, semuanya di satu tempat.",
       "ctaPrimary": "Beritahu saya",
-      "ctaSecondary": "Terokai demo"
+      "ctaSecondary": "Terokai demo",
+      "ctaSecondaryBadge": "Cuba saya"
     },
     "usps": {
       "eyebrow": "Yang akan datang",
