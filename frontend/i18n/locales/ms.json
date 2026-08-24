@@ -58,7 +58,31 @@
     "loginSubtitle": "Log masuk untuk uruskan hartanah anda.",
     "registerTitle": "Mula dengan Roofly",
     "registerSubtitle": "Cipta akaun pemilik untuk urus penyewaan.",
-    "invalidCredentials": "E-mel atau kata laluan tidak sah."
+    "invalidCredentials": "E-mel atau kata laluan tidak sah.",
+    "google": {
+      "or": "atau",
+      "unavailable": "Log masuk Google tidak tersedia buat masa ini — gunakan e-mel anda di bawah.",
+      "failed": "Log masuk Google gagal. Sila cuba lagi.",
+      "notOwner": "E-mel ini ialah akaun penyewa. Minta pautan jemputan daripada tuan rumah anda."
+    },
+    "forgot": {
+      "title": "Lupa kata laluan?",
+      "subtitle": "Masukkan e-mel anda dan kami akan hantar pautan tetapan semula.",
+      "submit": "Hantar pautan tetapan semula",
+      "sentTitle": "Semak peti masuk anda",
+      "sentHelp": "Jika {email} mempunyai akaun, pautan tetapan semula sedang dihantar. Ia tamat tempoh dalam 60 minit.",
+      "backToLogin": "Kembali ke log masuk"
+    },
+    "reset": {
+      "title": "Tetapkan kata laluan baharu",
+      "subtitle": "Pilih kata laluan sekurang-kurangnya 8 aksara.",
+      "newPassword": "Kata laluan baharu",
+      "confirmPassword": "Sahkan kata laluan",
+      "mismatch": "Kata laluan tidak sepadan.",
+      "submit": "Simpan kata laluan dan log masuk",
+      "invalid": "Pautan tetapan semula ini tidak sah atau telah tamat tempoh.",
+      "requestNew": "Minta pautan baharu"
+    }
   },
   "suspended": {
     "title": "Akaun digantung",
@@ -71,6 +95,7 @@
       "eyebrow": "Untuk tujuan demo sahaja",
       "continueAsOwner": "Teruskan sebagai pemilik",
       "continueAsTenant": "Teruskan sebagai penyewa",
+      "continueWithGoogle": "Teruskan dengan Google (demo)",
       "comingSoon": "Akan datang",
       "tryFirst": "Nak cuba dulu?",
       "exploreDemo": "Terokai demo"
@@ -565,6 +590,20 @@
         "cta": "Tambah hartanah"
       }
     },
+    "checklist": {
+      "title": "Mula di sini",
+      "progress": "{done} daripada {total} selesai",
+      "dismiss": "Sembunyikan senarai semak",
+      "dismissedToast": "Disembunyikan. Paparkan semula dari Tetapan → Keutamaan.",
+      "steps": {
+        "add_property": { "title": "Tambah hartanah pertama anda", "hint": "Nama, alamat dan jenis — seminit sahaja." },
+        "fill_ownership": { "title": "Isi butiran pemilikan", "hint": "Hakmilik, harga belian, penilaian dan pinjaman." },
+        "fill_utilities": { "title": "Isi utiliti dan yuran", "hint": "Yuran penyelenggaraan, cukai tanah, akaun TNB dan air." },
+        "add_unit": { "title": "Tambah unit", "hint": "Penyewa dan perjanjian dikaitkan dengan unit." },
+        "invite_tenant": { "title": "Jemput penyewa pertama anda", "hint": "Nama, e-mel dan telefon — mereka akan terima pautan." },
+        "create_agreement": { "title": "Cipta perjanjian", "hint": "Kaitkan penyewa dengan unit, sewa dan tarikh." }
+      }
+    },
     "reports": {
       "subtitle": "Pendapatan tahun ke tahun, sewa tertunggak, dan kedudukan modal mengikut hartanah.",
       "yearLabel": "Tahun",
@@ -592,6 +631,10 @@
           "outstanding": "Tertunggak",
           "netGain": "Untung bersih (RPGT)"
         }
+      },
+      "notForRent": {
+        "title": "Bukan untuk disewa",
+        "help": "Hartanah kediaman sendiri dan pelaburan — kedudukan modal sahaja, tiada pendapatan sewa."
       },
       "csv": {
         "property": "Hartanah",
@@ -715,14 +758,27 @@
         "photoPlaceholderHelp": "Foto profil tiba dalam fasa seterusnya, setelah storan fail siap.",
         "payout": "Akaun bayaran",
         "payoutHelp": "Tempat kutipan sewa akan dimasukkan. Akaun bank diuruskan melalui tetapan kewangan.",
-        "bankMasked": "Akaun Maybank berakhir dengan"
+        "bankMasked": "Akaun Maybank berakhir dengan",
+        "passwordTitle": "Tetapkan kata laluan",
+        "passwordHelp": "Anda mendaftar dengan Google. Tambah kata laluan untuk log masuk dengan e-mel juga.",
+        "setPassword": "Tetapkan kata laluan",
+        "newPassword": "Kata laluan baharu",
+        "confirmPassword": "Sahkan kata laluan",
+        "passwordTooShort": "Gunakan sekurang-kurangnya 8 aksara.",
+        "passwordMismatch": "Kata laluan tidak sepadan.",
+        "passwordSetToast": "Kata laluan ditetapkan. Anda kini boleh log masuk dengan e-mel juga."
       },
       "preferences": {
         "languageHelp": "Mempengaruhi setiap label, format tarikh, dan mesej terjemahan dalam aplikasi.",
         "themeHelp": "Pilih tema tetap atau ikut sistem operasi anda.",
         "themeLightHelp": "Sentiasa gunakan tema cerah.",
         "themeDarkHelp": "Sentiasa gunakan tema gelap.",
-        "themeSystemHelp": "Ikut keutamaan sistem operasi anda."
+        "themeSystemHelp": "Ikut keutamaan sistem operasi anda.",
+        "purposesTitle": "Apa yang anda urus",
+        "purposesHelp": "Menentukan senarai semak permulaan dan tetapan lalai hartanah baharu.",
+        "purposesMin": "Pilih sekurang-kurangnya satu.",
+        "checklistToggle": "Papar senarai semak permulaan di halaman utama",
+        "checklistHelp": "Ia akan tersembunyi sendiri apabila semua langkah selesai."
       },
       "notifications": {
         "channelTitle": "Saluran penghantaran",
@@ -797,6 +853,7 @@
         "fields": {
           "name": "Nama hartanah",
           "type": "Jenis",
+          "purpose": "Hartanah ini untuk",
           "address": "Alamat",
           "city": "Bandar",
           "state": "Negeri",
@@ -952,6 +1009,17 @@
           "placeholderHelp": "Muat naik dokumen tiba dalam fasa seterusnya. Anda boleh lampirkan geran, polisi insurans, dan resit cukai di sini."
         }
       }
+    },
+    "purposes": {
+      "rental": { "title": "Sewaan", "help": "Unit dengan penyewa, kutipan sewa, perjanjian." },
+      "own_stay": { "title": "Kediaman sendiri", "help": "Rumah yang anda diami — pemilikan, pinjaman, bil." },
+      "investment": { "title": "Pelaburan", "help": "Disimpan untuk nilai, tidak disewakan buat masa ini." }
+    },
+    "onboarding": {
+      "title": "Apa yang anda akan urus di Roofly?",
+      "subtitle": "Pilih semua yang berkenaan. Anda boleh ubah kemudian di Tetapan.",
+      "continue": "Teruskan",
+      "skip": "Langkau buat masa ini"
     }
   },
   "tenant": {

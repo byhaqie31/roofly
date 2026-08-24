@@ -61,6 +61,8 @@ If a question is answered by one of these, defer to that doc and don't re-derive
 
 **Tracking** — `composables/useTrack.ts` fires a `POST /track` beacon (guest, `throttle:track`) on tracked marketing/auth paths only (`/`, `/coming-soon`, `/demo`, `/auth/*`). **Tracking calls never belong inside `/owner`, `/tenant`, or `/admin` pages/components** — those are authenticated product surfaces, not the marketing funnel the beacon measures; `plugins/track.client.ts` and the five explicit call sites (waitlist signup, demo entry, feedback click, register) are the only places `useTrack()`/`track()` should ever be called. Gated by `useEnv().trackingEnabled` (env `NUXT_PUBLIC_TRACKING`, default on) — always `false` in demo, so `demo-roofly` never generates `/api/track` rows even though `AnalyticsDemoSeeder` gives the admin page 90 days of seeded story data (40 leads, 8 converted to real property-less owner users `lead05@example.com`…, password `password`; refuses to run in production).
 
+**Google sign-in + owner onboarding** — owners only, gated by `useEnv().features.googleLogin` (`!isDemo && Boolean(NUXT_PUBLIC_GOOGLE_CLIENT_ID)`; backend needs its own `GOOGLE_CLIENT_ID`, same OAuth web client id). `POST /auth/google` verifies a Google Identity Services ID token via `App\Support\GoogleIdToken` (no Composer package — `laravel/socialite` was rejected, it expects an OAuth access token, not an ID token) and auto-links/creates an owner by verified email; a tenant/admin email 403s with `code: "not_owner"`. `GoogleSignInButton.vue` renders above the login/register form with an `or` divider, never in demo (demo gets a "Continue with Google (demo)" shortcut instead). A new owner (Google or password) with a falsy `onboardedAt` is routed to the full-screen `/owner/onboarding` (`layouts/onboarding.vue`) by a guard in `middleware/auth.global.ts`, picks one or more `Property.purpose` values (`rental`/`own_stay`/`investment`, now required on the type) via `OwnerPurposePicker`, then never sees it again — existing owners were back-filled with `onboardedAt`/`purposes: ["rental"]` so nobody live is retroactively gated. The dashboard's `GettingStartedCard` shows a computed (never stored) getting-started checklist — `utils/onboardingChecklist.ts`'s pure `buildChecklist()`, covered by this repo's first Vitest suite (`docker exec roofly-frontend npm test`). Non-rental properties are excluded from occupancy/dashboard/income and instead show under a "Not for rent" capital-position group in Reports.
+
 ---
 
 ## Where things live
@@ -79,7 +81,8 @@ frontend/app/
 │   ├── api/       # apiX: XService — Laravel calls via useApi(); NEVER imports ~/demo; admin/ subfolder (+ query.ts helper); track.ts (sendBeacon/$fetch)
 │   └── useX.ts    # auto-imported selector: useEnv().useMock ? demoX : apiX (+ type re-exports); useAdminAnalytics.ts
 ├── composables/   # useDashboard, useReports, useTheme, useToast, useMoney, useApi, useApiError, useAdminPermissions,
-│                  # useAdminDashboardData, useTrack (visitorId + first-touch UTM, gated by trackingEnabled + isTrackedPath)
+│                  # useAdminDashboardData, useTrack (visitorId + first-touch UTM, gated by trackingEnabled + isTrackedPath),
+│                  # useGoogleSignIn, useOnboardingChecklist (wraps utils/onboardingChecklist.ts's pure buildChecklist())
 ├── components/
 │   ├── ui/        # Card, Pill, Button, Input, Select, Modal, Icon, MoneyDisplay,
 │   │              # MiniAreaChart, EmptyState, Toaster
@@ -90,11 +93,11 @@ frontend/app/
 │   ├── topbar/    # ThemeToggle, LangSwitcher, UserMenu
 │   └── layout/    # MobileNavDrawer
 ├── pages/         # routing (Nuxt file-based)
-├── layouts/       # owner.vue, tenant.vue, admin.vue, auth.vue, auth-admin.vue, default.vue
+├── layouts/       # owner.vue, tenant.vue, admin.vue, auth.vue, auth-admin.vue, onboarding.vue (full-screen, /owner/onboarding only), default.vue
 ├── stores/        # auth.ts (Pinia; delegates to demoAuth / apiAuth)
 ├── plugins/       # theme.ts, auth-restore.client.ts, track.client.ts (page_view on tracked-path navigation)
-├── middleware/    # env.global.ts (renamed from the old demo-only middleware — now also drives the admin-host redirect), auth.global.ts
-└── utils/         # rpgt.ts, propertyCompletion.ts, csv.ts, warningText.ts
+├── middleware/    # env.global.ts (renamed from the old demo-only middleware — now also drives the admin-host redirect), auth.global.ts (also the onboarding-screen guard)
+└── utils/         # rpgt.ts, propertyCompletion.ts, csv.ts, warningText.ts, gisLoader.ts, onboardingChecklist.ts (Vitest-covered)
 ```
 
 **Routing rule:** for tab-style detail pages, use `pages/owner/<entity>/index.vue` + `[id].vue` (NOT `<entity>.vue` + `<entity>/[id].vue` — the latter requires `<NuxtPage />` in the parent and silently fails to render the child if you forget).
@@ -152,6 +155,9 @@ open http://localhost:3000        # owner login lands at /auth/login
 
 # typecheck
 docker exec roofly-frontend npm run typecheck
+
+# unit tests (Vitest — pure .ts modules only, no jsdom/@vue-test-utils yet)
+docker exec roofly-frontend npm test
 
 # install a new package (must run inside the container)
 docker exec roofly-frontend npm install <pkg>

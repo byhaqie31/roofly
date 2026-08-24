@@ -150,6 +150,16 @@ class DemoSeeder extends Seeder
                     'in_app' => true,
                 ],
             ],
+            // Mirrors the demo persona (frontend/app/demo/auth.ts): a seasoned
+            // owner, already onboarded, checklist dismissed over five
+            // already-populated properties. Without this, a fresh
+            // migrate:fresh --seed leaves onboarded_at NULL (the Task 1
+            // migration only back-fills rows that exist when it runs) and the
+            // API-mode owner gets ambushed by onboarding, disagreeing with the
+            // demo adapter for the same persona.
+            'purposes' => ['rental'],
+            'onboarded_at' => now(),
+            'checklist_dismissed_at' => now(),
         ]);
     }
 
@@ -306,6 +316,7 @@ class DemoSeeder extends Seeder
             'name' => 'Suria KLCC #12-3A',
             'internal_label' => 'KLCC-A',
             'type' => 'condo',
+            'purpose' => 'rental',
             'notes' => 'Master bedroom AC serviced 2025-11.',
             'address' => 'Jalan Ampang, Lot 241',
             'city' => 'Kuala Lumpur',
@@ -360,6 +371,7 @@ class DemoSeeder extends Seeder
             'owner_id' => self::OWNER_ID,
             'name' => 'TTDI Terrace',
             'type' => 'landed',
+            'purpose' => 'rental',
             'address' => '12, Jalan Burhanuddin Helmi 2',
             'city' => 'Kuala Lumpur',
             'state' => 'W.P. Kuala Lumpur',
@@ -394,6 +406,7 @@ class DemoSeeder extends Seeder
             'owner_id' => self::OWNER_ID,
             'name' => 'Wangsa Walk Shoplot G-12',
             'type' => 'shoplot',
+            'purpose' => 'rental',
             'address' => 'Lot 12, Jalan Wangsa Delima',
             'city' => 'Kuala Lumpur',
             'state' => 'W.P. Kuala Lumpur',
@@ -417,6 +430,7 @@ class DemoSeeder extends Seeder
             'owner_id' => self::OWNER_ID,
             'name' => 'USJ 9 Spare Room',
             'type' => 'room',
+            'purpose' => 'rental',
             'address' => '32, Jalan USJ 9/2',
             'city' => 'Subang Jaya',
             'state' => 'Selangor',
@@ -429,6 +443,7 @@ class DemoSeeder extends Seeder
             'name' => 'Subang Terrace (multi-unit)',
             'internal_label' => 'USJ-MULTI',
             'type' => 'landed',
+            'purpose' => 'rental',
             'notes' => 'Three rentable units under one terrace. Master + 2 rooms.',
             'address' => '8, Jalan USJ 18/3',
             'city' => 'Subang Jaya',

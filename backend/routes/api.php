@@ -20,8 +20,11 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('register',      [\App\Http\Controllers\Api\Auth\RegisterController::class, 'store']);
     Route::post('login',         [\App\Http\Controllers\Api\Auth\LoginController::class, 'store']);
+    Route::post('google',        [\App\Http\Controllers\Api\Auth\GoogleLoginController::class, 'store'])->middleware('throttle:10,1');
     Route::post('magic-link',    [\App\Http\Controllers\Api\Auth\MagicLinkController::class, 'store']);
     Route::get('magic-link/{token}', [\App\Http\Controllers\Api\Auth\MagicLinkController::class, 'authenticate']);
+    Route::post('forgot-password', [\App\Http\Controllers\Api\Auth\PasswordResetController::class, 'forgot'])->middleware('throttle:5,1');
+    Route::post('reset-password',  [\App\Http\Controllers\Api\Auth\PasswordResetController::class, 'reset'])->middleware('throttle:5,1');
 });
 
 // ── Public: analytics beacon (spec: admin analytics § 3) ─────────────────────
@@ -50,6 +53,9 @@ Route::middleware(['auth:sanctum', 'touch-active'])->group(function () {
         Route::patch('account/profile',                [\App\Http\Controllers\Api\Owner\AccountController::class, 'updateProfile']);
         Route::patch('account/preferences',            [\App\Http\Controllers\Api\Owner\AccountController::class, 'updatePreferences']);
         Route::patch('account/notifications',          [\App\Http\Controllers\Api\Owner\AccountController::class, 'updateNotifications']);
+        Route::patch('account/onboarding',             [\App\Http\Controllers\Api\Owner\AccountController::class, 'completeOnboarding']);
+        Route::patch('account/checklist',              [\App\Http\Controllers\Api\Owner\AccountController::class, 'updateChecklist']);
+        Route::post('account/password',                [\App\Http\Controllers\Api\Owner\AccountController::class, 'setPassword']);
         Route::get('plans',                            [\App\Http\Controllers\Api\Owner\AccountController::class, 'plans']);
 
         // Properties

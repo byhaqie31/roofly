@@ -51,8 +51,33 @@ export const useReports = (year: Ref<number>) => {
     }
   };
 
+  // Mirror DashboardController / demo dashboard: only rental properties feed
+  // the income/outstanding totals and the main per-property table.
+  const rentalProperties = computed(() =>
+    properties.value.filter((p) => p.purpose === "rental"),
+  );
+  const rentalUnitIds = computed(
+    () =>
+      new Set(
+        units.value
+          .filter((u) => rentalProperties.value.some((p) => p.id === u.propertyId))
+          .map((u) => u.id),
+      ),
+  );
+  const rentalInvoiceIds = computed(() => {
+    const agIds = new Set(
+      agreements.value
+        .filter((a) => rentalUnitIds.value.has(a.unitId))
+        .map((a) => a.id),
+    );
+    return new Set(
+      invoices.value.filter((i) => agIds.has(i.agreementId)).map((i) => i.id),
+    );
+  });
+
   const successfulInYear = computed(() =>
     payments.value
+      .filter((p) => rentalInvoiceIds.value.has(p.invoiceId))
       .filter((p) => p.status === "successful")
       .filter((p) => new Date(p.paidAt).getFullYear() === year.value),
   );
@@ -63,6 +88,7 @@ export const useReports = (year: Ref<number>) => {
 
   const totalOutstanding = computed(() =>
     invoices.value
+      .filter((i) => rentalInvoiceIds.value.has(i.id))
       .filter((i) => new Date(i.dueDate).getFullYear() === year.value)
       .filter((i) => i.status === "pending" || i.status === "overdue")
       .reduce((sum, i) => sum + i.amount + i.lateFee, 0),
@@ -86,56 +112,62 @@ export const useReports = (year: Ref<number>) => {
     return series;
   });
 
-  const perProperty = computed<PropertyReportRow[]>(() => {
-    return properties.value.map((prop) => {
-      const propUnits = units.value.filter((u) => u.propertyId === prop.id);
-      const propUnitIds = new Set(propUnits.map((u) => u.id));
-      const propAgreements = agreements.value.filter((a) =>
-        propUnitIds.has(a.unitId),
-      );
-      const propAgIds = new Set(propAgreements.map((a) => a.id));
-      const propInvoices = invoices.value.filter((i) =>
-        propAgIds.has(i.agreementId),
-      );
-      const propInvIds = new Set(propInvoices.map((i) => i.id));
-      const propPayments = payments.value.filter((p) =>
-        propInvIds.has(p.invoiceId),
-      );
+  const rowFor = (prop: Property): PropertyReportRow => {
+    const propUnits = units.value.filter((u) => u.propertyId === prop.id);
+    const propUnitIds = new Set(propUnits.map((u) => u.id));
+    const propAgreements = agreements.value.filter((a) =>
+      propUnitIds.has(a.unitId),
+    );
+    const propAgIds = new Set(propAgreements.map((a) => a.id));
+    const propInvoices = invoices.value.filter((i) =>
+      propAgIds.has(i.agreementId),
+    );
+    const propInvIds = new Set(propInvoices.map((i) => i.id));
+    const propPayments = payments.value.filter((p) =>
+      propInvIds.has(p.invoiceId),
+    );
 
-      const incomeForYear = propPayments
-        .filter((p) => p.status === "successful")
-        .filter((p) => new Date(p.paidAt).getFullYear() === year.value)
-        .reduce((sum, p) => sum + p.amount, 0);
+    const incomeForYear = propPayments
+      .filter((p) => p.status === "successful")
+      .filter((p) => new Date(p.paidAt).getFullYear() === year.value)
+      .reduce((sum, p) => sum + p.amount, 0);
 
-      const outstanding = propInvoices
-        .filter((i) => i.status === "pending" || i.status === "overdue")
-        .reduce((sum, i) => sum + i.amount + i.lateFee, 0);
+    const outstanding = propInvoices
+      .filter((i) => i.status === "pending" || i.status === "overdue")
+      .reduce((sum, i) => sum + i.amount + i.lateFee, 0);
 
-      const occupied = propUnits.filter((u) => u.status === "occupied").length;
-      const occupancyPct =
-        propUnits.length > 0
-          ? Math.round((occupied / propUnits.length) * 100)
-          : 0;
+    const occupied = propUnits.filter((u) => u.status === "occupied").length;
+    const occupancyPct =
+      propUnits.length > 0
+        ? Math.round((occupied / propUnits.length) * 100)
+        : 0;
 
-      const gains = computeCapitalGains({
-        purchasePrice: prop.ownership?.purchasePrice,
-        stampDuty: prop.ownership?.stampDuty,
-        legalFees: prop.ownership?.legalFees,
-        currentMarketValue: prop.ownership?.currentMarketValue,
-        purchaseDate: prop.ownership?.purchaseDate,
-      });
-
-      return {
-        property: prop,
-        unitsCount: propUnits.length,
-        occupiedCount: occupied,
-        occupancyPct,
-        incomeForYear,
-        outstanding,
-        gains,
-      };
+    const gains = computeCapitalGains({
+      purchasePrice: prop.ownership?.purchasePrice,
+      stampDuty: prop.ownership?.stampDuty,
+      legalFees: prop.ownership?.legalFees,
+      currentMarketValue: prop.ownership?.currentMarketValue,
+      purchaseDate: prop.ownership?.purchaseDate,
     });
-  });
+
+    return {
+      property: prop,
+      unitsCount: propUnits.length,
+      occupiedCount: occupied,
+      occupancyPct,
+      incomeForYear,
+      outstanding,
+      gains,
+    };
+  };
+
+  const perProperty = computed<PropertyReportRow[]>(() =>
+    rentalProperties.value.map(rowFor),
+  );
+
+  const notForRent = computed<PropertyReportRow[]>(() =>
+    properties.value.filter((p) => p.purpose !== "rental").map(rowFor),
+  );
 
   // Years that show up in any payment or invoice; falls back to current year.
   const availableYears = computed(() => {
@@ -156,6 +188,7 @@ export const useReports = (year: Ref<number>) => {
     totalOutstanding,
     monthlyBreakdown,
     perProperty,
+    notForRent,
     availableYears,
     isEmpty,
   };

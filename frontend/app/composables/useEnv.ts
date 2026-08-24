@@ -45,11 +45,17 @@ export const useEnv = () => {
     // its mock data even if NUXT_PUBLIC_USE_MOCK is left at "false".
     useMock: isDemo || config.public.useMock,
 
+    // Google OAuth web client id (empty ⇒ button hidden). See features.googleLogin.
+    googleClientId: config.public.googleClientId as string,
+
     // Feature flags. `admin` is never on in demo — demo-roofly must not show
     // the back office (spec § 2).
     features: {
       documents: config.public.features.documents,
       admin: !isDemo && config.public.features.admin,
+      // Google sign-in needs a client id and is never shown in demo (demo has
+      // its own "Continue with Google (demo)" shortcut instead).
+      googleLogin: !isDemo && Boolean(config.public.googleClientId),
     },
 
     // Marketing/analytics tracking — off in demo (useMock) and when the

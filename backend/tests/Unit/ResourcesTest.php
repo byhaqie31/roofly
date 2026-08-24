@@ -56,7 +56,7 @@ class ResourcesTest extends TestCase
         $out = (new PropertyResource($property->load('coOwners')))->resolve();
 
         $this->assertSame(
-            ['id', 'ownerId', 'name', 'internalLabel', 'type', 'notes', 'address', 'city', 'state', 'postcode',
+            ['id', 'ownerId', 'name', 'internalLabel', 'type', 'purpose', 'notes', 'address', 'city', 'state', 'postcode',
              'yearBuilt', 'builtUpSqft', 'landSqft', 'bedrooms', 'bathrooms', 'parkingLots', 'furnishing',
              'ownership', 'utilities', 'coOwners', 'createdAt'],
             array_keys($out)

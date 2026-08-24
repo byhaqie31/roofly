@@ -48,4 +48,20 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (inWrongShell) {
     return navigateTo(shellRootFor(auth));
   }
+
+  // Owner onboarding (spec 2026-08-23 § 4.1): un-onboarded owners see the
+  // one-screen onboarding before anything else in /owner; onboarded owners
+  // can't revisit it (Settings → Preferences edits the answer).
+  //
+  // A stale localStorage["roofly_auth"] session written before this feature
+  // shipped won't carry the new AuthUser fields, so `onboardedAt` reads as
+  // `undefined` there rather than `null`. We treat any falsy value (`null`
+  // or `undefined`) as "needs onboarding" so that session is routed through
+  // the one-screen flow once rather than silently skipping it forever.
+  if (isOwnerArea && auth.isOwner) {
+    const needsOnboarding = !auth.user?.onboardedAt;
+    const onOnboarding = to.path === "/owner/onboarding";
+    if (needsOnboarding && !onOnboarding) return navigateTo("/owner/onboarding");
+    if (!needsOnboarding && onOnboarding) return navigateTo("/owner");
+  }
 });

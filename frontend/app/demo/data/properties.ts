@@ -8,6 +8,7 @@ export const propertiesMock: Property[] = [
     name: "Suria KLCC #12-3A",
     internalLabel: "KLCC-A",
     type: "condo",
+    purpose: "rental",
     notes: "Master bedroom AC serviced 2025-11.",
     address: "Jalan Ampang, Lot 241",
     city: "Kuala Lumpur",
@@ -66,6 +67,7 @@ export const propertiesMock: Property[] = [
     ownerId: "co-ttdi-primary",
     name: "TTDI Terrace",
     type: "landed",
+    purpose: "rental",
     address: "12, Jalan Burhanuddin Helmi 2",
     city: "Kuala Lumpur",
     state: "W.P. Kuala Lumpur",
@@ -103,6 +105,7 @@ export const propertiesMock: Property[] = [
     ownerId: "co-wangsa-primary",
     name: "Wangsa Walk Shoplot G-12",
     type: "shoplot",
+    purpose: "rental",
     address: "Lot 12, Jalan Wangsa Delima",
     city: "Kuala Lumpur",
     state: "W.P. Kuala Lumpur",
@@ -129,6 +132,7 @@ export const propertiesMock: Property[] = [
     ownerId: "co-usj-primary",
     name: "USJ 9 Spare Room",
     type: "room",
+    purpose: "rental",
     address: "32, Jalan USJ 9/2",
     city: "Subang Jaya",
     state: "Selangor",
@@ -146,6 +150,7 @@ export const propertiesMock: Property[] = [
     name: "Subang Terrace (multi-unit)",
     internalLabel: "USJ-MULTI",
     type: "landed",
+    purpose: "rental",
     notes: "Three rentable units under one terrace. Master + 2 rooms.",
     address: "8, Jalan USJ 18/3",
     city: "Subang Jaya",
@@ -181,5 +186,51 @@ export const propertiesMock: Property[] = [
       { id: "co-subang-imran", name: "Imran Baihaqie", sharePct: 40, isPrimary: false },
     ],
     createdAt: "2026-04-28T11:00:00Z",
+  },
+  // Own-stay home: no unit (see units.ts) so it never feeds occupancy/income.
+  {
+    id: "66666666-6666-6666-6666-666666666666",
+    ownerId: "co-bangsar-aminah",
+    name: "Bangsar family home",
+    type: "landed",
+    purpose: "own_stay",
+    address: "Jalan Maarof, No. 18",
+    city: "Kuala Lumpur",
+    state: "W.P. Kuala Lumpur",
+    postcode: "59000",
+    yearBuilt: 1996,
+    builtUpSqft: 2400,
+    landSqft: 3200,
+    bedrooms: 4,
+    bathrooms: 3,
+    parkingLots: 2,
+    furnishing: "fully",
+    ownership: {
+      titleType: "freehold",
+      purchaseDate: "2012-06-01",
+      purchasePrice: 120_000_000,        // RM 1,200,000
+      currentMarketValue: 210_000_000,   // RM 2,100,000
+      lastValuedAt: "2025-11-01",
+      valuationSource: "agent",
+      mortgage: {
+        bank: "CIMB",
+        loanAmount: 96_000_000,           // RM 960,000
+        outstandingBalance: 38_400_000,   // RM 384,000
+        monthlyInstalment: 480_000,       // RM 4,800
+        tenureYears: 30,
+        maturityDate: "2042-06-30",
+        interestRatePct: 4.1,
+      },
+    },
+    utilities: {
+      quitRentAnnual: 18_000,             // RM 180
+      assessmentRateAnnual: 96_000,       // RM 960
+      tnbAccountNo: "5551234567",
+      waterAccountNo: "4449876543",
+    },
+    coOwners: [
+      { id: "co-bangsar-aminah", name: "Cik Aminah", sharePct: 100, isPrimary: true },
+    ],
+    createdAt: "2026-02-02T09:00:00Z",
   },
 ];

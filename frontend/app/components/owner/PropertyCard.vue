@@ -37,6 +37,9 @@ const typeIcon = (type: PropertyType) => {
           />
           {{ t(`owner.properties.types.${property.type}`) }}
         </Pill>
+        <Pill v-if="property.purpose !== 'rental'" tone="neutral">
+          {{ t(`owner.purposes.${property.purpose}.title`) }}
+        </Pill>
       </div>
       <h3 class="truncate text-card-title text-ink">{{ property.name }}</h3>
       <p class="mt-1 line-clamp-2 text-caption text-ink-muted">

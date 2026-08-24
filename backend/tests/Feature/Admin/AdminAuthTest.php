@@ -16,7 +16,10 @@ class AdminAuthTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const KEYS = ['id', 'name', 'email', 'phone', 'role', 'permissions', 'isSuperAdmin'];
+    private const KEYS = [
+        'id', 'name', 'email', 'phone', 'role', 'permissions', 'isSuperAdmin',
+        'hasPassword', 'avatarUrl', 'onboardedAt', 'purposes', 'checklistDismissedAt',
+    ];
 
     protected function setUp(): void
     {

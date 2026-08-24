@@ -4,7 +4,7 @@ import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import { propertyInputSchema } from "~/schemas/property";
 import { MY_STATES } from "~/types/property";
-import type { MalaysianState, Property, PropertyInput } from "~/types/property";
+import type { MalaysianState, Property, PropertyInput, PropertyPurpose } from "~/types/property";
 import { useToast } from "~/composables/useToast";
 import Modal from "~/components/ui/Modal.vue";
 import Input from "~/components/ui/Input.vue";
@@ -19,9 +19,19 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const { show } = useToast();
+const auth = useAuthStore();
 const submitting = ref(false);
 
-const initialValues: PropertyInput = {
+const ownerPurposes = computed<PropertyPurpose[]>(() =>
+  auth.user?.purposes?.length ? auth.user.purposes : ["rental"],
+);
+// Hidden when the owner manages only one kind of property — the value is implied.
+const showPurpose = computed(() => ownerPurposes.value.length > 1);
+const purposeOptions = computed(() =>
+  ownerPurposes.value.map((p) => ({ value: p, label: t(`owner.purposes.${p}.title`) })),
+);
+
+const initialValues = (): PropertyInput => ({
   name: "",
   address: "",
   city: "",
@@ -29,12 +39,13 @@ const initialValues: PropertyInput = {
   state: "" as MalaysianState,
   postcode: "",
   type: "condo",
-};
+  purpose: ownerPurposes.value[0]!,
+});
 
 const { defineField, handleSubmit, errors, resetForm, setErrors } = useForm<PropertyInput>(
   {
     validationSchema: toTypedSchema(propertyInputSchema),
-    initialValues,
+    initialValues: initialValues(),
   },
 );
 const { toFieldErrors } = useApiError();
@@ -45,6 +56,7 @@ const [city] = defineField("city");
 const [state] = defineField("state");
 const [postcode] = defineField("postcode");
 const [type] = defineField("type");
+const [purpose] = defineField("purpose");
 
 const typeOptions = computed(() => [
   { value: "condo", label: t("owner.properties.types.condo") },
@@ -77,7 +89,7 @@ const onSubmit = handleSubmit(async (values) => {
 watch(
   () => props.open,
   (isOpen) => {
-    if (!isOpen) resetForm({ values: initialValues });
+    if (!isOpen) resetForm({ values: initialValues() });
   },
 );
 </script>
@@ -107,6 +119,14 @@ watch(
         :label="t('owner.properties.addModal.fields.type')"
         :options="typeOptions"
         :error="errors.type"
+      />
+
+      <Select
+        v-if="showPurpose"
+        v-model="purpose"
+        :label="t('owner.properties.addModal.fields.purpose')"
+        :options="purposeOptions"
+        :error="errors.purpose"
       />
 
       <Input

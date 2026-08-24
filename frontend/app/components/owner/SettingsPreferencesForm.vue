@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import type { Locale, OwnerAccount, ThemePreference } from "~/types/owner";
+import type { OwnerPurpose } from "~/types/auth";
 import { useToast } from "~/composables/useToast";
 import Button from "~/components/ui/Button.vue";
+import OwnerPurposePicker from "~/components/owner/OwnerPurposePicker.vue";
 
 const props = defineProps<{ account: OwnerAccount }>();
 const emit = defineEmits<{ saved: [account: OwnerAccount] }>();
@@ -11,10 +13,13 @@ const { t, setLocale } = useI18n();
 const { setTheme } = useTheme();
 const { show } = useToast();
 const { toFieldErrors } = useApiError();
+const auth = useAuthStore();
 const submitting = ref(false);
 
 const localeChoice = ref<Locale>(props.account.preferences.locale);
 const themeChoice = ref<ThemePreference>(props.account.preferences.theme);
+const purposes = ref<OwnerPurpose[]>([...(auth.user?.purposes ?? ["rental"])]);
+const showChecklist = ref(auth.user?.checklistDismissedAt === null);
 
 const localeOptions: { value: Locale; label: string; help: string }[] = [
   { value: "en", label: "English", help: "English" },
@@ -50,6 +55,13 @@ const onSubmit = async () => {
       theme: themeChoice.value,
     });
     emit("saved", updated);
+    if (purposes.value.length > 0) {
+      auth.setUser(await useOwnerSettings().completeOnboarding({ purposes: purposes.value }));
+    }
+    const wantsDismissed = !showChecklist.value;
+    if (wantsDismissed !== (auth.user?.checklistDismissedAt !== null)) {
+      auth.setUser(await useOwnerSettings().setChecklistDismissed(wantsDismissed));
+    }
     show(t("common.savedToast"), "success");
   } catch (err) {
     const fieldErrors = toFieldErrors(err);
@@ -131,8 +143,37 @@ const onSubmit = async () => {
       </div>
     </section>
 
+    <section class="space-y-4 border-t border-line-passive pt-6">
+      <header>
+        <h2 id="settings-purposes-heading" class="text-card-title font-semibold text-ink">
+          {{ t("owner.settings.preferences.purposesTitle") }}
+        </h2>
+        <p class="mt-1 text-caption text-ink-muted">
+          {{ t("owner.settings.preferences.purposesHelp") }}
+        </p>
+      </header>
+      <OwnerPurposePicker v-model="purposes" labelledby="settings-purposes-heading" />
+      <p v-if="purposes.length === 0" class="text-caption text-accent">
+        {{ t("owner.settings.preferences.purposesMin") }}
+      </p>
+    </section>
+
+    <section class="space-y-4 border-t border-line-passive pt-6">
+      <label class="flex cursor-pointer items-start gap-3">
+        <input v-model="showChecklist" type="checkbox" class="mt-1 h-4 w-4 accent-ink" />
+        <span>
+          <span class="block text-body text-ink">
+            {{ t("owner.settings.preferences.checklistToggle") }}
+          </span>
+          <span class="block text-caption text-ink-muted">
+            {{ t("owner.settings.preferences.checklistHelp") }}
+          </span>
+        </span>
+      </label>
+    </section>
+
     <div class="flex justify-end">
-      <Button type="submit" variant="primary" :loading="submitting">
+      <Button type="submit" variant="primary" :disabled="purposes.length === 0" :loading="submitting">
         {{ t("owner.settings.save") }}
       </Button>
     </div>

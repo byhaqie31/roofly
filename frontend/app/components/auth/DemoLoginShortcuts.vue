@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowUpRight, Building2, DoorOpen } from "lucide-vue-next";
+import { ArrowUpRight, Building2, DoorOpen, Sparkles } from "lucide-vue-next";
 import Button from "~/components/ui/Button.vue";
 
 /**
@@ -20,7 +20,7 @@ const TENANT_ENABLED = true;
 
 const auth = useAuthStore();
 const { t } = useI18n();
-const loadingRole = ref<"owner" | "tenant" | null>(null);
+const loadingRole = ref<"owner" | "tenant" | "google" | null>(null);
 const { showDemoShortcuts } = useEnv();
 const showShortcuts = showDemoShortcuts;
 const { track } = useTrack();
@@ -30,6 +30,14 @@ const enter = async (role: "owner" | "tenant") => {
   loadingRole.value = role;
   await auth.login(`${role}@roofly.my`, "password");
   await navigateTo(role === "owner" ? "/owner" : "/tenant");
+  loadingRole.value = null;
+};
+
+const enterGoogle = async () => {
+  track("demo_enter", { role: "owner_google" });
+  loadingRole.value = "google";
+  await auth.loginWithGoogle("demo");
+  await navigateTo("/owner");
   loadingRole.value = null;
 };
 </script>
@@ -89,6 +97,18 @@ const enter = async (role: "owner" | "tenant") => {
           {{ t("demo.shortcuts.comingSoon") }}
         </span>
       </button>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        class="col-span-2"
+        :loading="loadingRole === 'google'"
+        :disabled="loadingRole !== null"
+        @click="enterGoogle"
+      >
+        <Sparkles :size="16" :stroke-width="1.5" />
+        {{ t("demo.shortcuts.continueWithGoogle") }}
+      </Button>
     </div>
   </section>
 

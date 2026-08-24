@@ -114,6 +114,8 @@ export default defineNuxtConfig({
       // Canonical origin for absolute URLs in social meta (og:image must be
       // absolute). Override per env: https://uat.roofly.my, https://demo.roofly.my.
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL ?? "https://roofly.my",
+      // Google sign-in (owners only, spec 2026-08-23). Empty ⇒ button hidden.
+      googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID ?? "",
     },
   },
 

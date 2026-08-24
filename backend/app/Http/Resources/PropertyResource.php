@@ -14,6 +14,7 @@ class PropertyResource extends JsonResource
             'name'          => $this->name,
             'internalLabel' => $this->internal_label,
             'type'          => $this->type?->value,
+            'purpose'       => $this->purpose?->value ?? 'rental',
             'notes'         => $this->notes,
             'address'       => $this->address,
             'city'          => $this->city,

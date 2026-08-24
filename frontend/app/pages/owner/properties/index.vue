@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import Card from "~/components/ui/Card.vue";
 import EmptyState from "~/components/ui/EmptyState.vue";
 import Button from "~/components/ui/Button.vue";
@@ -11,11 +12,17 @@ definePageMeta({ layout: "owner" });
 const { t } = useI18n();
 useHead({ title: () => t("owner.nav.properties") });
 
+const route = useRoute();
+const router = useRouter();
 const showAddModal = ref(false);
 const properties = ref<Property[]>([]);
 const loading = ref(true);
 
 onMounted(async () => {
+  if (route.query.add === "1") {
+    showAddModal.value = true;
+    router.replace({ query: {} });
+  }
   try {
     properties.value = await useProperties().getProperties();
   } finally {

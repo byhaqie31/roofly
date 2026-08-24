@@ -1,4 +1,4 @@
-import type { AuthUser } from "~/types/auth";
+import type { AuthUser, OwnerPurpose } from "~/types/auth";
 import type { AuthAdapter } from "~/services/contracts/auth";
 import { ADMIN_PERMISSIONS, type AdminPermission } from "~/types/admin";
 
@@ -39,6 +39,35 @@ const restore = (): AuthUser | null => {
   }
 };
 
+const OWNER_DEFAULTS = {
+  hasPassword: true,
+  avatarUrl: null,
+  // The stock demo owner is "seasoned": onboarded long ago, checklist dismissed
+  // so the curated dashboard/tour is untouched. The Google-demo path resets both.
+  onboardedAt: "2026-01-12T09:00:00Z",
+  purposes: ["rental"] as OwnerPurpose[],
+  checklistDismissedAt: "2026-01-12T09:05:00Z",
+};
+const NON_OWNER_DEFAULTS = {
+  hasPassword: true,
+  avatarUrl: null,
+  onboardedAt: null,
+  purposes: [] as OwnerPurpose[],
+  checklistDismissedAt: null,
+};
+
+/** Lets demo services mutate the persisted demo user (onboarding, checklist). */
+export const demoSession = {
+  current: (): AuthUser | null => restore(),
+  update(patch: Partial<AuthUser>): AuthUser {
+    const current = restore();
+    if (!current) throw new Error("No demo session to update");
+    const next = { ...current, ...patch };
+    persist(next);
+    return next;
+  },
+};
+
 export const DEMO_SUPER_ADMIN_ID = "a-super";
 export const DEMO_OPS_ADMIN_ID = "a-ops";
 
@@ -61,6 +90,7 @@ const customerUserFor = (email: string): AuthUser =>
         role: "tenant",
         permissions: [],
         isSuperAdmin: false,
+        ...NON_OWNER_DEFAULTS,
       }
     : {
         id: DEMO_OWNER_ID,
@@ -70,6 +100,7 @@ const customerUserFor = (email: string): AuthUser =>
         role: "owner",
         permissions: [],
         isSuperAdmin: false,
+        ...OWNER_DEFAULTS,
       };
 
 const adminUserFor = (email: string): AuthUser =>
@@ -82,6 +113,7 @@ const adminUserFor = (email: string): AuthUser =>
         role: "admin",
         permissions: [...ADMIN_PERMISSIONS],
         isSuperAdmin: true,
+        ...NON_OWNER_DEFAULTS,
       }
     : {
         id: DEMO_OPS_ADMIN_ID,
@@ -91,6 +123,7 @@ const adminUserFor = (email: string): AuthUser =>
         role: "admin",
         permissions: DEMO_OPS_PRESET,
         isSuperAdmin: false,
+        ...NON_OWNER_DEFAULTS,
       };
 
 const delay = () => new Promise((r) => setTimeout(r, 300));
@@ -115,6 +148,29 @@ export const demoAuth: AuthAdapter = {
       role: "owner",
       permissions: [],
       isSuperAdmin: false,
+      ...OWNER_DEFAULTS,
+    };
+    persist(user);
+    return user;
+  },
+
+  async loginWithGoogle() {
+    await delay();
+    const user: AuthUser = {
+      id: DEMO_OWNER_ID,
+      name: "Cik Aminah",
+      email: "aminah.google@roofly.my",
+      phone: null,
+      role: "owner",
+      permissions: [],
+      isSuperAdmin: false,
+      // Google-only account, fresh onboarding — deliberately not `...OWNER_DEFAULTS`
+      // (every one of those fields is overridden here anyway).
+      hasPassword: false,
+      avatarUrl: null,
+      onboardedAt: null,
+      purposes: [],
+      checklistDismissedAt: null,
     };
     persist(user);
     return user;
@@ -139,6 +195,17 @@ export const demoAuth: AuthAdapter = {
   async acceptAdminInvite(_token) {
     await delay();
     const user = adminUserFor("ops@roofly.my");
+    persist(user);
+    return user;
+  },
+
+  async forgotPassword() {
+    await delay();
+  },
+
+  async resetPassword({ email }) {
+    await delay();
+    const user = customerUserFor(email);
     persist(user);
     return user;
   },

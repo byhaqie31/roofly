@@ -46,17 +46,19 @@ const yearString = computed({
 });
 
 const onDownloadCsv = () => {
-  const rows = reports.perProperty.value.map((row) => [
-    row.property.name,
-    row.property.type,
-    row.property.city,
-    row.unitsCount,
-    row.occupiedCount,
-    `${row.occupancyPct}%`,
-    (row.incomeForYear / 100).toFixed(2),
-    (row.outstanding / 100).toFixed(2),
-    row.gains ? (row.gains.net / 100).toFixed(2) : "",
-  ]);
+  const rows = [...reports.perProperty.value, ...reports.notForRent.value].map(
+    (row) => [
+      row.property.name,
+      row.property.type,
+      row.property.city,
+      row.unitsCount,
+      row.occupiedCount,
+      `${row.occupancyPct}%`,
+      (row.incomeForYear / 100).toFixed(2),
+      (row.outstanding / 100).toFixed(2),
+      row.gains ? (row.gains.net / 100).toFixed(2) : "",
+    ],
+  );
   downloadCsv(
     `roofly-report-${year.value}.csv`,
     [
@@ -173,7 +175,7 @@ const onDownloadPdf = () => {
         </Card>
       </section>
 
-      <section>
+      <section v-if="reports.perProperty.value.length > 0">
         <!-- Mobile: card stack -->
         <div class="sm:hidden">
           <header class="mb-4">
@@ -342,6 +344,40 @@ const onDownloadPdf = () => {
             {{ t("owner.reports.perProperty.disclaimer") }}
           </footer>
         </div>
+      </section>
+
+      <section v-if="reports.notForRent.value.length > 0" class="mt-6">
+        <Card padding="loose">
+          <header class="mb-4">
+            <h2 class="text-card-title font-semibold text-ink">
+              {{ t("owner.reports.notForRent.title") }}
+            </h2>
+            <p class="mt-1 text-caption text-ink-muted">
+              {{ t("owner.reports.notForRent.help") }}
+            </p>
+          </header>
+          <ul class="divide-y divide-line-passive">
+            <li
+              v-for="row in reports.notForRent.value"
+              :key="row.property.id"
+              class="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <NuxtLink :to="`/owner/properties/${row.property.id}`" class="min-w-0">
+                <p class="truncate text-body font-medium text-ink">{{ row.property.name }}</p>
+                <p class="truncate text-caption text-ink-muted">
+                  {{ t(`owner.purposes.${row.property.purpose}.title`) }} · {{ row.property.city }}
+                </p>
+              </NuxtLink>
+              <div class="text-left sm:text-right">
+                <p class="text-micro text-ink-faint">{{ t("owner.reports.perProperty.cols.netGain") }}</p>
+                <p class="text-body font-semibold text-ink">
+                  <MoneyDisplay v-if="row.gains" :cents="row.gains.net" />
+                  <span v-else class="text-ink-faint">—</span>
+                </p>
+              </div>
+            </li>
+          </ul>
+        </Card>
       </section>
     </template>
   </div>

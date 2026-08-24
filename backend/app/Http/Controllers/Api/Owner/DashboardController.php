@@ -40,8 +40,10 @@ class DashboardController extends Controller
         $ownerId = $request->user()->id;
         $now = now();
 
-        $propertyIds = Property::where('owner_id', $ownerId)->pluck('id');
-        $isEmpty = $propertyIds->isEmpty();
+        // isEmpty looks at every property (an own-stay home is still a property);
+        // everything else is rental-only (spec 2026-08-23 § 5.3).
+        $isEmpty = ! Property::where('owner_id', $ownerId)->exists();
+        $propertyIds = Property::where('owner_id', $ownerId)->rental()->pluck('id');
 
         // ── Units / occupancy ──────────────────────────────────────────────
         $units = Unit::whereIn('property_id', $propertyIds)->get(['id', 'status']);

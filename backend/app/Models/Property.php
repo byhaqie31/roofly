@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\FurnishingStatus;
+use App\Enums\PropertyPurpose;
 use App\Enums\PropertyType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,6 +25,7 @@ class Property extends Model implements HasMedia
         'name',
         'internal_label',
         'type',
+        'purpose',
         'notes',
         'address',
         'city',
@@ -44,6 +46,7 @@ class Property extends Model implements HasMedia
     {
         return [
             'type'       => PropertyType::class,
+            'purpose'    => PropertyPurpose::class,
             'furnishing' => FurnishingStatus::class,
             'ownership'  => 'array',
             'utilities'  => 'array',
@@ -70,5 +73,10 @@ class Property extends Model implements HasMedia
     public function units(): HasMany
     {
         return $this->hasMany(Unit::class, 'property_id');
+    }
+
+    public function scopeRental($query)
+    {
+        return $query->where('purpose', PropertyPurpose::RENTAL->value);
     }
 }

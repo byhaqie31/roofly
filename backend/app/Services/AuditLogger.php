@@ -25,6 +25,12 @@ class AuditLogger
     public const OWNER_UNSUSPENDED         = 'owner.unsuspended';
     public const TENANT_INVITE_RESENT      = 'tenant.invite_resent';
     public const ANALYTICS_EXPORTED        = 'analytics.exported';
+    public const AUTH_GOOGLE_LOGIN         = 'auth.google_login';
+    public const AUTH_GOOGLE_REGISTER      = 'auth.google_register';
+    public const ACCOUNT_ONBOARDED         = 'account.onboarded';
+    public const ACCOUNT_CHECKLIST_DISMISSED = 'account.checklist_dismissed';
+    public const ACCOUNT_CHECKLIST_RESTORED  = 'account.checklist_restored';
+    public const ACCOUNT_PASSWORD_SET      = 'account.password_set';
 
     /** Every SP1 action, for validation of the audit filter. */
     public const ACTIONS = [
@@ -32,6 +38,8 @@ class AuditLogger
         self::ADMIN_PERMISSIONS_CHANGED, self::ADMIN_DISABLED, self::ADMIN_ENABLED,
         self::OWNER_WARNED, self::OWNER_SUSPENDED, self::OWNER_UNSUSPENDED,
         self::TENANT_INVITE_RESENT, self::ANALYTICS_EXPORTED,
+        self::AUTH_GOOGLE_LOGIN, self::AUTH_GOOGLE_REGISTER, self::ACCOUNT_ONBOARDED,
+        self::ACCOUNT_CHECKLIST_DISMISSED, self::ACCOUNT_CHECKLIST_RESTORED, self::ACCOUNT_PASSWORD_SET,
     ];
 
     public function record(

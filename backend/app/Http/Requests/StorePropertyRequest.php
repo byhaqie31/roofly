@@ -17,6 +17,7 @@ class StorePropertyRequest extends FormRequest
         return [
             'name'     => 'required|string|max:255',
             'type'     => 'required|in:condo,landed,shoplot,room',
+            'purpose'  => ['sometimes', Rule::in(\App\Enums\PropertyPurpose::values())],
             'address'  => 'required|string|max:500',
             'city'     => 'required|string|max:100',
             'state'    => ['required', Rule::in(self::MY_STATES)],

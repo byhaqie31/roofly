@@ -1,4 +1,5 @@
 export type PropertyType = "condo" | "landed" | "shoplot" | "room";
+export type PropertyPurpose = "rental" | "own_stay" | "investment";
 export type Furnishing = "unfurnished" | "partial" | "fully";
 export type TitleType = "freehold" | "leasehold";
 export type ValuationSource = "bank" | "agent" | "self";
@@ -84,6 +85,7 @@ export interface Property {
   name: string;
   internalLabel?: string;
   type: PropertyType;
+  purpose: PropertyPurpose;
   notes?: string;
   // Location
   address: string;
@@ -111,7 +113,7 @@ export interface Property {
 // Add Property modal — Tier 1 only
 export type PropertyInput = Pick<
   Property,
-  "name" | "address" | "city" | "state" | "postcode" | "type"
+  "name" | "address" | "city" | "state" | "postcode" | "type" | "purpose"
 >;
 
 export type PropertyUpdate = Partial<

@@ -28,6 +28,16 @@ export const apiAuth: AuthAdapter = {
     return res.user;
   },
 
+  async loginWithGoogle(credential) {
+    const { request } = useApi();
+    await request("/../sanctum/csrf-cookie");
+    const res = await request<{ user: AuthUser }>("/auth/google", {
+      method: "POST",
+      body: { credential },
+    });
+    return res.user;
+  },
+
   async logout() {
     try {
       await useApi().request("/auth/logout", { method: "POST" });
@@ -61,6 +71,22 @@ export const apiAuth: AuthAdapter = {
     const res = await request<{ user: AuthUser }>("/admin/auth/accept-invite", {
       method: "POST",
       body: { token, password, password_confirmation: password },
+    });
+    return res.user;
+  },
+
+  async forgotPassword(email) {
+    const { request } = useApi();
+    await request("/../sanctum/csrf-cookie");
+    await request("/auth/forgot-password", { method: "POST", body: { email } });
+  },
+
+  async resetPassword({ token, email, password }) {
+    const { request } = useApi();
+    await request("/../sanctum/csrf-cookie");
+    const res = await request<{ user: AuthUser }>("/auth/reset-password", {
+      method: "POST",
+      body: { token, email, password, password_confirmation: password },
     });
     return res.user;
   },

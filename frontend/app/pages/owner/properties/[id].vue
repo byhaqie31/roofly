@@ -30,7 +30,11 @@ const property = ref<Property | null>(null);
 const loading = ref(true);
 const showDeleteConfirm = ref(false);
 const deleting = ref(false);
-const activeTab = ref<string>("overview");
+const TAB_KEYS = ["overview", "details", "ownership", "utilities", "documents"];
+const requestedTab = typeof route.query.tab === "string" && TAB_KEYS.includes(route.query.tab) ? route.query.tab : "overview";
+const initialTab = requestedTab === "documents" && !documentsEnabled ? "overview" : requestedTab;
+const activeTab = ref<string>(initialTab);
+if (route.query.tab !== undefined) router.replace({ query: {} });
 
 onMounted(async () => {
   try {

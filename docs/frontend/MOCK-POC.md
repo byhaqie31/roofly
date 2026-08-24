@@ -318,6 +318,7 @@ The PROJECT.md `properties` table currently covers Tier 1 only. Recommended exte
   - `properties.owner_id` continues to point at the primary co-owner's `user_id`; the table just makes the joint-ownership picture explicit and queryable ("show all properties where user X is any kind of owner" becomes a simple join).
 - **Mortgage stays nested in `ownership` JSON for now.** TODO: extract to a `property_mortgages` table when we add payment history, refinancing events, or multi-mortgage support.
 - Photos and document uploads (Documents tab) are deferred to Phase 4+ when storage is wired; reuse the polymorphic `documents` table already in PROJECT.md.
+- **`purpose` string column** (default `"rental"`, `rental|own_stay|investment`) shipped in `2026_08_25_000002_add_purpose_to_properties_table.php` — a plain string, not a DB enum, so sqlite `ALTER TABLE` stays simple; `App\Enums\PropertyPurpose` + an Eloquent cast give it type safety in PHP. Non-rental properties are excluded from occupancy stats, the dashboard attention feed, and the Reports income table — they surface only in a separate "not for rent" capital-position group. The Add Property modal only shows a purpose picker once the owner has more than one purpose selected in onboarding; otherwise the value is implied.
 
 ---
 
@@ -783,7 +784,12 @@ The Preferences form is special — it applies its values to the live app *immed
 - **`owner_preferences` JSON** column on `users` (or sibling table) — `{ locale, theme, money_locale }`. Could also be a kv-store; small enough to stay JSON.
 - **`notification_preferences` JSON** column on `users` — `{ events: {...}, channels: {...} }`. Phase 4 may promote channels into a per-event matrix; the JSON shape absorbs that without a migration.
 - **Subscription / plan** is its own concern in Phase 7 — likely a `subscriptions` table joined to `users.id`. The frontend currently reads `account.planTier` from the same payload as profile.
-- **Endpoints the frontend mocks today**: `GET /account`, `PATCH /account/profile`, `PATCH /account/preferences`, `PATCH /account/notifications`, `GET /plans`.
+- **Endpoints the frontend mocks today**: `GET /account`, `PATCH /account/profile`, `PATCH /account/preferences`, `PATCH /account/notifications`, `GET /plans`, `PATCH /account/onboarding`, `PATCH /account/checklist`, `POST /account/password`.
+- **New `users` columns** (`2026_08_25_000001_add_google_and_onboarding_to_users_table.php`): `google_id` (nullable unique, owner-only Google sign-in), `avatar_url`, `purposes` (json, e.g. `["rental","own_stay"]`), `onboarded_at` (nullable timestamp — backfilled to `created_at` for every pre-existing owner so no one is retroactively forced through onboarding), `checklist_dismissed_at` (nullable timestamp).
+
+### 9.6 Owner onboarding & getting-started checklist
+
+One-screen `/owner/onboarding` (full-screen `layouts/onboarding.vue`, no sidebar) asks a new owner to pick one or more purposes (`rental` / `own_stay` / `investment`) via `OwnerPurposePicker`; submits to `completeOnboarding`. A route guard in `middleware/auth.global.ts` routes any owner with a falsy `onboardedAt` here before anything else in `/owner/*`. The dashboard's `GettingStartedCard` shows a computed, **not stored**, checklist (`utils/onboardingChecklist.ts`'s `buildChecklist()`) derived fresh each load from the owner's real properties/units/tenants/agreements — steps can never drift out of sync with reality the way a stored "completed steps" list could. Only `checklistDismissedAt` (dismiss/restore) and `purposes`/`onboardedAt` (the one-time gate) are persisted.
 
 ---
 

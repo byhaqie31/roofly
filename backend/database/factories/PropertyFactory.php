@@ -14,6 +14,7 @@ class PropertyFactory extends Factory
             'owner_id' => User::factory()->owner(),
             'name'     => fake()->streetName() . ' Residence',
             'type'     => 'condo',
+            'purpose'  => 'rental',
             'address'  => fake()->streetAddress(),
             'city'     => 'Kuala Lumpur',
             'state'    => 'W.P. Kuala Lumpur',

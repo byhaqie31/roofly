@@ -8,6 +8,7 @@ import { useToast } from "~/composables/useToast";
 import Input from "~/components/ui/Input.vue";
 import Button from "~/components/ui/Button.vue";
 import EmptyState from "~/components/ui/EmptyState.vue";
+import SettingsSetPasswordForm from "~/components/owner/SettingsSetPasswordForm.vue";
 
 const props = defineProps<{ account: OwnerAccount }>();
 const emit = defineEmits<{ saved: [account: OwnerAccount] }>();
@@ -17,6 +18,7 @@ const { show } = useToast();
 const { public: { features } } = useRuntimeConfig();
 const photosEnabled = features.documents;
 const submitting = ref(false);
+const auth = useAuthStore();
 
 const initialValues = {
   name: props.account.profile.name,
@@ -146,4 +148,16 @@ const onSubmit = handleSubmit(async (values) => {
       </Button>
     </div>
   </form>
+
+  <section v-if="!auth.user?.hasPassword" class="mt-8 space-y-4 border-t border-line-passive pt-6">
+    <header>
+      <h2 class="text-card-title font-semibold text-ink">
+        {{ t("owner.settings.profile.passwordTitle") }}
+      </h2>
+      <p class="mt-1 text-caption text-ink-muted">
+        {{ t("owner.settings.profile.passwordHelp") }}
+      </p>
+    </header>
+    <SettingsSetPasswordForm />
+  </section>
 </template>

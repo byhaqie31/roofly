@@ -49,6 +49,20 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
+    async loginWithGoogle(credential: string) {
+      this.loading = true;
+      try {
+        this.user = await adapter().loginWithGoogle(credential);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    /** Replace the session user after an account mutation (onboarding, checklist, password). */
+    setUser(user: AuthUser) {
+      this.user = user;
+    },
+
     async loginAdmin(email: string, password: string) {
       this.loading = true;
       try {
@@ -62,6 +76,24 @@ export const useAuthStore = defineStore("auth", {
       this.loading = true;
       try {
         this.user = await adapter().acceptAdminInvite(token, password);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async forgotPassword(email: string) {
+      this.loading = true;
+      try {
+        await adapter().forgotPassword(email);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async resetPassword(input: { token: string; email: string; password: string }) {
+      this.loading = true;
+      try {
+        this.user = await adapter().resetPassword(input);
       } finally {
         this.loading = false;
       }

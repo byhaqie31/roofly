@@ -63,7 +63,13 @@ class AnalyticsDemoSeeder extends Seeder
                     $lead = Lead::create(['email' => $email, 'visitor_id' => $vid, 'source' => 'waitlist', 'first_seen_at' => $t, 'last_seen_at' => $t]);
                     if ($converted < 8 && $n % 5 === 0) {
                         $converted++;
-                        $owner = User::create(['name' => "Lead {$n}", 'email' => $email, 'role' => 'owner', 'password' => Hash::make('password'), 'plan_tier' => 'free']);
+                        // onboarded_at + purposes keep these seeded owners off the
+                        // onboarding wall on a fresh migrate:fresh --seed (the Task 1
+                        // migration only back-fills rows that pre-date it). They're
+                        // property-less, so the getting-started checklist staying
+                        // visible (checklist_dismissed_at left null) is desirable —
+                        // it's exactly the persona onboarding is meant to guide.
+                        $owner = User::create(['name' => "Lead {$n}", 'email' => $email, 'role' => 'owner', 'password' => Hash::make('password'), 'plan_tier' => 'free', 'purposes' => ['rental'], 'onboarded_at' => $t->copy()->addDays(2)]);
                         $owner->forceFill(['created_at' => $t->copy()->addDays(2)])->saveQuietly();
                         $this->event($vid, 'register', $t->copy()->addDays(2), ['path' => '/auth/register', 'props' => ['email' => $email, 'userId' => $owner->id]]);
                         $lead->update(['converted_user_id' => $owner->id, 'last_seen_at' => $t->copy()->addDays(2)]);

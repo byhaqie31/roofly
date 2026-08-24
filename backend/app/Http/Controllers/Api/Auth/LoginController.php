@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AuthUserResource;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,14 @@ class LoginController extends Controller
             'email'    => 'required|email',
             'password' => 'required|string',
         ]);
+
+        $existing = User::where('email', $credentials['email'])->first();
+        if ($existing !== null && $existing->isOwner() && ! $existing->hasPassword()) {
+            return response()->json([
+                'message' => 'This account signs in with Google.',
+                'errors'  => ['email' => ['This account signs in with Google.']],
+            ], 422);
+        }
 
         if (! Auth::attempt($credentials)) {
             return response()->json(['message' => 'Invalid credentials.'], 401);

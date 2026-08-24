@@ -1,5 +1,6 @@
 import type { OwnerSettingsService } from "~/services/contracts/ownerSettings";
 import { ownerAccountMock, plansMock } from "~/demo/data/owner";
+import { demoSession } from "~/demo/auth";
 
 export const demoOwnerSettings: OwnerSettingsService = {
   async getAccount() {
@@ -32,5 +33,23 @@ export const demoOwnerSettings: OwnerSettingsService = {
 
   async getPlans() {
     return structuredClone(plansMock);
+  },
+
+  async completeOnboarding({ purposes }) {
+    const current = demoSession.current();
+    return demoSession.update({
+      purposes: [...new Set(purposes)],
+      onboardedAt: current?.onboardedAt ?? new Date().toISOString(),
+    });
+  },
+
+  async setChecklistDismissed(dismissed) {
+    return demoSession.update({
+      checklistDismissedAt: dismissed ? new Date().toISOString() : null,
+    });
+  },
+
+  async setPassword() {
+    return demoSession.update({ hasPassword: true });
   },
 };

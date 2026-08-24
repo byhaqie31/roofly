@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import Card from "~/components/ui/Card.vue";
 import EmptyState from "~/components/ui/EmptyState.vue";
 import Button from "~/components/ui/Button.vue";
@@ -11,6 +12,8 @@ definePageMeta({ layout: "owner" });
 const { t } = useI18n();
 useHead({ title: () => t("owner.nav.tenants") });
 
+const route = useRoute();
+const router = useRouter();
 const tenants = ref<Tenant[]>([]);
 const loading = ref(true);
 const showModal = ref(false);
@@ -20,6 +23,10 @@ const refresh = async () => {
 };
 
 onMounted(async () => {
+  if (route.query.invite === "1") {
+    showModal.value = true;
+    router.replace({ query: {} });
+  }
   try {
     await refresh();
   } finally {

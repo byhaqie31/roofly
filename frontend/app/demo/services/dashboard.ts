@@ -22,13 +22,21 @@ const ymKey = (d: Date) =>
  */
 const buildFromDemoData = (): DashboardData => {
   const isEmpty = propertiesMock.length === 0;
+  // Mirror DashboardController: only rental properties feed the stats/feed.
+  const rentalIds = new Set(propertiesMock.filter((p) => p.purpose === "rental").map((p) => p.id));
+  const rentalUnits = unitsMock.filter((u) => rentalIds.has(u.propertyId));
+  const rentalUnitIds = new Set(rentalUnits.map((u) => u.id));
+  const rentalAgreements = agreementsMock.filter((a) => rentalUnitIds.has(a.unitId));
+  const rentalAgreementIds = new Set(rentalAgreements.map((a) => a.id));
+  const rentalInvoices = invoicesMock.filter((i) => rentalAgreementIds.has(i.agreementId));
+  const rentalInvoiceIds = new Set(rentalInvoices.map((i) => i.id));
 
-  const unitCount = unitsMock.length;
-  const occupiedCount = unitsMock.filter((u) => u.status === "occupied").length;
+  const unitCount = rentalUnits.length;
+  const occupiedCount = rentalUnits.filter((u) => u.status === "occupied").length;
   const occupancyPct =
     unitCount > 0 ? Math.round((occupiedCount / unitCount) * 100) : 0;
 
-  const outstandingInvoices = invoicesMock.filter(
+  const outstandingInvoices = rentalInvoices.filter(
     (i) => i.status === "pending" || i.status === "overdue",
   );
   const outstanding = outstandingInvoices.reduce(
@@ -39,7 +47,9 @@ const buildFromDemoData = (): DashboardData => {
 
   const now = new Date();
   const thisMonth = ymKey(now);
-  const successful = paymentsMock.filter((p) => p.status === "successful");
+  const successful = paymentsMock
+    .filter((p) => rentalInvoiceIds.has(p.invoiceId))
+    .filter((p) => p.status === "successful");
   const monthlyIncome = successful
     .filter((p) => ymKey(new Date(p.paidAt)) === thisMonth)
     .reduce((sum, p) => sum + p.amount, 0);
@@ -55,7 +65,7 @@ const buildFromDemoData = (): DashboardData => {
   });
 
   const nowMs = now.getTime();
-  const expiringAgreements = agreementsMock.filter((a) => {
+  const expiringAgreements = rentalAgreements.filter((a) => {
     if (a.status !== "active") return false;
     const end = new Date(a.endDate).getTime();
     return end >= nowMs && end - nowMs <= 60 * DAY_MS;
@@ -63,7 +73,7 @@ const buildFromDemoData = (): DashboardData => {
 
   const needsAttention: AttentionItem[] = [];
 
-  invoicesMock
+  rentalInvoices
     .filter((i) => i.status === "overdue")
     .forEach((inv) => {
       const ag = agreementsMock.find((a) => a.id === inv.agreementId);
@@ -99,6 +109,7 @@ const buildFromDemoData = (): DashboardData => {
     });
 
   ticketsMock
+    .filter((t) => rentalUnitIds.has(t.unitId))
     .filter((t) => t.status === "new")
     .filter((t) => t.priority === "high" || t.priority === "urgent")
     .forEach((t) => {
@@ -111,6 +122,7 @@ const buildFromDemoData = (): DashboardData => {
     });
 
   ticketsMock
+    .filter((t) => rentalUnitIds.has(t.unitId))
     .filter((t) => t.status === "reopened")
     .forEach((t) => {
       needsAttention.push({

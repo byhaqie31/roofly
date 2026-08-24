@@ -59,6 +59,12 @@
     "registerTitle": "Start with Roofly",
     "registerSubtitle": "Create an owner account to manage your rentals.",
     "invalidCredentials": "Invalid email or password.",
+    "google": {
+      "or": "or",
+      "unavailable": "Google sign-in is unavailable right now — use your email below.",
+      "failed": "Google sign-in failed. Please try again.",
+      "notOwner": "This email is a tenant account. Ask your landlord for your invite link."
+    },
     "admin": {
       "title": "Admin portal",
       "subtitle": "Sign in with your Roofly team account.",
@@ -73,6 +79,24 @@
       "accept": "Set password and sign in",
       "notCustomer": "Not a Roofly team member?",
       "customerLogin": "Go to the customer login"
+    },
+    "forgot": {
+      "title": "Forgot your password?",
+      "subtitle": "Enter your email and we'll send you a reset link.",
+      "submit": "Send reset link",
+      "sentTitle": "Check your inbox",
+      "sentHelp": "If {email} has an account, a reset link is on its way. It expires in 60 minutes.",
+      "backToLogin": "Back to log in"
+    },
+    "reset": {
+      "title": "Set a new password",
+      "subtitle": "Choose a password with at least 8 characters.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "mismatch": "Passwords do not match.",
+      "submit": "Save password and log in",
+      "invalid": "This reset link is invalid or has expired.",
+      "requestNew": "Request a new link"
     }
   },
   "suspended": {
@@ -86,6 +110,7 @@
       "eyebrow": "For demo purposes only",
       "continueAsOwner": "Continue as owner",
       "continueAsTenant": "Continue as tenant",
+      "continueWithGoogle": "Continue with Google (demo)",
       "comingSoon": "Coming soon",
       "tryFirst": "Want to try it first?",
       "exploreDemo": "Explore the demo"
@@ -580,6 +605,20 @@
         "cta": "Add property"
       }
     },
+    "checklist": {
+      "title": "Getting started",
+      "progress": "{done} of {total} done",
+      "dismiss": "Hide checklist",
+      "dismissedToast": "Hidden. Bring it back from Settings → Preferences.",
+      "steps": {
+        "add_property": { "title": "Add your first property", "hint": "Name, address and type — takes a minute." },
+        "fill_ownership": { "title": "Fill in ownership details", "hint": "Title, purchase price, valuation and loan." },
+        "fill_utilities": { "title": "Fill in utilities and fees", "hint": "Maintenance fee, quit rent, TNB and water accounts." },
+        "add_unit": { "title": "Add a unit", "hint": "Tenants and agreements attach to units." },
+        "invite_tenant": { "title": "Invite your first tenant", "hint": "Name, email and phone — they get a link." },
+        "create_agreement": { "title": "Create an agreement", "hint": "Link a tenant to a unit with rent and dates." }
+      }
+    },
     "reports": {
       "subtitle": "Year-over-year income, outstanding rent, and capital position by property.",
       "yearLabel": "Year",
@@ -607,6 +646,10 @@
           "outstanding": "Outstanding",
           "netGain": "Net gain (RPGT)"
         }
+      },
+      "notForRent": {
+        "title": "Not for rent",
+        "help": "Own-stay and investment properties — capital position only, no rental income."
       },
       "csv": {
         "property": "Property",
@@ -730,14 +773,27 @@
         "photoPlaceholderHelp": "Profile photos arrive in the next phase, once file storage is wired.",
         "payout": "Payout account",
         "payoutHelp": "Where rent collections will be deposited. Bank linkage is managed via your finance settings.",
-        "bankMasked": "Maybank account ending in"
+        "bankMasked": "Maybank account ending in",
+        "passwordTitle": "Set a password",
+        "passwordHelp": "You signed up with Google. Add a password to also log in with email.",
+        "setPassword": "Set password",
+        "newPassword": "New password",
+        "confirmPassword": "Confirm password",
+        "passwordTooShort": "Use at least 8 characters.",
+        "passwordMismatch": "Passwords do not match.",
+        "passwordSetToast": "Password set. You can now log in with email too."
       },
       "preferences": {
         "languageHelp": "Affects every label, date format, and translated message in the app.",
         "themeHelp": "Pick a fixed theme or follow your operating system.",
         "themeLightHelp": "Always use the light token set.",
         "themeDarkHelp": "Always use the dark token set.",
-        "themeSystemHelp": "Follow your OS preference."
+        "themeSystemHelp": "Follow your OS preference.",
+        "purposesTitle": "What you manage",
+        "purposesHelp": "Drives the getting-started checklist and the default for new properties.",
+        "purposesMin": "Pick at least one.",
+        "checklistToggle": "Show the getting-started checklist on the dashboard",
+        "checklistHelp": "It hides itself once every step is done."
       },
       "notifications": {
         "channelTitle": "Delivery channels",
@@ -812,6 +868,7 @@
         "fields": {
           "name": "Property name",
           "type": "Type",
+          "purpose": "This property is for",
           "address": "Address",
           "city": "City",
           "state": "State",
@@ -967,6 +1024,17 @@
           "placeholderHelp": "Document upload arrives in the next phase. You'll be able to attach title deeds, insurance policies, and tax receipts here."
         }
       }
+    },
+    "purposes": {
+      "rental": { "title": "Rental", "help": "Units with tenants, rent collection, agreements." },
+      "own_stay": { "title": "Own stay", "help": "The home you live in — ownership, loan, bills." },
+      "investment": { "title": "Investment", "help": "Held for value, not rented right now." }
+    },
+    "onboarding": {
+      "title": "What will you manage in Roofly?",
+      "subtitle": "Pick everything that applies. You can change this later in Settings.",
+      "continue": "Continue",
+      "skip": "Skip for now"
     }
   },
   "tenant": {

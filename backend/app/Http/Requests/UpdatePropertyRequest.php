@@ -19,6 +19,7 @@ class UpdatePropertyRequest extends FormRequest
             'name'          => 'sometimes|string|max:255',
             'internalLabel' => 'nullable|string|max:255',
             'type'          => 'sometimes|in:condo,landed,shoplot,room',
+            'purpose'       => ['sometimes', Rule::in(\App\Enums\PropertyPurpose::values())],
             'notes'         => 'nullable|string',
             'address'       => 'sometimes|string|max:500',
             'city'          => 'sometimes|string|max:100',

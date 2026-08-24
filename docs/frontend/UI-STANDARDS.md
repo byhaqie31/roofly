@@ -759,6 +759,32 @@ Every admin list page (Owners, Tenants, Audit) follows the same shell so the des
 - Every helper collapses to an instant state under `prefers-reduced-motion: reduce`. Content must never be gated on an animation finishing.
 - Hero backdrop lives at `public/marketing/hero-skyline.svg` (self-drawn Malaysian residential skyline). Keep a `#1c1a17` top/bottom gradient overlay on top of any replacement image so the headline stays AA.
 
+### 11.18 Checklist card (getting-started)
+
+See [components/owner/GettingStartedCard.vue](../../frontend/app/components/owner/GettingStartedCard.vue).
+
+- **Row = numbered circle + title + one-line hint, whole row is the link.** Undone/enabled steps render as `<NuxtLink>` wrapping the whole row (`hover:bg-surface-hover`, trailing chevron); done or not-yet-enabled steps render the same markup as a plain `<div>` (no link, no hover, no chevron) so the row shape never shifts between states.
+- **Three visual states per step** — done: filled circle with a check icon, `bg-status-paid-soft`/`text-status-paid`, title `line-through text-ink-muted`, hint hidden; enabled-not-done: `bg-ink` circle with the step number, title `text-ink`, hint `text-ink-muted`; disabled (no property yet): `bg-line-passive` circle, title + hint both `text-ink-faint` — muted, not hidden, so the owner sees the whole path up front.
+- **Card hides itself entirely** once every step is done or the owner has dismissed it (✕ in the header) — it never renders a "you're all set" empty version. Dismiss/restore is a single persisted flag (`checklistDismissedAt`), not per-step state.
+- **Same row layout on mobile and desktop** — no card-vs-table split needed here; the row already degrades cleanly at narrow widths (title/hint stack naturally under the fixed-width circle + icon).
+
+### 11.19 Full-screen onboarding layout
+
+See [layouts/onboarding.vue](../../frontend/app/layouts/onboarding.vue) + [pages/owner/onboarding.vue](../../frontend/app/pages/owner/onboarding.vue).
+
+- **Own layout, no product chrome** — no sidebar, no topbar, no `UserMenu`. Just a slim header (wordmark + language switcher only — no theme toggle), a centered `max-w-2xl` content column, and a footer tagline. Mirrors the structure of `layouts/auth.vue`'s form pane, not the owner shell.
+- **Pinned to light theme** (`data-theme="light"` on the layout root) — the owner arrives here straight from the (always-light) auth/signup flow, and onboarding is still part of that first-run moment, so the visual experience stays continuous rather than snapping to a previously-set dark preference.
+- **One question, one primary action, one skip.** A single picker (`OwnerPurposePicker`), a full-width primary button that's disabled until at least one purpose is chosen, and a muted underlined "skip" text-link beneath it that submits a sensible default rather than leaving the screen with no way forward.
+
+### 11.20 Auth pages: social button above the form
+
+See [pages/auth/login.vue](../../frontend/app/pages/auth/login.vue) / [pages/auth/register.vue](../../frontend/app/pages/auth/register.vue) + [components/auth/GoogleSignInButton.vue](../../frontend/app/components/auth/GoogleSignInButton.vue).
+
+- **Social sign-in renders above the email/password form**, followed by an `or` divider (`h-px` line either side of a small uppercase `or` label) before the form starts — never interleaved with form fields, never below the submit button.
+- **Gated by `features.googleLogin`** (`!isDemo && Boolean(googleClientId)`) — the whole block, divider included, is absent when the flag is off, so a build with no client id configured shows a plain email/password form with no dead space where the button would have been.
+- **Never shown in demo.** `demo-roofly` always has `isDemo: true`, so this block never renders there; `components/auth/DemoLoginShortcuts.vue`'s "Continue with Google (demo)" button on `/demo` is the demo-mode substitute, and it is a separate component, not a themed variant of this one.
+- **Renders Google's own button** (via GIS's `renderButton`, not a custom-styled button) so it stays visually consistent with Google's own branding requirements; theme (`filled_black` dark / `outline` light) and locale are kept in sync with the app's own theme/language state, re-rendered on change.
+
 ## 12. Hard rules — do not break
 
 1. Page background is **always** `#F7F4ED` (light) or `#1C1A17` (dark). Pure white only inside generated PDFs.

@@ -7,6 +7,7 @@ import MoneyDisplay from "~/components/ui/MoneyDisplay.vue";
 import MiniAreaChart from "~/components/ui/MiniAreaChart.vue";
 import Pill from "~/components/ui/Pill.vue";
 import Icon from "~/components/ui/Icon.vue";
+import GettingStartedCard from "~/components/owner/GettingStartedCard.vue";
 import { useDashboard, type AttentionKind } from "~/composables/useDashboard";
 
 definePageMeta({ layout: "owner" });
@@ -15,9 +16,10 @@ const { t } = useI18n();
 useHead({ title: () => t("owner.dashboard.title") });
 
 const dashboard = useDashboard();
+const checklist = useOnboardingChecklist();
 const demoTour = useDemoTour();
 onMounted(async () => {
-  await dashboard.getDashboard();
+  await Promise.all([dashboard.getDashboard(), checklist.load()]);
   // Auto-start the product tour once per browser on demo. No-op elsewhere.
   demoTour.maybeAutoStart();
 });
@@ -63,6 +65,13 @@ const attentionTone: Record<
       </p>
     </header>
 
+    <GettingStartedCard
+      v-if="checklist.visible.value"
+      :steps="checklist.steps.value"
+      :done-count="checklist.doneCount.value"
+      @dismiss="checklist.dismiss"
+    />
+
     <Card v-if="dashboard.loading.value" padding="loose">
       <p class="text-center text-body text-ink-muted">
         {{ t("common.loading") }}
@@ -76,7 +85,7 @@ const attentionTone: Record<
         :description="t('owner.dashboard.emptyState.description')"
       >
         <template #action>
-          <NuxtLink to="/owner/properties">
+          <NuxtLink to="/owner/properties?add=1">
             <Button variant="primary" size="lg">
               {{ t("owner.dashboard.emptyState.cta") }}
             </Button>

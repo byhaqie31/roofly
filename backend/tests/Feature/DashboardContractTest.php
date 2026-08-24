@@ -130,4 +130,20 @@ class DashboardContractTest extends TestCase
         Sanctum::actingAs(User::factory()->tenant()->create());
         $this->getJson('/api/dashboard')->assertForbidden();
     }
+
+    public function test_non_rental_properties_are_excluded_from_occupancy_but_not_is_empty(): void
+    {
+        $home = \App\Models\Property::factory()->create(['owner_id' => $this->owner->id, 'purpose' => 'own_stay']);
+        \App\Models\Unit::factory()->create(['property_id' => $home->id, 'status' => 'vacant']);
+
+        $res = $this->getJson('/api/dashboard')->assertOk();
+        $this->assertFalse($res->json('isEmpty'));
+        $this->assertSame(0, $res->json('stats.unitCount'));
+
+        $rental = \App\Models\Property::factory()->create(['owner_id' => $this->owner->id]);
+        \App\Models\Unit::factory()->create(['property_id' => $rental->id, 'status' => 'occupied']);
+        $res = $this->getJson('/api/dashboard')->assertOk();
+        $this->assertSame(1, $res->json('stats.unitCount'));
+        $this->assertSame(100, $res->json('stats.occupancyPct'));
+    }
 }

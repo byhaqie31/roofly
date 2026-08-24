@@ -44,6 +44,11 @@ class User extends Authenticatable
         'plan_tier',
         'owner_preferences',
         'notification_preferences',
+        'google_id',
+        'avatar_url',
+        'purposes',
+        'onboarded_at',
+        'checklist_dismissed_at',
         'personal_info',
         'emergency_contact',
     ];
@@ -68,6 +73,9 @@ class User extends Authenticatable
             'password'                 => 'hashed',
             'owner_preferences'        => 'array',
             'notification_preferences' => 'array',
+            'purposes'                 => 'array',
+            'onboarded_at'             => 'datetime',
+            'checklist_dismissed_at'   => 'datetime',
             'personal_info'            => 'array',
             'emergency_contact'        => 'array',
         ];
@@ -156,5 +164,15 @@ class User extends Authenticatable
     public function isDisabled(): bool
     {
         return $this->disabled_at !== null;
+    }
+
+    public function hasPassword(): bool
+    {
+        return $this->password !== null;
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\ResetPassword($token));
     }
 }
