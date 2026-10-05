@@ -20,7 +20,7 @@ const words = computed(() =>
 // public/marketing/hero/ (see UI-STANDARDS § 11.21 and scripts/hero/README.md).
 // Array order is playback order; slides[0] is rendered visible server-side
 // and fetched eagerly. To add a slide, pack the photo and append its name.
-const slides = ["bungalow", "terrace", "condo"].map(
+const slides = ["bungalow", "terrace", "condo", "semid", "apartment"].map(
   (name) => `/marketing/hero/${name}.webp`,
 );
 
@@ -172,8 +172,9 @@ onBeforeUnmount(() => {
         rel="noopener noreferrer"
         class="relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-pill text-body font-medium will-change-transform"
         style="
-          color: rgba(247, 244, 237, 0.85);
-          box-shadow: inset 0 0 0 1px rgba(247, 244, 237, 0.2);
+          background-color: #f7f4ed;
+          color: #1c1a17;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
         "
       >
         <PlayCircle :size="18" :stroke-width="1.75" />

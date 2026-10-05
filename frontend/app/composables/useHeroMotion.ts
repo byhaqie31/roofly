@@ -127,7 +127,7 @@ export const useHeroMotion = () => {
     const lift = gsap.to(trigger, {
       scale: 1.04,
       y: -2,
-      boxShadow: "inset 0 0 0 1px rgba(247, 244, 237, 0.45)",
+      boxShadow: "0 12px 24px -10px rgba(0, 0, 0, 0.5)",
       duration: 0.25,
       ease: "power3.out",
       paused: true,
