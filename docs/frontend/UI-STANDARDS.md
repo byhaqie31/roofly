@@ -755,9 +755,9 @@ Every admin list page (Owners, Tenants, Audit) follows the same shell so the des
 ### 11.x Marketing motion (GSAP)
 
 - GSAP (`gsap` 3.x) is used **only on the marketing surface** (`/coming-soon`, `layouts/marketing.vue` descendants). Product shells keep CSS transitions.
-- All marketing motion goes through `composables/useHeroMotion.ts` — `enter` (staggered entrance via `[data-enter]` targets), `drift` (Ken-Burns on the hero backdrop), `rotateWords` (brand-word flip on the headline accent, words from `marketing.hero.headlineWords[]` per locale, `words[0]` rendered server-side so first paint is never blank), `revealOnScroll` (IntersectionObserver + one-shot fade-up for card grids), `hoverExpand` (card lift + grow, `[data-watermark]` icon swell, `[data-body]` brighten; binds only on `(hover: hover) and (pointer: fine)` so touch is untouched).
+- All marketing motion goes through `composables/useHeroMotion.ts` — `enter` (staggered entrance via `[data-enter]` targets), `slideshow` (hero background crossfade + drift, § 11.21), `drift` (single-image Ken-Burns, kept for one-off backdrops), `rotateWords` (brand-word flip on the headline accent, words from `marketing.hero.headlineWords[]` per locale, `words[0]` rendered server-side so first paint is never blank), `revealOnScroll` (IntersectionObserver + one-shot fade-up for card grids), `hoverExpand` (card lift + grow, `[data-watermark]` icon swell, `[data-body]` brighten; binds only on `(hover: hover) and (pointer: fine)` so touch is untouched).
 - Every helper collapses to an instant state under `prefers-reduced-motion: reduce`. Content must never be gated on an animation finishing.
-- Hero backdrop lives at `public/marketing/hero-skyline.svg` (self-drawn Malaysian residential skyline). Keep a `#1c1a17` top/bottom gradient overlay on top of any replacement image so the headline stays AA.
+- Hero backdrop is the § 11.21 slideshow. `public/marketing/hero-skyline.svg` (self-drawn Malaysian residential skyline) is no longer used by the hero but still feeds `scripts/og/og-card.html` — don't delete it.
 
 ### 11.18 Checklist card (getting-started)
 
@@ -784,6 +784,18 @@ See [pages/auth/login.vue](../../frontend/app/pages/auth/login.vue) / [pages/aut
 - **Gated by `features.googleLogin`** (`!isDemo && Boolean(googleClientId)`) — the whole block, divider included, is absent when the flag is off, so a build with no client id configured shows a plain email/password form with no dead space where the button would have been.
 - **Never shown in demo.** `demo-roofly` always has `isDemo: true`, so this block never renders there; `components/auth/DemoLoginShortcuts.vue`'s "Continue with Google (demo)" button on `/demo` is the demo-mode substitute, and it is a separate component, not a themed variant of this one.
 - **Renders Google's own button** (via GIS's `renderButton`, not a custom-styled button) so it stays visually consistent with Google's own branding requirements; theme (`filled_black` dark / `outline` light) and locale are kept in sync with the app's own theme/language state, re-rendered on change.
+
+### 11.21 Hero background slideshow
+
+See [components/marketing/HeroSection.vue](../../frontend/app/components/marketing/HeroSection.vue) + `slideshow()` in [composables/useHeroMotion.ts](../../frontend/app/composables/useHeroMotion.ts).
+
+- **Images** live in `public/marketing/hero/` as `<subject>.webp` — 16:9, up to 1920 wide (never upscaled), each kept under ~250 KB. Currently three (`bungalow`, `terrace`, `condo`); add more by packing the photo (`scripts/hero/pack.py`) and appending its name to `slides`. Blue-hour / dusk exposure with warm window light, subject centred with breathing room on both sides so `object-cover object-center` crops cleanly on portrait phones. No people, text or signage. The component's `slides` array is the playback order.
+- **First slide is SSR-visible and eager** (`loading="eager" fetchpriority="high"`), the rest render `opacity-0 invisible` with `loading="lazy" fetchpriority="low"` so first paint always has an image and LCP isn't split across five downloads. Always set `width`/`height` on the `<img>`s so there's no layout shift.
+- **Crossfade, not carousel.** Every 6 s the next slide fades in *on top* (z-index bump) over 1.4 s while the outgoing slide stays opaque underneath, then the outgoing one is hidden. Fading both at once dips to the page background mid-transition — don't. Each visible slide drifts Ken-Burns style (scale 1.04 → 1.12, ±1.2 % x) for its whole on-screen life, alternating direction per slide.
+- **Reduced motion** → static first slide, no timer. **Hidden tab** → the timer pauses and resumes on return. Cleanup kills tweens and the listener on unmount.
+- **The stack wrapper is `isolate`.** `slideshow()` sets `z-index` 0 / 1 / 2 on the slides and the gradient is `z-[3]`; without `isolation: isolate` on the wrapper those values escape to the page stacking context and paint over the headline (which is plain `relative`). Keep the hero copy free of z-index hacks — scope the stack instead.
+- **Overlay stays.** Keep the `#1c1a17` top/bottom gradient (≈0.76 at 35 %, ≈0.64 at 65 %) above the stack (`z-[3]`) so the headline keeps AA contrast over any photo — the photos are a glimpse, not the subject. If a photo still reads too bright under it, darken the photo, not the copy.
+- Same behaviour on mobile and desktop — no responsive switch; the crop and the overlay do the work.
 
 ## 12. Hard rules — do not break
 
