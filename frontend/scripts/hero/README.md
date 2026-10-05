@@ -4,9 +4,9 @@ The `/coming-soon` hero crossfades property photos (pattern:
 [UI-STANDARDS § 11.21](../../../docs/frontend/UI-STANDARDS.md)). They live at
 `public/marketing/hero/<subject>.webp` in the playback order set by `slides` in
 `app/components/marketing/HeroSection.vue`. Live set: `bungalow`, `terrace`,
-`condo` (generated 2026-10-06 from the prompts below). `generate.py` also carries
-`semid` and `apartment` prompts for when the set grows — pack the photo, then
-append the name to `slides`.
+`condo`, `semid`, `apartment` (all generated 2026-10-06 from the prompts below).
+To grow the set, add a prompt to `generate.py`, pack the photo, then append the
+name to `slides`.
 
 ## Spec
 
