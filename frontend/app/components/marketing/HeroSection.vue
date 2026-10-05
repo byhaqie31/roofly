@@ -2,7 +2,7 @@
 import { ArrowDown, PlayCircle } from "lucide-vue-next";
 
 const { t, tm, rt } = useI18n();
-const { enter, drift, rotateWords, bob, wiggleOnHover } = useHeroMotion();
+const { enter, slideshow, rotateWords, bob, wiggleOnHover } = useHeroMotion();
 
 const emit = defineEmits<{
   "scroll-to-capture": [];
@@ -16,14 +16,22 @@ const words = computed(() =>
   (tm("marketing.hero.headlineWords") as unknown[]).map((w) => rt(w as never)),
 );
 
-const backdrop = ref<HTMLElement | null>(null);
+// Background slideshow — generated blue-hour property photos under
+// public/marketing/hero/ (see UI-STANDARDS § 11.21 and scripts/hero/README.md).
+// Array order is playback order; slides[0] is rendered visible server-side
+// and fetched eagerly. To add a slide, pack the photo and append its name.
+const slides = ["bungalow", "terrace", "condo"].map(
+  (name) => `/marketing/hero/${name}.webp`,
+);
+
+const stack = ref<HTMLElement | null>(null);
 const accent = ref<HTMLElement | null>(null);
 const stage = ref<HTMLElement | null>(null);
 const badge = ref<HTMLElement | null>(null);
 const demoCta = ref<HTMLElement | null>(null);
 
 let stopRotate: (() => void) | null = null;
-let driftTween: ReturnType<typeof drift> = null;
+let stopSlides: (() => void) | null = null;
 let bobTween: ReturnType<typeof bob> = null;
 let stopWiggle: (() => void) | null = null;
 
@@ -31,7 +39,9 @@ onMounted(() => {
   if (stage.value) {
     enter(Array.from(stage.value.querySelectorAll<HTMLElement>("[data-enter]")));
   }
-  if (backdrop.value) driftTween = drift(backdrop.value);
+  if (stack.value) {
+    stopSlides = slideshow(Array.from(stack.value.querySelectorAll<HTMLElement>("[data-slide]")));
+  }
   if (badge.value) bobTween = bob(badge.value);
   if (demoCta.value && badge.value) stopWiggle = wiggleOnHover(demoCta.value, badge.value, bobTween);
   if (accent.value) stopRotate = rotateWords(accent.value, words.value);
@@ -48,7 +58,7 @@ watch(words, (next) => {
 
 onBeforeUnmount(() => {
   stopRotate?.();
-  driftTween?.kill();
+  stopSlides?.();
   bobTween?.kill();
   stopWiggle?.();
 });
@@ -59,22 +69,33 @@ onBeforeUnmount(() => {
     ref="stage"
     class="relative flex flex-col items-center justify-center text-center px-6 lg:px-12 py-20 lg:py-28 min-h-[80vh] overflow-hidden"
   >
-    <!-- Backdrop: residential skyline illustration, Ken-Burns drift, dark
-         gradient on top so the headline keeps AA contrast. Swap the file at
-         public/marketing/hero-skyline.svg for a licensed photo if wanted. -->
-    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <!-- Backdrop: crossfading slideshow of property photos with a slow
+         Ken-Burns drift (useHeroMotion().slideshow). The first slide is
+         visible server-side; the rest start hidden and are lazy-loaded.
+         Dark gradient on top so the headline keeps AA contrast over photos.
+         `isolate` gives the stack its own stacking context so the z-indexes
+         the slideshow sets on the slides (and z-[3] on the gradient) can
+         never climb above the hero copy, which is plain `relative`. -->
+    <div ref="stack" class="absolute inset-0 pointer-events-none isolate" aria-hidden="true">
       <img
-        ref="backdrop"
-        src="/marketing/hero-skyline.svg"
+        v-for="(src, idx) in slides"
+        :key="src"
+        data-slide
+        :src="src"
         alt=""
-        class="absolute inset-0 w-full h-full object-cover object-bottom will-change-transform"
-        style="opacity: 0.9"
+        width="1920"
+        height="1080"
+        :loading="idx === 0 ? 'eager' : 'lazy'"
+        :fetchpriority="idx === 0 ? 'high' : 'low'"
+        decoding="async"
+        class="absolute inset-0 w-full h-full object-cover object-center will-change-transform"
+        :class="idx === 0 ? 'opacity-100' : 'opacity-0 invisible'"
       />
       <div
-        class="absolute inset-0"
+        class="absolute inset-0 z-[3]"
         style="
           background:
-            linear-gradient(180deg, #1c1a17 0%, rgba(28, 26, 23, 0.55) 40%, rgba(28, 26, 23, 0.2) 70%, #1c1a17 100%);
+            linear-gradient(180deg, #1c1a17 0%, rgba(28, 26, 23, 0.76) 35%, rgba(28, 26, 23, 0.64) 65%, #1c1a17 100%);
         "
       />
     </div>

@@ -34,6 +34,77 @@ export const useHeroMotion = () => {
     );
   };
 
+  /**
+   * Background slideshow for the hero. `slides` are stacked, absolutely
+   * positioned images in DOM order; slides[0] is rendered visible
+   * server-side so first paint always has an image. Every `hold` seconds
+   * the next slide fades in *on top* of the current one over `fade`
+   * seconds (the outgoing slide stays opaque underneath, so the crossfade
+   * never dips to the page background), while each visible slide drifts
+   * Ken-Burns style for its whole on-screen life. Pauses while the tab is
+   * hidden. Reduced motion → static first slide. Returns a cleanup fn.
+   *
+   * Sets z-index on the slides (0 / 1 / 2) to control the crossfade, so the
+   * slides' parent MUST be its own stacking context (`isolate`) — otherwise
+   * those z-indexes escape and paint over the hero copy.
+   */
+  const slideshow = (slides: HTMLElement[], { hold = 6, fade = 1.4 } = {}) => {
+    if (slides.length === 0) return () => {};
+    gsap.set(slides, { autoAlpha: 0, zIndex: 0 });
+    gsap.set(slides[0] as HTMLElement, { autoAlpha: 1, zIndex: 1 });
+    if (slides.length < 2 || reduced()) return () => {};
+
+    const life = hold + fade * 2;
+    let i = 0;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let alive = true;
+
+    // Alternate drift direction per slide so consecutive moves differ.
+    const driftSlide = (el: HTMLElement, dir: 1 | -1) =>
+      gsap.fromTo(
+        el,
+        { scale: 1.04, xPercent: -1.2 * dir },
+        { scale: 1.12, xPercent: 1.2 * dir, duration: life, ease: "none", overwrite: "auto" },
+      );
+
+    const step = () => {
+      if (!alive) return;
+      const cur = slides[i] as HTMLElement;
+      i = (i + 1) % slides.length;
+      const next = slides[i] as HTMLElement;
+      gsap.set(next, { zIndex: 2 });
+      gsap.set(cur, { zIndex: 1 });
+      driftSlide(next, i % 2 === 0 ? 1 : -1);
+      gsap.to(next, {
+        autoAlpha: 1,
+        duration: fade,
+        ease: "power1.inOut",
+        onComplete: () => gsap.set(cur, { autoAlpha: 0, zIndex: 0 }),
+      });
+      timer = setTimeout(step, (hold + fade) * 1000);
+    };
+
+    const onVisibility = () => {
+      if (document.hidden) {
+        if (timer) clearTimeout(timer);
+        timer = null;
+      } else if (alive && timer === null) {
+        timer = setTimeout(step, hold * 1000);
+      }
+    };
+
+    driftSlide(slides[0] as HTMLElement, 1);
+    timer = setTimeout(step, hold * 1000);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      alive = false;
+      if (timer) clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisibility);
+      gsap.killTweensOf(slides);
+    };
+  };
+
   /** Gentle attention bob for a badge. Returns the tween for cleanup. */
   const bob = (el: Element) => {
     if (reduced()) return null;
@@ -187,5 +258,5 @@ export const useHeroMotion = () => {
     return () => unbinders.forEach((u) => u());
   };
 
-  return { enter, drift, bob, wiggleOnHover, rotateWords, revealOnScroll, hoverExpand };
+  return { enter, drift, slideshow, bob, wiggleOnHover, rotateWords, revealOnScroll, hoverExpand };
 };
