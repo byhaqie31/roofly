@@ -6,8 +6,10 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AuthUserResource;
 use App\Models\User;
+use App\Notifications\AdminNewOwnerSignup;
 use App\Notifications\OwnerWelcome;
 use App\Services\AnalyticsRecorder;
+use App\Support\SuperAdminAlerts;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -50,6 +52,7 @@ class RegisterController extends Controller
         } catch (Throwable $e) {
             report($e); // the account exists; a queue outage shouldn't fail sign-up
         }
+        SuperAdminAlerts::send(AdminNewOwnerSignup::fromOwner($user, 'password'));
 
         return response()->json([
             'user'  => (new AuthUserResource($user))->resolve(),

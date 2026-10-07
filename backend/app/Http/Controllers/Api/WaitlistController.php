@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\WaitlistRequest;
+use App\Notifications\AdminNewEnquiry;
 use App\Notifications\WaitlistConfirmation;
+use App\Support\SuperAdminAlerts;
 use App\Services\AnalyticsRecorder;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Notification;
@@ -14,7 +16,8 @@ use Throwable;
 /**
  * Public coming-soon waitlist capture. Always 204: a repeat signup, a brand-new
  * one and a honeypot hit all look identical to the caller. Only a brand-new
- * lead gets the WaitlistConfirmation email.
+ * lead gets the WaitlistConfirmation email, and only then are super admins
+ * told (AdminNewEnquiry).
  */
 class WaitlistController extends Controller
 {
@@ -40,6 +43,7 @@ class WaitlistController extends Controller
             } catch (Throwable $e) {
                 report($e); // the lead is saved; a queue outage shouldn't fail the form
             }
+            SuperAdminAlerts::send(AdminNewEnquiry::make($email));
         }
 
         return response()->noContent();

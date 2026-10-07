@@ -6,9 +6,11 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AuthUserResource;
 use App\Models\User;
+use App\Notifications\AdminNewOwnerSignup;
 use App\Notifications\OwnerWelcome;
 use App\Services\AuditLogger;
 use App\Support\GoogleIdToken;
+use App\Support\SuperAdminAlerts;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -82,6 +84,7 @@ class GoogleLoginController extends Controller
             } catch (Throwable $e) {
                 report($e); // the account exists; a queue outage shouldn't fail sign-in
             }
+            SuperAdminAlerts::send(AdminNewOwnerSignup::fromOwner($user, 'google'));
         }
 
         $token = $user->createToken('api')->plainTextToken;
