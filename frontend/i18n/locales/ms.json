@@ -49,6 +49,10 @@
     "register": "Daftar",
     "email": "Alamat emel",
     "password": "Kata laluan",
+    "confirmPassword": "Taip semula kata laluan",
+    "showPassword": "Tunjuk kata laluan",
+    "hidePassword": "Sembunyi kata laluan",
+    "passwordMismatch": "Kata laluan tidak sepadan.",
     "forgotPassword": "Lupa kata laluan?",
     "noAccount": "Belum ada akaun?",
     "haveAccount": "Sudah ada akaun?",
@@ -60,6 +64,13 @@
     "registerTitle": "Mula dengan Roofly",
     "registerSubtitle": "Cipta akaun pemilik untuk urus penyewaan.",
     "invalidCredentials": "E-mel atau kata laluan tidak sah.",
+    "placeholders": {
+      "fullName": "cth. Aminah Yusof",
+      "email": "cth. aminah{'@'}gmail.com",
+      "phone": "cth. +60 12 345 6789",
+      "newPassword": "Sekurang-kurangnya 8 aksara",
+      "confirmPassword": "Taip kata laluan yang sama sekali lagi"
+    },
     "google": {
       "or": "atau",
       "unavailable": "Log masuk Google tidak tersedia buat masa ini — gunakan e-mel anda di bawah.",

@@ -23,7 +23,14 @@ export const apiAuth: AuthAdapter = {
     await request("/../sanctum/csrf-cookie");
     const res = await request<{ user: AuthUser }>("/auth/register", {
       method: "POST",
-      body: { ...payload, password_confirmation: payload.password },
+      body: {
+        name: payload.name,
+        email: payload.email,
+        phone: payload.phone,
+        password: payload.password,
+        password_confirmation: payload.passwordConfirmation,
+        visitorId: payload.visitorId,
+      },
     });
     return res.user;
   },

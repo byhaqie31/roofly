@@ -49,6 +49,10 @@
     "register": "Sign up",
     "email": "Email address",
     "password": "Password",
+    "confirmPassword": "Retype password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "passwordMismatch": "Passwords do not match.",
     "forgotPassword": "Forgot your password?",
     "noAccount": "Don't have an account?",
     "haveAccount": "Already have an account?",
@@ -60,6 +64,13 @@
     "registerTitle": "Start with Roofly",
     "registerSubtitle": "Create an owner account to manage your rentals.",
     "invalidCredentials": "Invalid email or password.",
+    "placeholders": {
+      "fullName": "e.g. Aminah Yusof",
+      "email": "e.g. aminah{'@'}gmail.com",
+      "phone": "e.g. +60 12 345 6789",
+      "newPassword": "At least 8 characters",
+      "confirmPassword": "Type the same password again"
+    },
     "google": {
       "or": "or",
       "unavailable": "Google sign-in is unavailable right now — use your email below.",
