@@ -2,7 +2,11 @@
 import { Info } from "lucide-vue-next";
 
 /**
- * Small floating "i" pill that tells testers they're on UAT, not production.
+ * Small floating "i" pill that tells beta testers they're on the preview (UAT),
+ * not production: "Beta preview · You're trying an early version…". On phones
+ * it opens to the "Beta preview" label only, so it never covers the page or the
+ * Help & feedback button in the other corner; the sentence shows from sm: up
+ * (and is always in the aria-label).
  * Click expands it in place to show the notice; it collapses back to the icon
  * after 5 seconds (or on a second click), so it never covers page content.
  *
@@ -11,7 +15,6 @@ import { Info } from "lucide-vue-next";
  * demo feedback button (bottom-right).
  */
 const { t } = useI18n();
-const { env } = useEnv();
 const expanded = ref(false);
 
 // Auto-collapse 5s after expanding; a manual collapse cancels the timer.
@@ -32,7 +35,7 @@ onBeforeUnmount(() => clearTimeout(collapseTimer));
   <button
     type="button"
     :aria-expanded="expanded"
-    :aria-label="`${env.toUpperCase()}: ${t('common.envBanner')}`"
+    :aria-label="`${t('common.envBannerLabel')}: ${t('common.envBanner')}`"
     class="fixed bottom-4 left-4 z-50 inline-flex h-9 max-w-[calc(100vw-2rem)] items-center rounded-full bg-ink pl-[9px] pr-[9px] text-caption font-medium text-surface-page shadow-lg outline-none transition-colors hover:bg-ink-strong focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
     @click="toggle"
   >
@@ -42,10 +45,10 @@ onBeforeUnmount(() => clearTimeout(collapseTimer));
       :class="expanded ? 'grid-cols-[1fr]' : 'grid-cols-[0fr]'"
     >
       <span class="overflow-hidden whitespace-nowrap">
-        <span class="pl-2 pr-1">
-          <span class="uppercase tracking-wide">{{ env }}</span>
-          <span class="mx-1.5 opacity-50">·</span>
-          <span>{{ t("common.envBanner") }}</span>
+        <span class="block pl-2 pr-1">
+          <span class="text-micro font-semibold uppercase tracking-[0.12em]">{{ t("common.envBannerLabel") }}</span>
+          <span class="mx-1.5 hidden opacity-50 sm:inline">·</span>
+          <span class="hidden sm:inline">{{ t("common.envBanner") }}</span>
         </span>
       </span>
     </span>

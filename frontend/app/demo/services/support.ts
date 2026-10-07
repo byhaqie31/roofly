@@ -12,6 +12,7 @@ export const demoSupport: SupportService = {
       status: "new",
       message: input.message.trim(),
       pageUrl: input.pageUrl ?? null,
+      pageLabel: input.pageLabel ?? null,
       name: user?.name ?? "Demo user",
       email: user?.email ?? "demo@roofly.my",
       role: user?.role === "tenant" ? "tenant" : "owner",

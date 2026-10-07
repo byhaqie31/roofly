@@ -16,7 +16,7 @@ class SupportEnquiryTest extends TestCase
 
     private function payload(array $over = []): array
     {
-        return ['type' => 'issue', 'message' => 'The payments page shows the wrong month.', 'pageUrl' => '/owner/payments'] + $over;
+        return ['type' => 'issue', 'message' => 'The payments page shows the wrong month.', 'pageUrl' => '/owner/payments', 'pageLabel' => 'Owner app · Payments'] + $over;
     }
 
     public function test_owner_sends_enquiry_with_identity_copied_and_super_admins_alerted(): void
@@ -29,8 +29,8 @@ class SupportEnquiryTest extends TestCase
         $res = $this->postJson('/api/support/enquiries', $this->payload())->assertCreated();
 
         $e = Enquiry::findOrFail($res->json('id'));
-        $this->assertSame([$owner->id, 'Aminah Yusof', 'aminah@x.my', 'owner', 'issue', 'new', '/owner/payments'],
-            [$e->user_id, $e->name, $e->email, $e->role, $e->type, $e->status, $e->page_url]);
+        $this->assertSame([$owner->id, 'Aminah Yusof', 'aminah@x.my', 'owner', 'issue', 'new', '/owner/payments', 'Owner app · Payments'],
+            [$e->user_id, $e->name, $e->email, $e->role, $e->type, $e->status, $e->page_url, $e->page_label]);
         Notification::assertSentTo($super, AdminNewSupportEnquiry::class, fn ($n) => $n->email === 'aminah@x.my');
     }
 
@@ -66,11 +66,13 @@ class SupportEnquiryTest extends TestCase
 
     public function test_alert_email_replies_to_sender(): void
     {
-        $e = Enquiry::factory()->create(['name' => 'Arif Hakim', 'email' => 'arif@x.my', 'type' => 'feedback', 'message' => 'Love the WhatsApp reminders!']);
+        $e = Enquiry::factory()->create(['name' => 'Arif Hakim', 'email' => 'arif@x.my', 'type' => 'feedback', 'message' => 'Love the WhatsApp reminders!', 'page_url' => '/tenant', 'page_label' => 'Tenant app · Home']);
         $mail = AdminNewSupportEnquiry::fromEnquiry($e)->toMail(User::factory()->superAdmin()->make());
 
         $this->assertSame('Feedback from Arif Hakim: Love the WhatsApp reminders!', $mail->subject);
         $this->assertSame([['arif@x.my', 'Arif Hakim']], $mail->replyTo);
-        $this->assertStringContainsString('NEW FEEDBACK', $mail->render());
+        $html = $mail->render();
+        $this->assertStringContainsString('NEW FEEDBACK', $html);
+        $this->assertStringContainsString('Tenant app · Home (/tenant)', $html);
     }
 }

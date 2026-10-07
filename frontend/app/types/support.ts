@@ -12,6 +12,8 @@ export interface SupportEnquiryInput {
   message: string;
   /** The page the user was on when they opened the form (path + query). */
   pageUrl?: string;
+  /** Readable name for that page ("Owner app · Payments"), from utils/pageLabel. */
+  pageLabel?: string;
 }
 
 export interface AdminEnquiry {
@@ -20,6 +22,7 @@ export interface AdminEnquiry {
   status: EnquiryStatus;
   message: string;
   pageUrl: string | null;
+  pageLabel: string | null;
   name: string;
   email: string;
   role: "owner" | "tenant" | null;

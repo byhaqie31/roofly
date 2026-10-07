@@ -16,7 +16,7 @@ class AdminEnquiriesTest extends TestCase
 {
     use RefreshDatabase;
 
-    public const ENQUIRY_KEYS = ['id', 'type', 'status', 'message', 'pageUrl', 'name', 'email', 'role', 'userId', 'adminNote', 'handledByName', 'statusChangedAt', 'createdAt'];
+    public const ENQUIRY_KEYS = ['id', 'type', 'status', 'message', 'pageUrl', 'pageLabel', 'name', 'email', 'role', 'userId', 'adminNote', 'handledByName', 'statusChangedAt', 'createdAt'];
 
     private function actingAsAdmin(array $permissions = [AdminPermissions::SUPPORT_MANAGE]): User
     {

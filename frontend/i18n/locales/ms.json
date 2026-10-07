@@ -1,7 +1,8 @@
 {
   "common": {
     "appName": "Roofly.my",
-    "envBanner": "Persekitaran ujian. Data di sini mungkin diset semula.",
+    "envBannerLabel": "Pratonton beta",
+    "envBanner": "Anda sedang mencuba versi awal Roofly. Data mungkin ditetapkan semula semasa ujian.",
     "tagline": "Urus sewa rumah, lebih mudah.",
     "marketing": {
       "headlineLead": "Urus sewa rumah,",

@@ -27,6 +27,7 @@ class SupportEnquiryController extends Controller
             'type'    => ['required', Rule::in(Enquiry::TYPES)],
             'message' => 'required|string|min:5|max:5000',
             'pageUrl' => 'nullable|string|max:500',
+            'pageLabel' => 'nullable|string|max:120',
         ]);
 
         $enquiry = Enquiry::create([
@@ -37,6 +38,7 @@ class SupportEnquiryController extends Controller
             'type'       => $data['type'],
             'message'    => trim($data['message']),
             'page_url'   => $data['pageUrl'] ?? null,
+            'page_label' => $data['pageLabel'] ?? null,
             'user_agent' => Str::limit((string) $request->userAgent(), 497),
             'status'     => 'new',
         ]);

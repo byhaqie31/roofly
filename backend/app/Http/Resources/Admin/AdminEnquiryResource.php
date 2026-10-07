@@ -15,6 +15,7 @@ class AdminEnquiryResource extends JsonResource
             'status'          => $this->status,
             'message'         => $this->message,
             'pageUrl'         => $this->page_url,
+            'pageLabel'       => $this->page_label,
             'name'            => $this->name,
             'email'           => $this->email,
             'role'            => $this->role,

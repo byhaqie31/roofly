@@ -73,7 +73,14 @@ const columns = computed<ColumnDef<AdminEnquiry>[]>(() => [
     ]),
   },
   { id: "type", header: () => t("admin.enquiries.messages.columns.type"), cell: (i) => h(Pill, { tone: typeTone[i.row.original.type] }, { default: () => t(`admin.enquiries.messages.types.${i.row.original.type}`) }) },
-  { id: "message", header: () => t("admin.enquiries.messages.columns.message"), cell: (i) => h("p", { class: "text-caption text-ink-muted line-clamp-2 max-w-md" }, i.row.original.message) },
+  {
+    id: "message",
+    header: () => t("admin.enquiries.messages.columns.message"),
+    cell: (i) => h("div", { class: "max-w-md" }, [
+      h("p", { class: "text-caption text-ink-muted line-clamp-2" }, i.row.original.message),
+      i.row.original.pageLabel ? h("p", { class: "mt-1 text-micro text-ink-faint" }, i.row.original.pageLabel) : null,
+    ]),
+  },
   { id: "status", header: () => t("admin.enquiries.messages.columns.status"), cell: (i) => h(Pill, { tone: statusTone[i.row.original.status] }, { default: () => t(`admin.enquiries.messages.status.${i.row.original.status}`) }) },
 ]);
 

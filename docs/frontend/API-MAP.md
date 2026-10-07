@@ -140,7 +140,7 @@ The `POST /track` beacon (see `docs/backend/API-SPEC.md` § Shell 1 — Analytic
 
 ## Help & feedback (owner + tenant shells)
 
-`components/layout/SupportWidget.vue`, mounted in `layouts/owner.vue` and `layouts/tenant.vue` behind `useEnv().showSupportWidget` (`!isDemo` — demo keeps its Google Form `FloatingFeedback`, since demo never reaches the backend). Floating bottom-right button → modal (Issue / Feedback / Question + message; current `route.fullPath` attached) → `useSupport().send({ type, message, pageUrl })` → `POST /support/enquiries`. Demo adapter (`demoSupport`) unshifts into `demo/data/enquiries.ts` so local mock mode shows it in the admin Messages tab.
+`components/layout/SupportWidget.vue`, mounted in `layouts/owner.vue` and `layouts/tenant.vue` behind `useEnv().showSupportWidget` (`!isDemo` — demo keeps its Google Form `FloatingFeedback`, since demo never reaches the backend). Floating bottom-right button → modal (Issue / Feedback / Question + message; current `route.fullPath` attached, plus `utils/pageLabel.ts`'s readable name for it) → `useSupport().send({ type, message, pageUrl, pageLabel })` → `POST /support/enquiries`. Demo adapter (`demoSupport`) unshifts into `demo/data/enquiries.ts` so local mock mode shows it in the admin Messages tab.
 
 ## Cross-shell composables worth flagging
 

@@ -24,6 +24,7 @@ class AdminNewSupportEnquiry extends Notification implements ShouldQueue
         public string $message,
         public ?string $pageUrl,
         public string $receivedAt,
+        public ?string $pageLabel = null,
     ) {}
 
     public static function fromEnquiry(Enquiry $e): self
@@ -31,6 +32,7 @@ class AdminNewSupportEnquiry extends Notification implements ShouldQueue
         return new self(
             $e->type, $e->name, $e->email, $e->role, $e->message, $e->page_url,
             ($e->created_at ?? now())->timezone('Asia/Kuala_Lumpur')->format('j M Y, g:i a') . ' MYT',
+            $e->page_label,
         );
     }
 
@@ -57,7 +59,7 @@ class AdminNewSupportEnquiry extends Notification implements ShouldQueue
                     'From'     => $this->name . ($this->role ? ' (' . $this->role . ')' : ''),
                     'Email'    => $this->email,
                     'Type'     => $label,
-                    'Page'     => $this->pageUrl,
+                    'Sent from' => $this->pageLabel && $this->pageUrl ? "{$this->pageLabel} ({$this->pageUrl})" : ($this->pageLabel ?? $this->pageUrl),
                     'Received' => $this->receivedAt,
                 ]),
                 'ctaUrl'   => rtrim(config('app.frontend_url'), '/') . '/admin/enquiries?tab=messages',

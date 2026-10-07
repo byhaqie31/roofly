@@ -68,9 +68,12 @@ const save = async () => {
       <p class="whitespace-pre-wrap rounded-sm border border-line-passive bg-surface-page p-4 text-body text-ink">{{ enquiry.message }}</p>
 
       <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-caption">
-        <template v-if="enquiry.pageUrl">
+        <template v-if="enquiry.pageUrl || enquiry.pageLabel">
           <dt class="text-ink-muted">{{ t("admin.enquiries.messages.detail.page") }}</dt>
-          <dd class="text-ink break-all font-mono text-micro leading-5">{{ enquiry.pageUrl }}</dd>
+          <dd class="text-ink">
+            <span class="font-medium">{{ enquiry.pageLabel ?? enquiry.pageUrl }}</span>
+            <span v-if="enquiry.pageLabel && enquiry.pageUrl" class="ml-1.5 break-all font-mono text-micro text-ink-muted">{{ enquiry.pageUrl }}</span>
+          </dd>
         </template>
         <template v-if="enquiry.handledByName">
           <dt class="text-ink-muted">{{ t("admin.enquiries.messages.detail.handledBy") }}</dt>
