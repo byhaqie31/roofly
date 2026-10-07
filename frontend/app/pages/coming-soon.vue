@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import HeroSection from "~/components/marketing/HeroSection.vue";
+import PromoVideo from "~/components/marketing/PromoVideo.vue";
 import UspShowcase from "~/components/marketing/UspShowcase.vue";
 import EmailCapture from "~/components/marketing/EmailCapture.vue";
 
@@ -43,6 +44,7 @@ const scrollToCapture = () => {
 <template>
   <div>
     <HeroSection @scroll-to-capture="scrollToCapture" />
+    <PromoVideo />
     <UspShowcase />
     <EmailCapture />
   </div>
