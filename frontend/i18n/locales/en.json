@@ -296,6 +296,28 @@
       "submitting": "Sending…"
     }
   },
+  "support": {
+    "button": "Help & feedback",
+    "title": "How can we help?",
+    "description": "Your message goes straight to the Roofly team. We'll reply by email to {email}.",
+    "typeLabel": "What's this about?",
+    "types": {
+      "issue": "Report an issue",
+      "feedback": "Feedback",
+      "question": "Question"
+    },
+    "messageLabel": "Message",
+    "placeholders": {
+      "issue": "What went wrong, and what did you expect to happen?",
+      "feedback": "What do you like, or what would make Roofly better?",
+      "question": "Ask us anything about using Roofly."
+    },
+    "pageNote": "We'll include the page you're on so we can see the problem.",
+    "tooShort": "Please write a little more (at least 5 characters).",
+    "send": "Send message",
+    "sentTitle": "Message sent",
+    "sentBody": "Thanks! The Roofly team will get back to you at {email}."
+  },
   "validation": {
     "required": "This field is required",
     "email": "Enter a valid email address",
@@ -1537,6 +1559,9 @@
         },
         "lead": {
           "invited": "Waitlist invitation sent"
+        },
+        "enquiry": {
+          "updated": "Enquiry updated"
         }
       }
     },
@@ -1565,7 +1590,48 @@
     },
     "enquiries": {
       "title": "Enquiries",
-      "subtitle": "Everyone who left an email on the coming-soon page, latest activity first.",
+      "subtitle": "Messages from owners and tenants, and everyone who joined the waitlist.",
+      "tabs": {
+        "messages": "Messages",
+        "waitlist": "Waitlist"
+      },
+      "messages": {
+        "searchPlaceholder": "Search name, email or message",
+        "allStatuses": "All statuses",
+        "allTypes": "All types",
+        "columns": {
+          "received": "Received",
+          "from": "From",
+          "type": "Type",
+          "message": "Message",
+          "status": "Status"
+        },
+        "status": {
+          "new": "New",
+          "replied": "Replied",
+          "closed": "Closed"
+        },
+        "types": {
+          "issue": "Issue",
+          "feedback": "Feedback",
+          "question": "Question"
+        },
+        "roles": {
+          "owner": "Owner",
+          "tenant": "Tenant"
+        },
+        "empty": "No messages yet",
+        "emptyHelp": "Messages appear when an owner or tenant uses the Help & feedback button.",
+        "detail": {
+          "page": "Sent from",
+          "handledBy": "Last handled by",
+          "status": "Status",
+          "note": "Internal note",
+          "notePlaceholder": "Only admins see this.",
+          "reply": "Reply by email",
+          "savedToast": "Message updated"
+        }
+      },
       "searchPlaceholder": "Search email",
       "columns": {
         "email": "Email",

@@ -47,6 +47,10 @@ Route::middleware(['auth:sanctum', 'touch-active'])->group(function () {
     Route::post('auth/logout', [\App\Http\Controllers\Api\Auth\LoginController::class, 'destroy']);
     Route::get('auth/me',      [\App\Http\Controllers\Api\Auth\LoginController::class, 'show']);
 
+    // In-app help button — owners + tenants (role checked in the controller; outside
+    // the owner group's not-suspended guard so a suspended owner can still reach us).
+    Route::post('support/enquiries', [\App\Http\Controllers\Api\SupportEnquiryController::class, 'store'])->middleware('throttle:support');
+
     // ── Owner routes ─────────────────────────────────────────────────────────
     Route::middleware(['role:owner', 'not-suspended'])->group(function () {
 
@@ -183,6 +187,12 @@ Route::middleware(['auth:sanctum', 'touch-active'])->group(function () {
             Route::get('analytics/leads/export.csv', [$Analytics, 'export']);   // before {lead}
             Route::get('analytics/leads/{lead}',     [$Analytics, 'lead']);
             Route::post('analytics/leads/{lead}/invite', [$Analytics, 'invite'])->middleware('can:' . $P::BROADCAST_SEND);
+        });
+
+        $Enquiry = \App\Http\Controllers\Api\Admin\EnquiryController::class;
+        Route::middleware('can:' . $P::SUPPORT_MANAGE)->group(function () use ($Enquiry) {
+            Route::get('enquiries',               [$Enquiry, 'index']);
+            Route::patch('enquiries/{enquiry}',   [$Enquiry, 'update']);
         });
     });
 
