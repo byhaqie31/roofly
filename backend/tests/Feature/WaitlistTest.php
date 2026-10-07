@@ -4,7 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\AnalyticsEvent;
 use App\Models\Lead;
+use App\Notifications\WaitlistWelcome;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
 
@@ -78,6 +81,54 @@ class WaitlistTest extends TestCase
         $this->assertSame(0, AnalyticsEvent::count());
         $this->assertSame(1, Lead::count());
         $this->assertNull(Lead::first()->visitor_id);
+    }
+
+    public function test_new_signup_gets_one_welcome_email(): void
+    {
+        Notification::fake();
+
+        $this->postJson('/api/waitlist', ['email' => ' A@B.my '])->assertNoContent();
+
+        Notification::assertSentOnDemandTimes(WaitlistWelcome::class, 1);
+        Notification::assertSentOnDemand(
+            WaitlistWelcome::class,
+            fn ($notification, array $channels, object $notifiable) => $channels === ['mail']
+                && $notifiable->routes['mail'] === 'a@b.my',
+        );
+    }
+
+    public function test_repeat_signup_sends_no_welcome_email(): void
+    {
+        Notification::fake();
+        Lead::factory()->create(['email' => 'a@b.my', 'source' => 'waitlist']);
+
+        $this->postJson('/api/waitlist', ['email' => 'A@b.my'])->assertNoContent();
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_honeypot_sends_no_welcome_email(): void
+    {
+        Notification::fake();
+
+        $this->postJson('/api/waitlist', ['email' => 'bot@spam.my', 'website' => 'http://spam.example'])->assertNoContent();
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_welcome_email_content(): void
+    {
+        $mail = (new WaitlistWelcome)->toMail(new AnonymousNotifiable);
+        $text = implode("\n", [$mail->greeting, ...$mail->introLines, $mail->salutation]);
+
+        $this->assertStringContainsString('Roofly waitlist', $mail->subject);
+        $this->assertSame('Hi there,', $mail->greeting);
+        $this->assertStringContainsString("You're officially on the Roofly waitlist!", $text);
+        $this->assertStringContainsString("There's nothing else you need to do for now.", $text);
+        $this->assertStringContainsString('Thanks for being part of our journey from the start.', $text);
+        $this->assertStringContainsString('senarai menunggu Roofly', $text);
+        $this->assertStringContainsString('The Roofly Team', $text);
+        $this->assertNull($mail->actionUrl);
     }
 
     public function test_is_rate_limited(): void

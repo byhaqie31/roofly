@@ -65,9 +65,10 @@ final class AnalyticsRecorder
      * First-party waitlist signup (POST /waitlist). Upserts the lead directly so
      * the row never depends on the analytics beacon, and writes the
      * `waitlist_signup` event when the visitor is known so the lead's timeline
-     * still shows it.
+     * still shows it. Returns true only when this call created the lead, so the
+     * caller can welcome a first-time signup and never a repeat.
      */
-    public function recordWaitlist(string $email, ?string $visitorId, ?string $ip, ?string $userAgent): void
+    public function recordWaitlist(string $email, ?string $visitorId, ?string $ip, ?string $userAgent): bool
     {
         $email = Str::lower(trim($email));
 
@@ -82,7 +83,7 @@ final class AnalyticsRecorder
             ]);
         }
 
-        $this->touchLead($email, $visitorId, 'waitlist', null);
+        return $this->touchLead($email, $visitorId, 'waitlist', null)->wasRecentlyCreated;
     }
 
     public function linkRegistration(User $user, ?string $visitorId = null): void
@@ -90,7 +91,7 @@ final class AnalyticsRecorder
         $this->touchLead(Str::lower($user->email), $visitorId, 'register', $user->id);
     }
 
-    private function touchLead(string $email, ?string $visitorId, string $sourceIfNew, ?string $convertedUserId): void
+    private function touchLead(string $email, ?string $visitorId, string $sourceIfNew, ?string $convertedUserId): Lead
     {
         $lead = Lead::firstOrNew(['email' => $email]);
         if (! $lead->exists) {
@@ -103,5 +104,7 @@ final class AnalyticsRecorder
             $lead->converted_user_id = $convertedUserId;
         }
         $lead->save();
+
+        return $lead;
     }
 }
