@@ -16,6 +16,25 @@ const formatDate = (iso: string) => {
 };
 
 const today = new Date();
+
+const formatStamp = (iso: string | null | undefined) => (iso ? formatDate(iso.slice(0, 10)) : "");
+
+/** Banner copy for the review flow; null for statuses with nothing to say (active/expired/terminated). */
+const review = computed(() => {
+  const a = props.row.agreement;
+  switch (a.status) {
+    case "pending_review":
+      return { tone: "warn", icon: "Send" as const, text: t("owner.agreements.review.sentOn", { date: formatStamp(a.sentAt) }), note: null };
+    case "accepted":
+      return { tone: "good", icon: "CircleCheck" as const, text: t("owner.agreements.review.acceptedOn", { date: formatStamp(a.acceptedAt) }), note: null };
+    case "draft":
+      return a.reviewNote
+        ? { tone: "warn", icon: "MessageSquare" as const, text: t("owner.agreements.review.changesRequestedOn", { date: formatStamp(a.changesRequestedAt) }), note: a.reviewNote }
+        : { tone: "muted", icon: "EyeOff" as const, text: t("owner.agreements.review.draftHint"), note: null };
+    default:
+      return null;
+  }
+});
 today.setHours(0, 0, 0, 0);
 const startMs = computed(() => new Date(props.row.agreement.startDate).getTime());
 const endMs = computed(() => new Date(props.row.agreement.endDate).getTime());
@@ -87,6 +106,27 @@ const tilesPillToneClass = (tone: TermStatus["tone"]) => {
     <p class="text-caption text-ink-muted">
       {{ t("owner.agreements.detail.overviewHelp") }}
     </p>
+
+    <!-- Review state (spec 2026-10-07 agreement-review): where the tenant's answer stands -->
+    <div
+      v-if="review"
+      class="flex items-start gap-3 rounded-md border px-4 py-3"
+      :class="review.tone === 'warn'
+        ? 'border-status-pending bg-status-pending-soft'
+        : review.tone === 'good'
+          ? 'border-status-paid bg-status-paid-soft'
+          : 'border-line-passive bg-surface-page'"
+      role="status"
+    >
+      <Icon :name="review.icon" :size="16" class="mt-0.5 shrink-0" />
+      <div class="min-w-0">
+        <p class="text-body font-medium text-ink">{{ review.text }}</p>
+        <p v-if="review.note" class="mt-1 text-caption text-ink-muted">
+          <span class="font-medium text-ink">{{ t("owner.agreements.review.noteLabel") }}:</span>
+          “{{ review.note }}”
+        </p>
+      </div>
+    </div>
 
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
       <div class="rounded-md border border-line-passive bg-surface-page p-4">

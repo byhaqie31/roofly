@@ -64,4 +64,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (needsOnboarding && !onOnboarding) return navigateTo("/owner/onboarding");
     if (!needsOnboarding && onOnboarding) return navigateTo("/owner");
   }
+
+  // Tenant onboarding (spec 2026-10-07 § 4.4): same shape — an invited tenant
+  // who just set a password fills the core profile before anything in /tenant.
+  // Mandatory (no skip), so there is no other way out of the screen.
+  if (isTenantArea && auth.isTenant) {
+    const needsOnboarding = !auth.user?.onboardedAt;
+    const onOnboarding = to.path === "/tenant/onboarding";
+    if (needsOnboarding && !onOnboarding) return navigateTo("/tenant/onboarding");
+    if (!needsOnboarding && onOnboarding) return navigateTo("/tenant");
+  }
 });

@@ -85,8 +85,10 @@ Route::middleware(['auth:sanctum', 'touch-active'])->group(function () {
         Route::post('tenants/{tenant}/invite-link', [\App\Http\Controllers\Api\Owner\TenantController::class, 'inviteLink']); // copy/share backup, no mail
         Route::apiResource('tenants', \App\Http\Controllers\Api\Owner\TenantController::class);
 
-        // Agreements
+        // Agreements (+ review flow, spec 2026-10-07 agreement-review)
         Route::apiResource('agreements', \App\Http\Controllers\Api\Owner\AgreementController::class);
+        Route::post('agreements/{agreement}/send',     [\App\Http\Controllers\Api\Owner\AgreementController::class, 'send']);
+        Route::post('agreements/{agreement}/withdraw', [\App\Http\Controllers\Api\Owner\AgreementController::class, 'withdraw']);
 
         // Invoices
         Route::get('invoices',                         [\App\Http\Controllers\Api\Owner\InvoiceController::class, 'index']);
@@ -112,6 +114,9 @@ Route::middleware(['auth:sanctum', 'touch-active'])->group(function () {
 
         // Active agreement for the signed-in tenant
         Route::get('agreement',    [\App\Http\Controllers\Api\Tenant\TenantAgreementController::class, 'show']);
+        // Review an agreement the owner sent (spec 2026-10-07 agreement-review)
+        Route::post('agreements/{agreement}/accept',          [\App\Http\Controllers\Api\Tenant\TenantAgreementReviewController::class, 'accept']);
+        Route::post('agreements/{agreement}/request-changes', [\App\Http\Controllers\Api\Tenant\TenantAgreementReviewController::class, 'requestChanges']);
 
         // Invoices scoped to the tenant
         Route::get('invoices',             [\App\Http\Controllers\Api\Tenant\TenantInvoiceController::class, 'index']);
@@ -126,6 +131,8 @@ Route::middleware(['auth:sanctum', 'touch-active'])->group(function () {
         // Profile (reads from + writes to the tenant's own user record)
         Route::get('profile',              [\App\Http\Controllers\Api\Tenant\TenantProfileController::class, 'show']);
         Route::patch('profile',            [\App\Http\Controllers\Api\Tenant\TenantProfileController::class, 'update']);
+        // First-run onboarding: core profile fields + onboarded_at (spec 2026-10-07 § 4.4)
+        Route::patch('onboarding',         [\App\Http\Controllers\Api\Tenant\TenantOnboardingController::class, 'store']);
     });
 
     // ── Admin routes (spec § 9). Every write goes through AuditLogger. ──────

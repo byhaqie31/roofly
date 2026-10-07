@@ -91,6 +91,8 @@ const customerUserFor = (email: string): AuthUser =>
         permissions: [],
         isSuperAdmin: false,
         ...NON_OWNER_DEFAULTS,
+        // The stock demo tenant is settled in; only demoAuth.acceptInvite resets this.
+        onboardedAt: "2026-01-12T09:00:00Z",
       }
     : {
         id: DEMO_OWNER_ID,
@@ -214,7 +216,9 @@ export const demoAuth: AuthAdapter = {
     await delay();
     // Invites only ever go to tenants, so skip the email-prefix role rule and
     // hand back the fixed tenant record under the invited address.
-    const user: AuthUser = { ...customerUserFor("tenant@roofly.my"), email };
+    // A freshly invited tenant hasn't onboarded yet — the guard sends them to
+    // /tenant/onboarding once, exactly like the API build.
+    const user: AuthUser = { ...customerUserFor("tenant@roofly.my"), email, onboardedAt: null };
     persist(user);
     return user;
   },

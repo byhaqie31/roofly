@@ -1,4 +1,5 @@
 import type { Tenant } from "~/types/tenant";
+import type { AuthUser } from "~/types/auth";
 import type {
   TenantInviteLink,
   TenantInviteResult,
@@ -32,4 +33,7 @@ export const apiTenants: TenantsService = {
       method: "PATCH",
       body: patch,
     }),
+
+  completeOnboarding: (_tenantId, patch) =>
+    useApi().request<AuthUser>("/me/onboarding", { method: "PATCH", body: patch }),
 };

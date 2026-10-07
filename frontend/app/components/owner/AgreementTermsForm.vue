@@ -93,6 +93,10 @@ const tenantOptions = computed(() =>
 
 const statusOptions = computed(() => [
   { value: "draft", label: t("owner.agreements.status.draft") },
+  // Reached only by Send / the tenant agreeing — shown so the current value
+  // renders, disabled so it can't be picked by hand (API refuses it too).
+  { value: "pending_review", label: t("owner.agreements.status.pending_review"), disabled: true },
+  { value: "accepted", label: t("owner.agreements.status.accepted"), disabled: true },
   { value: "active", label: t("owner.agreements.status.active") },
   { value: "expired", label: t("owner.agreements.status.expired") },
   { value: "terminated", label: t("owner.agreements.status.terminated") },

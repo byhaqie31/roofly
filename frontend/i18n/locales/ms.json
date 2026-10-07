@@ -349,6 +349,22 @@
       }
     },
     "agreements": {
+      "review": {
+        "send": "Hantar kepada penyewa",
+        "sending": "Menghantar…",
+        "sentToast": "Perjanjian dihantar kepada {name} untuk semakan",
+        "withdraw": "Tarik balik",
+        "withdrawnToast": "Perjanjian ditarik balik — kembali kepada draf",
+        "activate": "Aktifkan perjanjian",
+        "activatedToast": "Perjanjian aktif — invois pertama dicipta",
+        "backToDraftToast": "Terma berubah — perjanjian kembali kepada draf. Hantar semula kepada penyewa.",
+        "deleteAria": "Padam perjanjian",
+        "sentOn": "Dihantar pada {date} · menunggu penyewa",
+        "acceptedOn": "Dipersetujui penyewa pada {date} · aktifkan untuk memulakan penyewaan",
+        "changesRequestedOn": "Penyewa meminta perubahan pada {date}",
+        "noteLabel": "Nota penyewa",
+        "draftHint": "Penyewa tidak dapat melihat perjanjian ini sehingga anda menghantarnya."
+      },
       "addCta": "Tambah perjanjian",
       "addTitle": "Tambah perjanjian",
       "editTitle": "Edit perjanjian",
@@ -386,6 +402,8 @@
       },
       "status": {
         "draft": "Draf",
+      "pending_review": "Menunggu penyewa",
+      "accepted": "Dipersetujui penyewa",
         "active": "Aktif",
         "expired": "Tamat tempoh",
         "terminated": "Ditamatkan"
@@ -1042,6 +1060,20 @@
     }
   },
   "tenant": {
+    "onboarding": {
+      "title": "Sediakan profil penyewa anda",
+      "subtitle": "Tuan rumah anda memerlukan butiran ini untuk perjanjian sewa. Ia mengambil masa kira-kira dua minit.",
+      "step": "Langkah {n} daripada {total}",
+      "steps": {
+        "about": { "title": "Tentang anda", "hint": "Seperti yang tertera pada MyKad anda." },
+        "work": { "title": "Pekerjaan", "hint": "Pilihan. Membantu tuan rumah anda dengan rujukan." },
+        "emergency": { "title": "Hubungan kecemasan", "hint": "Seseorang yang boleh kami hubungi jika anda tidak dapat dihubungi." }
+      },
+      "back": "Kembali",
+      "continue": "Teruskan",
+      "finish": "Selesai dan pergi ke laman utama saya",
+      "optional": "Pilihan"
+    },
     "nav": {
       "home": "Utama",
       "agreement": "Perjanjian",
@@ -1050,6 +1082,11 @@
       "profile": "Profil"
     },
     "home": {
+      "reviewCard": {
+        "title": "Perjanjian anda sedia untuk disemak",
+        "hint": "Tuan rumah anda menghantar terma penyewaan. Bersetuju, atau minta perubahan.",
+        "cta": "Semak sekarang"
+      },
       "title": "Selamat datang",
       "greeting": "Hai, {name}",
       "subtitle": "Segala-galanya tentang penyewaan anda, di satu tempat.",
@@ -1080,9 +1117,33 @@
       "reportIssue": "Lapor aduan",
       "openIssuesTitle": "Aduan terbuka",
       "viewAll": "Lihat semua",
-      "noOpenIssues": "Tiada aduan terbuka. Beritahu tuan rumah jika ada yang perlu dibaiki."
+      "noOpenIssues": "Tiada aduan terbuka. Beritahu tuan rumah jika ada yang perlu dibaiki.",
+      "profileCard": {
+        "title": "Lengkapkan profil anda",
+        "hint": "Tuan rumah anda memerlukan nombor MyKad, telefon dan hubungan kecemasan anda untuk perjanjian.",
+        "progress": "{done} daripada {total} butiran utama diisi",
+        "cta": "Isi sekarang"
+      }
     },
     "agreement": {
+      "review": {
+        "title": "Tuan rumah anda menghantar perjanjian ini",
+        "subtitle": "Semak terma di bawah. Bersetuju untuk mengesahkannya, atau minta perubahan dan tuan rumah anda akan menerima nota anda.",
+        "agree": "Bersetuju dengan terma ini",
+        "requestChanges": "Minta perubahan",
+        "confirmTitle": "Bersetuju dengan perjanjian?",
+        "confirmBody": "Anda bersetuju menyewa {unit} pada {rent} sebulan, dari {start} hingga {end}, dengan deposit {deposit}.",
+        "confirmCta": "Ya, saya bersetuju",
+        "agreedToast": "Terima kasih — tuan rumah anda telah dimaklumkan. Mereka akan mengaktifkan penyewaan seterusnya.",
+        "agreedTitle": "Anda telah bersetuju dengan perjanjian ini",
+        "agreedBody": "Tuan rumah anda akan mengaktifkan penyewaan. Sewa dan invois pertama anda bermula ketika itu.",
+        "changesTitle": "Apa yang anda mahu ubah?",
+        "changesHint": "Ringkaskan. Tuan rumah anda akan mengedit perjanjian dan menghantarnya semula.",
+        "noteLabel": "Nota anda",
+        "notePlaceholder": "cth. Boleh tarikh mula ditukar ke 15 hb?",
+        "sendNote": "Hantar kepada tuan rumah",
+        "changesSentToast": "Nota anda telah dihantar. Perjanjian kembali kepada tuan rumah anda."
+      },
       "title": "Perjanjian anda",
       "subtitle": "Terma penyewaan semasa anda.",
       "none": "Perjanjian anda sedang disediakan oleh tuan rumah.",
@@ -1101,6 +1162,8 @@
       "documents": "Dokumen",
       "status": {
         "draft": "Draf",
+        "pending_review": "Menunggu semakan anda",
+        "accepted": "Anda bersetuju",
         "active": "Aktif",
         "expired": "Tamat tempoh",
         "terminated": "Ditamatkan"

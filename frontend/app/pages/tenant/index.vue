@@ -6,6 +6,9 @@ import Icon from "~/components/ui/Icon.vue";
 import Button from "~/components/ui/Button.vue";
 import EmptyState from "~/components/ui/EmptyState.vue";
 import PayInvoiceModal from "~/components/tenant/PayInvoiceModal.vue";
+import ProfileNudgeCard from "~/components/tenant/ProfileNudgeCard.vue";
+import AgreementReviewCard from "~/components/tenant/AgreementReviewCard.vue";
+import { tenantProfileGaps, type TenantProfileGaps } from "~/utils/tenantProfileCompletion";
 import type { AgreementWithRefs } from "~/services/useAgreements";
 import type { InvoiceWithRefs } from "~/services/useInvoices";
 import type { TicketWithRefs } from "~/services/useTickets";
@@ -24,6 +27,8 @@ const tickets = ref<TicketWithRefs[]>([]);
 const loading = ref(true);
 const payRow = ref<InvoiceWithRefs | null>(null);
 const showPay = ref(false);
+// Core-profile gaps drive the "Complete your profile" card (spec 2026-10-07 § 4.4).
+const profileGaps = ref<TenantProfileGaps | null>(null);
 
 const loadInvoices = async () => {
   if (!tenantId.value) return;
@@ -35,13 +40,15 @@ const load = async () => {
   try {
     const id = tenantId.value;
     if (!id) return;
-    const [a, , tk] = await Promise.all([
+    const [a, , tk, profile] = await Promise.all([
       useAgreements().getActiveAgreementForTenant(id),
       loadInvoices(),
       useTickets().getTicketsForTenant(id),
+      useTenants().getProfile(id),
     ]);
     agreement.value = a;
     tickets.value = tk;
+    profileGaps.value = tenantProfileGaps(profile);
   } finally {
     loading.value = false;
   }
@@ -133,6 +140,10 @@ const onPaid = async () => {
         {{ t("tenant.home.subtitle") }}
       </p>
     </header>
+
+    <!-- Profile nudge comes first, with or without an agreement -->
+    <ProfileNudgeCard v-if="!loading && profileGaps && profileGaps.missing.length > 0" :gaps="profileGaps" />
+    <AgreementReviewCard v-if="!loading && agreement?.agreement.status === 'pending_review'" />
 
     <Card v-if="loading" padding="loose">
       <p class="text-center text-body text-ink-muted">{{ t("common.loading") }}</p>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import Card from "~/components/ui/Card.vue";
@@ -10,8 +11,11 @@ import { tenantProfileFormSchema } from "~/schemas/tenant";
 import type { TenantProfileFormDto } from "~/schemas/tenant";
 import type { TenantProfile } from "~/services/useTenants";
 import { useToast } from "~/composables/useToast";
+import { dateOfBirthFromMyKad, formatMyKadInput, normalizeMyKad } from "~/utils/mykad";
 
 definePageMeta({ layout: "tenant" });
+const route = useRoute();
+const router = useRouter();
 const { t } = useI18n();
 const { formatRM } = useMoney();
 const { show } = useToast();
@@ -53,6 +57,11 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+  // /tenant/profile?edit=1 (from the home-page nudge) opens the form directly.
+  if (route.query.edit === "1" && tenant.value) {
+    startEdit();
+    router.replace({ query: {} });
+  }
 });
 
 const fromTenant = (tn: TenantProfile): TenantProfileFormDto => ({
@@ -83,6 +92,17 @@ const cancelEdit = () => {
   editing.value = false;
 };
 
+// MyKad typed without dashes is formatted live and fills the date of birth.
+watch(icNumber, (v) => {
+  const formatted = formatMyKadInput(v ?? "");
+  if (formatted !== (v ?? "")) {
+    icNumber.value = formatted;
+    return;
+  }
+  const dob = dateOfBirthFromMyKad(formatted);
+  if (dob) dateOfBirth.value = dob;
+});
+
 const onSave = handleSubmit(async (values) => {
   if (!tenantId.value) return;
   saving.value = true;
@@ -92,7 +112,7 @@ const onSave = handleSubmit(async (values) => {
       name: values.name,
       phone: values.phone,
       personal: {
-        icNumber: values.icNumber || undefined,
+        icNumber: values.icNumber ? (normalizeMyKad(values.icNumber) ?? values.icNumber) : undefined,
         dateOfBirth: values.dateOfBirth || undefined,
         occupation: values.occupation || undefined,
         employer: values.employer || undefined,

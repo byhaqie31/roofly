@@ -31,4 +31,17 @@ export const apiAgreements: AgreementsService = {
   remove: async (id) => {
     await useApi().request(`/agreements/${id}`, { method: "DELETE" });
   },
+
+  send: (id) => useApi().request<Agreement>(`/agreements/${id}/send`, { method: "POST" }),
+
+  withdraw: (id) => useApi().request<Agreement>(`/agreements/${id}/withdraw`, { method: "POST" }),
+
+  acceptForTenant: (_tenantId, agreementId) =>
+    useApi().request<Agreement>(`/me/agreements/${agreementId}/accept`, { method: "POST" }),
+
+  requestChangesForTenant: (_tenantId, agreementId, note) =>
+    useApi().request<Agreement>(`/me/agreements/${agreementId}/request-changes`, {
+      method: "POST",
+      body: { note },
+    }),
 };

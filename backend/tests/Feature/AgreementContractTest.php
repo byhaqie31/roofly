@@ -35,7 +35,7 @@ class AgreementContractTest extends TestCase
         Agreement::factory()->create(['unit_id' => $this->unit->id]);
         $res = $this->getJson('/api/agreements')->assertOk();
         $this->assertSame(
-            ['id', 'unitId', 'tenantId', 'startDate', 'endDate', 'rentAmount', 'depositAmount', 'lateFee', 'rentDueDay', 'status', 'createdAt'],
+            ['id', 'unitId', 'tenantId', 'startDate', 'endDate', 'rentAmount', 'depositAmount', 'lateFee', 'rentDueDay', 'status', 'sentAt', 'acceptedAt', 'changesRequestedAt', 'reviewNote', 'createdAt'],
             array_keys($res->json()[0])
         );
     }

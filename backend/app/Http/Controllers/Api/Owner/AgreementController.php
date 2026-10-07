@@ -10,6 +10,7 @@ use App\Http\Resources\AgreementResource;
 use App\Http\Resources\AgreementWithRefsResource;
 use App\Models\Agreement;
 use App\Models\Unit;
+use App\Notifications\AgreementSent;
 use App\Services\InvoiceGenerator;
 use Illuminate\Http\Request;
 
@@ -65,6 +66,12 @@ class AgreementController extends Controller
         $before = $agreement->status;
         $agreement->update($attributes);
 
+        // The tenant agreed to specific terms: editing any of them while sent or
+        // accepted voids that and sends the agreement back to draft (re-send).
+        if ($before->isUnderReview() && $agreement->wasChanged(Agreement::TERM_COLUMNS)) {
+            $agreement->forceFill(['status' => AgreementStatus::DRAFT, 'sent_at' => null, 'accepted_at' => null])->save();
+        }
+
         // Idempotent: activating (or extending) picks up missing periods; ending
         // early cancels pending periods that haven't come due. Existing invoices
         // are never rewritten when rent or the due day changes.
@@ -84,6 +91,33 @@ class AgreementController extends Controller
         $agreement->delete();
 
         return response()->json(null, 204);
+    }
+
+    /** draft → pending_review: email the tenant a link to review the terms. */
+    public function send(Request $request, Agreement $agreement)
+    {
+        $this->authorizeOwner($request, $agreement);
+        abort_unless($agreement->status === AgreementStatus::DRAFT, 409, 'Only drafts can be sent for review.');
+
+        $agreement->update([
+            'status'      => AgreementStatus::PENDING_REVIEW,
+            'sent_at'     => now(),
+            'review_note' => null,
+        ]);
+        $agreement->tenant?->notify(new AgreementSent($agreement));
+
+        return new AgreementResource($agreement->fresh());
+    }
+
+    /** pending_review → draft without the tenant answering. */
+    public function withdraw(Request $request, Agreement $agreement)
+    {
+        $this->authorizeOwner($request, $agreement);
+        abort_unless($agreement->status === AgreementStatus::PENDING_REVIEW, 409, 'Only an agreement awaiting review can be withdrawn.');
+
+        $agreement->update(['status' => AgreementStatus::DRAFT, 'sent_at' => null]);
+
+        return new AgreementResource($agreement->fresh());
     }
 
     private function authorizeOwner(Request $request, Agreement $agreement): void

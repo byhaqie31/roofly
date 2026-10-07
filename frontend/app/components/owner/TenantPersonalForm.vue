@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useForm } from "vee-validate";
+import { dateOfBirthFromMyKad, formatMyKadInput, normalizeMyKad } from "~/utils/mykad";
 import { toTypedSchema } from "@vee-validate/zod";
 import { tenantPersonalSchema } from "~/schemas/tenant";
 import type { Tenant } from "~/types/tenant";
@@ -43,12 +44,23 @@ const [employer] = defineField("employer");
 const [monthlyIncome] = defineField("monthlyIncome");
 const [nationality] = defineField("nationality");
 
+// MyKad typed without dashes is formatted live and fills the date of birth.
+watch(icNumber, (v) => {
+  const formatted = formatMyKadInput(v ?? "");
+  if (formatted !== (v ?? "")) {
+    icNumber.value = formatted;
+    return;
+  }
+  const dob = dateOfBirthFromMyKad(formatted);
+  if (dob) dateOfBirth.value = dob;
+});
+
 const onSubmit = handleSubmit(async (values) => {
   submitting.value = true;
   try {
     const updated = await useTenants().update(props.tenant.id, {
       personal: {
-        icNumber: values.icNumber || undefined,
+        icNumber: values.icNumber ? (normalizeMyKad(values.icNumber) ?? values.icNumber) : undefined,
         dateOfBirth: values.dateOfBirth || undefined,
         occupation: values.occupation || undefined,
         employer: values.employer || undefined,

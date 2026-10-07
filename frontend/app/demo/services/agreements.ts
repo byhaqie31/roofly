@@ -38,8 +38,10 @@ export const demoAgreements: AgreementsService = {
 
   async getActiveAgreementForTenant(tenantId) {
     const mine = agreementsMock.filter((a) => a.tenantId === tenantId);
+    // Same precedence as the API: active, then awaiting review / agreed, then history.
     const current =
       mine.find((a) => a.status === "active") ??
+      mine.find((a) => a.status === "pending_review" || a.status === "accepted") ??
       mine
         .filter((a) => a.status !== "draft")
         .sort((a, b) => b.startDate.localeCompare(a.startDate))[0] ??
@@ -60,7 +62,14 @@ export const demoAgreements: AgreementsService = {
   async update(id, patch) {
     const idx = agreementsMock.findIndex((a) => a.id === id);
     if (idx === -1) throw new Error(`Agreement ${id} not found`);
-    const merged: Agreement = { ...agreementsMock[idx]!, ...patch };
+    const before = agreementsMock[idx]!;
+    let merged: Agreement = { ...before, ...patch };
+    // Mirrors the API: a term edit while sent / accepted voids the review.
+    const underReview = before.status === "pending_review" || before.status === "accepted";
+    const termChanged = TERM_KEYS.some((k) => k in patch && patch[k] !== before[k]);
+    if (underReview && termChanged) {
+      merged = { ...merged, status: "draft", sentAt: null, acceptedAt: null };
+    }
     agreementsMock[idx] = merged;
     return structuredClone(merged);
   },
@@ -69,4 +78,35 @@ export const demoAgreements: AgreementsService = {
     const idx = agreementsMock.findIndex((a) => a.id === id);
     if (idx !== -1) agreementsMock.splice(idx, 1);
   },
+
+  async send(id) {
+    return transition(id, "draft", (a) => ({ ...a, status: "pending_review", sentAt: new Date().toISOString(), reviewNote: null }));
+  },
+
+  async withdraw(id) {
+    return transition(id, "pending_review", (a) => ({ ...a, status: "draft", sentAt: null }));
+  },
+
+  async acceptForTenant(_tenantId, agreementId) {
+    return transition(agreementId, "pending_review", (a) => ({ ...a, status: "accepted", acceptedAt: new Date().toISOString() }));
+  },
+
+  async requestChangesForTenant(_tenantId, agreementId, note) {
+    return transition(agreementId, "pending_review", (a) => ({
+      ...a, status: "draft", sentAt: null, reviewNote: note, changesRequestedAt: new Date().toISOString(),
+    }));
+  },
+};
+
+const TERM_KEYS = ["unitId", "tenantId", "startDate", "endDate", "rentAmount", "depositAmount", "lateFee", "rentDueDay"] as const;
+
+/** Apply a status transition only from the expected state — same 409 rule as the API, as a thrown Error. */
+const transition = (id: string, from: Agreement["status"], apply: (a: Agreement) => Agreement): Agreement => {
+  const idx = agreementsMock.findIndex((a) => a.id === id);
+  if (idx === -1) throw new Error(`Agreement ${id} not found`);
+  const current = agreementsMock[idx]!;
+  if (current.status !== from) throw new Error(`Agreement is ${current.status}, expected ${from}`);
+  const next = apply(current);
+  agreementsMock[idx] = next;
+  return structuredClone(next);
 };

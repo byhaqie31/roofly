@@ -5,6 +5,7 @@ import type {
   TenantPersonal,
   TenantUpdate,
 } from "~/types/tenant";
+import type { AuthUser } from "~/types/auth";
 
 /** What a tenant sees of themselves — no owner-side fields (status, invitedAt). */
 export type TenantProfile = Pick<
@@ -50,4 +51,11 @@ export interface TenantsService {
     tenantId: string,
     patch: TenantProfileUpdate,
   ): Promise<TenantProfile>;
+  /**
+   * First-run onboarding (spec 2026-10-07 § 4.4): saves the profile AND stamps
+   * `onboardedAt` in one call; returns the refreshed auth user so the route
+   * guard lets the tenant through. The API requires phone, MyKad number and
+   * emergency contact name + phone.
+   */
+  completeOnboarding(tenantId: string, patch: TenantProfileUpdate): Promise<AuthUser>;
 }

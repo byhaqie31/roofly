@@ -364,6 +364,22 @@
       }
     },
     "agreements": {
+      "review": {
+        "send": "Send to tenant",
+        "sending": "Sending…",
+        "sentToast": "Agreement sent to {name} for review",
+        "withdraw": "Withdraw",
+        "withdrawnToast": "Agreement withdrawn — back to draft",
+        "activate": "Activate agreement",
+        "activatedToast": "Agreement active — first invoice created",
+        "backToDraftToast": "Terms changed — the agreement is back in draft. Send it to the tenant again.",
+        "deleteAria": "Delete agreement",
+        "sentOn": "Sent on {date} · waiting for the tenant",
+        "acceptedOn": "Agreed by the tenant on {date} · activate to start the tenancy",
+        "changesRequestedOn": "Tenant asked for changes on {date}",
+        "noteLabel": "Tenant's note",
+        "draftHint": "The tenant can't see this agreement until you send it."
+      },
       "addCta": "Add agreement",
       "addTitle": "Add agreement",
       "editTitle": "Edit agreement",
@@ -401,6 +417,8 @@
       },
       "status": {
         "draft": "Draft",
+      "pending_review": "Awaiting tenant",
+      "accepted": "Agreed by tenant",
         "active": "Active",
         "expired": "Expired",
         "terminated": "Terminated"
@@ -1057,6 +1075,20 @@
     }
   },
   "tenant": {
+    "onboarding": {
+      "title": "Set up your tenant profile",
+      "subtitle": "Your landlord needs these details for the tenancy agreement. It takes about two minutes.",
+      "step": "Step {n} of {total}",
+      "steps": {
+        "about": { "title": "About you", "hint": "As they appear on your MyKad." },
+        "work": { "title": "Work", "hint": "Optional. Helps your landlord with references." },
+        "emergency": { "title": "Emergency contact", "hint": "Someone we can reach if you can't be." }
+      },
+      "back": "Back",
+      "continue": "Continue",
+      "finish": "Finish and go to my home",
+      "optional": "Optional"
+    },
     "nav": {
       "home": "Home",
       "agreement": "Agreement",
@@ -1065,6 +1097,11 @@
       "profile": "Profile"
     },
     "home": {
+      "reviewCard": {
+        "title": "Your agreement is ready to review",
+        "hint": "Your landlord sent the tenancy terms. Agree, or ask for changes.",
+        "cta": "Review now"
+      },
       "title": "Welcome",
       "greeting": "Hi, {name}",
       "subtitle": "Everything about your tenancy, in one place.",
@@ -1095,9 +1132,33 @@
       "reportIssue": "Report an issue",
       "openIssuesTitle": "Open issues",
       "viewAll": "View all",
-      "noOpenIssues": "No open issues. Let your landlord know if something needs fixing."
+      "noOpenIssues": "No open issues. Let your landlord know if something needs fixing.",
+      "profileCard": {
+        "title": "Complete your profile",
+        "hint": "Your landlord needs your MyKad number, phone and an emergency contact for the agreement.",
+        "progress": "{done} of {total} key details filled",
+        "cta": "Fill in now"
+      }
     },
     "agreement": {
+      "review": {
+        "title": "Your landlord sent you this agreement",
+        "subtitle": "Check the terms below. Agree to confirm them, or ask for changes and your landlord will get your note.",
+        "agree": "Agree to these terms",
+        "requestChanges": "Ask for changes",
+        "confirmTitle": "Agree to the agreement?",
+        "confirmBody": "You are agreeing to rent {unit} for {rent} a month, from {start} to {end}, with a deposit of {deposit}.",
+        "confirmCta": "Yes, I agree",
+        "agreedToast": "Thanks — your landlord has been told. They'll activate the tenancy next.",
+        "agreedTitle": "You agreed to this agreement",
+        "agreedBody": "Your landlord will activate the tenancy. Rent and your first invoice start then.",
+        "changesTitle": "What would you like changed?",
+        "changesHint": "Keep it short. Your landlord will edit the agreement and send it again.",
+        "noteLabel": "Your note",
+        "notePlaceholder": "e.g. Can the start date be the 15th instead?",
+        "sendNote": "Send to landlord",
+        "changesSentToast": "Your note was sent. The agreement goes back to your landlord."
+      },
       "title": "Your agreement",
       "subtitle": "The terms of your current tenancy.",
       "none": "Your agreement is being prepared by your landlord.",
@@ -1116,6 +1177,8 @@
       "documents": "Documents",
       "status": {
         "draft": "Draft",
+        "pending_review": "Awaiting your review",
+        "accepted": "You agreed",
         "active": "Active",
         "expired": "Expired",
         "terminated": "Terminated"
