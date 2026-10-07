@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import { Sparkles } from "lucide-vue-next";
 import Button from "~/components/ui/Button.vue";
 import Input from "~/components/ui/Input.vue";
+import PasswordInput from "~/components/ui/PasswordInput.vue";
 import GoogleSignInButton from "~/components/auth/GoogleSignInButton.vue";
 
 definePageMeta({ layout: "auth" });
@@ -12,17 +14,27 @@ useHead({ title: () => t("auth.register") });
 const { toFieldErrors } = useApiError();
 const auth = useAuthStore();
 const env = useEnv();
-const { features } = env;
+const { features, isDemo } = env;
 const { track, visitorId } = useTrack();
 const name = ref("");
 const email = ref("");
 const phone = ref("");
 const password = ref("");
+const passwordConfirmation = ref("");
+const submitted = ref(false);
 const error = ref<string | null>(null);
+
+// Live once the user has tried to submit, so they see it clear as they fix it.
+const confirmError = computed(() =>
+  submitted.value && passwordConfirmation.value !== password.value
+    ? t("auth.passwordMismatch")
+    : undefined,
+);
 
 const onSubmit = async () => {
   error.value = null;
-  if (!name.value || !email.value || !phone.value || !password.value) {
+  submitted.value = true;
+  if (!name.value || !email.value || !phone.value || !password.value || !passwordConfirmation.value) {
     error.value = t("validation.required");
     return;
   }
@@ -30,12 +42,14 @@ const onSubmit = async () => {
     error.value = t("validation.minLength", { min: 8 });
     return;
   }
+  if (confirmError.value) return;
   try {
     await auth.register({
       name: name.value,
       email: email.value,
       phone: phone.value,
       password: password.value,
+      passwordConfirmation: passwordConfirmation.value,
       visitorId: env.trackingEnabled ? visitorId() : undefined,
     });
     track("register", { email: email.value, userId: auth.user?.id ?? "" });
@@ -49,6 +63,19 @@ const onSubmit = async () => {
 const { googleError, onGoogle } = useGoogleSignIn(async () => {
   await navigateTo("/owner");
 });
+
+// Demo has no real Google client — stand in with the same fresh Google-owner
+// account the login page's demo shortcut uses (lands on owner onboarding).
+const demoGoogleLoading = ref(false);
+const onDemoGoogle = async () => {
+  demoGoogleLoading.value = true;
+  try {
+    await auth.loginWithGoogle("demo");
+    await navigateTo("/owner");
+  } finally {
+    demoGoogleLoading.value = false;
+  }
+};
 </script>
 
 <template>
@@ -60,8 +87,19 @@ const { googleError, onGoogle } = useGoogleSignIn(async () => {
       <p class="mt-2 text-body text-ink-muted">{{ t("auth.registerSubtitle") }}</p>
     </header>
 
-    <div v-if="features.googleLogin" class="mb-6 space-y-3">
-      <GoogleSignInButton @credential="onGoogle" />
+    <div v-if="features.googleLogin || isDemo" class="mb-6 space-y-3">
+      <GoogleSignInButton v-if="features.googleLogin" @credential="onGoogle" />
+      <Button
+        v-else
+        variant="ghost"
+        size="lg"
+        block
+        :loading="demoGoogleLoading"
+        @click="onDemoGoogle"
+      >
+        <Sparkles :size="16" :stroke-width="1.5" />
+        {{ t("demo.shortcuts.continueWithGoogle") }}
+      </Button>
       <p v-if="googleError" class="text-center text-caption text-accent" role="alert">{{ googleError }}</p>
       <div class="flex items-center gap-3 text-micro uppercase tracking-wider text-ink-faint">
         <span class="h-px flex-1 bg-line-passive" />
@@ -75,6 +113,7 @@ const { googleError, onGoogle } = useGoogleSignIn(async () => {
         v-model="name"
         autocomplete="name"
         :label="t('auth.fullName')"
+        :placeholder="t('auth.placeholders.fullName')"
         size="lg"
       />
       <Input
@@ -82,21 +121,30 @@ const { googleError, onGoogle } = useGoogleSignIn(async () => {
         type="email"
         autocomplete="email"
         :label="t('auth.email')"
+        :placeholder="t('auth.placeholders.email')"
         size="lg"
       />
       <Input
         v-model="phone"
         type="tel"
         autocomplete="tel"
-        placeholder="+60 12 345 6789"
         :label="t('auth.phone')"
+        :placeholder="t('auth.placeholders.phone')"
         size="lg"
       />
-      <Input
+      <PasswordInput
         v-model="password"
-        type="password"
         autocomplete="new-password"
         :label="t('auth.password')"
+        :placeholder="t('auth.placeholders.newPassword')"
+        size="lg"
+      />
+      <PasswordInput
+        v-model="passwordConfirmation"
+        autocomplete="new-password"
+        :label="t('auth.confirmPassword')"
+        :placeholder="t('auth.placeholders.confirmPassword')"
+        :error="confirmError"
         size="lg"
       />
 

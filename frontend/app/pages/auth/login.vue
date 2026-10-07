@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import Button from "~/components/ui/Button.vue";
 import Input from "~/components/ui/Input.vue";
+import PasswordInput from "~/components/ui/PasswordInput.vue";
 import DemoLoginShortcuts from "~/components/auth/DemoLoginShortcuts.vue";
 import GoogleSignInButton from "~/components/auth/GoogleSignInButton.vue";
 
@@ -66,9 +67,8 @@ const { googleError, onGoogle } = useGoogleSignIn(async () => {
         :label="t('auth.email')"
         size="lg"
       />
-      <Input
+      <PasswordInput
         v-model="password"
-        type="password"
         autocomplete="current-password"
         :label="t('auth.password')"
         size="lg"

@@ -221,6 +221,10 @@ focus: border var(--border-interactive) + var(--shadow-focus)
 
 VeeValidate error messages: 14px, `var(--accent)`, 4px below the field. Pair with a Lucide `alert-circle` icon — never color-only.
 
+**Placeholders show an example, not the label again** — `e.g. Aminah Yusof`, `e.g. +60 12 345 6789` (BM `cth. …`), or a rule for password fields (`At least 8 characters`). Keep them in i18n under the form's `placeholders` group; escape the `@` in example emails as `{'@'}`.
+
+**Password fields use `ui/PasswordInput.vue`** — `Input` plus a show/hide eye button in the suffix slot (`aria-label` "Show password"/"Hide password", `aria-pressed`). Any form that sets a new password also asks for it twice ("Retype password") and shows "Passwords do not match." inline on the second field, live once the user has tried to submit.
+
 ### 3.4 Status pills
 
 ```
@@ -483,7 +487,7 @@ PDFs are the **only** place we deviate from cream.
 | CSS tokens | `frontend/assets/css/tokens.css` |
 | Tailwind config (token mirror) | `frontend/tailwind.config.ts` |
 | Inter font | `frontend/plugins/fonts.client.ts` via `@fontsource-variable/inter` |
-| UI primitives | `frontend/components/ui/` — `Button.vue`, `Card.vue`, `Input.vue`, `Pill.vue`, `EmptyState.vue`, `Icon.vue`, `MoneyDisplay.vue` |
+| UI primitives | `frontend/components/ui/` — `Button.vue`, `Card.vue`, `Input.vue`, `PasswordInput.vue`, `Pill.vue`, `EmptyState.vue`, `Icon.vue`, `MoneyDisplay.vue` |
 | Storybook (Phase 6) | `frontend/.storybook/` |
 | PDF templates | `backend/resources/views/pdfs/agreement.blade.php`, `.../receipt.blade.php` |
 | Money format helper | `frontend/composables/useMoney.ts` |

@@ -5,6 +5,8 @@ export interface RegisterPayload {
   email: string;
   phone: string;
   password: string;
+  /** The retyped password — the API's `confirmed` rule checks it; demo ignores it. */
+  passwordConfirmation: string;
   visitorId?: string;
 }
 
