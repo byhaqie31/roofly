@@ -8,15 +8,21 @@ use App\Http\Resources\Admin\AdminLeadResource;
 use App\Http\Resources\Admin\LeadEventResource;
 use App\Models\AnalyticsEvent;
 use App\Models\Lead;
+use App\Models\User;
+use App\Notifications\WaitlistInvitation;
 use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-/** Read-only platform analytics (spec § 5). Counts only — never money, never PII beyond lead email. */
+/**
+ * Platform analytics (spec § 5). Counts only — never money, never PII beyond lead email.
+ * The one write is invite(): emailing a waitlist lead the sign-up invitation.
+ */
 class AnalyticsController extends Controller
 {
     public function overview(AnalyticsRangeRequest $request): JsonResponse
@@ -134,6 +140,29 @@ class AnalyticsController extends Controller
         LeadEventResource::forLead(null);
 
         return response()->json((new AdminLeadResource($lead))->resolve() + ['events' => $eventsPayload]);
+    }
+
+    /** Emails a waitlist lead the sign-up invitation. Re-sending is allowed and just bumps invited_at. */
+    public function invite(Lead $lead, AuditLogger $audit): JsonResponse
+    {
+        abort_unless($lead->source === 'waitlist', 409, 'Only waitlist enquiries can be invited.');
+        abort_if(
+            $lead->converted_user_id !== null || User::where('email', $lead->email)->exists(),
+            409,
+            'This email already has a Roofly account.',
+        );
+
+        // Send first: if queueing fails the admin sees the error and invited_at stays honest.
+        Notification::route('mail', $lead->email)->notify(new WaitlistInvitation($lead->email));
+
+        $before = ['invitedAt' => $lead->invited_at?->toISOString()];
+        $lead->update(['invited_at' => now()]);
+        $audit->record(AuditLogger::LEAD_INVITED, $lead, $before, ['invitedAt' => $lead->invited_at->toISOString()]);
+
+        $lead->load('convertedUser:id,name');
+        $this->decorate(collect([$lead]));
+
+        return response()->json((new AdminLeadResource($lead))->resolve());
     }
 
     public function export(Request $request, AuditLogger $audit): StreamedResponse

@@ -25,6 +25,7 @@ class AuditLogger
     public const OWNER_UNSUSPENDED         = 'owner.unsuspended';
     public const TENANT_INVITE_RESENT      = 'tenant.invite_resent';
     public const ANALYTICS_EXPORTED        = 'analytics.exported';
+    public const LEAD_INVITED              = 'lead.invited';
     public const AUTH_GOOGLE_LOGIN         = 'auth.google_login';
     public const AUTH_GOOGLE_REGISTER      = 'auth.google_register';
     public const ACCOUNT_ONBOARDED         = 'account.onboarded';
@@ -37,7 +38,7 @@ class AuditLogger
         self::ADMIN_LOGIN, self::ADMIN_INVITE_SENT, self::ADMIN_INVITE_ACCEPTED,
         self::ADMIN_PERMISSIONS_CHANGED, self::ADMIN_DISABLED, self::ADMIN_ENABLED,
         self::OWNER_WARNED, self::OWNER_SUSPENDED, self::OWNER_UNSUSPENDED,
-        self::TENANT_INVITE_RESENT, self::ANALYTICS_EXPORTED,
+        self::TENANT_INVITE_RESENT, self::ANALYTICS_EXPORTED, self::LEAD_INVITED,
         self::AUTH_GOOGLE_LOGIN, self::AUTH_GOOGLE_REGISTER, self::ACCOUNT_ONBOARDED,
         self::ACCOUNT_CHECKLIST_DISMISSED, self::ACCOUNT_CHECKLIST_RESTORED, self::ACCOUNT_PASSWORD_SET,
     ];

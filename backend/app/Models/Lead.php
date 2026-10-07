@@ -12,11 +12,11 @@ class Lead extends Model
 
     public const SOURCES = ['waitlist', 'demo', 'register'];
 
-    protected $fillable = ['email', 'visitor_id', 'source', 'first_seen_at', 'last_seen_at', 'converted_user_id'];
+    protected $fillable = ['email', 'visitor_id', 'source', 'first_seen_at', 'last_seen_at', 'invited_at', 'converted_user_id'];
 
     protected function casts(): array
     {
-        return ['first_seen_at' => 'datetime', 'last_seen_at' => 'datetime'];
+        return ['first_seen_at' => 'datetime', 'last_seen_at' => 'datetime', 'invited_at' => 'datetime'];
     }
 
     public function convertedUser(): BelongsTo

@@ -15,6 +15,7 @@ class AdminLeadResource extends JsonResource
             'source'             => $this->source,
             'firstSeenAt'        => $this->first_seen_at?->toISOString(),
             'lastSeenAt'         => $this->last_seen_at?->toISOString(),
+            'invitedAt'          => $this->invited_at?->toISOString(),
             'pageViews'          => (int) ($this->page_views_count ?? 0),
             'demoEntered'        => (bool) ($this->demo_entered ?? false),
             'convertedUserId'    => $this->converted_user_id,

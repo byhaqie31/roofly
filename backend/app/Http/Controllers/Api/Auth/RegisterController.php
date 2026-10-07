@@ -6,11 +6,13 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AuthUserResource;
 use App\Models\User;
+use App\Notifications\OwnerWelcome;
 use App\Services\AnalyticsRecorder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Throwable;
 
 class RegisterController extends Controller
 {
@@ -38,6 +40,12 @@ class RegisterController extends Controller
         $token = $user->createToken('api')->plainTextToken;
 
         $recorder->linkRegistration($user, $data['visitorId'] ?? null);
+
+        try {
+            $user->notify(new OwnerWelcome);
+        } catch (Throwable $e) {
+            report($e); // the account exists; a queue outage shouldn't fail sign-up
+        }
 
         return response()->json([
             'user'  => (new AuthUserResource($user))->resolve(),

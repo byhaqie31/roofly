@@ -16,4 +16,5 @@ export const apiAdminAnalytics: AdminAnalyticsService = {
   },
   exportCsv: (query) =>
     useApi().request<string>("/admin/analytics/leads/export.csv", { query: cleanQuery({ ...query }), responseType: "text" }),
+  invite: (id) => useApi().request<AdminLead>(`/admin/analytics/leads/${id}/invite`, { method: "POST" }),
 };

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\WaitlistRequest;
-use App\Notifications\WaitlistWelcome;
+use App\Notifications\WaitlistConfirmation;
 use App\Services\AnalyticsRecorder;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Notification;
@@ -14,7 +14,7 @@ use Throwable;
 /**
  * Public coming-soon waitlist capture. Always 204: a repeat signup, a brand-new
  * one and a honeypot hit all look identical to the caller. Only a brand-new
- * lead gets the WaitlistWelcome email.
+ * lead gets the WaitlistConfirmation email.
  */
 class WaitlistController extends Controller
 {
@@ -36,7 +36,7 @@ class WaitlistController extends Controller
         // First signup only — a repeat must not let anyone re-mail someone else's address.
         if ($isNew) {
             try {
-                Notification::route('mail', $email)->notify(new WaitlistWelcome);
+                Notification::route('mail', $email)->notify(new WaitlistConfirmation);
             } catch (Throwable $e) {
                 report($e); // the lead is saved; a queue outage shouldn't fail the form
             }

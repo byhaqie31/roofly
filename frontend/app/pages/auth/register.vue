@@ -17,7 +17,9 @@ const env = useEnv();
 const { features, isDemo } = env;
 const { track, visitorId } = useTrack();
 const name = ref("");
-const email = ref("");
+// The waitlist invitation email links here with ?email= so the invitee doesn't retype it.
+const invitedEmail = useRoute().query.email;
+const email = ref(typeof invitedEmail === "string" ? invitedEmail : "");
 const phone = ref("");
 const password = ref("");
 const passwordConfirmation = ref("");

@@ -20,6 +20,11 @@ class LeadFactory extends Factory
         ];
     }
 
+    public function invited(): static
+    {
+        return $this->state(fn () => ['invited_at' => now()->subDay()]);
+    }
+
     public function converted(User $user): static
     {
         return $this->state(fn () => ['converted_user_id' => $user->id, 'source' => 'register']);

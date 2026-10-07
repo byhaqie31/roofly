@@ -56,6 +56,9 @@ return [
 
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
 
+    // The public demo, linked from the waitlist confirmation email.
+    'demo_url' => env('DEMO_URL') ?: 'https://demo.roofly.my',
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

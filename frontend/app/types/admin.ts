@@ -128,12 +128,13 @@ export type AuditAction =
   | "owner.unsuspended"
   | "tenant.invite_resent"
   | "analytics.exported"
+  | "lead.invited"
   | "owner.signup"; // synthesised in owner history only
 
 export const AUDIT_ACTIONS: AuditAction[] = [
   "admin.login", "admin.invite_sent", "admin.invite_accepted", "admin.permissions_changed",
   "admin.disabled", "admin.enabled", "owner.warned", "owner.suspended", "owner.unsuspended",
-  "tenant.invite_resent", "analytics.exported",
+  "tenant.invite_resent", "analytics.exported", "lead.invited",
 ];
 
 export interface AuditEntry {
@@ -141,7 +142,7 @@ export interface AuditEntry {
   action: AuditAction;
   actorId: string | null;
   actorName: string | null;
-  subjectType: "user" | null;
+  subjectType: "user" | "lead" | null;
   subjectId: string | null;
   subjectName: string | null;
   before: Record<string, unknown>;

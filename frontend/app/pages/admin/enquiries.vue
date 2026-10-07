@@ -7,6 +7,7 @@ import Button from "~/components/ui/Button.vue";
 import Pill from "~/components/ui/Pill.vue";
 import DataTableShell from "~/components/admin/DataTableShell.vue";
 import LeadDrawer from "~/components/admin/LeadDrawer.vue";
+import InviteLeadModal from "~/components/admin/InviteLeadModal.vue";
 import NoAccess from "~/components/admin/NoAccess.vue";
 import { downloadCsvText } from "~/utils/csv";
 import { formatAdminDate } from "~/utils/adminDate";
@@ -16,6 +17,7 @@ import type { Paginated } from "~/types/admin";
 // The coming-soon inbox: every email left via the "Notify me" form (POST /waitlist).
 // Same leads endpoints as Analytics, with `source` pinned to "waitlist" so this
 // page never mixes in registrations — it is the list to follow up, not the funnel.
+// Admins with broadcast.send can email a lead the sign-up invitation from here.
 definePageMeta({ layout: "admin" });
 const { can } = useAdminPermissions();
 const { t } = useI18n();
@@ -88,8 +90,22 @@ const goToOwner = (id: string, e: MouseEvent) => {
   router.push(`/admin/owners/${id}`);
 };
 
+// ── Invite ─────────────────────────────────────────────────────────────
+const canInvite = computed(() => can("broadcast.send"));
+const inviteOpen = ref(false);
+const inviteLead = ref<AdminLead | null>(null);
+const openInvite = (lead: AdminLead, e?: Event) => {
+  e?.stopPropagation(); // the row itself opens the drawer
+  inviteLead.value = lead;
+  inviteOpen.value = true;
+};
+const onInvited = (updated: AdminLead) => {
+  result.value = { ...result.value, data: result.value.data.map((l) => (l.id === updated.id ? updated : l)) };
+};
+
 const statusCell = (lead: AdminLead) => {
   const ownerId = lead.convertedUserId;
+  if (!ownerId && lead.invitedAt) return h(Pill, { tone: "pending" }, { default: () => t("admin.enquiries.status.invited") });
   if (!ownerId) return h(Pill, { tone: "neutral" }, { default: () => t("admin.enquiries.status.waiting") });
   return h("span", { class: "inline-flex items-center gap-2" }, [
     h(Pill, { tone: "active" }, { default: () => t("admin.enquiries.status.registered") }),
@@ -106,11 +122,24 @@ const statusCell = (lead: AdminLead) => {
   ]);
 };
 
+const inviteCell = (lead: AdminLead) => {
+  if (lead.convertedUserId) return h("span", { class: "text-caption text-ink-faint" }, "—");
+  return h("span", { class: "inline-flex flex-col items-start gap-1", onKeydown: (e: KeyboardEvent) => e.stopPropagation() }, [
+    h(Button, { size: "sm", variant: lead.invitedAt ? "ghost" : "primary", onClick: (e: MouseEvent) => openInvite(lead, e) }, {
+      default: () => (lead.invitedAt ? t("admin.enquiries.invite.resend") : t("admin.enquiries.invite.send")),
+    }),
+    lead.invitedAt
+      ? h("span", { class: "text-micro text-ink-faint tabular-nums" }, t("admin.enquiries.invite.invitedOn", { date: fmtDate(lead.invitedAt) }))
+      : null,
+  ]);
+};
+
 const columns = computed<ColumnDef<AdminLead>[]>(() => [
   { id: "email", header: () => t("admin.enquiries.columns.email"), cell: (i) => h("span", { class: "text-body text-ink" }, i.row.original.email) },
   { id: "signedUp", header: () => t("admin.enquiries.columns.signedUp"), cell: (i) => h("span", { class: "text-caption tabular-nums" }, fmtDate(i.row.original.firstSeenAt)) },
   { id: "lastSeen", header: () => t("admin.enquiries.columns.lastSeen"), cell: (i) => h("span", { class: "text-caption tabular-nums" }, fmtDate(i.row.original.lastSeenAt)) },
   { id: "status", header: () => t("admin.enquiries.columns.status"), cell: (i) => statusCell(i.row.original) },
+  ...(canInvite.value ? [{ id: "invite", header: () => t("admin.enquiries.columns.actions"), cell: (i) => inviteCell(i.row.original) } as ColumnDef<AdminLead>] : []),
 ]);
 
 const table = useVueTable({
@@ -189,8 +218,8 @@ const exportCsv = async () => {
         <Card v-for="lead in result.data" :key="lead.id" padding="compact">
           <button type="button" class="block w-full text-left rounded-lg outline-none focus-visible:shadow-focus" @click="openLead(lead)">
             <div class="flex items-center gap-2">
-              <Pill :tone="lead.convertedUserId ? 'active' : 'neutral'">
-                {{ lead.convertedUserId ? t("admin.enquiries.status.registered") : t("admin.enquiries.status.waiting") }}
+              <Pill :tone="lead.convertedUserId ? 'active' : lead.invitedAt ? 'pending' : 'neutral'">
+                {{ lead.convertedUserId ? t("admin.enquiries.status.registered") : lead.invitedAt ? t("admin.enquiries.status.invited") : t("admin.enquiries.status.waiting") }}
               </Pill>
               <span class="text-micro text-ink-faint">{{ t("admin.enquiries.columns.signedUp") }} {{ fmtDate(lead.firstSeenAt) }}</span>
             </div>
@@ -200,10 +229,19 @@ const exportCsv = async () => {
               <template v-if="lead.convertedOwnerName"> · {{ lead.convertedOwnerName }}</template>
             </p>
           </button>
+          <div v-if="canInvite && !lead.convertedUserId" class="mt-3 flex items-center gap-3">
+            <Button size="sm" :variant="lead.invitedAt ? 'ghost' : 'primary'" @click="openInvite(lead)">
+              {{ lead.invitedAt ? t("admin.enquiries.invite.resend") : t("admin.enquiries.invite.send") }}
+            </Button>
+            <span v-if="lead.invitedAt" class="text-micro text-ink-faint tabular-nums">
+              {{ t("admin.enquiries.invite.invitedOn", { date: fmtDate(lead.invitedAt) }) }}
+            </span>
+          </div>
         </Card>
       </template>
     </DataTableShell>
 
     <LeadDrawer v-model:open="drawerOpen" :lead-id="selectedLeadId" />
+    <InviteLeadModal v-model:open="inviteOpen" :lead="inviteLead" @sent="onInvited" />
   </div>
 </template>

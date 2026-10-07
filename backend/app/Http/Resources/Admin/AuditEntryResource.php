@@ -2,6 +2,7 @@
 // backend/app/Http/Resources/Admin/AuditEntryResource.php
 namespace App\Http\Resources\Admin;
 
+use App\Models\Lead;
 use App\Models\User;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
@@ -20,7 +21,11 @@ class AuditEntryResource extends JsonResource
             'actorName'   => $this->causer?->name,
             'subjectType' => $this->subject_type ? Str::lower(class_basename($this->subject_type)) : null,
             'subjectId'   => $this->subject_id,
-            'subjectName' => $this->subject instanceof User ? $this->subject->name : null,
+            'subjectName' => match (true) {
+                $this->subject instanceof User => $this->subject->name,
+                $this->subject instanceof Lead => $this->subject->email,
+                default                        => null,
+            },
             'before'      => (object) ($props['before'] ?? []),
             'after'       => (object) ($props['after'] ?? []),
             'reason'      => $props['reason'] ?? null,
