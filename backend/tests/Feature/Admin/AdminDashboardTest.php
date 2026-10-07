@@ -38,7 +38,10 @@ class AdminDashboardTest extends TestCase
         $p2 = Property::factory()->create(['owner_id' => $due->id]);
         $u2 = Unit::factory()->create(['property_id' => $p2->id]);
         $a2 = Agreement::factory()->create(['unit_id' => $u2->id, 'tenant_id' => User::factory()->tenant()->create()->id, 'status' => 'active']);
-        Invoice::factory()->count(3)->create(['agreement_id' => $a2->id, 'status' => 'overdue']);
+        // One period per invoice — invoices(agreement_id, due_date) is unique.
+        Invoice::factory()->count(3)
+            ->sequence(['due_date' => '2026-07-01'], ['due_date' => '2026-08-01'], ['due_date' => '2026-09-01'])
+            ->create(['agreement_id' => $a2->id, 'status' => 'overdue']);
 
         // invite_stale_7d
         $stale = User::factory()->owner()->create(['name' => 'Stale']);

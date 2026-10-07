@@ -1,2 +1,11 @@
-User-Agent: *
-Disallow:
+# Marketing pages are indexable; authenticated shells, auth forms and the
+# curated demo are not. demo.roofly.my serves /demo/* only, so it stays out
+# of search entirely.
+User-agent: *
+Disallow: /owner
+Disallow: /tenant
+Disallow: /admin
+Disallow: /auth
+Disallow: /demo
+Disallow: /suspended
+Allow: /

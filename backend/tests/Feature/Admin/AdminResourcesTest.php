@@ -61,8 +61,8 @@ class AdminResourcesTest extends TestCase
         $unit = Unit::factory()->create(['property_id' => $property->id, 'status' => 'occupied']);
         $tenant = User::factory()->tenant()->create(['invited_by' => $owner->id]);
         $agreement = Agreement::factory()->create(['unit_id' => $unit->id, 'tenant_id' => $tenant->id, 'status' => 'active', 'end_date' => now()->addDays(10)->toDateString()]);
-        Invoice::factory()->create(['agreement_id' => $agreement->id, 'status' => 'overdue']);
-        Invoice::factory()->create(['agreement_id' => $agreement->id, 'status' => 'paid']);
+        Invoice::factory()->create(['agreement_id' => $agreement->id, 'status' => 'overdue', 'due_date' => '2026-07-01']);
+        Invoice::factory()->create(['agreement_id' => $agreement->id, 'status' => 'paid', 'due_date' => '2026-08-01']);
         Ticket::factory()->create(['unit_id' => $unit->id, 'status' => 'new']);
         Ticket::factory()->create(['unit_id' => $unit->id, 'status' => 'resolved']);
 

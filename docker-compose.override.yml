@@ -56,6 +56,23 @@ services:
       - APP_ENV=local
       - APP_DEBUG=true
 
+  # ── Local-only host ports for GUI clients (TablePlus, redis-cli, RabbitMQ UI) ─
+  # The base file deliberately publishes none of these; see its db/redis/rabbitmq
+  # comments. Override the host side if something on your machine already
+  # listens there.
+  db:
+    ports:
+      - "${DB_PORT_EXPOSE:-3306}:3306"
+
+  redis:
+    ports:
+      - "${REDIS_PORT_EXPOSE:-6379}:6379"
+
+  rabbitmq:
+    ports:
+      - "${RABBITMQ_PORT_EXPOSE:-5672}:5672"
+      - "${RABBITMQ_MGMT_PORT:-15672}:15672"
+
   # ── phpMyAdmin (local-only DB browser) ─────────────────────────────────────
   phpmyadmin:
     image: phpmyadmin:latest

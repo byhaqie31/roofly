@@ -28,4 +28,8 @@ export interface AuthAdapter {
   forgotPassword(email: string): Promise<void>;
   /** Sets the password from an emailed token and logs the user in. */
   resetPassword(input: { token: string; email: string; password: string }): Promise<AuthUser>;
+
+  // ── Tenant invite (spec 2026-10-07 § 4) ──
+  /** Invited tenant sets their password from the emailed link; becomes `active` and is logged in. */
+  acceptInvite(input: { token: string; email: string; password: string }): Promise<AuthUser>;
 }

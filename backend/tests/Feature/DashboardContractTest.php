@@ -68,10 +68,12 @@ class DashboardContractTest extends TestCase
         ]);
 
         // A paid invoice this month → counts toward monthly income.
+        // (Its own period — invoices(agreement_id, due_date) is unique; income buckets by paid_at, not due_date.)
         $paid = Invoice::factory()->create([
             'agreement_id' => $agreement->id,
             'amount_cents' => 180000,
             'status' => 'paid',
+            'due_date' => '2026-08-01',
         ]);
         Payment::factory()->create([
             'invoice_id' => $paid->id,

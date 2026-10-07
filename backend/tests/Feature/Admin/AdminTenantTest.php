@@ -2,10 +2,13 @@
 // backend/tests/Feature/Admin/AdminTenantTest.php
 namespace Tests\Feature\Admin;
 
+use App\Models\TenantInvite as TenantInviteModel;
 use App\Models\User;
+use App\Notifications\TenantInvite;
 use App\Support\AdminPermissions;
 use Database\Seeders\AdminPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
@@ -48,10 +51,17 @@ class AdminTenantTest extends TestCase
 
     public function test_resend_invite_only_for_invited_and_logs(): void
     {
+        Notification::fake();
         $invited = User::factory()->invitedTenant()->create(['invited_at' => now()->subDays(9)]);
+        $old = TenantInviteModel::create(['user_id' => $invited->id, 'token_hash' => hash('sha256', 'old'), 'expires_at' => now()->addDays(7)]);
+
         $this->postJson("/api/admin/tenants/{$invited->id}/resend-invite")->assertNoContent();
+
         $this->assertTrue($invited->fresh()->invited_at->isToday());
         $this->assertSame('tenant.invite_resent', Activity::inLog('admin')->latest('id')->first()->event);
+        Notification::assertSentTo($invited, TenantInvite::class);
+        $this->assertNotNull($old->fresh()->accepted_at); // the old link is voided — only the newest works
+        $this->assertSame(1, TenantInviteModel::where('user_id', $invited->id)->whereNull('accepted_at')->count());
 
         $active = User::factory()->tenant()->create();
         $this->postJson("/api/admin/tenants/{$active->id}/resend-invite")->assertStatus(409);

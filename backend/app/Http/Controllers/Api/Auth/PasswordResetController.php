@@ -55,7 +55,11 @@ class PasswordResetController extends Controller
             if ($user->isAdmin()) {
                 return; // admins never reset through the customer flow
             }
-            $user->forceFill(['password' => $password, 'remember_token' => Str::random(60)])->save();
+            $attributes = ['password' => $password, 'remember_token' => Str::random(60)];
+            if ($user->isTenant() && $user->status === 'invited') {
+                $attributes['status'] = 'active'; // invited tenant chose "Forgot password" over the invite link
+            }
+            $user->forceFill($attributes)->save();
             $user->tokens()->delete(); // revoke any tokens issued before this reset (likely reason for the reset)
             event(new PasswordReset($user));
         });
