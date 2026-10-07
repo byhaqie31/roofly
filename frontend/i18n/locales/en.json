@@ -263,6 +263,10 @@
       "ctaSecondary": "Explore demo",
       "ctaSecondaryBadge": "Try me"
     },
+    "promo": {
+      "eyebrow": "Sneak peek",
+      "title": "Preview Roofly before it launches."
+    },
     "usps": {
       "eyebrow": "What's coming",
       "title": "Nine ways Roofly works for you.",
