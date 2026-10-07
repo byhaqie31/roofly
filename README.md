@@ -196,6 +196,9 @@ BACKEND_PORT=8002
 NUXT_PUBLIC_API_BASE=https://roofly.my/api
 # NUXT_PUBLIC_APP_ENV unset → production; plus the same backend block with
 # SANCTUM_STATEFUL_DOMAINS=roofly.my,admin.roofly.my and SESSION_DOMAIN=.roofly.my
+# Beta-tester hunt only (remove both at launch):
+REGISTRATION_OPEN=false
+INVITE_SIGNUP_URL=https://uat.roofly.my/auth/register
 ```
 
 See [.env.example](.env.example) for the full list with comments. The base compose file publishes **no** host ports for MySQL, Redis or RabbitMQ — three environments on one VPS cannot each own 3306 — and binds the backend Nginx to loopback only. Local dev gets those ports back from `docker-compose.override.yml`.
@@ -216,15 +219,21 @@ So:
 
 The same `frontend/Dockerfile` serves both contexts via multi-stage targets (`deps` → `dev` / `builder` → `runner`).
 
+### Production during the beta-tester hunt
+
+Production runs the full stack below, but its **public site is only the coming-soon page**: `useEnv().comingSoonOnly` (on in production) makes `env.global.ts` redirect every non-admin route to `/coming-soon`, and `REGISTRATION_OPEN=false` makes the API refuse owner sign-up (`POST /auth/register` and Google auto-create → `403 registration_closed`). Waitlist leads land in **production's** Enquiries at `admin.roofly.my`; the invitation you send from there links to **UAT's** register page (`INVITE_SIGNUP_URL`), so beta testers use UAT. A lead's status stays "Invited" (they register in UAT's database, not production's).
+
+**At launch:** set `comingSoonOnly` to `false` in `frontend/app/composables/useEnv.ts`, remove `REGISTRATION_OPEN` and `INVITE_SIGNUP_URL` from `~/roofly/.env`, swap the waitlist form for the contact form, and migrate beta testers' UAT accounts into production (UUID keys, so rows copy without collisions). Until then, never `migrate:fresh` or reseed UAT once testers have signed up.
+
 ### Production go-live checklist (first backend deploy + admin back office)
 
 Merging `UAT → main` ships the full stack (Laravel API, MySQL, Redis, RabbitMQ, queue-worker, scheduler) to `~/roofly`, not just the marketing page. `roofly.my/` keeps redirecting unauthenticated visitors to `/coming-soon` (see `frontend/app/middleware/env.global.ts`) — the admin back office at `admin.roofly.my` is what you use to watch the funnel. Before merging:
 
-1. **`~/roofly/.env`** — in addition to the frontend vars above: `APP_KEY` (`php artisan key:generate --show`), `APP_URL=https://roofly.my`, DB/Redis/RabbitMQ credentials, `SANCTUM_STATEFUL_DOMAINS=roofly.my,admin.roofly.my`, `SESSION_DOMAIN=.roofly.my`. Leave `NUXT_PUBLIC_FEATURE_ADMIN` and `NUXT_PUBLIC_TRACKING` unset (both default on).
+1. **`~/roofly/.env`** — in addition to the frontend vars above: `APP_KEY` (`php artisan key:generate --show`), `APP_URL=https://roofly.my`, `FRONTEND_URL=https://roofly.my`, DB/Redis/RabbitMQ credentials, real `MAIL_*` credentials (not the Mailtrap sandbox — the waitlist confirmation goes to real people), `SANCTUM_STATEFUL_DOMAINS=roofly.my,admin.roofly.my`, `SESSION_DOMAIN=.roofly.my`, and the two beta-hunt lines `REGISTRATION_OPEN=false` + `INVITE_SIGNUP_URL=https://uat.roofly.my/auth/register`. Leave `NUXT_PUBLIC_FEATURE_ADMIN` and `NUXT_PUBLIC_TRACKING` unset (both default on).
 2. **DNS + Nginx** — add `admin.roofly.my` in Cloudflare pointing at the VPS and an Nginx site for it that `proxy_pass`es to the same `localhost:3002` as `roofly.my`. The app is one build; `env.global.ts` sends `/` → `/admin` on the `admin.` host.
 3. **Migrations run on every deploy** — the workflow runs `migrate --force` and the idempotent `AdminPermissionSeeder` after `compose up` whenever the compose file has a `backend` service, then restarts the queue-worker and scheduler. **Do not** run `DemoSeeder` / `AnalyticsDemoSeeder` in production (the latter refuses anyway). On UAT, `DemoSeeder` is fine and gives testers the seeded owner / tenant / admin accounts listed in `.claude/CLAUDE.md`.
 4. **First admin** — `docker compose -f docker-compose.yml exec backend php artisan admin:create --email=you@roofly.my --name="Your Name"` prints a one-time generated password. Sign in at `https://admin.roofly.my`, then invite further admins from Settings → Admins.
-5. **Verify** — `curl -I https://roofly.my` → `302 /coming-soon`; `docker compose -f docker-compose.yml ps` shows backend/queue-worker/scheduler healthy (the deploy healthcheck only probes the frontend port); paste `https://roofly.my` into WhatsApp/Slack to confirm the OG card, or check it with Facebook's Sharing Debugger. Page views start landing in Admin → Analytics within a minute.
+5. **Verify** — `curl -I https://roofly.my` → `302 /coming-soon` (so does `/auth/register` while `comingSoonOnly` is on); a test signup on the coming-soon form shows up in admin → Enquiries and its confirmation email arrives; `docker compose -f docker-compose.yml ps` shows backend/queue-worker/scheduler healthy (the deploy healthcheck only probes the frontend port); paste `https://roofly.my` into WhatsApp/Slack to confirm the OG card, or check it with Facebook's Sharing Debugger. Page views start landing in Admin → Analytics within a minute.
 
 ### Auto-deploy
 

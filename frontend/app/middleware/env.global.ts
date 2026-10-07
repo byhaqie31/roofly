@@ -12,6 +12,11 @@
  * / on admin host | n/a (demo has no admin host) | redirect → /admin    | redirect → /admin              | redirect → /admin   | redirect → /admin
  * everything    | render                  | render                    | render                        | render              | render
  *
+ * While `comingSoonOnly` is on (production during the beta-tester hunt), every
+ * production route except /coming-soon and /admin/* redirects to /coming-soon
+ * (admin.roofly.my still lands on /admin); the production columns above apply
+ * again at launch.
+ *
  * Why:
  *  - Demo subdomain: clients land directly on the curated demo, never see the
  *    pre-launch marketing page.
@@ -32,7 +37,7 @@
  *    always redirects straight to `/admin`, ahead of the demo/uat/prod split.
  */
 export default defineNuxtRouteMiddleware((to) => {
-  const { isDemo, isProduction, isAdminHost, features } = useEnv();
+  const { isDemo, isProduction, isAdminHost, features, comingSoonOnly } = useEnv();
   const isDemoRoute = to.path === "/demo" || to.path.startsWith("/demo/");
   const isComingSoon = to.path === "/coming-soon";
   const isAdminRoute = to.path === "/admin" || to.path.startsWith("/admin/");
@@ -45,6 +50,12 @@ export default defineNuxtRouteMiddleware((to) => {
   // admin.roofly.my — root goes straight to the back office.
   if (isAdminHost && to.path === "/") {
     return navigateTo("/admin", { redirectCode: 302 });
+  }
+
+  // Production during the beta hunt: the coming-soon page is the whole public
+  // site; only the admin back office (Enquiries) stays reachable.
+  if (comingSoonOnly && !isComingSoon && !isAdminRoute) {
+    return navigateTo("/coming-soon", { redirectCode: 302 });
   }
 
   if (isDemo) {

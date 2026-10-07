@@ -9,7 +9,9 @@ use Illuminate\Notifications\Notification;
 
 /**
  * To a waitlist lead, sent by an admin from Enquiries: you're invited to sign
- * up. The button points at this environment's FRONTEND_URL/auth/register?email=….
+ * up. The button points at config('app.invite_signup_url') — this environment's
+ * own register page unless INVITE_SIGNUP_URL overrides it (production → UAT's
+ * while sign-up is held) — with ?email=… to prefill the form.
  * Template: resources/views/emails/waitlist-invitation(-text).blade.php.
  */
 class WaitlistInvitation extends Notification implements ShouldQueue
@@ -29,8 +31,15 @@ class WaitlistInvitation extends Notification implements ShouldQueue
             ->subject('Your Roofly invitation is here')
             ->view(['emails.waitlist-invitation', 'emails.waitlist-invitation-text'], [
                 // Prefills the register form's email field.
-                'ctaUrl'   => rtrim(config('app.frontend_url'), '/') . '/auth/register?' . http_build_query(['email' => $this->email]),
+                'ctaUrl'   => $this->signupUrl(),
                 'ctaLabel' => 'Create your Roofly account',
             ]);
+    }
+
+    private function signupUrl(): string
+    {
+        $url = config('app.invite_signup_url');
+
+        return $url . (str_contains($url, '?') ? '&' : '?') . http_build_query(['email' => $this->email]);
     }
 }

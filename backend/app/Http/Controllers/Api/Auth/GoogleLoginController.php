@@ -40,6 +40,11 @@ class GoogleLoginController extends Controller
             ], 403);
         }
 
+        // Existing owners can still sign in while sign-up is held; new ones can't be created.
+        if ($user === null && ! config('app.registration_open')) {
+            return response()->json(['message' => 'Sign-up is not open yet.', 'code' => 'registration_closed'], 403);
+        }
+
         if ($user === null) {
             $user = User::create([
                 'name'       => $profile['name'],
