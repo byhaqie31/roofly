@@ -349,6 +349,11 @@
       }
     },
     "agreements": {
+      "term": {
+        "months": "{n} bulan",
+        "custom": "Tersuai",
+        "endsOn": "Tamat {date}"
+      },
       "review": {
         "send": "Hantar kepada penyewa",
         "sending": "Menghantar…",
@@ -387,6 +392,7 @@
         "unit": "Unit",
         "tenant": "Penyewa",
         "startDate": "Tarikh mula",
+        "term": "Tempoh",
         "endDate": "Tarikh tamat",
         "rentAmount": "Sewa bulanan (RM)",
         "depositAmount": "Deposit jaminan (RM)",

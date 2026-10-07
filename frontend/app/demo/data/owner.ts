@@ -40,8 +40,8 @@ export const ownerAccountMock: OwnerAccount = {
  * § 12; "Upgrade" CTAs toast a Phase-7 stub until billing ships.
  */
 export const plansMock: Plan[] = [
-  { tier: "free", priceRm: 0, unitsCap: 3, description: "free" },
-  { tier: "starter", priceRm: 29, unitsCap: 5, description: "starter" },
-  { tier: "pro", priceRm: 79, unitsCap: 25, description: "pro" },
+  { tier: "free", priceRm: 0, unitsCap: 2, description: "free" }, // cap matches PlanCaps + PROJECT.md § 12
+  { tier: "starter", priceRm: 49, unitsCap: 5, description: "starter" },
+  { tier: "pro", priceRm: 99, unitsCap: 25, description: "pro" },
   { tier: "business", priceRm: 199, unitsCap: "unlimited", description: "business" },
 ];

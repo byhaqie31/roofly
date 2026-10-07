@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import { agreementFormSchema } from "~/schemas/agreement";
@@ -8,6 +8,7 @@ import type { Property } from "~/types/property";
 import type { Unit } from "~/types/unit";
 import type { Tenant } from "~/types/tenant";
 import { useToast } from "~/composables/useToast";
+import { AGREEMENT_TERM_PRESETS, endDateForTerm, termMonthsBetween, type AgreementTermPreset } from "~/utils/agreementTerm";
 import Input from "~/components/ui/Input.vue";
 import Select from "~/components/ui/Select.vue";
 import Button from "~/components/ui/Button.vue";
@@ -76,6 +77,29 @@ const [depositAmount] = defineField("depositAmount");
 const [lateFee] = defineField("lateFee");
 const [rentDueDay] = defineField("rentDueDay");
 const [status] = defineField("status");
+
+// ── Term presets: 6 / 12 / 24 months fill the end date from the start date ──
+// (same day N months on, minus a day). Editing the end date by hand switches
+// to Custom; an existing agreement pre-selects the preset its dates match.
+type TermChoice = AgreementTermPreset | "custom";
+const termChoice = ref<TermChoice>(
+  termMonthsBetween(startDate.value ?? "", endDate.value ?? "") ?? (endDate.value ? "custom" : 12),
+);
+const termOptions = computed<{ value: TermChoice; label: string }[]>(() => [
+  ...AGREEMENT_TERM_PRESETS.map((months) => ({ value: months, label: t("owner.agreements.term.months", { n: months }) })),
+  { value: "custom", label: t("owner.agreements.term.custom") },
+]);
+const dmy = (iso: string) => iso.split("-").reverse().join("/");
+
+watch([startDate, termChoice], () => {
+  if (termChoice.value === "custom") return;
+  const end = endDateForTerm(startDate.value ?? "", termChoice.value);
+  if (end && end !== endDate.value) setFieldValue("endDate", end);
+});
+watch(endDate, (end) => {
+  if (termChoice.value === "custom") return;
+  if (termMonthsBetween(startDate.value ?? "", end ?? "") !== termChoice.value) termChoice.value = "custom";
+});
 
 const propertyOptions = computed(() =>
   allProperties.value.map((p) => ({ value: p.id, label: p.name })),
@@ -211,6 +235,29 @@ const onSubmit = handleSubmit(async (values) => {
       >
         {{ t("owner.agreements.detail.sections.term") }}
       </h3>
+      <div>
+        <p class="mb-2 text-caption font-medium text-ink">{{ t("owner.agreements.fields.term") }}</p>
+        <div class="flex flex-wrap gap-2" role="radiogroup" :aria-label="t('owner.agreements.fields.term')">
+          <button
+            v-for="opt in termOptions"
+            :key="String(opt.value)"
+            type="button"
+            role="radio"
+            :aria-checked="termChoice === opt.value"
+            class="rounded-pill border px-3.5 py-1.5 text-caption font-medium transition focus:outline-none focus-visible:shadow-focus"
+            :class="termChoice === opt.value
+              ? 'border-ink bg-ink text-surface-page'
+              : 'border-line-passive bg-surface-page text-ink hover:bg-surface-hover'"
+            @click="termChoice = opt.value"
+          >
+            {{ opt.label }}
+          </button>
+        </div>
+        <p v-if="termChoice !== 'custom' && endDate" class="mt-2 text-caption text-ink-muted">
+          {{ t("owner.agreements.term.endsOn", { date: dmy(endDate) }) }}
+        </p>
+      </div>
+
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           v-model="startDate"

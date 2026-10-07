@@ -795,6 +795,14 @@ See [pages/owner/agreements/[id].vue](../../frontend/app/pages/owner/agreements/
 - **Same group on every width** — it wraps under the title on mobile (`mt-4 sm:mt-0`) instead of a second mobile-only copy in the top bar.
 - **State banner lives in the content, not the header.** Where the record is in a flow (sent on…, agreed on…, changes requested + note) is a bordered `role="status"` strip at the top of the Overview tab using the matching status soft tokens; the header pill stays a one-word status.
 
+### 11.19c Preset chips that fill a dependent field
+
+See the term chooser in [components/owner/AgreementTermsForm.vue](../../frontend/app/components/owner/AgreementTermsForm.vue).
+
+- **Chips, not a select, for 3–4 common values + Custom.** A `role="radiogroup"` row of pill buttons (`rounded-pill border px-3.5 py-1.5 text-caption font-medium`), selected = `border-ink bg-ink text-surface-page`, others = `border-line-passive bg-surface-page` with `hover:bg-surface-hover`; `aria-checked` on each. Wraps on mobile.
+- **The dependent field stays visible and editable.** The preset writes into the real input (here `endDate`) rather than hiding it, and a one-line caption under the chips restates the outcome ("Ends 31/12/2026"). Editing the dependent field by hand flips the chooser to Custom — never silently overwrite a manual value.
+- **Pre-select on edit** when the stored values match a preset exactly; otherwise land on Custom.
+
 ### 11.20 Auth pages: social button above the form
 
 See [pages/auth/login.vue](../../frontend/app/pages/auth/login.vue) / [pages/auth/register.vue](../../frontend/app/pages/auth/register.vue) + [components/auth/GoogleSignInButton.vue](../../frontend/app/components/auth/GoogleSignInButton.vue).
