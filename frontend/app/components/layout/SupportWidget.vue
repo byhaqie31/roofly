@@ -4,6 +4,7 @@ import { Bug, CircleCheck, Headset, Lightbulb, MessageCircleQuestion } from "luc
 import Modal from "~/components/ui/Modal.vue";
 import Button from "~/components/ui/Button.vue";
 import { ENQUIRY_TYPES, type EnquiryType } from "~/types/support";
+import { pageLabelFor } from "~/utils/pageLabel";
 
 // Floating help button for the owner + tenant shells. Sends an issue / feedback /
 // question to admin → Enquiries → Messages (super admins get an email). Name and
@@ -43,7 +44,7 @@ const send = async () => {
   if (tooShort.value) return;
   sending.value = true;
   try {
-    await useSupport().send({ type: type.value, message: message.value, pageUrl: pageUrl.value });
+    await useSupport().send({ type: type.value, message: message.value, pageUrl: pageUrl.value, pageLabel: pageLabelFor(pageUrl.value) });
     sent.value = true;
   } catch (e) {
     error.value = (e as { data?: { message?: string } })?.data?.message ?? t("common.genericError");

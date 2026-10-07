@@ -16,7 +16,7 @@ class Enquiry extends Model
     public const STATUSES = ['new', 'replied', 'closed'];
 
     protected $fillable = [
-        'user_id', 'name', 'email', 'role', 'type', 'message', 'page_url', 'user_agent',
+        'user_id', 'name', 'email', 'role', 'type', 'message', 'page_url', 'page_label', 'user_agent',
         'status', 'admin_note', 'handled_by', 'status_changed_at',
     ];
 

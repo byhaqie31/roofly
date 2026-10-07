@@ -1,7 +1,8 @@
 {
   "common": {
     "appName": "Roofly.my",
-    "envBanner": "Test environment. Data here may be reset.",
+    "envBannerLabel": "Beta preview",
+    "envBanner": "You’re trying an early version of Roofly. Data may be reset during testing.",
     "tagline": "Rent management, simplified.",
     "marketing": {
       "headlineLead": "Rent management,",
