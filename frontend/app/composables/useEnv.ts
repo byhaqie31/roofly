@@ -67,5 +67,12 @@ export const useEnv = () => {
     showFloatingFeedback: isDemo && Boolean(config.public.demoFeedbackUrl),
     showEnvBanner: isUat,
     redirectRootToDemo: isDemo,
+
+    // Beta-tester hunt: production's public site is only /coming-soon (every
+    // other non-admin route redirects there; the admin back office stays up to
+    // work the Enquiries inbox). Beta testers sign up on UAT. Flip to `false`
+    // at launch, together with the backend's REGISTRATION_OPEN. See
+    // middleware/env.global.ts.
+    comingSoonOnly: isProduction,
   };
 };

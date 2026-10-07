@@ -107,9 +107,10 @@ class AdminLeadInviteTest extends TestCase
         Notification::assertNothingSent();
     }
 
-    public function test_email_links_to_frontend_register_with_email_prefilled(): void
+    public function test_email_links_to_invite_signup_url_with_email_prefilled(): void
     {
-        config(['app.frontend_url' => 'https://uat.example.test/']);
+        // Production sets INVITE_SIGNUP_URL to UAT's register page during the beta hunt.
+        config(['app.invite_signup_url' => 'https://uat.example.test/auth/register']);
 
         $mail = (new WaitlistInvitation('a+b@x.my'))->toMail(new AnonymousNotifiable);
         $html = $mail->render();
@@ -118,5 +119,10 @@ class AdminLeadInviteTest extends TestCase
         $this->assertStringContainsString('YOUR INVITATION HAS ARRIVED', $html);
         $this->assertStringContainsString('https://uat.example.test/auth/register?email=a%2Bb%40x.my', $html);
         $this->assertStringContainsString('Create your Roofly account', $html);
+    }
+
+    public function test_invite_signup_url_defaults_to_this_environments_register_page(): void
+    {
+        $this->assertSame(rtrim(env('FRONTEND_URL', 'http://localhost:3000'), '/') . '/auth/register', config('app.invite_signup_url'));
     }
 }

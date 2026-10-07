@@ -59,6 +59,15 @@ return [
     // The public demo, linked from the waitlist confirmation email.
     'demo_url' => env('DEMO_URL') ?: 'https://demo.roofly.my',
 
+    // Owner self sign-up (POST /auth/register + Google auto-create). Production
+    // holds it closed during the beta-tester hunt; testers sign up on UAT.
+    'registration_open' => (bool) env('REGISTRATION_OPEN', true),
+
+    // Where the waitlist invitation's button sends people. Blank = this
+    // environment's own register page; production points it at UAT's while
+    // sign-up is held there.
+    'invite_signup_url' => env('INVITE_SIGNUP_URL') ?: rtrim(env('FRONTEND_URL', 'http://localhost:3000'), '/') . '/auth/register',
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

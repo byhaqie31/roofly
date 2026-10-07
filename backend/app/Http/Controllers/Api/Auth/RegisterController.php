@@ -18,6 +18,10 @@ class RegisterController extends Controller
 {
     public function store(Request $request, AnalyticsRecorder $recorder): JsonResponse
     {
+        if (! config('app.registration_open')) {
+            return response()->json(['message' => 'Sign-up is not open yet.', 'code' => 'registration_closed'], 403);
+        }
+
         $data = $request->validate([
             'name'                  => 'required|string|max:255',
             'email'                 => 'required|email|max:255|unique:users,email',
