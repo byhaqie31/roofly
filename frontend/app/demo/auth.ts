@@ -209,4 +209,13 @@ export const demoAuth: AuthAdapter = {
     persist(user);
     return user;
   },
+
+  async acceptInvite({ email }) {
+    await delay();
+    // Invites only ever go to tenants, so skip the email-prefix role rule and
+    // hand back the fixed tenant record under the invited address.
+    const user: AuthUser = { ...customerUserFor("tenant@roofly.my"), email };
+    persist(user);
+    return user;
+  },
 };

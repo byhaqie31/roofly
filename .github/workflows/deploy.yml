@@ -6,9 +6,9 @@ name: Deploy roofly to Hostinger VPS
 #   main        → ~/roofly       → roofly.my       (host port 3002)
 # Note: 3003 is taken by axelnova-frontend on this VPS — UAT uses 3004 instead.
 #
-# Per-clone .env files on the VPS supply NUXT_PUBLIC_APP_ENV, NUXT_PUBLIC_USE_MOCK,
-# NUXT_PUBLIC_DEMO_FEEDBACK_URL, etc. The
-# workflow doesn't bake env-specific values — it just pulls + rebuilds.
+# Per-clone .env files on the VPS supply NUXT_PUBLIC_APP_ENV, NUXT_PUBLIC_API_BASE,
+# APP_KEY, DB/MAIL credentials, etc. (see .env.example). The workflow doesn't
+# bake env-specific values — it pulls, rebuilds, migrates, and health-checks.
 #
 # Required GitHub secrets: SSH_HOST, SSH_USER, SSH_PRIVATE_KEY.
 
@@ -70,6 +70,28 @@ jobs:
             # -f docker-compose.yml bypasses docker-compose.override.yml (which
             # is for local dev only — switches to dev target with bind mounts).
             docker compose -f docker-compose.yml up -d --build
+
+            # Backend environments (UAT / prod) also need the schema brought up
+            # to date and the admin permission rows present. Both steps are
+            # idempotent. demo-roofly is frontend-only — its compose file has no
+            # `backend` service — so the whole block is skipped there.
+            if docker compose -f docker-compose.yml config --services | grep -qx backend; then
+              echo "==> Running migrations"
+              attempt=1
+              until docker compose -f docker-compose.yml exec -T backend php artisan migrate --force; do
+                if [ "$attempt" -ge 6 ]; then
+                  echo "Migrations still failing after $attempt attempts — recent backend logs:"
+                  docker compose -f docker-compose.yml logs --tail 30 backend db
+                  exit 1
+                fi
+                attempt=$((attempt + 1))
+                echo "Database not ready yet — retrying in 10s (attempt $attempt/6)..."
+                sleep 10
+              done
+              docker compose -f docker-compose.yml exec -T backend php artisan db:seed --class=AdminPermissionSeeder --force
+              # Workers hold compiled code in memory; make sure they run the new build.
+              docker compose -f docker-compose.yml restart queue-worker scheduler
+            fi
 
             echo "==> Waiting for app to respond on port $HEALTH_PORT..."
             sleep 5

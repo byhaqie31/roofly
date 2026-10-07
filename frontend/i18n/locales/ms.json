@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "Roofly.my",
+    "envBanner": "Persekitaran ujian. Data di sini mungkin diset semula.",
     "tagline": "Urus sewa rumah, lebih mudah.",
     "marketing": {
       "headlineLead": "Urus sewa rumah,",
@@ -82,6 +83,13 @@
       "submit": "Simpan kata laluan dan log masuk",
       "invalid": "Pautan tetapan semula ini tidak sah atau telah tamat tempoh.",
       "requestNew": "Minta pautan baharu"
+    },
+    "acceptInvite": {
+      "title": "Selamat datang ke Roofly",
+      "subtitle": "Tetapkan kata laluan untuk melihat sewa, membayar dan melaporkan masalah.",
+      "submit": "Tetapkan kata laluan dan teruskan",
+      "invalid": "Pautan jemputan ini tidak sah atau telah tamat tempoh. Minta tuan rumah hantar semula, atau gunakan lupa kata laluan dengan e-mel yang sama.",
+      "forgotInstead": "Gunakan lupa kata laluan"
     }
   },
   "suspended": {
@@ -445,7 +453,7 @@
     "tenants": {
       "inviteCta": "Jemput penyewa",
       "inviteTitle": "Jemput penyewa",
-      "inviteHelp": "Maklumat ini akan direkodkan. Jemputan melalui pautan khas akan aktif apabila pengesahan akaun siap.",
+      "inviteHelp": "Mereka akan menerima e-mel dengan pautan untuk menetapkan kata laluan. Pautan tamat tempoh dalam 7 hari.",
       "editTitle": "Edit penyewa",
       "save": "Simpan",
       "delete": "Buang penyewa",

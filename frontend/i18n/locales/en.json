@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "Roofly.my",
+    "envBanner": "Test environment. Data here may be reset.",
     "tagline": "Rent management, simplified.",
     "marketing": {
       "headlineLead": "Rent management,",
@@ -97,6 +98,13 @@
       "submit": "Save password and log in",
       "invalid": "This reset link is invalid or has expired.",
       "requestNew": "Request a new link"
+    },
+    "acceptInvite": {
+      "title": "Welcome to Roofly",
+      "subtitle": "Set a password to see your rent, pay it and report issues.",
+      "submit": "Set password and continue",
+      "invalid": "This invite link is invalid or has expired. Ask your landlord to resend it, or use forgot password with the same email.",
+      "forgotInstead": "Use forgot password instead"
     }
   },
   "suspended": {
@@ -460,7 +468,7 @@
     "tenants": {
       "inviteCta": "Invite tenant",
       "inviteTitle": "Invite tenant",
-      "inviteHelp": "We'll record this contact. Magic-link invites land when authentication ships.",
+      "inviteHelp": "They'll get an email with a link to set their password. The link expires in 7 days.",
       "editTitle": "Edit tenant",
       "save": "Save",
       "delete": "Remove tenant",

@@ -8,6 +8,7 @@ use App\Http\Requests\InviteTenantRequest;
 use App\Http\Requests\UpdateTenantRequest;
 use App\Http\Resources\TenantResource;
 use App\Models\User;
+use App\Services\TenantInvites;
 use Illuminate\Http\Request;
 
 class TenantController extends Controller
@@ -33,12 +34,12 @@ class TenantController extends Controller
         return TenantResource::collection($tenants);
     }
 
-    public function store(InviteTenantRequest $request)
+    public function store(InviteTenantRequest $request, TenantInvites $invites)
     {
-        return $this->invite($request);
+        return $this->invite($request, $invites);
     }
 
-    public function invite(InviteTenantRequest $request)
+    public function invite(InviteTenantRequest $request, TenantInvites $invites)
     {
         $tenant = User::create(array_merge($request->validated(), [
             'role'       => UserRole::TENANT,
@@ -47,7 +48,8 @@ class TenantController extends Controller
             'invited_by' => $request->user()->id,
         ]));
 
-        // TODO Phase 3: dispatch magic-link invite notification
+        // Emailed set-password link (queued). The tenant becomes `active` when they accept.
+        $invites->send($tenant);
 
         return (new TenantResource($tenant))->response()->setStatusCode(201);
     }

@@ -99,6 +99,15 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
+    async acceptInvite(input: { token: string; email: string; password: string }) {
+      this.loading = true;
+      try {
+        this.user = await adapter().acceptInvite(input);
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async logout() {
       await adapter().logout();
       this.user = null;

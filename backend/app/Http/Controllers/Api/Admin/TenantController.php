@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\AdminTenantResource;
 use App\Models\User;
 use App\Services\AuditLogger;
+use App\Services\TenantInvites;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -47,14 +48,14 @@ class TenantController extends Controller
         return new AdminTenantResource($tenant->load(self::WITH));
     }
 
-    public function resendInvite(User $tenant, AuditLogger $audit): JsonResponse
+    public function resendInvite(User $tenant, AuditLogger $audit, TenantInvites $invites): JsonResponse
     {
         abort_if($tenant->role !== UserRole::TENANT, 404);
         abort_unless($tenant->status === 'invited', 409, 'Only pending invites can be resent.');
 
         $before = ['invitedAt' => $tenant->invited_at?->toISOString()];
         $tenant->update(['invited_at' => now()]);
-        // TODO Phase 2: dispatch magic-link invite notification (see MagicLinkController)
+        $invites->send($tenant); // voids the previous link, emails a new one
         $audit->record(AuditLogger::TENANT_INVITE_RESENT, $tenant, $before, ['invitedAt' => $tenant->invited_at->toISOString()]);
 
         return response()->json(null, 204);

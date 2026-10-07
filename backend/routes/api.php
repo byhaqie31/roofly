@@ -25,6 +25,8 @@ Route::prefix('auth')->group(function () {
     Route::get('magic-link/{token}', [\App\Http\Controllers\Api\Auth\MagicLinkController::class, 'authenticate']);
     Route::post('forgot-password', [\App\Http\Controllers\Api\Auth\PasswordResetController::class, 'forgot'])->middleware('throttle:5,1');
     Route::post('reset-password',  [\App\Http\Controllers\Api\Auth\PasswordResetController::class, 'reset'])->middleware('throttle:5,1');
+    // Tenant accepts the emailed invite (spec 2026-10-07 § 4) — sets password, activates, logs in.
+    Route::post('accept-invite',   [\App\Http\Controllers\Api\Auth\AcceptTenantInviteController::class, 'store'])->middleware('throttle:5,1');
 });
 
 // ── Public: analytics beacon (spec: admin analytics § 3) ─────────────────────

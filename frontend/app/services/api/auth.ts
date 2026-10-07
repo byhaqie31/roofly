@@ -90,4 +90,14 @@ export const apiAuth: AuthAdapter = {
     });
     return res.user;
   },
+
+  async acceptInvite({ token, email, password }) {
+    const { request } = useApi();
+    await request("/../sanctum/csrf-cookie");
+    const res = await request<{ user: AuthUser }>("/auth/accept-invite", {
+      method: "POST",
+      body: { token, email, password, password_confirmation: password },
+    });
+    return res.user;
+  },
 };

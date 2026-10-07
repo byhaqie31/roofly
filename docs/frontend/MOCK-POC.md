@@ -396,6 +396,8 @@ PROJECT.md's `users` table covers Tier 1 (with `role="tenant"`). Tier 2/3 are ex
 
 Photo + document uploads are Phase 4+; they reuse the polymorphic `documents` table already in PROJECT.md.
 
+Invite delivery (shipped 2026-10-07): `tenant_invites` (`user_id`, `token_hash`, `expires_at`, `accepted_at`) + `POST /auth/accept-invite`. Accepting sets the password and flips `users.status` `invited → active`; so does the forgot-password path. Spec: [2026-10-07-invoice-generation-tenant-invite-design.md](../superpowers/specs/2026-10-07-invoice-generation-tenant-invite-design.md).
+
 ### 5.5 Mock seed
 
 `app/mocks/tenants.ts` carries 5 tenants spanning all four statuses (`invited`, `active`, `notice_given`, `moved_out`), with mixed Tier 2/3 fullness so the detail page renders both rich and sparse cases. The `notice_given` case anchors the upcoming-vacancy widgets on the dashboard.
@@ -524,6 +526,8 @@ UX rules locked in here:
 - `POST /invoices/:id/send` — dispatch invoice via email / WhatsApp. Returns `{ sentAt }`.
 
 Late-fee accrual is a backend concern (cron job per [PROJECT.md § Flow 3 step 6](../global/PROJECT.md#L184)). The mock just snapshots `agreement.lateFee` onto overdue invoices for display.
+
+Generation (shipped 2026-10-07): no create endpoint. `InvoiceGenerator` creates the next-due-date invoice when an agreement is activated — **never back-fills past months** — and `invoices:roll` extends it daily within a 30-day horizon, flipping unpaid ones to `overdue` with the flat late fee the day after `due_date`. `invoices(agreement_id, due_date)` is unique. The demo generator in § 6.2 stays as the curated-history source for demo and `DemoSeeder`; it is not what production runs.
 
 ---
 

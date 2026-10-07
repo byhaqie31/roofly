@@ -13,7 +13,8 @@ const pageUrl = `${siteUrl}/coming-soon`;
 // Social preview (Open Graph + Twitter card). The image lives at
 // public/marketing/og.png (1200x630) — regenerate it if the hero copy changes.
 useSeoMeta({
-  title: () => `${t("marketing.hero.eyebrow")} · Roofly.my`,
+  // nuxt.config's titleTemplate already appends "· Roofly.my" — don't double it.
+  title: () => t("marketing.hero.eyebrow"),
   description: () => t("marketing.hero.subhead"),
   ogType: "website",
   ogSiteName: "Roofly.my",

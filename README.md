@@ -114,7 +114,7 @@ Three environments run off three branches on one Hostinger VPS, separated by sub
 | | Branch | Subdomain | VPS clone path | Container | Host port | `APP_ENV` |
 |---|---|---|---|---|---|---|
 | **Demo** (client pitches) | `demo-roofly` | demo.roofly.my | `~/roofly-demo` | `demo-roofly` | `3001` | `demo` |
-| **UAT** (staging) | `UAT` | uat.roofly.my | `~/roofly-uat` | `uat-roofly` | `3003` | `uat` |
+| **UAT** (staging) | `UAT` | uat.roofly.my | `~/roofly-uat` | `uat-roofly` | `3004` | `uat` |
 | **Prod** (live) | `main` | roofly.my | `~/roofly` | `roofly` | `3002` | `production` |
 
 ### How a request reaches the right code
@@ -141,6 +141,28 @@ Nuxt SSR (with demo behavior) → returns HTML
 
 Five independent layers, each pointing to the next. To stand up a new environment, replicate the chain.
 
+UAT and production run the full stack, so their host Nginx site needs a second location that sends the API to the backend container (published on loopback only):
+
+```nginx
+# Laravel API — 8004 is that clone's BACKEND_PORT (loopback only)
+location /api/ {
+    proxy_pass http://127.0.0.1:8004/api/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+# Sanctum's CSRF cookie route is NOT under /api — the frontend requests
+# /api/../sanctum/csrf-cookie, which the browser normalises to /sanctum/csrf-cookie.
+location /sanctum/ {
+    proxy_pass http://127.0.0.1:8004/sanctum/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
 ### Per-environment `.env`
 
 Each VPS clone has its own gitignored `.env` overriding `docker-compose.yml`'s defaults (which are production-safe — never accidentally serves demo widgets).
@@ -153,18 +175,30 @@ NUXT_PUBLIC_APP_ENV=demo
 NUXT_PUBLIC_USE_MOCK=true
 NUXT_PUBLIC_DEMO_FEEDBACK_URL=https://forms.google.com/your-form-id
 
-# ~/roofly-uat/.env
+# ~/roofly-uat/.env  (full stack — the frontend vars alone are not enough)
 COMPOSE_PROJECT_NAME=uat-roofly
-FRONTEND_PORT=3003
+FRONTEND_PORT=3004
+BACKEND_PORT=8004
 NUXT_PUBLIC_APP_ENV=uat
+NUXT_PUBLIC_API_BASE=https://uat.roofly.my/api
+NUXT_PUBLIC_SITE_URL=https://uat.roofly.my
+APP_KEY=base64:...
+APP_URL=https://uat.roofly.my
+FRONTEND_URL=https://uat.roofly.my
+SANCTUM_STATEFUL_DOMAINS=uat.roofly.my
+DB_PASSWORD=...            # + DB_ROOT_PASSWORD, RABBITMQ_PASSWORD
+MAIL_USERNAME=...          # Mailtrap sandbox creds; mails are captured, not delivered
 
 # ~/roofly/.env
 COMPOSE_PROJECT_NAME=roofly
 FRONTEND_PORT=3002
-# All NUXT_PUBLIC_* unset → defaults to production
+BACKEND_PORT=8002
+NUXT_PUBLIC_API_BASE=https://roofly.my/api
+# NUXT_PUBLIC_APP_ENV unset → production; plus the same backend block with
+# SANCTUM_STATEFUL_DOMAINS=roofly.my,admin.roofly.my and SESSION_DOMAIN=.roofly.my
 ```
 
-See [.env.example](.env.example) for the full list with comments.
+See [.env.example](.env.example) for the full list with comments. The base compose file publishes **no** host ports for MySQL, Redis or RabbitMQ — three environments on one VPS cannot each own 3306 — and binds the backend Nginx to loopback only. Local dev gets those ports back from `docker-compose.override.yml`.
 
 ### Compose files (local dev vs prod deploy)
 
@@ -188,13 +222,15 @@ Merging `UAT → main` ships the full stack (Laravel API, MySQL, Redis, RabbitMQ
 
 1. **`~/roofly/.env`** — in addition to the frontend vars above: `APP_KEY` (`php artisan key:generate --show`), `APP_URL=https://roofly.my`, DB/Redis/RabbitMQ credentials, `SANCTUM_STATEFUL_DOMAINS=roofly.my,admin.roofly.my`, `SESSION_DOMAIN=.roofly.my`. Leave `NUXT_PUBLIC_FEATURE_ADMIN` and `NUXT_PUBLIC_TRACKING` unset (both default on).
 2. **DNS + Nginx** — add `admin.roofly.my` in Cloudflare pointing at the VPS and an Nginx site for it that `proxy_pass`es to the same `localhost:3002` as `roofly.my`. The app is one build; `env.global.ts` sends `/` → `/admin` on the `admin.` host.
-3. **Migrate, never demo-seed** — after the first deploy: `docker compose -f docker-compose.yml exec backend php artisan migrate --force` then `php artisan db:seed --class=AdminPermissionSeeder --force`. **Do not** run `DemoSeeder` / `AnalyticsDemoSeeder` in production (the latter refuses anyway).
+3. **Migrations run on every deploy** — the workflow runs `migrate --force` and the idempotent `AdminPermissionSeeder` after `compose up` whenever the compose file has a `backend` service, then restarts the queue-worker and scheduler. **Do not** run `DemoSeeder` / `AnalyticsDemoSeeder` in production (the latter refuses anyway). On UAT, `DemoSeeder` is fine and gives testers the seeded owner / tenant / admin accounts listed in `.claude/CLAUDE.md`.
 4. **First admin** — `docker compose -f docker-compose.yml exec backend php artisan admin:create --email=you@roofly.my --name="Your Name"` prints a one-time generated password. Sign in at `https://admin.roofly.my`, then invite further admins from Settings → Admins.
 5. **Verify** — `curl -I https://roofly.my` → `302 /coming-soon`; `docker compose -f docker-compose.yml ps` shows backend/queue-worker/scheduler healthy (the deploy healthcheck only probes the frontend port); paste `https://roofly.my` into WhatsApp/Slack to confirm the OG card, or check it with Facebook's Sharing Debugger. Page views start landing in Admin → Analytics within a minute.
 
 ### Auto-deploy
 
-Pushes to `demo-roofly`, `UAT`, or `main` trigger [.github/workflows/deploy.yml](.github/workflows/deploy.yml). The workflow detects the branch, SSHes into the VPS, pulls the matching clone, and runs the prod-only compose. Required GitHub Secrets: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`.
+Pushes to `demo-roofly`, `UAT`, or `main` trigger [.github/workflows/deploy.yml](.github/workflows/deploy.yml). The workflow detects the branch, SSHes into the VPS, pulls the matching clone, runs the prod-only compose, migrates (backend environments only), and health-checks the frontend port. Required GitHub Secrets: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`.
+
+If a deploy fails with `failed to set up container networking … port is already allocated`, a host port in that clone's `.env` collides with another clone or service on the VPS — compare `FRONTEND_PORT` / `BACKEND_PORT` across `~/roofly*/.env` and `ss -ltnp`.
 
 ---
 
