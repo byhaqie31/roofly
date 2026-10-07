@@ -177,11 +177,12 @@ Route::middleware(['auth:sanctum', 'touch-active'])->group(function () {
         Route::get('audit/export.csv', [$Audit, 'export'])->middleware('can:' . $P::AUDIT_VIEW);
 
         $Analytics = \App\Http\Controllers\Api\Admin\AnalyticsController::class;
-        Route::middleware('can:' . $P::ANALYTICS_VIEW)->group(function () use ($Analytics) {
+        Route::middleware('can:' . $P::ANALYTICS_VIEW)->group(function () use ($Analytics, $P) {
             Route::get('analytics/overview', [$Analytics, 'overview']);
             Route::get('analytics/leads',            [$Analytics, 'leads']);
             Route::get('analytics/leads/export.csv', [$Analytics, 'export']);   // before {lead}
             Route::get('analytics/leads/{lead}',     [$Analytics, 'lead']);
+            Route::post('analytics/leads/{lead}/invite', [$Analytics, 'invite'])->middleware('can:' . $P::BROADCAST_SEND);
         });
     });
 

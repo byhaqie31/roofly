@@ -24,6 +24,8 @@ export interface AdminLead {
   source: LeadSource;
   firstSeenAt: string;
   lastSeenAt: string;
+  /** When an admin last emailed the waitlist invitation (Enquiries → Invite); null = never. */
+  invitedAt: string | null;
   pageViews: number;
   demoEntered: boolean;
   convertedUserId: string | null;

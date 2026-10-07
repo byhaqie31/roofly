@@ -6,11 +6,13 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AuthUserResource;
 use App\Models\User;
+use App\Notifications\OwnerWelcome;
 use App\Services\AuditLogger;
 use App\Support\GoogleIdToken;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Throwable;
 
 /**
  * Owner-only Google sign-in (spec 2026-08-23 § 3.3). The SPA posts the GIS
@@ -68,6 +70,14 @@ class GoogleLoginController extends Controller
         }
 
         $audit->record($created ? AuditLogger::AUTH_GOOGLE_REGISTER : AuditLogger::AUTH_GOOGLE_LOGIN, $user);
+
+        if ($created) {
+            try {
+                $user->notify(new OwnerWelcome);
+            } catch (Throwable $e) {
+                report($e); // the account exists; a queue outage shouldn't fail sign-in
+            }
+        }
 
         $token = $user->createToken('api')->plainTextToken;
 

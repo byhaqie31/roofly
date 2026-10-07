@@ -16,7 +16,7 @@ class AdminLeadsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public const LEAD_KEYS = ['id', 'email', 'source', 'firstSeenAt', 'lastSeenAt', 'pageViews', 'demoEntered', 'convertedUserId', 'convertedOwnerName'];
+    public const LEAD_KEYS = ['id', 'email', 'source', 'firstSeenAt', 'lastSeenAt', 'invitedAt', 'pageViews', 'demoEntered', 'convertedUserId', 'convertedOwnerName'];
     private const VID = '55555555-5555-4555-8555-555555555555';
 
     protected function setUp(): void

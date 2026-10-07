@@ -8,4 +8,6 @@ export interface AdminAnalyticsService {
   leads(query: LeadListQuery): Promise<Paginated<AdminLead>>;
   lead(id: string): Promise<AdminLeadDetail | null>;
   exportCsv(query: LeadListQuery): Promise<string>;
+  /** Emails a waitlist lead the sign-up invitation (re-send allowed); returns the updated lead. */
+  invite(id: string): Promise<AdminLead>;
 }

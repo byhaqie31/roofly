@@ -3,6 +3,7 @@ import type { AdminLead, AdminLeadDetail, LeadEvent, LeadListQuery } from "~/typ
 import { analyticsEventsMock, computeOverview, leadVisitorIds, leadsMock } from "~/demo/data/analytics";
 import { paginate } from "~/demo/services/admin/paginate";
 import { buildCsv } from "~/utils/csv";
+import { pushAudit } from "~/demo/data/admin";
 
 const filterLeads = (query: LeadListQuery): AdminLead[] => {
   let rows = [...leadsMock].sort((a, b) => b.lastSeenAt.localeCompare(a.lastSeenAt));
@@ -44,5 +45,17 @@ export const demoAdminAnalytics: AdminAnalyticsService = {
       ["email", "source", "firstSeenAt", "lastSeenAt", "pageViews", "demoEntered", "convertedOwnerName"],
       rows.map((l) => [l.email, l.source, l.firstSeenAt, l.lastSeenAt, l.pageViews, l.demoEntered ? "yes" : "no", l.convertedOwnerName]),
     );
+  },
+
+  // Mirrors AnalyticsController@invite: waitlist + not registered only, re-send bumps invitedAt.
+  async invite(id) {
+    const lead = leadsMock.find((l) => l.id === id);
+    if (!lead) throw Object.assign(new Error("Not found"), { statusCode: 404 });
+    if (lead.source !== "waitlist") throw Object.assign(new Error("Only waitlist enquiries can be invited."), { statusCode: 409 });
+    if (lead.convertedUserId) throw Object.assign(new Error("This email already has a Roofly account."), { statusCode: 409 });
+    const before = { invitedAt: lead.invitedAt };
+    lead.invitedAt = new Date().toISOString();
+    pushAudit({ action: "lead.invited", actorId: useAuthStore().user?.id ?? null, subjectType: "lead", subjectId: id, before, after: { invitedAt: lead.invitedAt }, reason: null });
+    return structuredClone(lead);
   },
 };

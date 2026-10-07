@@ -123,12 +123,14 @@ const buildDemoAnalytics = (): { events: AnalyticsEventMock[]; leads: AdminLead[
     if (e.event === "demo_enter") demoEnteredVisitors.add(e.visitorId);
   }
 
-  const leads: AdminLead[] = leadSeeds.map((l) => ({
+  const leads: AdminLead[] = leadSeeds.map((l, i) => ({
     id: l.id,
     email: l.email,
     source: "waitlist" as LeadSource,
     firstSeenAt: l.firstSeenAt,
     lastSeenAt: l.lastSeenAt,
+    // Every converted lead was invited first, plus every 7th waiting one.
+    invitedAt: l.convertedUserId || i % 7 === 3 ? l.lastSeenAt : null,
     pageViews: pageViewsByVisitor.get(l.visitorId) ?? 0,
     demoEntered: demoEnteredVisitors.has(l.visitorId),
     convertedUserId: l.convertedUserId,

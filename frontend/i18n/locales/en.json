@@ -1532,6 +1532,9 @@
         },
         "analytics": {
           "exported": "Leads exported"
+        },
+        "lead": {
+          "invited": "Waitlist invitation sent"
         }
       }
     },
@@ -1566,11 +1569,24 @@
         "email": "Email",
         "signedUp": "Signed up",
         "lastSeen": "Last seen",
-        "status": "Status"
+        "status": "Status",
+        "actions": "Invitation"
       },
       "status": {
         "waiting": "Waiting",
+        "invited": "Invited",
         "registered": "Registered"
+      },
+      "invite": {
+        "send": "Invite",
+        "resend": "Resend",
+        "invitedOn": "Invited {date}",
+        "title": "Send sign-up invitation",
+        "resendTitle": "Resend sign-up invitation",
+        "description": "Emails {email} the \"Your Roofly invitation is here\" message with a link to create their account.",
+        "lastSent": "Last sent {date}.",
+        "confirm": "Send invitation",
+        "sentToast": "Invitation sent to {email}"
       },
       "empty": "No enquiries yet",
       "emptyHelp": "Enquiries appear when someone submits the notify-me form on the coming-soon page."
