@@ -3,13 +3,17 @@ import { computed, onMounted, ref } from "vue";
 import Card from "~/components/ui/Card.vue";
 import Pill from "~/components/ui/Pill.vue";
 import Icon from "~/components/ui/Icon.vue";
+import Button from "~/components/ui/Button.vue";
+import Modal from "~/components/ui/Modal.vue";
 import EmptyState from "~/components/ui/EmptyState.vue";
 import AgreementDocumentsPanel from "~/components/owner/AgreementDocumentsPanel.vue";
+import { useToast } from "~/composables/useToast";
 import type { AgreementWithRefs } from "~/services/useAgreements";
 
 definePageMeta({ layout: "tenant" });
 const { t } = useI18n();
 const { formatRM } = useMoney();
+const { show } = useToast();
 const { tenantId } = useTenantSession();
 const { public: { features } } = useRuntimeConfig();
 const documentsEnabled = features.documents;
@@ -18,15 +22,58 @@ useHead({ title: () => t("tenant.nav.agreement") });
 const row = ref<AgreementWithRefs | null>(null);
 const loading = ref(true);
 
+const load = async () => {
+  if (tenantId.value) {
+    row.value = await useAgreements().getActiveAgreementForTenant(tenantId.value);
+  }
+};
+
 onMounted(async () => {
   try {
-    if (tenantId.value) {
-      row.value = await useAgreements().getActiveAgreementForTenant(tenantId.value);
-    }
+    await load();
   } finally {
     loading.value = false;
   }
 });
+
+// ── Review (spec 2026-10-07 agreement-review § 5): agree, or ask for changes ──
+const showAgree = ref(false);
+const showChanges = ref(false);
+const note = ref("");
+const acting = ref(false);
+const isPending = computed(() => row.value?.agreement.status === "pending_review");
+const isAccepted = computed(() => row.value?.agreement.status === "accepted");
+
+const agree = async () => {
+  if (!row.value || !tenantId.value) return;
+  acting.value = true;
+  try {
+    await useAgreements().acceptForTenant(tenantId.value, row.value.agreement.id);
+    await load();
+    showAgree.value = false;
+    show(t("tenant.agreement.review.agreedToast"), "success");
+  } catch {
+    show(t("common.genericError"), "danger");
+  } finally {
+    acting.value = false;
+  }
+};
+
+const sendNote = async () => {
+  if (!row.value || !tenantId.value || note.value.trim() === "") return;
+  acting.value = true;
+  try {
+    await useAgreements().requestChangesForTenant(tenantId.value, row.value.agreement.id, note.value.trim());
+    await load();
+    showChanges.value = false;
+    note.value = "";
+    show(t("tenant.agreement.review.changesSentToast"), "success");
+  } catch {
+    show(t("common.genericError"), "danger");
+  } finally {
+    acting.value = false;
+  }
+};
 
 const dayMs = 24 * 60 * 60 * 1000;
 const termSummary = computed(() => {
@@ -71,6 +118,41 @@ const formatDate = (iso: string) => {
     </Card>
 
     <div v-else class="space-y-4 sm:space-y-6">
+      <!-- Review card: the tenant's answer to what the landlord sent -->
+      <Card v-if="isPending" padding="loose" class="border-status-pending" data-testid="agreement-review">
+        <div class="flex items-start gap-3">
+          <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-pill bg-ink text-surface-page">
+            <Icon name="FileSignature" :size="16" />
+          </span>
+          <div class="min-w-0 flex-1">
+            <h2 class="text-card-title font-semibold text-ink">{{ t("tenant.agreement.review.title") }}</h2>
+            <p class="mt-1 text-caption text-ink-muted">{{ t("tenant.agreement.review.subtitle") }}</p>
+            <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+              <Button variant="primary" :disabled="acting" @click="showAgree = true">
+                <Icon name="Check" :size="14" class="mr-1" />
+                {{ t("tenant.agreement.review.agree") }}
+              </Button>
+              <Button variant="ghost" :disabled="acting" @click="showChanges = true">
+                <Icon name="MessageSquare" :size="14" class="mr-1" />
+                {{ t("tenant.agreement.review.requestChanges") }}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <Card v-else-if="isAccepted" padding="loose" class="border-status-paid">
+        <div class="flex items-start gap-3">
+          <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-pill bg-status-paid-soft text-status-paid">
+            <Icon name="CircleCheck" :size="16" />
+          </span>
+          <div>
+            <h2 class="text-card-title font-semibold text-ink">{{ t("tenant.agreement.review.agreedTitle") }}</h2>
+            <p class="mt-1 text-caption text-ink-muted">{{ t("tenant.agreement.review.agreedBody") }}</p>
+          </div>
+        </div>
+      </Card>
+
       <!-- Summary -->
       <Card padding="loose">
         <div class="mb-5 flex flex-wrap items-center gap-2">
@@ -169,5 +251,46 @@ const formatDate = (iso: string) => {
         <AgreementDocumentsPanel />
       </Card>
     </div>
+
+    <!-- Agree: restate the money terms before committing -->
+    <Modal :open="showAgree" :title="t('tenant.agreement.review.confirmTitle')" size="md" @update:open="showAgree = $event">
+      <p v-if="row" class="text-body text-ink">
+        {{ t("tenant.agreement.review.confirmBody", {
+          unit: `${row.property?.name ?? ""} · ${row.unit?.label ?? ""}`,
+          rent: formatRM(row.agreement.rentAmount),
+          start: formatDate(row.agreement.startDate),
+          end: formatDate(row.agreement.endDate),
+          deposit: formatRM(row.agreement.depositAmount),
+        }) }}
+      </p>
+      <template #footer>
+        <Button variant="ghost" :disabled="acting" @click="showAgree = false">{{ t("common.cancel") }}</Button>
+        <Button variant="primary" :loading="acting" @click="agree">{{ t("tenant.agreement.review.confirmCta") }}</Button>
+      </template>
+    </Modal>
+
+    <!-- Ask for changes: a short note the landlord sees on the agreement -->
+    <Modal :open="showChanges" :title="t('tenant.agreement.review.changesTitle')" size="md" @update:open="showChanges = $event">
+      <form id="agreement-changes-form" class="space-y-3" @submit.prevent="sendNote">
+        <p class="text-caption text-ink-muted">{{ t("tenant.agreement.review.changesHint") }}</p>
+        <label class="block">
+          <span class="mb-1 block text-caption font-medium text-ink">{{ t("tenant.agreement.review.noteLabel") }}</span>
+          <textarea
+            v-model="note"
+            rows="4"
+            maxlength="500"
+            required
+            :placeholder="t('tenant.agreement.review.notePlaceholder')"
+            class="w-full rounded-md border border-line-passive bg-surface-page px-3 py-2 text-body text-ink outline-none transition placeholder:text-ink-muted focus-visible:shadow-focus"
+          />
+        </label>
+      </form>
+      <template #footer>
+        <Button variant="ghost" :disabled="acting" @click="showChanges = false">{{ t("common.cancel") }}</Button>
+        <Button type="submit" form="agreement-changes-form" variant="primary" :loading="acting" :disabled="note.trim() === ''">
+          {{ t("tenant.agreement.review.sendNote") }}
+        </Button>
+      </template>
+    </Modal>
   </div>
 </template>

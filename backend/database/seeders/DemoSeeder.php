@@ -293,6 +293,10 @@ class DemoSeeder extends Seeder
                 // have no password. A known password lets local + UAT testers
                 // log in as a tenant through the normal form.
                 'password' => Hash::make('password'),
+                // Seeded tenants are "settled in" — only pending invites meet the
+                // tenant onboarding screen (spec 2026-10-07 § 4.4). The back-fill
+                // migration can't do this: it runs before the seeder.
+                'onboarded_at' => ($attrs['status'] ?? null) === 'invited' ? null : $createdAt,
             ]));
 
             $this->pinCreatedAt('users', $id, $createdAt);

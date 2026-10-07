@@ -17,7 +17,7 @@ export interface AuthUser {
   /** False for Google-only accounts — Settings → Profile offers "Set a password". */
   hasPassword: boolean;
   avatarUrl: string | null;
-  /** Owners only. `null` ⇒ the route guard sends them to /owner/onboarding. */
+  /** Owners and tenants. `null` ⇒ the route guard sends them to /owner/onboarding or /tenant/onboarding. Always `null` for admins. */
   onboardedAt: string | null;
   /** Owners only — `[]` until onboarded. */
   purposes: OwnerPurpose[];

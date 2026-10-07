@@ -5,6 +5,7 @@ import type {
   TenantsService,
 } from "~/services/contracts/tenants";
 import { tenantsMock } from "~/demo/data/tenants";
+import { demoSession } from "~/demo/auth";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -83,6 +84,15 @@ export const demoTenants: TenantsService = {
   async updateProfile(tenantId, patch) {
     const updated = await demoTenants.update(tenantId, patch);
     return toProfile(updated);
+  },
+
+  async completeOnboarding(tenantId, patch) {
+    const updated = await demoTenants.update(tenantId, patch);
+    return demoSession.update({
+      name: updated.name,
+      phone: updated.phone,
+      onboardedAt: new Date().toISOString(),
+    });
   },
 };
 

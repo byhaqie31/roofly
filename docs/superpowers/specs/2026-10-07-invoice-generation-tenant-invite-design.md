@@ -83,6 +83,18 @@ Email can fail silently (spam, typo, provider outage). Because only a token hash
 - Admin resend is unchanged (email only).
 - `TenantInvites` is split into `issue()` (token + url, no mail) and `send()` (issue + email); both return `{invite, url}`.
 
+### 4.4 Tenant onboarding (added 2026-10-07, approved in chat)
+
+Decisions: **mandatory, core fields required** (phone, MyKad number, emergency contact name + phone; everything else optional) and **home card + Profile second in the nav**.
+
+- `users.onboarded_at` is reused for tenants. `AuthUserResource.onboardedAt` is exposed for owners and tenants (still `null` for admins). Migration `2026_10_07_000003` back-fills non-invited tenants with `COALESCE(first_login_at, created_at)`; pending invites stay `null` and meet the screen right after `accept-invite`.
+- `PATCH /me/onboarding` (`CompleteTenantOnboardingRequest`) saves the profile columns and stamps `onboarded_at` idempotently, returning `AuthUserResource`.
+- `middleware/auth.global.ts` gains the tenant twin of the owner guard: `onboardedAt` falsy → `/tenant/onboarding`; onboarded tenants can't revisit it.
+- `/tenant/onboarding` (layout `onboarding`): three steps — About you (name, phone, MyKad, DOB, nationality defaulting to Malaysian), Work (optional), Emergency contact — with a segment progress bar, Back/Continue, per-step validation, and Finish. No skip link.
+- Tenant home shows `ProfileNudgeCard` at the top while `tenantProfileGaps()` reports a missing core field; it links to `/tenant/profile?edit=1`. The sidebar order becomes Home, Profile, Agreement, Payments, Issues.
+- Demo: stock tenant login is pre-onboarded; `acceptInvite` is not, so the flow is demoable from the owner's invite link.
+- **MyKad input (2026-10-07):** no dashes to type. `utils/mykad.ts` / `App\Support\MyKad` accept 12 digits in any spacing, store the dashed canonical form, format live as the tenant types, and derive `dateOfBirth` from `YYMMDD` (current century unless that lands in the future). Applied on the onboarding page, the tenant profile form and the owner's personal form; the backend repeats it in all three write requests so API clients behave the same.
+
 ## 5. Out of scope (recorded so nobody expects it)
 
 Back-filling historical invoices or payments · owner-side "resend email" button (admin has one; the owner's backup is the copy / WhatsApp link in § 4.3, and the tenant can also use Forgot password) · WhatsApp · rent reminders · automatic agreement expiry · Billplz · changing already-generated invoices when rent is edited · demo-adapter regeneration on `demoAgreements.create` (demo invoices stay precomputed from `agreementsMock`; documented in API-MAP).

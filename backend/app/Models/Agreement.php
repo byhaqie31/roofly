@@ -29,6 +29,16 @@ class Agreement extends Model implements HasMedia
         'late_fee_cents',
         'rent_due_day',
         'status',
+        'sent_at',
+        'accepted_at',
+        'changes_requested_at',
+        'review_note',
+    ];
+
+    /** Columns the tenant agreed to — changing any of them while under review drops back to draft. */
+    public const TERM_COLUMNS = [
+        'unit_id', 'tenant_id', 'start_date', 'end_date',
+        'rent_amount_cents', 'deposit_amount_cents', 'late_fee_cents', 'rent_due_day',
     ];
 
     protected function casts(): array
@@ -37,6 +47,9 @@ class Agreement extends Model implements HasMedia
             'status'     => AgreementStatus::class,
             'start_date' => 'date',
             'end_date'   => 'date',
+            'sent_at'              => 'datetime',
+            'accepted_at'          => 'datetime',
+            'changes_requested_at' => 'datetime',
         ];
     }
 

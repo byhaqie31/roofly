@@ -19,6 +19,11 @@ class AgreementResource extends JsonResource
             'lateFee'       => $this->late_fee_cents,
             'rentDueDay'    => $this->rent_due_day,
             'status'        => $this->status?->value,
+            // Review flow (spec 2026-10-07 agreement-review)
+            'sentAt'             => $this->sent_at?->toISOString(),
+            'acceptedAt'         => $this->accepted_at?->toISOString(),
+            'changesRequestedAt' => $this->changes_requested_at?->toISOString(),
+            'reviewNote'         => $this->review_note,
             'createdAt'     => $this->created_at?->toISOString(),
         ];
     }

@@ -1,7 +1,12 @@
 import { z } from "zod";
 
+// pending_review / accepted are valid *current* values (the form shows them
+// disabled) but the API refuses them as a manual choice — only the send /
+// agree flow reaches them.
 const agreementStatusSchema = z.enum([
   "draft",
+  "pending_review",
+  "accepted",
   "active",
   "expired",
   "terminated",

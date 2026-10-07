@@ -14,7 +14,11 @@ class TenantAgreementController extends Controller
     {
         $base = Agreement::where('tenant_id', $request->user()->id);
 
+        // Active tenancy first; then one awaiting the tenant's answer (or already
+        // agreed, waiting on the owner); then history. A pending agreement must
+        // outrank an old expired one or the tenant never sees it.
         $agreement = (clone $base)->where('status', 'active')->latest()->first()
+            ?? (clone $base)->whereIn('status', ['pending_review', 'accepted'])->orderByDesc('updated_at')->first()
             ?? (clone $base)->where('status', '!=', 'draft')->orderByDesc('start_date')->first();
 
         if (! $agreement) {

@@ -777,6 +777,24 @@ See [layouts/onboarding.vue](../../frontend/app/layouts/onboarding.vue) + [pages
 - **Pinned to light theme** (`data-theme="light"` on the layout root) — the owner arrives here straight from the (always-light) auth/signup flow, and onboarding is still part of that first-run moment, so the visual experience stays continuous rather than snapping to a previously-set dark preference.
 - **One question, one primary action, one skip.** A single picker (`OwnerPurposePicker`), a full-width primary button that's disabled until at least one purpose is chosen, and a muted underlined "skip" text-link beneath it that submits a sensible default rather than leaving the screen with no way forward.
 
+### 11.19a Multi-step onboarding (tenant)
+
+See [pages/tenant/onboarding.vue](../../frontend/app/pages/tenant/onboarding.vue). Same `onboarding` layout as 11.19, with three short steps instead of one picker.
+
+- **Step indicator is text + segments, not a numbered stepper.** A `text-micro` uppercase "Step 1 of 3" above the title, and a row of `h-1` pill segments (filled `bg-ink` up to the current step, `bg-line-passive` after). No labels on the segments — the title changes per step instead.
+- **Each step validates only its own fields** before Continue advances; the final step's button becomes Finish and submits everything. Server-side field errors are mapped back onto the flat form and the view jumps to the earliest step that has one.
+- **Action row stacks on mobile** (`flex-col-reverse gap-3`) so the primary button is thumb-reachable at the bottom, and goes `sm:flex-row sm:justify-between` with Back on the left from `sm:` up. Back is rendered `invisible` (not removed) on step 1 so the primary button doesn't jump.
+- **Mandatory flows have no skip link.** When the data is required for the product to work (here, what the landlord needs for the agreement), don't offer "skip for now" — mark optional fields with "· Optional" in their label instead.
+- **Identity numbers format themselves.** MyKad fields accept bare digits (`inputmode="numeric"`), insert the dashes live via `utils/mykad.ts`'s `formatMyKadInput`, and derive dependent fields (date of birth) instead of asking twice. The derived field stays editable for the rare mismatch.
+
+### 11.19b Detail-page action group with icon-only destructive action
+
+See [pages/owner/agreements/[id].vue](../../frontend/app/pages/owner/agreements/[id].vue) header.
+
+- **One primary state action, then the destructive one as an icon.** The header's right side is a `flex flex-wrap gap-2` group: the single most useful next step for the record's current status (Send / Withdraw / Activate) rendered as a real labelled button, followed by Delete as a `ghost` `size="sm"` **icon-only** button (`Trash2`, `!px-2`, `aria-label` + `title`). Delete never competes visually with the forward action.
+- **Same group on every width** — it wraps under the title on mobile (`mt-4 sm:mt-0`) instead of a second mobile-only copy in the top bar.
+- **State banner lives in the content, not the header.** Where the record is in a flow (sent on…, agreed on…, changes requested + note) is a bordered `role="status"` strip at the top of the Overview tab using the matching status soft tokens; the header pill stays a one-word status.
+
 ### 11.20 Auth pages: social button above the form
 
 See [pages/auth/login.vue](../../frontend/app/pages/auth/login.vue) / [pages/auth/register.vue](../../frontend/app/pages/auth/register.vue) + [components/auth/GoogleSignInButton.vue](../../frontend/app/components/auth/GoogleSignInButton.vue).

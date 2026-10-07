@@ -11,10 +11,11 @@ const { t } = useI18n();
 
 const items = computed(() => [
   { to: "/tenant", label: t("tenant.nav.home"), icon: DoorOpen, exact: true },
+  // Profile sits right after Home: it's the first thing a new tenant must finish.
+  { to: "/tenant/profile", label: t("tenant.nav.profile"), icon: UserIcon },
   { to: "/tenant/agreement", label: t("tenant.nav.agreement"), icon: FileText },
   { to: "/tenant/payments", label: t("tenant.nav.payments"), icon: Receipt },
   { to: "/tenant/tickets", label: t("tenant.nav.tickets"), icon: Wrench },
-  { to: "/tenant/profile", label: t("tenant.nav.profile"), icon: UserIcon },
 ]);
 </script>
 

@@ -13,6 +13,10 @@ const statusTone = (status: AgreementStatus) => {
   switch (status) {
     case "draft":
       return "draft";
+    case "pending_review":
+      return "pending_review";
+    case "accepted":
+      return "accepted";
     case "active":
       return "active";
     case "expired":

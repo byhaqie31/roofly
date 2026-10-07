@@ -26,6 +26,17 @@ export interface AgreementsService {
     tenantId: string,
   ): Promise<AgreementWithRefs | null>;
   create(input: AgreementInput): Promise<Agreement>;
+  /** Term edits while `pending_review`/`accepted` come back as `draft` — check the response status. */
   update(id: string, patch: AgreementUpdate): Promise<Agreement>;
   remove(id: string): Promise<void>;
+
+  // ── Review flow (spec 2026-10-07 agreement-review) ──
+  /** draft → pending_review; the tenant is emailed. */
+  send(id: string): Promise<Agreement>;
+  /** pending_review → draft without an answer. */
+  withdraw(id: string): Promise<Agreement>;
+  /** Tenant: pending_review → accepted. `tenantId` is only used by demo. */
+  acceptForTenant(tenantId: string, agreementId: string): Promise<Agreement>;
+  /** Tenant: pending_review → draft with a note the owner sees. */
+  requestChangesForTenant(tenantId: string, agreementId: string, note: string): Promise<Agreement>;
 }

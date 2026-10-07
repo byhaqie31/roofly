@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\MyKad;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateTenantProfileRequest extends FormRequest
@@ -19,6 +20,15 @@ class UpdateTenantProfileRequest extends FormRequest
             'personal'         => 'nullable|array',   // camelCase interior stored verbatim
             'emergencyContact' => 'nullable|array',
         ];
+    }
+
+    /** MyKad: accept bare digits, store dashed; default date of birth from it. */
+    protected function prepareForValidation(): void
+    {
+        $personal = $this->input('personal');
+        if (is_array($personal)) {
+            $this->merge(['personal' => MyKad::applyToPersonal($personal)]);
+        }
     }
 
     public function toModelAttributes(): array

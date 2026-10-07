@@ -17,7 +17,8 @@ class AuthUserResource extends JsonResource
                 ? AdminPermissions::keys()
                 : $this->getPermissionNames()->values()->all());
 
-        $isOwner = $this->role === UserRole::OWNER;
+        $isOwner  = $this->role === UserRole::OWNER;
+        $isTenant = $this->role === UserRole::TENANT;
 
         return [
             'id'                   => $this->id,
@@ -29,7 +30,8 @@ class AuthUserResource extends JsonResource
             'isSuperAdmin'         => (bool) $this->is_super_admin,
             'hasPassword'          => $this->password !== null,
             'avatarUrl'            => $this->avatar_url,
-            'onboardedAt'          => $isOwner ? $this->onboarded_at?->toISOString() : null,
+            // Owners (purpose picker) and tenants (profile steps) both onboard; admins don't.
+            'onboardedAt'          => ($isOwner || $isTenant) ? $this->onboarded_at?->toISOString() : null,
             'purposes'             => $isOwner ? ($this->purposes ?? []) : [],
             'checklistDismissedAt' => $isOwner ? $this->checklist_dismissed_at?->toISOString() : null,
         ];
