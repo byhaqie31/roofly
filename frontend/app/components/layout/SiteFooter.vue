@@ -6,15 +6,18 @@
  * footer block in a layout — extend this component instead.
  *
  * Tone defaults to a dark surface (matches marketing/auth layout charcoal pane).
- * Pass `tone="light"` on light surfaces to flip the colour palette.
+ * Pass `tone="light"` on light surfaces to flip the colour palette, and
+ * `compact` where the footer is a slim band (auth layout) rather than the end
+ * of a long page.
  */
 type Tone = "dark" | "light";
 
 const props = withDefaults(
   defineProps<{
     tone?: Tone;
+    compact?: boolean;
   }>(),
-  { tone: "dark" },
+  { tone: "dark", compact: false },
 );
 
 const year = new Date().getFullYear();
@@ -38,7 +41,8 @@ const palette = computed(() =>
 
 <template>
   <footer
-    class="relative z-10 px-6 lg:px-12 py-8 mt-16 border-t"
+    class="relative z-10 px-6 lg:px-12 border-t"
+    :class="compact ? 'py-3' : 'py-8 mt-16'"
     :style="{ borderColor: palette.border }"
   >
     <div
