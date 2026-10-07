@@ -514,8 +514,8 @@ USERS (owner | tenant | admin)
 | Plan | Price | Units | Best for |
 |---|---|---|---|
 | **Free** | RM 0/mo | 2 | Single property owners trying it out |
-| **Starter** | RM 29/mo | 5 | Small landlords |
-| **Pro** | RM 79/mo | 25 | Growing portfolios |
+| **Starter** | RM 49/mo | 5 | Small landlords |
+| **Pro** | RM 99/mo | 25 | Growing portfolios |
 | **Business** | RM 199/mo | Unlimited | Agents & multi-org |
 
 **Beta strategy:** Free during beta (first 6 months) to gather feedback and case studies. Forever-free plan continues post-beta.

@@ -364,6 +364,11 @@
       }
     },
     "agreements": {
+      "term": {
+        "months": "{n} months",
+        "custom": "Custom",
+        "endsOn": "Ends {date}"
+      },
       "review": {
         "send": "Send to tenant",
         "sending": "Sending…",
@@ -402,6 +407,7 @@
         "unit": "Unit",
         "tenant": "Tenant",
         "startDate": "Start date",
+        "term": "Term",
         "endDate": "End date",
         "rentAmount": "Monthly rent (RM)",
         "depositAmount": "Security deposit (RM)",
