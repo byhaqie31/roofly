@@ -276,7 +276,9 @@
     },
     "promo": {
       "eyebrow": "Sneak peek",
-      "title": "Preview Roofly before it launches."
+      "title": "Preview Roofly before it launches.",
+      "unmute": "Unmute video",
+      "mute": "Mute video"
     },
     "usps": {
       "eyebrow": "What's coming",

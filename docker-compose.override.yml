@@ -30,6 +30,10 @@ services:
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
+      # Local mail goes to Mailpit (inbox UI at http://localhost:8025).
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=mailpit
+      - MAIL_PORT=1025
     command: php artisan serve --host=0.0.0.0 --port=9000
     # Publish the dev server directly — nginx expects php-fpm and can't proxy
     # `artisan serve`, so local API testing hits this port instead.
@@ -45,6 +49,10 @@ services:
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
+      # Local mail goes to Mailpit (inbox UI at http://localhost:8025).
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=mailpit
+      - MAIL_PORT=1025
 
   scheduler:
     build:
@@ -72,6 +80,19 @@ services:
     ports:
       - "${RABBITMQ_PORT_EXPOSE:-5672}:5672"
       - "${RABBITMQ_MGMT_PORT:-15672}:15672"
+
+  # ── Mailpit (local-only mail catcher) ──────────────────────────────────────
+  # Every email the backend / queue-worker sends lands here instead of a real
+  # inbox: open http://localhost:8025. Emails are queued, so queue-worker must
+  # be running too (`docker compose up -d mailpit queue-worker`).
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-roofly}-mailpit
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+    networks:
+      - roofly
 
   # ── phpMyAdmin (local-only DB browser) ─────────────────────────────────────
   phpmyadmin:

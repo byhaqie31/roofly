@@ -261,7 +261,9 @@
     },
     "promo": {
       "eyebrow": "Intipan awal",
-      "title": "Lihat Roofly sebelum ia dilancarkan."
+      "title": "Lihat Roofly sebelum ia dilancarkan.",
+      "unmute": "Hidupkan bunyi video",
+      "mute": "Matikan bunyi video"
     },
     "usps": {
       "eyebrow": "Yang akan datang",

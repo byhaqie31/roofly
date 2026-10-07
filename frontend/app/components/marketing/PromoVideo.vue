@@ -1,50 +1,10 @@
 <script setup lang="ts">
-// Promo reel for the coming-soon page. Files live in public/marketing/promo/
-// (see the README there): a landscape cut for md+ and a portrait cut below.
-// The source is picked client-side via matchMedia so each device downloads
-// only its own file; a missing file hides the whole section.
-const MD_QUERY = "(min-width: 768px)";
-const BASE = "/marketing/promo";
-
+// Promo reel section on the coming-soon page. Playback (cut selection,
+// in-view autoplay, missing-file detection) lives in usePromoVideo; a
+// missing file hides the whole section.
 const { t } = useI18n();
-const variant = ref<"web" | "mobile" | null>(null);
-const failed = ref(false);
 const video = ref<HTMLVideoElement | null>(null);
-
-const src = computed(() => (variant.value ? `${BASE}/promo-${variant.value}.mp4` : ""));
-const poster = computed(() => (variant.value ? `${BASE}/promo-${variant.value}-poster.webp` : undefined));
-
-let mql: MediaQueryList | null = null;
-let observer: IntersectionObserver | null = null;
-const pickVariant = () => {
-  variant.value = mql?.matches ? "web" : "mobile";
-  failed.value = false;
-};
-
-onMounted(() => {
-  mql = window.matchMedia(MD_QUERY);
-  pickVariant();
-  mql.addEventListener("change", pickVariant);
-});
-
-// Autoplay (muted) only while on screen, and never for reduced-motion users.
-watch(video, (el) => {
-  observer?.disconnect();
-  if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  observer = new IntersectionObserver(
-    ([entry]) => {
-      if (entry?.isIntersecting) el.play().catch(() => {});
-      else el.pause();
-    },
-    { threshold: 0.4 },
-  );
-  observer.observe(el);
-});
-
-onBeforeUnmount(() => {
-  mql?.removeEventListener("change", pickVariant);
-  observer?.disconnect();
-});
+const { variant, src, poster, failed } = usePromoVideo(video);
 </script>
 
 <template>
