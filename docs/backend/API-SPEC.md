@@ -2,7 +2,7 @@
 
 First-cut reference for the Laravel API — organised per shell → per module → per endpoint. Accuracy over prose: every field/rule below was read from `backend/routes/api.php`, the controllers, FormRequests, and Resources, not invented. Cross-link: [docs/frontend/API-MAP.md](../frontend/API-MAP.md) — how the frontend consumes this contract, per page.
 
-Route count documented: **97** (`POST /admin/analytics/leads/{lead}/invite` + 90 above baseline + `POST /auth/google`, `POST /auth/forgot-password`, `POST /auth/reset-password`, `PATCH /account/onboarding`, `PATCH /account/checklist`, `POST /account/password` from `.superpowers/sdd/2026-08-23-google-login-owner-onboarding/`).
+Route count documented: **100** (`POST /support/enquiries`, `GET /admin/enquiries`, `PATCH /admin/enquiries/{enquiry}` + `POST /admin/analytics/leads/{lead}/invite` + 90 above baseline + `POST /auth/google`, `POST /auth/forgot-password`, `POST /auth/reset-password`, `PATCH /account/onboarding`, `PATCH /account/checklist`, `POST /account/password` from `.superpowers/sdd/2026-08-23-google-login-owner-onboarding/`).
 
 ---
 
@@ -57,6 +57,7 @@ No auth required except where noted. Base path `/api`.
 |---|---|---|---|---|---|
 | POST | `/auth/logout` | `Authenticate:sanctum`, `touch-active` | — | `204` | Deletes only the current access token (`$request->user()->currentAccessToken()->delete()`). |
 | GET | `/auth/me` | `Authenticate:sanctum`, `touch-active` | — | `200` `AuthUserResource` | Works for owner, tenant, and admin. Frontend/admin-portal use this to detect a suspended owner without a failed login. |
+| POST | `/support/enquiries` | `Authenticate:sanctum`, `touch-active`, `throttle:support` (20/hour/user) | body: `type` (required, `issue\|feedback\|question`), `message` (required, string 5–5000), `pageUrl` (nullable, ≤500) | `201` `{id}` | The in-app **Help & feedback** button. Owner or tenant only (role checked in the controller, `403` otherwise) and deliberately **outside** `not-suspended`, so a suspended owner can still write in. Copies `name`/`email`/`role` from the session into the new `enquiries` row (`status: new`), then `SuperAdminAlerts` emails every active super admin `App\Notifications\AdminNewSupportEnquiry` (`emails/admin-alert`, `Reply-To` the sender, button to `FRONTEND_URL/admin/enquiries?tab=messages`). |
 
 ---
 
@@ -236,6 +237,15 @@ Read-only platform analytics (marketing-site funnel + leads). Counts only — ne
 | GET | `/admin/analytics/leads/{lead}` | `analytics.view` | — | `200` `AdminLeadResource` `+ {events: LeadEventResource[]}` (latest 20 by `created_at`, only if the lead has a `visitor_id`) | Same per-lead decoration as the list. |
 | POST | `/admin/analytics/leads/{lead}/invite` | `analytics.view` + `broadcast.send` | — | `200` `AdminLeadResource` (updated `invitedAt`) | Emails the lead `App\Notifications\WaitlistInvitation` on demand (branded "Your Roofly invitation is here", `emails/waitlist-invitation(-text)`), button to `config('app.invite_signup_url')` (env `INVITE_SIGNUP_URL`, blank = `FRONTEND_URL/auth/register`; production → UAT's register page during the beta hunt) with `?email=` appended so the register form prefills. `409` if `source !== 'waitlist'`, or the lead is converted / a `users` row already has that email. Re-send allowed — bumps `leads.invited_at`. Mail is sent before `invited_at` is set, so a queue failure surfaces as an error and the lead stays un-invited. Logs `lead.invited` (subject = the lead; `AuditEntryResource.subjectName` = lead email). |
 
+### Enquiries (Messages tab)
+
+| Method | Path | `can:` | Request | Response | Notes |
+|---|---|---|---|---|---|
+| GET | `/admin/enquiries` | `support.manage` | query: `q` (name/email/message like-search), `status` (`new\|replied\|closed`), `type` (`issue\|feedback\|question`), `page`, `perPage` (default 20, clamped 1–100) | `200` `{data: AdminEnquiryResource[], meta:{page, perPage, total, lastPage, newCount}}` | Newest first. `newCount` = all `status: new` rows (for the tab badge), ignoring filters. `422` on an unknown status/type. |
+| PATCH | `/admin/enquiries/{enquiry}` | `support.manage` | body: `status?` (`new\|replied\|closed`), `adminNote?` (nullable, ≤5000) | `200` `AdminEnquiryResource` | Track only — no reply is sent. Sets `handled_by` to the caller; `status_changed_at` only moves when the status actually changes. Logs `enquiry.updated` (before/after status + note; `AuditEntryResource.subjectName` = sender name). |
+
+---
+
 ### Tenants
 
 | Method | Path | `can:` | Request | Response | Notes |
@@ -289,6 +299,7 @@ Key lists below are read directly from each `toArray()`. `?` marks a value that 
 - **`TicketWithRefsResource`** — `{ticket, unit?, property?, reporter: TenantResource? (null for owner-reported tickets), comments: TicketCommentResource[] (sorted by created_at)}`
 - **`UnitResource`** — `id, propertyId, label, bedrooms?, bathrooms?, sqft?, status?, createdAt?`
 - **`Admin\AdminLeadResource`** — `id, email, source ("waitlist"|"demo"|"register"), firstSeenAt, lastSeenAt, invitedAt?, pageViews: int, demoEntered: bool, convertedUserId?, convertedOwnerName?` (`pageViews`/`demoEntered` are controller-set attributes, not model columns — see the Analytics endpoints above)
+- **`Admin\AdminEnquiryResource`** — `id, type, status, message, pageUrl?, name, email, role? ("owner"|"tenant"), userId?, adminNote?, handledByName?, statusChangedAt?, createdAt` (pinned by `AdminEnquiriesTest::ENQUIRY_KEYS`).
 - **`Admin\AdminOwnerResource`** — `id, name, email, phone?, businessName?, planTier ("free" default), unitsUsed, unitsCap (int? — null = unlimited), status ("active"|"suspended"), suspendedAt?, suspensionReason?, createdAt?, lastActiveAt?, counts:{properties, units, unitsOccupied, tenants, agreementsActive, agreementsExpiring30d, invoicesOverdue, ticketsOpen}`
 - **`Admin\AdminPropertySummaryResource`** — `id, name, address:{line, postcode, city, state}, type?, unitsTotal, unitsOccupied, createdAt?`
 - **`Admin\AdminTenantResource`** — `id, name, email, phone?, status, ownerId?, ownerName?, propertyName?, unitLabel?, invitedAt?, acceptedAt?, createdAt?` (`ownerId`/`ownerName` prefer the direct inviter, fall back to the most-relevant agreement's property owner)

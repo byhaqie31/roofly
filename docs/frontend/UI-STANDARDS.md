@@ -828,6 +828,8 @@ See [components/marketing/HeroSection.vue](../../frontend/app/components/marketi
 - **Overlay stays.** Keep the `#1c1a17` top/bottom gradient (≈0.76 at 35 %, ≈0.64 at 65 %) above the stack (`z-[3]`) so the headline keeps AA contrast over any photo — the photos are a glimpse, not the subject. If a photo still reads too bright under it, darken the photo, not the copy.
 - Same behaviour on mobile and desktop — no responsive switch; the crop and the overlay do the work.
 
+**Floating buttons own a corner each** — bottom-left: the UAT `EnvBanner`; bottom-right: the owner/tenant **Help & feedback** button (`SupportWidget`, icon-only on mobile, label slides out on hover/focus from `md:`) or, in demo, the Google Form `FloatingFeedback` (never both — `showSupportWidget` is `!isDemo`). Don't add a third floating control in either corner.
+
 ## 12. Hard rules — do not break
 
 1. Page background is **always** `#F7F4ED` (light) or `#1C1A17` (dark). Pure white only inside generated PDFs.

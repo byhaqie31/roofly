@@ -281,6 +281,28 @@
       "submitting": "Menghantar…"
     }
   },
+  "support": {
+    "button": "Bantuan & maklum balas",
+    "title": "Bagaimana kami boleh bantu?",
+    "description": "Mesej anda terus sampai kepada pasukan Roofly. Kami akan balas melalui e-mel ke {email}.",
+    "typeLabel": "Tentang apa?",
+    "types": {
+      "issue": "Laporkan masalah",
+      "feedback": "Maklum balas",
+      "question": "Soalan"
+    },
+    "messageLabel": "Mesej",
+    "placeholders": {
+      "issue": "Apa yang tidak kena, dan apa yang anda jangkakan?",
+      "feedback": "Apa yang anda suka, atau apa yang boleh menjadikan Roofly lebih baik?",
+      "question": "Tanya apa sahaja tentang penggunaan Roofly."
+    },
+    "pageNote": "Kami akan sertakan halaman yang anda buka supaya kami nampak masalahnya.",
+    "tooShort": "Sila tulis sedikit lagi (sekurang-kurangnya 5 aksara).",
+    "send": "Hantar mesej",
+    "sentTitle": "Mesej dihantar",
+    "sentBody": "Terima kasih! Pasukan Roofly akan menghubungi anda di {email}."
+  },
   "validation": {
     "required": "Ruangan ini wajib diisi",
     "email": "Sila masukkan alamat emel yang sah",

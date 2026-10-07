@@ -66,6 +66,9 @@ export const useEnv = () => {
     showDemoShortcuts: isDemo,
     showFloatingFeedback: isDemo && Boolean(config.public.demoFeedbackUrl),
     showEnvBanner: isUat,
+    // In-app help button (owner + tenant shells → admin Enquiries → Messages).
+    // Demo keeps its Google Form button instead: demo never reaches the backend.
+    showSupportWidget: !isDemo,
     redirectRootToDemo: isDemo,
 
     // Beta-tester hunt: production's public site is only /coming-soon (every

@@ -39,5 +39,6 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('track', fn (Request $request) => Limit::perMinute(120)->by('track:' . $request->ip()));
         RateLimiter::for('waitlist', fn (Request $request) => Limit::perMinute(5)->by('waitlist:' . $request->ip()));
+        RateLimiter::for('support', fn (Request $request) => Limit::perHour(20)->by('support:' . ($request->user()?->id ?? $request->ip())));
     }
 }

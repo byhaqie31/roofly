@@ -7,9 +7,10 @@ import LangSwitcher from "~/components/topbar/LangSwitcher.vue";
 import UserMenu from "~/components/topbar/UserMenu.vue";
 import MobileNavDrawer from "~/components/layout/MobileNavDrawer.vue";
 import DemoTourButton from "~/components/demo/DemoTourButton.vue";
+import SupportWidget from "~/components/layout/SupportWidget.vue";
 
 const drawerOpen = ref(false);
-const { isDemo } = useEnv();
+const { isDemo, showSupportWidget } = useEnv();
 </script>
 
 <template>
@@ -73,5 +74,7 @@ const { isDemo } = useEnv();
         </div>
       </main>
     </div>
+    <!-- Help & feedback → admin Enquiries → Messages (hidden in demo). -->
+    <SupportWidget v-if="showSupportWidget" />
   </div>
 </template>

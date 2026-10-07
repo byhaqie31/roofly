@@ -22,6 +22,7 @@ const TONE: Record<AuditAction, Tone> = {
   "tenant.invite_resent": "neutral",
   "analytics.exported": "neutral",
   "lead.invited": "neutral",
+  "enquiry.updated": "neutral",
   "owner.signup": "draft",
 };
 

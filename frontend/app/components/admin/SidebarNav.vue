@@ -5,7 +5,8 @@ import type { AdminPermission } from "~/types/admin";
 const { t } = useI18n();
 const { can } = useAdminPermissions();
 
-type Item = { to: string; label: string; icon: unknown; exact?: boolean; needs?: AdminPermission };
+// `needs` as an array = any one of them (Enquiries has two tabs with different permissions).
+type Item = { to: string; label: string; icon: unknown; exact?: boolean; needs?: AdminPermission | AdminPermission[] };
 
 const items = computed<Item[]>(() =>
   (
@@ -13,12 +14,12 @@ const items = computed<Item[]>(() =>
       { to: "/admin", label: t("admin.nav.dashboard"), icon: LayoutDashboard, exact: true, needs: "dashboard.view" },
       { to: "/admin/owners", label: t("admin.nav.owners"), icon: Building2, needs: "owners.view" },
       { to: "/admin/tenants", label: t("admin.nav.tenants"), icon: Users, needs: "tenants.view" },
-      { to: "/admin/enquiries", label: t("admin.nav.enquiries"), icon: Inbox, needs: "analytics.view" },
+      { to: "/admin/enquiries", label: t("admin.nav.enquiries"), icon: Inbox, needs: ["support.manage", "analytics.view"] },
       { to: "/admin/analytics", label: t("admin.nav.analytics"), icon: ChartBar, needs: "analytics.view" },
       { to: "/admin/audit", label: t("admin.nav.audit"), icon: ScrollText },
       { to: "/admin/settings", label: t("admin.nav.settings"), icon: Settings, needs: "admins.manage" },
     ] as Item[]
-  ).filter((i) => !i.needs || can(i.needs)),
+  ).filter((i) => !i.needs || (Array.isArray(i.needs) ? i.needs.some((p) => can(p)) : can(i.needs))),
 );
 </script>
 

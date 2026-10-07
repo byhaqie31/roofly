@@ -2,6 +2,7 @@
 // backend/app/Http/Resources/Admin/AuditEntryResource.php
 namespace App\Http\Resources\Admin;
 
+use App\Models\Enquiry;
 use App\Models\Lead;
 use App\Models\User;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -24,6 +25,7 @@ class AuditEntryResource extends JsonResource
             'subjectName' => match (true) {
                 $this->subject instanceof User => $this->subject->name,
                 $this->subject instanceof Lead => $this->subject->email,
+                $this->subject instanceof Enquiry => $this->subject->name,
                 default                        => null,
             },
             'before'      => (object) ($props['before'] ?? []),
