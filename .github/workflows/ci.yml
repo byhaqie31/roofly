@@ -1,0 +1,74 @@
+name: CI
+
+# Runs on every push to every branch. `backend` and `frontend` are required
+# status checks on the protect-UAT and protect-main rulesets — keep those job
+# names stable (see docs/global/BRANCH-PROTECTION.md). A PR's required checks
+# are satisfied by the push run on its head commit, so there is no separate
+# pull_request trigger (it would only run everything twice).
+#
+# demo-roofly is skipped: it only ever merges UAT (already gated) and its
+# backend/ is an empty placeholder, so the backend job can't run there.
+
+on:
+  push:
+    branches-ignore: [demo-roofly]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v5
+
+      # Mirrors backend/Dockerfile's extensions; tests run on sqlite in-memory
+      # (phpunit.xml), so no MySQL / Redis / RabbitMQ service is needed.
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, exif, sockets, bcmath, pcntl, gd, zip, pdo_sqlite
+          coverage: none
+
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare env
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - run: php artisan test
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
+      # Production build catches SFC compile errors vue-tsc misses.
+      - run: npm run build
