@@ -107,4 +107,60 @@ class TenantInviteTest extends TestCase
 
         $this->assertSame('active', $tenant->fresh()->status);
     }
+
+    // ── Owner backup: copy / share the link (spec 2026-10-07 § 4.3) ─────────
+
+    public function test_invite_response_carries_the_same_link_as_the_email(): void
+    {
+        Notification::fake();
+        Sanctum::actingAs(User::factory()->owner()->create());
+
+        $res = $this->postJson('/api/tenants/invite', ['name' => 'Adi', 'email' => 'adi@example.com', 'phone' => '+60 1'])
+            ->assertCreated();
+
+        $tenant = User::where('email', 'adi@example.com')->firstOrFail();
+        $emailed = null;
+        Notification::assertSentTo($tenant, TenantInvite::class, function (TenantInvite $n) use ($tenant, &$emailed) {
+            $emailed = $n->url($tenant);
+            return true;
+        });
+        $this->assertSame($emailed, $res->json('inviteUrl'));
+        $this->assertNotNull($res->json('inviteExpiresAt'));
+    }
+
+    public function test_owner_can_mint_a_fresh_invite_link_without_sending_mail(): void
+    {
+        Notification::fake();
+        $owner = User::factory()->owner()->create();
+        $tenant = User::factory()->invitedTenant()->create(['email' => 'adi@example.com', 'password' => null, 'invited_by' => $owner->id]);
+        $old = $this->invite($tenant, 'old-token');
+        Sanctum::actingAs($owner);
+
+        $res = $this->postJson("/api/tenants/{$tenant->id}/invite-link")->assertOk();
+
+        $this->assertSame(['inviteUrl', 'inviteExpiresAt'], array_keys($res->json()));
+        $this->assertNotNull($old->fresh()->accepted_at); // earlier links stop working
+        Notification::assertNothingSent();
+
+        // The returned link actually works.
+        parse_str(parse_url($res->json('inviteUrl'), PHP_URL_QUERY), $q);
+        $this->assertSame('adi@example.com', $q['email']);
+        $this->postJson('/api/auth/accept-invite', [
+            'token' => $q['token'], 'email' => $q['email'],
+            'password' => 'newsecret1', 'password_confirmation' => 'newsecret1',
+        ])->assertOk();
+        $this->assertSame('active', $tenant->fresh()->status);
+    }
+
+    public function test_invite_link_is_refused_for_active_tenants_and_other_owners(): void
+    {
+        $owner = User::factory()->owner()->create();
+        Sanctum::actingAs($owner);
+
+        $active = User::factory()->tenant()->create(['invited_by' => $owner->id]);
+        $this->postJson("/api/tenants/{$active->id}/invite-link")->assertStatus(409);
+
+        $someoneElses = User::factory()->invitedTenant()->create(['invited_by' => User::factory()->owner()->create()->id]);
+        $this->postJson("/api/tenants/{$someoneElses->id}/invite-link")->assertStatus(403);
+    }
 }

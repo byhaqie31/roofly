@@ -25,9 +25,7 @@ class TenantInvite extends Notification implements ShouldQueue
 
     public function url(object $notifiable): string
     {
-        return rtrim(config('app.frontend_url'), '/')
-            . '/auth/accept-invite?token=' . $this->plainToken
-            . '&email=' . urlencode($notifiable->email);
+        return TenantInvites::urlFor($notifiable, $this->plainToken);
     }
 
     public function toMail(object $notifiable): MailMessage

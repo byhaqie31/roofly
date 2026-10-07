@@ -41,7 +41,7 @@ class AcceptTenantInviteController extends Controller
         ])->save();
         $invite->update(['accepted_at' => now()]);
 
-        Auth::login($user);
+        Auth::guard('web')->login($user); // pin the session guard, like the admin accept flow
         if ($request->hasSession()) {
             $request->session()->regenerate();
         }

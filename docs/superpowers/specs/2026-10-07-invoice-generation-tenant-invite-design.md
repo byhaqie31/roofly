@@ -74,9 +74,18 @@ So an owner activating on 7 Oct with due day 1 gets `2026-11-01` (not October); 
 - `pages/auth/accept-invite.vue` — copy of `reset-password.vue` with its own copy (`auth.acceptInvite.*`, en + ms): "Welcome to Roofly — set your password". Email is prefilled from the query and read-only. Success → `/tenant`.
 - `TenantInviteModal` help text (en + ms) → "They'll get an email with a link to set their password. It expires in 7 days."
 
+### 4.3 Owner backup: copy / share the link (added 2026-10-07, approved in chat)
+
+Email can fail silently (spam, typo, provider outage). Because only a token hash is stored, a plain link exists exactly once — when it is issued — so the backup works like this:
+
+- `POST /tenants/invite` returns `{tenant, inviteUrl, inviteExpiresAt}`; `TenantInviteModal` stays open on a "sent" panel showing that same link with **Copy link** and **Send via WhatsApp** (`wa.me/<digits>?text=…` with a prefilled bilingual-safe message; `0`-prefixed Malaysian numbers become `60…`).
+- Tenant detail page, while `status = invited`: **Copy invite link** / **Send via WhatsApp** call `POST /tenants/{tenant}/invite-link`, which mints a **fresh** link (voiding earlier ones, the emailed one included), sends **no** mail, and is `409` once the tenant is active. The toast says earlier links no longer work.
+- Admin resend is unchanged (email only).
+- `TenantInvites` is split into `issue()` (token + url, no mail) and `send()` (issue + email); both return `{invite, url}`.
+
 ## 5. Out of scope (recorded so nobody expects it)
 
-Back-filling historical invoices or payments · owner-side "resend invite" button (admin has one; the tenant can also use Forgot password) · WhatsApp · rent reminders · automatic agreement expiry · Billplz · changing already-generated invoices when rent is edited · demo-adapter regeneration on `demoAgreements.create` (demo invoices stay precomputed from `agreementsMock`; documented in API-MAP).
+Back-filling historical invoices or payments · owner-side "resend email" button (admin has one; the owner's backup is the copy / WhatsApp link in § 4.3, and the tenant can also use Forgot password) · WhatsApp · rent reminders · automatic agreement expiry · Billplz · changing already-generated invoices when rent is edited · demo-adapter regeneration on `demoAgreements.create` (demo invoices stay precomputed from `agreementsMock`; documented in API-MAP).
 
 ## 6. Tests
 

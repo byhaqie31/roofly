@@ -48,10 +48,34 @@ class TenantController extends Controller
             'invited_by' => $request->user()->id,
         ]));
 
-        // Emailed set-password link (queued). The tenant becomes `active` when they accept.
-        $invites->send($tenant);
+        // Emailed set-password link (queued). The tenant becomes `active` when they
+        // accept. The same link is returned once so the owner can copy / WhatsApp
+        // it if the email never arrives (spec 2026-10-07 § 4.3).
+        $issued = $invites->send($tenant);
 
-        return (new TenantResource($tenant))->response()->setStatusCode(201);
+        return response()->json([
+            'tenant'          => (new TenantResource($tenant))->resolve(),
+            'inviteUrl'       => $issued['url'],
+            'inviteExpiresAt' => $issued['invite']->expires_at->toISOString(),
+        ], 201);
+    }
+
+    /**
+     * Owner backup for a lost invite email: mint a fresh link (earlier ones stop
+     * working) and hand it back WITHOUT sending mail — the owner shares it.
+     */
+    public function inviteLink(Request $request, User $tenant, TenantInvites $invites)
+    {
+        abort_if($tenant->role !== UserRole::TENANT, 404);
+        $this->authorizeTenantAccess($request, $tenant);
+        abort_unless($tenant->status === 'invited', 409, 'Only pending invites have an invite link.');
+
+        $issued = $invites->issue($tenant);
+
+        return response()->json([
+            'inviteUrl'       => $issued['url'],
+            'inviteExpiresAt' => $issued['invite']->expires_at->toISOString(),
+        ]);
     }
 
     public function show(Request $request, User $tenant)
