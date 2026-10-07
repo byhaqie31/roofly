@@ -267,7 +267,7 @@
       "submit": "Notify me",
       "success": "Thanks! We'll let you know when we go live.",
       "invalid": "Please enter a valid email address.",
-      "submitError": "Couldn't reach the waitlist service. Please try again.",
+      "submitError": "Couldn't save your email. Please try again.",
       "submitting": "Sending…"
     }
   },
@@ -1235,6 +1235,7 @@
       "dashboard": "Dashboard",
       "owners": "Owners",
       "tenants": "Tenants",
+      "enquiries": "Enquiries",
       "analytics": "Analytics",
       "audit": "Audit log",
       "settings": "Settings"
@@ -1453,6 +1454,23 @@
         "noHistory": "No admin actions on this tenant yet.",
         "privacy": "Personal details, documents and payments are never shown here."
       }
+    },
+    "enquiries": {
+      "title": "Enquiries",
+      "subtitle": "Everyone who left an email on the coming-soon page, latest activity first.",
+      "searchPlaceholder": "Search email",
+      "columns": {
+        "email": "Email",
+        "signedUp": "Signed up",
+        "lastSeen": "Last seen",
+        "status": "Status"
+      },
+      "status": {
+        "waiting": "Waiting",
+        "registered": "Registered"
+      },
+      "empty": "No enquiries yet",
+      "emptyHelp": "Enquiries appear when someone submits the notify-me form on the coming-soon page."
     },
     "analytics": {
       "title": "Analytics",

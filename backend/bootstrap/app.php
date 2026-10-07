@@ -21,8 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         // /api/track is a public beacon (sendBeacon/fetch from marketing pages, no session
         // cookie round-trip guaranteed) — exempt it from CSRF so cross-origin beacons aren't
-        // rejected with 419.
-        $middleware->validateCsrfTokens(except: ['api/track']);
+        // rejected with 419. /api/waitlist is the same shape of guest marketing-page post
+        // (per-IP throttled + honeypot instead), so it gets the same exemption.
+        $middleware->validateCsrfTokens(except: ['api/track', 'api/waitlist']);
         // nginx/Cloudflare sit in front of every environment; trust all proxies so the
         // client IP (used for per-IP throttling and analytics ip_hash) is read from
         // X-Forwarded-For rather than the proxy's own address.

@@ -30,6 +30,9 @@ Route::prefix('auth')->group(function () {
 // ── Public: analytics beacon (spec: admin analytics § 3) ─────────────────────
 Route::post('track', [\App\Http\Controllers\Api\TrackController::class, 'store'])->middleware('throttle:track');
 
+// ── Public: coming-soon waitlist (first-party, replaces the Web3Forms relay) ──
+Route::post('waitlist', [\App\Http\Controllers\Api\WaitlistController::class, 'store'])->middleware('throttle:waitlist');
+
 // ── Public: Admin Portal auth (spec § 4) ─────────────────────────────────────
 Route::prefix('admin/auth')->group(function () {
     Route::post('login',         [\App\Http\Controllers\Api\Admin\AdminLoginController::class, 'store']);

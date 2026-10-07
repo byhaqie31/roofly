@@ -860,10 +860,11 @@ The tenant-facing app reuses the owner entities and services rather than introdu
 
 A third shell alongside owner/tenant — Roofly staff, not customers. Gated by `useEnv().features.admin`, always off in demo, separate `/admin/login` auth. Own demo data (`app/demo/data/admin.ts`) and own contracts/services (`services/contracts/admin/`, `services/api/admin/`, `demo/services/admin/`), not a reuse of the owner/tenant entities — admin reads are cross-tenant summaries, never the full owner/tenant records.
 
-**Five surfaces:**
+**Surfaces:**
 - **Dashboard** (`pages/admin/index.vue`) — platform-wide stat tiles + an attention list (over-cap owners, overdue-heavy owners, etc.), via `useAdminDashboardData`.
 - **Owners** (`pages/admin/owners/index.vue` + `[id].vue`) — searchable/filterable list + detail (properties, tenants, warn/suspend actions).
 - **Tenants** (`pages/admin/tenants/index.vue` + `[id].vue`) — searchable/filterable list + detail.
+- **Enquiries** (`pages/admin/enquiries.vue`) — the coming-soon inbox: `leads` rows with `source = waitlist`, written by the first-party `POST /waitlist` that `components/marketing/EmailCapture.vue` posts to through `useWaitlist()` (no Web3Forms, no client beacon). Reuses the analytics leads endpoints with the source pinned; email search, CSV export, `LeadDrawer` on row click; gated by `analytics.view`.
 - **Settings → Admins** (`pages/admin/settings.vue`) — invite/edit admin users, assign permissions from the fixed `AdminPermissions` catalogue (13 keys, incl. an Operations preset).
 - **Audit** (`pages/admin/audit.vue`) — paginated, filterable log of admin actions.
 
