@@ -172,7 +172,7 @@ Runs on every push to every branch except `demo-roofly` (it only merges already-
 | `backend` | `composer install` → `php artisan test` (sqlite in-memory, no services) |
 | `frontend` | `npm ci` → `npm test` (Vitest) → `npm run build` |
 
-Not in CI yet (each has a backlog to clear first): `pint --test` (163 files drift), `npm run typecheck` (5 known errors), `composer audit` / `npm audit`. `protect-main` also requires `only-from-uat` (from `guard-main.yml`). `.github/dependabot.yml` opens weekly grouped minor/patch PRs into `UAT` for npm, Composer and Actions (major bumps skipped — those are deliberate migrations).
+Not in CI yet (each has a backlog to clear first): `pint --test` (163 files drift), `npm run typecheck` (5 known errors), `composer audit` / `npm audit`. `protect-main` also requires `only-from-uat` (from `guard-main.yml`). **No Dependabot.** The config was tried on 2026-10-07 and removed the same day: seven bot PRs in ten minutes is noise for a solo build. Dependency bumps are done deliberately, by hand, in a normal feature → UAT PR.
 
 CI is a merge gate, not a deploy gate: `deploy.yml` fires on push, so the gate only works because direct pushes are blocked. Admin bypass (below) skips it — use it for emergencies only.
 
