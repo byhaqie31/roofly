@@ -61,4 +61,26 @@ class AuthContractTest extends TestCase
         $this->assertSame([], $res->json('purposes'));
         $this->assertNull($res->json('onboardedAt'));
     }
+
+    /**
+     * Regression: the SPA authenticates with the Sanctum cookie session, not the
+     * returned token. Register used to only mint a token, so a browser that was
+     * previously signed in as a tenant/admin kept THAT session — and the very next
+     * owner call (PATCH /account/onboarding) hit role:owner as the wrong user → 403.
+     */
+    public function test_register_logs_the_new_owner_into_the_web_session_replacing_a_stale_one(): void
+    {
+        $stale = User::factory()->tenant()->create();
+        $this->actingAs($stale, 'web');
+
+        $res = $this->postJson('/api/auth/register', [
+            'name' => 'New Owner', 'email' => 'new@example.com', 'phone' => '+60 1',
+            'password' => 'secret123', 'password_confirmation' => 'secret123',
+        ])->assertCreated();
+
+        $owner = User::where('email', 'new@example.com')->firstOrFail();
+        $this->assertAuthenticatedAs($owner, 'web');
+        $this->assertSame($owner->id, $this->getJson('/api/auth/me')->assertOk()->json('id'));
+        $this->assertSame($res->json('user.id'), $owner->id);
+    }
 }

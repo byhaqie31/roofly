@@ -29,12 +29,14 @@ class TenantContractTest extends TestCase
             'name' => 'Aminah Binti Yusof', 'email' => 'aminah@x.my', 'phone' => '+60 12-345 6789',
         ])->assertCreated();
 
+        // Envelope: the tenant plus the one-time plain invite link (spec 2026-10-07 § 4.3).
+        $this->assertSame(['tenant', 'inviteUrl', 'inviteExpiresAt'], array_keys($res->json()));
         $this->assertSame(
             ['id', 'name', 'email', 'phone', 'status', 'invitedAt', 'createdAt', 'personal', 'emergencyContact'],
-            array_keys($res->json())
+            array_keys($res->json('tenant'))
         );
-        $this->assertSame('invited', $res->json('status'));
-        $this->assertNotNull($res->json('invitedAt'));
+        $this->assertSame('invited', $res->json('tenant.status'));
+        $this->assertNotNull($res->json('tenant.invitedAt'));
     }
 
     public function test_index_includes_invited_tenants_without_agreements(): void

@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import Card from "~/components/ui/Card.vue";
 import Icon from "~/components/ui/Icon.vue";
+// Dynamic `<component :is>` resolves strings against the app's component
+// registry, and Nuxt only auto-imports NuxtLink at compile time (it is not
+// registered globally) — so `:is="'NuxtLink'"` silently rendered an inert
+// <nuxtlink> element and no checklist step navigated. Pass the component itself.
+import { NuxtLink } from "#components";
 import type { ChecklistStep } from "~/utils/onboardingChecklist";
 
 const props = defineProps<{ steps: ChecklistStep[]; doneCount: number }>();
@@ -38,7 +43,7 @@ const onDismiss = () => {
       <ol class="divide-y divide-line-passive">
         <li v-for="(step, i) in steps" :key="step.key">
           <component
-            :is="step.enabled && !step.done ? 'NuxtLink' : 'div'"
+            :is="step.enabled && !step.done ? NuxtLink : 'div'"
             :to="step.enabled && !step.done ? step.to : undefined"
             class="group flex items-start gap-3 rounded-sm py-3 outline-none transition"
             :class="step.enabled && !step.done ? 'hover:bg-surface-hover focus-visible:shadow-focus' : ''"

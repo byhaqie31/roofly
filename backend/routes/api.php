@@ -82,6 +82,7 @@ Route::middleware(['auth:sanctum', 'touch-active'])->group(function () {
 
         // Tenants
         Route::post('tenants/invite', [\App\Http\Controllers\Api\Owner\TenantController::class, 'invite']);
+        Route::post('tenants/{tenant}/invite-link', [\App\Http\Controllers\Api\Owner\TenantController::class, 'inviteLink']); // copy/share backup, no mail
         Route::apiResource('tenants', \App\Http\Controllers\Api\Owner\TenantController::class);
 
         // Agreements

@@ -1,5 +1,7 @@
 import type { Tenant } from "~/types/tenant";
 import type {
+  TenantInviteLink,
+  TenantInviteResult,
   TenantProfile,
   TenantsService,
 } from "~/services/contracts/tenants";
@@ -10,7 +12,10 @@ export const apiTenants: TenantsService = {
   getTenant: (id) => useApi().request<Tenant>(`/tenants/${id}`),
 
   invite: (input) =>
-    useApi().request<Tenant>("/tenants/invite", { method: "POST", body: input }),
+    useApi().request<TenantInviteResult>("/tenants/invite", { method: "POST", body: input }),
+
+  createInviteLink: (id) =>
+    useApi().request<TenantInviteLink>(`/tenants/${id}/invite-link`, { method: "POST" }),
 
   update: (id, patch) =>
     useApi().request<Tenant>(`/tenants/${id}`, { method: "PATCH", body: patch }),
