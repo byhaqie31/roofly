@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { LogOut, Sun, Moon, Monitor, Languages } from "lucide-vue-next";
-import { computed, ref } from "vue";
+import { LogOut, Sun, Moon, Monitor, Languages, User } from "lucide-vue-next";
+import { computed, ref, watch } from "vue";
 
 withDefaults(defineProps<{ showLocale?: boolean }>(), { showLocale: true });
 
@@ -22,15 +22,14 @@ const onLogout = async () => {
   await navigateTo(wasAdmin ? "/admin/login" : isDemo ? "/demo" : "/auth/login");
 };
 
-const initials = computed(() => {
-  const n = auth.user?.name ?? "";
-  return n
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((s) => s[0]?.toUpperCase())
-    .join("");
+// The trigger shows the account photo when we have one (Google sign-in
+// stores `avatarUrl`), otherwise a generic user glyph — never name initials.
+const avatarUrl = computed(() => auth.user?.avatarUrl ?? null);
+const avatarBroken = ref(false);
+watch(avatarUrl, () => {
+  avatarBroken.value = false;
 });
+const showPhoto = computed(() => Boolean(avatarUrl.value) && !avatarBroken.value);
 
 const ThemeIcon = computed(() => {
   if (theme.value === "dark") return Moon;
@@ -63,11 +62,19 @@ const toggleLocale = async () => {
   <div class="relative">
     <button
       type="button"
-      class="inline-flex items-center justify-center h-9 w-9 rounded-pill bg-accent-soft text-accent text-caption font-semibold hover:opacity-90 focus-visible:shadow-focus transition"
+      class="inline-flex shrink-0 items-center justify-center h-9 w-9 overflow-hidden rounded-pill bg-accent-soft text-accent hover:opacity-90 focus-visible:shadow-focus transition"
       :aria-label="auth.user?.name ?? 'User menu'"
       @click="open = !open"
     >
-      {{ initials || "·" }}
+      <img
+        v-if="showPhoto"
+        :src="avatarUrl ?? undefined"
+        alt=""
+        class="h-full w-full object-cover"
+        referrerpolicy="no-referrer"
+        @error="avatarBroken = true"
+      />
+      <User v-else :size="18" :stroke-width="1.75" aria-hidden="true" />
     </button>
     <Transition name="fade">
       <div

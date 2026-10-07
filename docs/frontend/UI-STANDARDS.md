@@ -264,6 +264,7 @@ One pill per row; never stack pills.
 **Topbar:**
 - 64px tall, `1px solid var(--border-passive)` on bottom
 - Right-aligned controls: language switcher, dark-mode toggle, user menu
+- User menu trigger: 36px circle, `var(--accent-soft)` bg, `var(--accent)` foreground. Shows the account photo when `AuthUser.avatarUrl` is set (Google sign-in stores it; falls back on load error), otherwise the Lucide `User` icon at 18px. Never render name initials — one glyph for every account keeps owner / tenant / admin shells consistent.
 
 ### 3.8 Empty states
 
