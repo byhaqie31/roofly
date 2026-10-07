@@ -104,10 +104,6 @@ export default defineNuxtConfig({
       // Demo subdomain's floating feedback widget opens this URL in a new tab.
       // Set per-env in docker-compose; empty string hides the widget.
       demoFeedbackUrl: process.env.NUXT_PUBLIC_DEMO_FEEDBACK_URL ?? "",
-      // Web3Forms access key for the coming-soon waitlist email capture.
-      // Empty = falls back to mock submit (console log only). Get a key at
-      // https://web3forms.com — free tier covers 250 submissions/month.
-      waitlistAccessKey: process.env.NUXT_PUBLIC_WAITLIST_ACCESS_KEY ?? "",
       // Marketing/analytics tracking (spec 2026-08-23). Default on for
       // uat/prod; useEnv() forces it off in demo (useMock) regardless.
       tracking: process.env.NUXT_PUBLIC_TRACKING !== "false",

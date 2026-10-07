@@ -252,7 +252,7 @@
       "submit": "Beritahu saya",
       "success": "Terima kasih! Kami akan beritahu apabila dilancarkan.",
       "invalid": "Sila masukkan alamat emel yang sah.",
-      "submitError": "Gagal hubungi servis senarai tunggu. Sila cuba lagi.",
+      "submitError": "Gagal simpan emel anda. Sila cuba lagi.",
       "submitting": "Menghantar…"
     }
   },

@@ -7,7 +7,7 @@ name: Deploy roofly to Hostinger VPS
 # Note: 3003 is taken by axelnova-frontend on this VPS — UAT uses 3004 instead.
 #
 # Per-clone .env files on the VPS supply NUXT_PUBLIC_APP_ENV, NUXT_PUBLIC_USE_MOCK,
-# NUXT_PUBLIC_DEMO_FEEDBACK_URL, NUXT_PUBLIC_WAITLIST_ACCESS_KEY, etc. The
+# NUXT_PUBLIC_DEMO_FEEDBACK_URL, etc. The
 # workflow doesn't bake env-specific values — it just pulls + rebuilds.
 #
 # Required GitHub secrets: SSH_HOST, SSH_USER, SSH_PRIVATE_KEY.

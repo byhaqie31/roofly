@@ -61,6 +61,30 @@ final class AnalyticsRecorder
         return $row;
     }
 
+    /**
+     * First-party waitlist signup (POST /waitlist). Upserts the lead directly so
+     * the row never depends on the analytics beacon, and writes the
+     * `waitlist_signup` event when the visitor is known so the lead's timeline
+     * still shows it.
+     */
+    public function recordWaitlist(string $email, ?string $visitorId, ?string $ip, ?string $userAgent): void
+    {
+        $email = Str::lower(trim($email));
+
+        if ($visitorId !== null) {
+            AnalyticsEvent::create([
+                'visitor_id' => $visitorId,
+                'event'      => 'waitlist_signup',
+                'props'      => ['email' => $email],
+                'ip_hash'    => self::hashIp($ip),
+                'user_agent' => $userAgent === null ? null : mb_substr($userAgent, 0, 255),
+                'created_at' => now(),
+            ]);
+        }
+
+        $this->touchLead($email, $visitorId, 'waitlist', null);
+    }
+
     public function linkRegistration(User $user, ?string $visitorId = null): void
     {
         $this->touchLead(Str::lower($user->email), $visitorId, 'register', $user->id);
