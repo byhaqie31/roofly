@@ -7,6 +7,7 @@ import { agreementsMock } from "~/demo/data/agreements";
 import { propertiesMock } from "~/demo/data/properties";
 import { unitsMock } from "~/demo/data/units";
 import { tenantsMock } from "~/demo/data/tenants";
+import { resolvePayoutAccount } from "~/demo/services/payoutAccounts";
 
 const hydrate = (a: Agreement): AgreementWithRefs => {
   const unit = unitsMock.find((u) => u.id === a.unitId) ?? null;
@@ -19,6 +20,7 @@ const hydrate = (a: Agreement): AgreementWithRefs => {
     unit: unit ? structuredClone(unit) : null,
     property: property ? structuredClone(property) : null,
     tenant: tenant ? structuredClone(tenant) : null,
+    payoutAccount: resolvePayoutAccount(a.payoutAccountId),
   };
 };
 

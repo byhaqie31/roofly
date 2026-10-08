@@ -68,6 +68,11 @@ return [
     // sign-up is held there.
     'invite_signup_url' => env('INVITE_SIGNUP_URL') ?: rtrim(env('FRONTEND_URL', 'http://localhost:3000'), '/') . '/auth/register',
 
+    // The simulated gateway (POST /me/invoices/{id}/pay marks an invoice paid
+    // instantly). Off everywhere until a real gateway lands — tenants report
+    // DuitNow/bank transfers instead and the owner confirms (spec 2026-10-08).
+    'online_payments' => (bool) env('ONLINE_PAYMENTS', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

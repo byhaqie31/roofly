@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Agreement;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\PayoutAccount;
 use App\Models\Property;
 use App\Models\PropertyCoOwner;
 use App\Models\Ticket;
@@ -99,6 +100,10 @@ class DemoSeeder extends Seeder
     private const TC_HEAT_1 = '00000000-0000-4000-8000-000000000806';
     private const TC_HEAT_2 = '00000000-0000-4000-8000-000000000807';
 
+    // ── Payout accounts (demo/data/payoutAccounts.ts) ───────────────────────
+    private const PAYOUT_MAYBANK = '00000000-0000-4000-8000-000000000501';
+    private const PAYOUT_CIMB = '00000000-0000-4000-8000-000000000502';
+
     /** Namespace for deterministic uuid5 ids (generated invoices/payments). */
     private const UUID_NAMESPACE = '00000000-0000-4000-8000-000000000000';
 
@@ -108,11 +113,13 @@ class DemoSeeder extends Seeder
             $this->call(AdminPermissionSeeder::class);
             $this->seedAdmins();
             $this->seedOwner();
+            $this->seedPayoutAccounts();
             $tenants = $this->seedTenants();
             $this->seedProperties();
             $this->seedUnits();
             $agreements = $this->seedAgreements($tenants);
             $this->seedInvoicesAndPayments($agreements);
+            $this->seedPendingTransferClaim();
             $this->seedTicketsAndComments();
             $this->call(AnalyticsDemoSeeder::class);
         });
@@ -129,7 +136,6 @@ class DemoSeeder extends Seeder
             'role' => 'owner',
             'password' => Hash::make('password'),
             'business_name' => 'Aminah Properties',
-            'bank_account_last4' => '4521',
             'plan_tier' => 'free',
             'owner_preferences' => [
                 'locale' => 'en',
@@ -160,6 +166,84 @@ class DemoSeeder extends Seeder
             'purposes' => ['rental'],
             'onboarded_at' => now(),
             'checklist_dismissed_at' => now(),
+        ]);
+    }
+
+    // ── Payout accounts (demo/data/payoutAccounts.ts, spec 2026-10-08) ────────
+
+    private function seedPayoutAccounts(): void
+    {
+        $rows = [
+            self::PAYOUT_MAYBANK => [
+                'label' => 'Personal Maybank',
+                'bank' => 'maybank',
+                'account_holder_name' => 'Cik Aminah',
+                'account_number' => '514012344521',
+                'duitnow_id_type' => 'phone',
+                'duitnow_id' => '+60123456789',
+                'is_default' => true,
+                'createdAt' => '2025-08-20T09:00:00Z',
+            ],
+            self::PAYOUT_CIMB => [
+                'label' => 'Aminah Properties CIMB',
+                'bank' => 'cimb',
+                'account_holder_name' => 'Aminah Properties',
+                'account_number' => '8604123456',
+                'duitnow_id_type' => 'brn',
+                'duitnow_id' => '202301012345',
+                'is_default' => false,
+                'createdAt' => '2025-11-15T09:00:00Z',
+            ],
+        ];
+
+        foreach ($rows as $id => $row) {
+            $createdAt = $row['createdAt'];
+            unset($row['createdAt']);
+            PayoutAccount::updateOrCreate(['id' => $id], ['owner_id' => self::OWNER_ID] + $row);
+            $this->pinCreatedAt('payout_accounts', $id, $createdAt);
+        }
+    }
+
+    /**
+     * One "Awaiting confirmation" transfer claim so the owner's review flow has
+     * something to show in UAT: on the tenant Aminah's earliest outstanding
+     * invoice. Her seeded agreement ends 2026-08-31, so once every one of its
+     * invoices has aged into "paid" this falls back to the next active
+     * agreement with an outstanding invoice (Arif's), rather than seeding nothing.
+     */
+    private function seedPendingTransferClaim(): void
+    {
+        $paymentId = (string) Uuid::uuid5(self::UUID_NAMESPACE, 'demo-pending-transfer-claim');
+
+        $invoice = null;
+        foreach ([self::AGR_SURIA_AMINAH, self::AGR_WANGSA_ARIF] as $agreementId) {
+            $invoice = Invoice::where('agreement_id', $agreementId)
+                ->whereIn('status', ['overdue', 'pending'])
+                ->orderByRaw("CASE WHEN status = 'overdue' THEN 0 ELSE 1 END")
+                ->orderBy('due_date')
+                ->first();
+            if ($invoice !== null) {
+                break;
+            }
+        }
+        if ($invoice === null) {
+            Payment::whereKey($paymentId)->delete();
+
+            return;
+        }
+
+        $paidAt = $invoice->due_date->copy()->min(now()->startOfDay());
+        Payment::updateOrCreate(['id' => $paymentId], [
+            'invoice_id' => $invoice->id,
+            'payout_account_id' => $invoice->agreement->resolvedPayoutAccount()?->id,
+            'amount_cents' => $invoice->totalDueCents(),
+            'method' => 'transfer',
+            'status' => 'pending',
+            'reference' => 'DN2610081234',
+            'note' => 'Paid via Maybank2u',
+            'rejection_reason' => null,
+            'confirmed_at' => null,
+            'paid_at' => $paidAt,
         ]);
     }
 
@@ -565,6 +649,8 @@ class DemoSeeder extends Seeder
                 'rentDueDay' => 5,
                 'status' => 'active',
                 'createdAt' => '2025-11-20T09:30:00Z',
+                // The commercial unit pays into the business account; every other agreement uses the default.
+                'payoutAccountId' => self::PAYOUT_CIMB,
             ],
             'a-ttdi-liwei' => [
                 'id' => self::AGR_TTDI_LIWEI,
@@ -605,6 +691,7 @@ class DemoSeeder extends Seeder
                 'late_fee_cents' => $a['lateFee'],
                 'rent_due_day' => $a['rentDueDay'],
                 'status' => $a['status'],
+                'payout_account_id' => $a['payoutAccountId'] ?? null,
             ]);
             $this->pinCreatedAt('agreements', $a['id'], $a['createdAt']);
         }

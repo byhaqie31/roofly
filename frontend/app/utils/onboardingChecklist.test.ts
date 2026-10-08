@@ -4,6 +4,7 @@ import type { Property } from "~/types/property";
 import type { Unit } from "~/types/unit";
 import type { Tenant } from "~/types/tenant";
 import type { Agreement } from "~/types/agreement";
+import type { PayoutAccount } from "~/types/payout";
 
 const property = (over: Partial<Property> = {}): Property => ({
   id: "p1", ownerId: "o1", name: "Home", type: "room", purpose: "rental",
@@ -23,13 +24,18 @@ const agreement = (status: Agreement["status"]): Agreement => ({
   rentAmount: 1, depositAmount: 1, lateFee: 0, rentDueDay: 1, status, createdAt: "",
 });
 
-const base: ChecklistInput = { purposes: ["rental"], properties: [], units: [], tenants: [], agreements: [] };
+const payout: PayoutAccount = {
+  id: "pa1", label: "Main", bank: "maybank", accountHolderName: "Me", accountNumber: "123",
+  duitnowIdType: null, duitnowId: null, isDefault: true, agreementCount: 0, createdAt: "",
+};
+
+const base: ChecklistInput = { purposes: ["rental"], properties: [], units: [], tenants: [], agreements: [], payoutAccounts: [] };
 const keys = (s: ReturnType<typeof buildChecklist>) => s.map((x) => x.key);
 
 describe("buildChecklist", () => {
-  it("rental owner gets all six steps, only add_property enabled when empty", () => {
+  it("rental owner gets all seven steps, only add_property enabled when empty", () => {
     const steps = buildChecklist(base);
-    expect(keys(steps)).toEqual(["add_property", "fill_ownership", "fill_utilities", "add_unit", "invite_tenant", "create_agreement"]);
+    expect(keys(steps)).toEqual(["add_property", "fill_ownership", "fill_utilities", "add_unit", "invite_tenant", "add_payout", "create_agreement"]);
     expect(steps[0]).toMatchObject({ done: false, enabled: true, to: "/owner/properties?add=1" });
     expect(steps.slice(1).every((s) => !s.enabled && !s.done)).toBe(true);
   });
@@ -40,7 +46,7 @@ describe("buildChecklist", () => {
 
   it("mixed purposes is the union in canonical order", () => {
     expect(keys(buildChecklist({ ...base, purposes: ["investment", "rental"] }))).toEqual([
-      "add_property", "fill_ownership", "fill_utilities", "add_unit", "invite_tenant", "create_agreement",
+      "add_property", "fill_ownership", "fill_utilities", "add_unit", "invite_tenant", "add_payout", "create_agreement",
     ]);
   });
 
@@ -77,5 +83,12 @@ describe("buildChecklist", () => {
     expect(steps.find((s) => s.key === "create_agreement")).toMatchObject({ done: false, enabled: true, to: "/owner/agreements/new" });
     const active = buildChecklist({ ...base, properties: [completeRoom()], units: [unit("p1")], tenants: [tenant], agreements: [agreement("active")] });
     expect(active.find((s) => s.key === "create_agreement")!.done).toBe(true);
+  });
+
+  it("add_payout is done once any payout account exists and deep-links to Settings → Payouts", () => {
+    const none = buildChecklist({ ...base, properties: [completeRoom()] });
+    expect(none.find((s) => s.key === "add_payout")).toMatchObject({ done: false, enabled: true, to: "/owner/settings?tab=payouts" });
+    const one = buildChecklist({ ...base, properties: [completeRoom()], payoutAccounts: [payout] });
+    expect(one.find((s) => s.key === "add_payout")!.done).toBe(true);
   });
 });

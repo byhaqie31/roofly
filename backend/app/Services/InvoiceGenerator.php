@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\AgreementStatus;
 use App\Enums\InvoiceStatus;
+use App\Enums\PaymentStatus;
 use App\Models\Agreement;
 use App\Models\Invoice;
 use Carbon\CarbonImmutable;
@@ -89,6 +90,11 @@ class InvoiceGenerator
     /**
      * pending → overdue the day after due_date, snapshotting the agreement's
      * late fee once. Already-overdue invoices are untouched, so the fee never stacks.
+     *
+     * Skips an invoice with a pending transfer claim dated on or before its due
+     * date — a tenant who paid on time isn't fined while the owner hasn't looked
+     * (spec 2026-10-08 § 5). A rejected claim, or one dated after the due date,
+     * doesn't protect it.
      */
     public function markOverdue(?CarbonInterface $today = null): int
     {
@@ -97,6 +103,12 @@ class InvoiceGenerator
 
         Invoice::where('status', InvoiceStatus::PENDING->value)
             ->whereDate('due_date', '<', $today->toDateString())
+            ->whereNotExists(fn ($q) => $q->selectRaw('1')
+                ->from('payments')
+                ->whereColumn('payments.invoice_id', 'invoices.id')
+                ->where('payments.status', PaymentStatus::PENDING->value)
+                // date() on both sides: MySQL DATE vs sqlite's 'Y-m-d H:i:s' text.
+                ->whereRaw('date(payments.paid_at) <= date(invoices.due_date)'))
             ->with('agreement')
             ->chunkById(200, function (Collection $invoices) use (&$count) {
                 foreach ($invoices as $invoice) {

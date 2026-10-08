@@ -12,7 +12,6 @@ export const ownerAccountMock: OwnerAccount = {
     email: "aminah@roofly.my",
     phone: "+60 12-345 6789",
     businessName: "Aminah Properties",
-    bankAccountLast4: "4521",
   },
   preferences: {
     locale: "en",

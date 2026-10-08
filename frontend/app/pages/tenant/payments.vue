@@ -8,6 +8,7 @@ import EmptyState from "~/components/ui/EmptyState.vue";
 import PayInvoiceModal from "~/components/tenant/PayInvoiceModal.vue";
 import type { InvoiceStatus } from "~/types/invoice";
 import type { InvoiceWithRefs } from "~/services/useInvoices";
+import { latestRejectedClaim, pendingClaim } from "~/utils/paymentClaim";
 
 definePageMeta({ layout: "tenant" });
 const { t } = useI18n();
@@ -57,6 +58,9 @@ const statusToneMap = {
 
 const isUnpaid = (r: InvoiceWithRefs) =>
   r.invoice.status === "pending" || r.invoice.status === "overdue";
+// "I've paid" sent, landlord hasn't confirmed yet (spec 2026-10-08).
+const isAwaiting = (r: InvoiceWithRefs) => isUnpaid(r) && pendingClaim(r.payments) !== null;
+const wasRejected = (r: InvoiceWithRefs) => isUnpaid(r) && latestRejectedClaim(r.payments) !== null;
 
 const formatDate = (iso: string) => {
   if (!iso) return "—";
@@ -144,7 +148,10 @@ const open = (r: InvoiceWithRefs) => {
                 {{ r.invoice.invoiceNumber }}
               </div>
             </div>
-            <Pill :tone="statusToneMap[r.invoice.status]">
+            <Pill v-if="isAwaiting(r)" tone="pending">
+              {{ t("tenant.payments.status.awaiting") }}
+            </Pill>
+            <Pill v-else :tone="statusToneMap[r.invoice.status]">
               {{ t(`tenant.payments.status.${r.invoice.status}`) }}
             </Pill>
           </div>
@@ -157,7 +164,13 @@ const open = (r: InvoiceWithRefs) => {
                 {{ formatRM(r.invoice.amount + r.invoice.lateFee) }}
               </div>
               <div class="text-caption tabular-nums text-ink-muted">
-                <template v-if="isUnpaid(r)">
+                <template v-if="isAwaiting(r)">
+                  {{ t("tenant.payments.awaitingHint") }}
+                </template>
+                <template v-else-if="wasRejected(r)">
+                  <span class="text-status-overdue">{{ t("tenant.payments.rejectedHint") }}</span>
+                </template>
+                <template v-else-if="isUnpaid(r)">
                   {{ t("tenant.payments.dueOn", { date: formatDate(r.invoice.dueDate) }) }}
                 </template>
                 <template v-else-if="r.payments[0]">
@@ -166,11 +179,11 @@ const open = (r: InvoiceWithRefs) => {
               </div>
             </div>
             <Button
-              :variant="isUnpaid(r) ? 'primary' : 'ghost'"
+              :variant="isUnpaid(r) && !isAwaiting(r) ? 'primary' : 'ghost'"
               size="sm"
               @click.stop="open(r)"
             >
-              {{ isUnpaid(r) ? t("tenant.payments.pay") : t("tenant.payments.view") }}
+              {{ isUnpaid(r) && !isAwaiting(r) ? t("tenant.payments.pay") : t("tenant.payments.view") }}
             </Button>
           </div>
         </div>

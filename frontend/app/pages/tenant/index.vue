@@ -6,6 +6,7 @@ import Icon from "~/components/ui/Icon.vue";
 import Button from "~/components/ui/Button.vue";
 import EmptyState from "~/components/ui/EmptyState.vue";
 import PayInvoiceModal from "~/components/tenant/PayInvoiceModal.vue";
+import { pendingClaim } from "~/utils/paymentClaim";
 import ProfileNudgeCard from "~/components/tenant/ProfileNudgeCard.vue";
 import AgreementReviewCard from "~/components/tenant/AgreementReviewCard.vue";
 import { tenantProfileGaps, type TenantProfileGaps } from "~/utils/tenantProfileCompletion";
@@ -70,6 +71,9 @@ const nextInvoice = computed<InvoiceWithRefs | null>(() => {
     .sort((a, b) => a.invoice.dueDate.localeCompare(b.invoice.dueDate));
   return unpaid[0] ?? null;
 });
+
+// The tenant already said "I've paid" — waiting on the landlord (spec 2026-10-08).
+const nextClaim = computed(() => (nextInvoice.value ? pendingClaim(nextInvoice.value.payments) : null));
 
 const nextDueDate = computed<string | null>(() => {
   const upcoming = invoices.value
@@ -172,8 +176,11 @@ const onPaid = async () => {
                     : t("tenant.home.rentDue.allPaidTitle")
                 }}
               </span>
+              <Pill v-if="nextClaim" tone="pending">
+                {{ t("tenant.payments.status.awaiting") }}
+              </Pill>
               <Pill
-                v-if="nextInvoice"
+                v-else-if="nextInvoice"
                 :tone="nextInvoice.invoice.status === 'overdue' ? 'overdue' : 'pending'"
               >
                 {{ t(`tenant.payments.status.${nextInvoice.invoice.status}`) }}
@@ -194,7 +201,10 @@ const onPaid = async () => {
             </div>
 
             <p class="mt-1 text-caption text-ink-muted tabular-nums">
-              <template v-if="nextInvoice">
+              <template v-if="nextClaim">
+                {{ t("tenant.home.rentDue.awaiting", { date: formatDate(nextClaim.paidAt.slice(0, 10)) }) }}
+              </template>
+              <template v-else-if="nextInvoice">
                 {{
                   nextInvoice.invoice.status === "overdue"
                     ? t("tenant.home.rentDue.overdueOn", {
@@ -215,7 +225,16 @@ const onPaid = async () => {
           </div>
 
           <Button
-            v-if="nextInvoice"
+            v-if="nextInvoice && nextClaim"
+            variant="ghost"
+            size="lg"
+            class="shrink-0 self-start sm:self-auto"
+            @click="onPay(nextInvoice)"
+          >
+            {{ t("tenant.payments.view") }}
+          </Button>
+          <Button
+            v-else-if="nextInvoice"
             variant="primary"
             size="lg"
             class="shrink-0 self-start sm:self-auto"

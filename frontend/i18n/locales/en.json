@@ -411,7 +411,8 @@
         "periodAriaActive": "Period filter: {label}. Tap to change.",
         "year": "Year",
         "month": "Month",
-        "clear": "Clear filters"
+        "clear": "Clear filters",
+        "awaiting": "Awaiting confirmation"
       },
       "pagination": {
         "showing": "Showing {from}–{to} of {total}",
@@ -431,7 +432,8 @@
         "pending": "Pending",
         "paid": "Paid",
         "overdue": "Overdue",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "awaiting": "Awaiting confirmation"
       },
       "methods": {
         "fpx": "FPX",
@@ -463,6 +465,32 @@
         "send": "Send to tenant",
         "downloadToast": "Coming soon — PDF download arrives in the next phase.",
         "sentToast": "Invoice sent to {email}"
+      },
+      "reviewCta": "Review",
+      "paymentStatus": {
+        "pending": "Awaiting confirmation",
+        "successful": "Confirmed",
+        "failed": "Rejected"
+      },
+      "claim": {
+        "title": "Your tenant says they've paid",
+        "help": "Check your bank statement for this transfer, then confirm or reject it.",
+        "amount": "Amount",
+        "paidAt": "Date paid",
+        "reference": "Reference",
+        "sentTo": "Paid to",
+        "note": "Tenant's note",
+        "receiptPlaceholder": "Receipt uploads arrive in the next phase, once file storage is wired.",
+        "confirmDate": "Date received",
+        "confirm": "Confirm payment",
+        "reject": "Reject",
+        "reasonLabel": "Why are you rejecting it?",
+        "reasonPlaceholder": "e.g. No transfer with this reference in my account yet.",
+        "reasonRequired": "Tell your tenant why, so they can fix it.",
+        "rejectConfirm": "Reject payment",
+        "confirmedToast": "Payment confirmed. The invoice is now paid.",
+        "rejectedToast": "Payment rejected. Your tenant will see your reason.",
+        "rejectedBecause": "Rejected: {reason}"
       }
     },
     "agreements": {
@@ -589,6 +617,16 @@
             }
           }
         }
+      },
+      "payout": {
+        "title": "Rent is paid to",
+        "help": "The payout account your tenant sees for this agreement.",
+        "useDefault": "Use my default",
+        "useDefaultNamed": "Use my default ({label})",
+        "defaultHint": "your default",
+        "change": "Change",
+        "none": "No payout account yet, so your tenant can't see where to pay.",
+        "addLink": "Add one in Settings"
       }
     },
     "tenants": {
@@ -742,7 +780,8 @@
           "expiring": "Expiring",
           "notice_given": "Notice given",
           "ticket_new": "New ticket",
-          "ticket_reopened": "Reopened"
+          "ticket_reopened": "Reopened",
+          "payment_claim": "Payment to confirm"
         }
       },
       "emptyState": {
@@ -762,7 +801,11 @@
         "fill_utilities": { "title": "Fill in utilities and fees", "hint": "Maintenance fee, quit rent, TNB and water accounts." },
         "add_unit": { "title": "Add a unit", "hint": "Tenants and agreements attach to units." },
         "invite_tenant": { "title": "Invite your first tenant", "hint": "Name, email and phone — they get a link." },
-        "create_agreement": { "title": "Create an agreement", "hint": "Link a tenant to a unit with rent and dates." }
+        "create_agreement": { "title": "Create an agreement", "hint": "Link a tenant to a unit with rent and dates." },
+        "add_payout": {
+          "title": "Add a payout account",
+          "hint": "Where your tenants pay rent by DuitNow or bank transfer."
+        }
       }
     },
     "reports": {
@@ -898,7 +941,8 @@
         "profile": "Profile",
         "preferences": "Preferences",
         "notifications": "Notifications",
-        "plan": "Plan"
+        "plan": "Plan",
+        "payouts": "Payouts"
       },
       "profile": {
         "identity": "Identity",
@@ -917,9 +961,6 @@
         "photoHelp": "Coming soon — profile photos arrive in the next phase, once file storage is wired up.",
         "photoPlaceholderTitle": "Coming soon",
         "photoPlaceholderHelp": "Profile photos arrive in the next phase, once file storage is wired.",
-        "payout": "Payout account",
-        "payoutHelp": "Where rent collections will be deposited. Bank linkage is managed via your finance settings.",
-        "bankMasked": "Maybank account ending in",
         "passwordTitle": "Set a password",
         "passwordHelp": "You signed up with Google. Add a password to also log in with email.",
         "setPassword": "Set password",
@@ -1001,6 +1042,58 @@
             "name": "Business",
             "description": "For agents and multi-org operators."
           }
+        }
+      },
+      "payouts": {
+        "title": "Payout accounts",
+        "help": "Tenants pay rent to these accounts by DuitNow or bank transfer. Each agreement uses your default unless you pick another on it.",
+        "add": "Add payout account",
+        "addTitle": "Add payout account",
+        "editTitle": "Edit payout account",
+        "formHelp": "Tenants see these details when they pay, so they can transfer straight from their banking app.",
+        "emptyTitle": "No payout account yet",
+        "emptyHelp": "Add the account your tenants should pay rent into. You can add more later and pick one per agreement.",
+        "default": "Default",
+        "setDefault": "Set as default",
+        "edit": "Edit",
+        "delete": "Delete payout account",
+        "duitnowLine": "DuitNow ({type}): {id}",
+        "usedBy": "Agreements using it: {count}",
+        "defaultToast": "{label} is now your default payout account",
+        "createdToast": "Payout account added",
+        "deletedToast": "Payout account deleted",
+        "bankOther": "Other bank",
+        "accountNumberHint": "Add an account number, a DuitNow ID, or both.",
+        "fields": {
+          "label": "Name",
+          "bank": "Bank",
+          "accountHolderName": "Account holder name",
+          "accountNumber": "Account number",
+          "duitnowIdType": "DuitNow ID type",
+          "duitnowId": "DuitNow ID"
+        },
+        "placeholders": {
+          "label": "e.g. Personal Maybank"
+        },
+        "duitnowTypes": {
+          "none": "No DuitNow ID",
+          "phone": "Mobile number",
+          "mykad": "MyKad",
+          "brn": "Business registration (SSM)",
+          "passport": "Passport"
+        },
+        "deleteConfirm": {
+          "title": "Delete payout account?",
+          "body": "{label} will be removed. Tenants won't see it any more.",
+          "agreements": "{count} agreement(s) use this account. They'll switch to your default.",
+          "confirm": "Delete"
+        },
+        "online": {
+          "title": "Online payments",
+          "comingSoon": "Coming soon",
+          "help": "Tenants will pay by FPX online banking or card inside Roofly, and the money settles to your default payout account. Nothing to set up yet.",
+          "fpx": "FPX online banking",
+          "card": "Debit and credit card"
         }
       }
     },
@@ -1226,7 +1319,8 @@
         "allPaidHelp": "Next rent is due {date}.",
         "noUpcoming": "No upcoming rent right now.",
         "dueOn": "Due {date}",
-        "overdueOn": "Was due {date}"
+        "overdueOn": "Was due {date}",
+        "awaiting": "You said you paid on {date}. Waiting for your landlord to confirm."
       },
       "stats": {
         "monthlyRent": "Monthly rent",
@@ -1308,7 +1402,8 @@
         "pending": "Pending",
         "paid": "Paid",
         "overdue": "Overdue",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "awaiting": "Awaiting confirmation"
       },
       "methods": {
         "fpx": "FPX",
@@ -1327,8 +1422,39 @@
         "receipt": "Receipt",
         "payCta": "Pay {amount}",
         "processing": "Processing payment…",
-        "successToast": "Payment successful — receipt sent to your email."
-      }
+        "successToast": "Payment successful — receipt sent to your email.",
+        "methodLabel": "How do you want to pay?",
+        "transfer": {
+          "title": "DuitNow or bank transfer",
+          "help": "Transfer from your banking app, then tell your landlord.",
+          "steps": "Transfer the total in your banking app, using the invoice number as the reference. Then fill in the form below."
+        },
+        "online": {
+          "title": "Online banking or card",
+          "comingSoon": "Coming soon",
+          "help": "Pay by FPX or card without leaving Roofly."
+        },
+        "claim": {
+          "title": "I've paid",
+          "reference": "Transfer reference",
+          "referencePlaceholder": "From your bank's receipt",
+          "paidAt": "Date paid",
+          "note": "Note for your landlord (optional)",
+          "notePlaceholder": "e.g. Paid from my spouse's account",
+          "receiptPlaceholder": "Receipt uploads arrive in the next phase, once file storage is wired.",
+          "submit": "I've paid"
+        },
+        "claimedToast": "Sent. Your landlord will confirm once they see the money.",
+        "awaitingTitle": "Waiting for your landlord to confirm",
+        "awaitingHelp": "You said you paid on {date} (reference {reference}). We'll mark it paid once your landlord confirms.",
+        "rejectedTitle": "Your landlord couldn't find your last payment",
+        "errors": {
+          "claimPending": "You've already told your landlord about a payment for this invoice.",
+          "noPayoutAccount": "Your landlord hasn't added payment details yet."
+        }
+      },
+      "awaitingHint": "Waiting for your landlord to confirm",
+      "rejectedHint": "Your landlord couldn't find this payment"
     },
     "tickets": {
       "subtitle": "Report and track maintenance issues.",
@@ -1419,6 +1545,25 @@
       "placeholders": {
         "icNumber": "YYMMDD-PB-####"
       }
+    },
+    "payTo": {
+      "title": "Pay rent to",
+      "help": "Your landlord's account for this agreement. Pay by DuitNow or bank transfer.",
+      "none": "Your landlord hasn't added payment details yet.",
+      "bank": "Bank",
+      "holder": "Account holder",
+      "accountNumber": "Account number",
+      "duitnow": "DuitNow ID ({type})",
+      "duitnowTypes": {
+        "phone": "mobile number",
+        "mykad": "MyKad",
+        "brn": "SSM",
+        "passport": "passport"
+      },
+      "reference": "Reference",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copyLabel": "Copy {what}"
     }
   },
   "admin": {

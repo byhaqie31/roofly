@@ -7,6 +7,7 @@ use App\Http\Resources\Admin\AdminPropertySummaryResource;
 use App\Http\Resources\Admin\AdminTenantResource;
 use App\Models\Agreement;
 use App\Models\Invoice;
+use App\Models\PayoutAccount;
 use App\Models\Property;
 use App\Models\Ticket;
 use App\Models\Unit;
@@ -31,7 +32,9 @@ class AdminResourcesTest extends TestCase
 
     public function test_owner_resource_emits_exactly_the_summary_tier(): void
     {
-        $owner = User::factory()->owner()->create(['plan_tier' => 'starter', 'bank_account_last4' => '4521', 'phone' => '+60 12-777 0001']);
+        $owner = User::factory()->owner()->create(['plan_tier' => 'starter', 'phone' => '+60 12-777 0001']);
+        // Admin never sees payout accounts (spec 2026-10-08 § 4).
+        PayoutAccount::factory()->default()->create(['owner_id' => $owner->id, 'account_number' => '514012344521', 'duitnow_id' => '+60123456789']);
         $property = Property::factory()->create(['owner_id' => $owner->id]);
         Unit::factory()->create(['property_id' => $property->id, 'status' => 'occupied']);
         Unit::factory()->create(['property_id' => $property->id, 'status' => 'vacant']);
@@ -43,6 +46,7 @@ class AdminResourcesTest extends TestCase
         $this->assertSame(2, $json['unitsUsed']);
         $this->assertSame(5, $json['unitsCap']);
         $this->assertStringNotContainsString('4521', json_encode($json));
+        $this->assertStringNotContainsString('60123456789', json_encode($json));
         $this->assertSame('+60 12-777 0001', $json['phone']);
     }
 

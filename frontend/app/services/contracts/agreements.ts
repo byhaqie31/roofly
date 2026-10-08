@@ -6,12 +6,15 @@ import type {
 import type { Property } from "~/types/property";
 import type { Unit } from "~/types/unit";
 import type { Tenant } from "~/types/tenant";
+import type { PayoutAccount } from "~/types/payout";
 
 export interface AgreementWithRefs {
   agreement: Agreement;
   unit: Unit | null;
   property: Property | null;
   tenant: Tenant | null;
+  /** Resolved: the agreement's own account ?? the owner's default ?? null. */
+  payoutAccount?: PayoutAccount | null;
 }
 
 export interface AgreementsService {

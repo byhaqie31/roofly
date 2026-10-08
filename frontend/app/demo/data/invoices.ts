@@ -104,5 +104,24 @@ all.invoices
     inv.invoiceNumber = `INV-${(idx + 1).toString().padStart(4, "0")}`;
   });
 
+// One tenant "I've paid" claim awaiting the owner (spec 2026-10-08): Arif's
+// first overdue invoice, transferred a day after it was due.
+const claimed = all.invoices.find((i) => i.agreementId === "a-wangsa-arif" && i.status === "overdue");
+if (claimed) {
+  const paidAt = new Date(new Date(claimed.dueDate).getTime() + DAY_MS).toISOString();
+  all.payments.push({
+    id: `pay-claim-${claimed.id}`,
+    invoiceId: claimed.id,
+    amount: claimed.amount + claimed.lateFee,
+    method: "transfer",
+    status: "pending",
+    paidAt,
+    reference: "DN2610081234",
+    note: "Paid via Maybank2u",
+    payoutAccountId: "pa-cimb",
+    createdAt: paidAt,
+  });
+}
+
 export const invoicesMock: Invoice[] = all.invoices;
 export const paymentsMock: Payment[] = all.payments;

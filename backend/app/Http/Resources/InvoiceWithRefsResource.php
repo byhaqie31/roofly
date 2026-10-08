@@ -20,6 +20,8 @@ class InvoiceWithRefsResource extends JsonResource
             'property'  => $property ? new PropertyResource($property) : null,
             'tenant'    => $agreement?->tenant ? new TenantResource($agreement->tenant) : null,
             'payments'  => PaymentResource::collection($this->payments),
+            // Resolved for the invoice's agreement (spec 2026-10-08 § 4)
+            'payoutAccount' => ($account = $agreement?->resolvedPayoutAccount()) ? new PayoutAccountResource($account) : null,
         ];
     }
 }

@@ -24,6 +24,8 @@ class AgreementResource extends JsonResource
             'acceptedAt'         => $this->accepted_at?->toISOString(),
             'changesRequestedAt' => $this->changes_requested_at?->toISOString(),
             'reviewNote'         => $this->review_note,
+            // null = the owner's default payout account (spec 2026-10-08 § 3.2)
+            'payoutAccountId'    => $this->payout_account_id,
             'createdAt'     => $this->created_at?->toISOString(),
         ];
     }

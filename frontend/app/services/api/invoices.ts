@@ -1,5 +1,6 @@
 import type { Invoice } from "~/types/invoice";
 import type {
+  ClaimResult,
   InvoicesService,
   InvoiceWithRefs,
 } from "~/services/contracts/invoices";
@@ -36,5 +37,23 @@ export const apiInvoices: InvoicesService = {
     useApi().request(`/me/invoices/${invoiceId}/pay`, {
       method: "POST",
       body: { method },
+    }),
+
+  claimTransferForTenant: (invoiceId, input) =>
+    useApi().request<ClaimResult>(`/me/invoices/${invoiceId}/claim`, {
+      method: "POST",
+      body: input,
+    }),
+
+  confirmClaim: (paymentId, input = {}) =>
+    useApi().request<ClaimResult>(`/payments/${paymentId}/confirm`, {
+      method: "POST",
+      body: input,
+    }),
+
+  rejectClaim: (paymentId, reason) =>
+    useApi().request<ClaimResult>(`/payments/${paymentId}/reject`, {
+      method: "POST",
+      body: { reason },
     }),
 };

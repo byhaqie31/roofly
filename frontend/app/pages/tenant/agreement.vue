@@ -7,6 +7,7 @@ import Button from "~/components/ui/Button.vue";
 import Modal from "~/components/ui/Modal.vue";
 import EmptyState from "~/components/ui/EmptyState.vue";
 import AgreementDocumentsPanel from "~/components/owner/AgreementDocumentsPanel.vue";
+import PayoutDetails from "~/components/tenant/PayoutDetails.vue";
 import { useToast } from "~/composables/useToast";
 import type { AgreementWithRefs } from "~/services/useAgreements";
 
@@ -241,6 +242,18 @@ const formatDate = (iso: string) => {
             {{ t("tenant.agreement.lateFeeHint") }}
           </p>
         </section>
+      </Card>
+
+      <!-- Where rent goes (spec 2026-10-08) — shown during review too, so the tenant sees it before agreeing -->
+      <Card padding="loose">
+        <h2 class="text-card-title font-semibold text-ink">
+          {{ t("tenant.payTo.title") }}
+        </h2>
+        <p class="mt-1 mb-4 text-caption text-ink-muted">
+          {{ t("tenant.payTo.help") }}
+        </p>
+        <PayoutDetails v-if="row.payoutAccount" :account="row.payoutAccount" />
+        <p v-else class="text-caption text-ink-muted">{{ t("tenant.payTo.none") }}</p>
       </Card>
 
       <!-- Documents (Phase-4 placeholder) -->

@@ -33,6 +33,7 @@ class Agreement extends Model implements HasMedia
         'accepted_at',
         'changes_requested_at',
         'review_note',
+        'payout_account_id',
     ];
 
     /** Columns the tenant agreed to — changing any of them while under review drops back to draft. */
@@ -79,4 +80,25 @@ class Agreement extends Model implements HasMedia
     {
         return $this->hasMany(Invoice::class, 'agreement_id');
     }
+
+    /** Explicit override; null means "the owner's default" (spec 2026-10-08 § 3.2). */
+    public function payoutAccount(): BelongsTo
+    {
+        return $this->belongsTo(PayoutAccount::class, 'payout_account_id');
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Where the tenant pays: this agreement's own account ?? the owner's default ?? null.
+     * Eager-load `payoutAccount` + `unit.property.owner.defaultPayoutAccount` on lists.
+     */
+    public function resolvedPayoutAccount(): ?PayoutAccount
+    {
+        return $this->payoutAccount
+            ?? $this->unit?->property?->owner?->defaultPayoutAccount;
+    }
+
+    /** Relations resolvedPayoutAccount() walks — prefix with the path to the agreement when eager-loading. */
+    public const PAYOUT_RELATIONS = ['payoutAccount', 'unit.property.owner.defaultPayoutAccount'];
 }

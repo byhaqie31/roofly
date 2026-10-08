@@ -7,6 +7,7 @@ import SettingsProfileForm from "~/components/owner/SettingsProfileForm.vue";
 import SettingsPreferencesForm from "~/components/owner/SettingsPreferencesForm.vue";
 import SettingsNotificationsForm from "~/components/owner/SettingsNotificationsForm.vue";
 import SettingsPlanPanel from "~/components/owner/SettingsPlanPanel.vue";
+import SettingsPayoutsPanel from "~/components/owner/SettingsPayoutsPanel.vue";
 import type { OwnerAccount, Plan } from "~/types/owner";
 
 definePageMeta({ layout: "owner" });
@@ -17,10 +18,15 @@ useHead({ title: () => t("owner.nav.settings") });
 const account = ref<OwnerAccount | null>(null);
 const plans = ref<Plan[]>([]);
 const loading = ref(true);
-const activeTab = ref<string>("profile");
+const TABS = ["profile", "payouts", "preferences", "notifications", "plan"] as const;
+// `?tab=payouts` deep-links (getting-started checklist, agreement payout row).
+const route = useRoute();
+const queryTab = String(route.query.tab ?? "");
+const activeTab = ref<string>((TABS as readonly string[]).includes(queryTab) ? queryTab : "profile");
 
 const tabOptions = computed(() => [
   { value: "profile", label: t("owner.settings.tabs.profile") },
+  { value: "payouts", label: t("owner.settings.tabs.payouts") },
   { value: "preferences", label: t("owner.settings.tabs.preferences") },
   { value: "notifications", label: t("owner.settings.tabs.notifications") },
   { value: "plan", label: t("owner.settings.tabs.plan") },
@@ -71,6 +77,9 @@ const tabTriggerClass =
             <TabsTrigger value="profile" :class="tabTriggerClass">
               {{ t("owner.settings.tabs.profile") }}
             </TabsTrigger>
+            <TabsTrigger value="payouts" :class="tabTriggerClass">
+              {{ t("owner.settings.tabs.payouts") }}
+            </TabsTrigger>
             <TabsTrigger value="preferences" :class="tabTriggerClass">
               {{ t("owner.settings.tabs.preferences") }}
             </TabsTrigger>
@@ -84,6 +93,9 @@ const tabTriggerClass =
 
           <TabsContent value="profile" class="outline-none">
             <SettingsProfileForm :account="account" @saved="onSaved" />
+          </TabsContent>
+          <TabsContent value="payouts" class="outline-none">
+            <SettingsPayoutsPanel />
           </TabsContent>
           <TabsContent value="preferences" class="outline-none">
             <SettingsPreferencesForm :account="account" @saved="onSaved" />

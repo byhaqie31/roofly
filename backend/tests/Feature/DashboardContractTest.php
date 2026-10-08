@@ -127,6 +127,33 @@ class DashboardContractTest extends TestCase
         );
     }
 
+    public function test_needs_attention_lists_payment_claims_first(): void
+    {
+        $property = Property::factory()->create(['owner_id' => $this->owner->id]);
+        $unit = Unit::factory()->create(['property_id' => $property->id]);
+        $tenant = User::factory()->tenant()->create(['name' => 'Arif Hakim']);
+        $agreement = Agreement::factory()->create(['unit_id' => $unit->id, 'tenant_id' => $tenant->id]);
+        Invoice::factory()->create(['agreement_id' => $agreement->id, 'invoice_number' => 'INV-LATE', 'status' => 'overdue', 'due_date' => '2026-08-01']);
+        $claimed = Invoice::factory()->create(['agreement_id' => $agreement->id, 'invoice_number' => 'INV-CLAIM', 'status' => 'pending', 'due_date' => '2026-09-01']);
+        Payment::factory()->create(['invoice_id' => $claimed->id, 'method' => 'transfer', 'status' => 'pending']);
+        Payment::factory()->create(['invoice_id' => $claimed->id, 'method' => 'transfer', 'status' => 'failed']); // earlier rejection: no extra row
+
+        // An own-stay property's claims stay out, like everything else on the dashboard.
+        $home = Property::factory()->create(['owner_id' => $this->owner->id, 'purpose' => 'own_stay']);
+        $homeAgreement = Agreement::factory()->create(['unit_id' => Unit::factory()->create(['property_id' => $home->id])->id]);
+        $homeInvoice = Invoice::factory()->create(['agreement_id' => $homeAgreement->id, 'status' => 'pending']);
+        Payment::factory()->create(['invoice_id' => $homeInvoice->id, 'method' => 'transfer', 'status' => 'pending']);
+
+        $feed = $this->getJson('/api/dashboard')->assertOk()->json('needsAttention');
+
+        $this->assertSame(
+            ['kind' => 'payment_claim', 'title' => 'INV-CLAIM', 'meta' => 'Arif Hakim', 'link' => '/owner/payments?status=awaiting'],
+            $feed[0]
+        );
+        $this->assertCount(1, array_filter($feed, fn ($i) => $i['kind'] === 'payment_claim'));
+        $this->assertSame('overdue', $feed[1]['kind']);
+    }
+
     public function test_tenant_is_blocked_from_the_owner_dashboard(): void
     {
         Sanctum::actingAs(User::factory()->tenant()->create());

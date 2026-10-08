@@ -9,10 +9,12 @@ use App\Http\Requests\UpdateAgreementRequest;
 use App\Http\Resources\AgreementResource;
 use App\Http\Resources\AgreementWithRefsResource;
 use App\Models\Agreement;
+use App\Models\PayoutAccount;
 use App\Models\Unit;
 use App\Notifications\AgreementSent;
 use App\Services\InvoiceGenerator;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class AgreementController extends Controller
 {
@@ -24,7 +26,7 @@ class AgreementController extends Controller
 
         if ($request->filled('expand')) {
             return AgreementWithRefsResource::collection(
-                $query->with(['unit.property.coOwners', 'tenant'])->get()
+                $query->with(['unit.property.coOwners', 'tenant', ...Agreement::PAYOUT_RELATIONS])->get()
             );
         }
 
@@ -36,7 +38,10 @@ class AgreementController extends Controller
         $unit = Unit::findOrFail($request->validated('unitId'));
         abort_if($unit->property->owner_id !== $request->user()->id, 403);
 
-        $agreement = Agreement::create($request->toModelAttributes());
+        $attributes = $request->toModelAttributes();
+        $this->assertOwnPayoutAccount($request, $attributes);
+
+        $agreement = Agreement::create($attributes);
 
         // ADR-006: an active agreement gets its first invoice (next due date onward).
         if ($agreement->status === AgreementStatus::ACTIVE) {
@@ -62,6 +67,7 @@ class AgreementController extends Controller
             $unit = Unit::findOrFail($attributes['unit_id']);
             abort_if($unit->property->owner_id !== $request->user()->id, 403);
         }
+        $this->assertOwnPayoutAccount($request, $attributes);
 
         $before = $agreement->status;
         $agreement->update($attributes);
@@ -118,6 +124,21 @@ class AgreementController extends Controller
         $agreement->update(['status' => AgreementStatus::DRAFT, 'sent_at' => null]);
 
         return new AgreementResource($agreement->fresh());
+    }
+
+    /** payoutAccountId must be one of the caller's own accounts (or null = default). */
+    private function assertOwnPayoutAccount(Request $request, array $attributes): void
+    {
+        $id = $attributes['payout_account_id'] ?? null;
+        if ($id === null) {
+            return;
+        }
+        $mine = PayoutAccount::whereKey($id)->where('owner_id', $request->user()->id)->exists();
+        if (! $mine) {
+            throw ValidationException::withMessages([
+                'payoutAccountId' => 'Choose one of your payout accounts.',
+            ]);
+        }
     }
 
     private function authorizeOwner(Request $request, Agreement $agreement): void

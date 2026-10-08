@@ -135,6 +135,22 @@ class DashboardController extends Controller
         // ── Needs-attention feed (order matches the frontend) ──────────────
         $needsAttention = [];
 
+        // Tenant transfer claims awaiting confirmation — first, they block the
+        // tenant (spec 2026-10-08 § 4). One item per invoice.
+        $claimedInvoiceIds = Payment::whereIn('invoice_id', $invoices->pluck('id'))
+            ->where('status', PaymentStatus::PENDING)
+            ->pluck('invoice_id')
+            ->unique()
+            ->all();
+        foreach ($invoices->whereIn('id', $claimedInvoiceIds)->sortBy('due_date') as $inv) {
+            $needsAttention[] = [
+                'kind'  => 'payment_claim',
+                'title' => $inv->invoice_number,
+                'meta'  => $inv->agreement?->tenant?->name ?? '—',
+                'link'  => '/owner/payments?status=awaiting',
+            ];
+        }
+
         foreach ($invoices->where('status', InvoiceStatus::OVERDUE) as $inv) {
             $needsAttention[] = [
                 'kind'  => 'overdue',

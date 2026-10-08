@@ -56,6 +56,8 @@ export const useEnv = () => {
       // Google sign-in needs a client id and is never shown in demo (demo has
       // its own "Continue with Google (demo)" shortcut instead).
       googleLogin: !isDemo && Boolean(config.public.googleClientId),
+      // Gateway payments (FPX / card). Off ⇒ "Coming soon" beside manual DuitNow.
+      onlinePayments: Boolean(config.public.features.onlinePayments),
     },
 
     // Marketing/analytics tracking — off in demo (useMock) and when the

@@ -17,6 +17,8 @@ class AgreementWithRefsResource extends JsonResource
             'unit'      => $unit ? new UnitResource($unit) : null,
             'property'  => $property ? new PropertyResource($property) : null,
             'tenant'    => $this->tenant ? new TenantResource($this->tenant) : null,
+            // Resolved: own account ?? owner's default ?? null (spec 2026-10-08 § 4)
+            'payoutAccount' => ($account = $this->resolvedPayoutAccount()) ? new PayoutAccountResource($account) : null,
         ];
     }
 }

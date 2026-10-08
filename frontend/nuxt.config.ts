@@ -97,6 +97,12 @@ export default defineNuxtConfig({
         // Admin back office (spec 2026-08-23). Default on for uat/prod; useEnv()
         // forces it off in demo regardless of this value.
         admin: process.env.NUXT_PUBLIC_FEATURE_ADMIN !== "false",
+        // Online rent payments (FPX / card through a gateway, spec 2026-10-08).
+        // Off by default everywhere — tenants pay by manual DuitNow transfer and
+        // the gateway option shows as "Coming soon". Flip with
+        // NUXT_PUBLIC_FEATURE_ONLINE_PAYMENTS=true together with the backend's
+        // ONLINE_PAYMENTS once the gateway lands.
+        onlinePayments: process.env.NUXT_PUBLIC_FEATURE_ONLINE_PAYMENTS === "true",
       },
       // App environment identifier — drives all UI feature flags via useEnv().
       // Values: "demo" | "uat" | "production". Defaults to production when unset.

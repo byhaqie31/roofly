@@ -12,6 +12,7 @@ import { AGREEMENT_TERM_PRESETS, endDateForTerm, termMonthsBetween, type Agreeme
 import Input from "~/components/ui/Input.vue";
 import Select from "~/components/ui/Select.vue";
 import Button from "~/components/ui/Button.vue";
+import AgreementPayoutSelect from "~/components/owner/AgreementPayoutSelect.vue";
 
 const props = defineProps<{
   agreement?: Agreement | null;
@@ -30,6 +31,10 @@ const allProperties = ref<Property[]>([]);
 const allUnits = ref<Unit[]>([]);
 const allTenants = ref<Tenant[]>([]);
 const formPropertyId = ref<string>("");
+// Create only — on an existing agreement it's changed from the Overview tab,
+// since it isn't a term (spec 2026-10-08 § 3.2).
+const payoutAccountId = ref<string | null>(null);
+const payoutError = ref<string | undefined>(undefined);
 
 const senToRinggit = (sen: number) => sen / 100;
 const ringgitToSen = (rm: number) => Math.round(rm * 100);
@@ -153,6 +158,7 @@ onMounted(async () => {
 
 const onSubmit = handleSubmit(async (values) => {
   submitting.value = true;
+  payoutError.value = undefined;
   try {
     const payload: AgreementInput = {
       unitId: values.unitId,
@@ -165,6 +171,7 @@ const onSubmit = handleSubmit(async (values) => {
       rentDueDay: values.rentDueDay,
       status: values.status,
     };
+    if (props.mode === "create") payload.payoutAccountId = payoutAccountId.value;
     if (props.mode === "edit" && props.agreement) {
       const updated = await useAgreements().update(props.agreement.id, payload);
       show(t("common.savedToast"), "success");
@@ -178,6 +185,7 @@ const onSubmit = handleSubmit(async (values) => {
     const fieldErrors = toFieldErrors(err);
     if (fieldErrors) {
       setErrors(fieldErrors);
+      payoutError.value = fieldErrors.payoutAccountId;
       return;
     }
     show(t("common.genericError"), "danger");
@@ -322,6 +330,16 @@ const onSubmit = handleSubmit(async (values) => {
           :label="t('owner.agreements.fields.status')"
           :error="errors.status"
         />
+      </div>
+    </section>
+
+    <section v-if="mode === 'create'" class="space-y-3">
+      <h3 class="text-caption font-semibold uppercase tracking-wide text-ink-muted">
+        {{ t("owner.agreements.payout.title") }}
+      </h3>
+      <p class="text-caption text-ink-muted">{{ t("owner.agreements.payout.help") }}</p>
+      <div class="sm:max-w-md">
+        <AgreementPayoutSelect v-model="payoutAccountId" :error="payoutError" />
       </div>
     </section>
 

@@ -256,7 +256,7 @@ const formatDate = (iso: string) => {
           </TabsList>
 
           <TabsContent value="overview" class="outline-none">
-            <AgreementOverviewPanel :row="row" />
+            <AgreementOverviewPanel :row="row" @updated="load" />
           </TabsContent>
           <TabsContent value="terms" class="outline-none">
             <AgreementTermsForm

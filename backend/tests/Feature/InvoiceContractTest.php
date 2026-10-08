@@ -37,10 +37,10 @@ class InvoiceContractTest extends TestCase
         Payment::factory()->create(['invoice_id' => $this->invoice->id]);
         $res = $this->getJson('/api/invoices?expand=agreement,unit,property,tenant,payments')->assertOk();
         $row = $res->json()[0];
-        $this->assertSame(['invoice', 'agreement', 'unit', 'property', 'tenant', 'payments'], array_keys($row));
+        $this->assertSame(['invoice', 'agreement', 'unit', 'property', 'tenant', 'payments', 'payoutAccount'], array_keys($row));
         $this->assertSame(180000, $row['invoice']['amount']);
         $this->assertSame(180000, $row['payments'][0]['amount']);
-        $this->assertSame(['id', 'invoiceId', 'amount', 'method', 'status', 'paidAt', 'reference', 'createdAt'], array_keys($row['payments'][0]));
+        $this->assertSame(['id', 'invoiceId', 'amount', 'method', 'status', 'paidAt', 'reference', 'createdAt', 'payoutAccountId', 'note', 'rejectionReason', 'confirmedAt'], array_keys($row['payments'][0]));
     }
 
     public function test_record_payment_accepts_camel_case_and_marks_paid(): void

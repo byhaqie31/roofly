@@ -36,7 +36,7 @@ class TenantShellContractTest extends TestCase
         $active = Agreement::factory()->create(['unit_id' => $this->unit->id, 'tenant_id' => $this->tenant->id, 'status' => 'active']);
 
         $res = $this->getJson('/api/me/agreement?expand=unit,property,tenant')->assertOk();
-        $this->assertSame(['agreement', 'unit', 'property', 'tenant'], array_keys($res->json()));
+        $this->assertSame(['agreement', 'unit', 'property', 'tenant', 'payoutAccount'], array_keys($res->json()));
         $this->assertSame($active->id, $res->json('agreement.id'));
     }
 
@@ -60,11 +60,12 @@ class TenantShellContractTest extends TestCase
 
         $res = $this->getJson('/api/me/invoices?expand=agreement,unit,property,tenant,payments')->assertOk();
         $this->assertCount(1, $res->json());
-        $this->assertSame(['invoice', 'agreement', 'unit', 'property', 'tenant', 'payments'], array_keys($res->json()[0]));
+        $this->assertSame(['invoice', 'agreement', 'unit', 'property', 'tenant', 'payments', 'payoutAccount'], array_keys($res->json()[0]));
     }
 
     public function test_me_pay_creates_successful_payment(): void
     {
+        config(['app.online_payments' => true]); // simulated gateway is off by default (spec 2026-10-08)
         $agreement = Agreement::factory()->create(['unit_id' => $this->unit->id, 'tenant_id' => $this->tenant->id]);
         $invoice = Invoice::factory()->create(['agreement_id' => $agreement->id, 'late_fee_cents' => 5000]);
 

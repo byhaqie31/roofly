@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -39,7 +40,6 @@ class User extends Authenticatable
         'first_login_at',
         'disabled_at',
         'business_name',
-        'bank_account_last4',
         'photo_path',
         'plan_tier',
         'owner_preferences',
@@ -137,6 +137,18 @@ class User extends Authenticatable
     public function adminInvites(): HasMany
     {
         return $this->hasMany(AdminInvite::class, 'user_id');
+    }
+
+    /** Owner payout accounts (spec 2026-10-08 § 3.1). */
+    public function payoutAccounts(): HasMany
+    {
+        return $this->hasMany(PayoutAccount::class, 'owner_id');
+    }
+
+    /** The owner's default payout account — eager-loadable, null until they add one. */
+    public function defaultPayoutAccount(): HasOne
+    {
+        return $this->hasOne(PayoutAccount::class, 'owner_id')->where('is_default', true);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
