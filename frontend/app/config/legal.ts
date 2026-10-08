@@ -38,20 +38,35 @@ export interface LegalConfig {
 export const LEGAL: LegalConfig = {
   operator: {
     name: "Axel Nova Ventures",
-    ssmNumber: null, // TODO(legal): SSM registration number
-    registeredAddress: null, // TODO(legal): registered business address
+    ssmNumber: "202603119899 (CA0420977-U)",
+    registeredAddress: null, // TODO(legal): full registered business address
     website: "https://axelnovaventures.com",
   },
   contact: {
-    email: null, // TODO(legal): general contact email (suspended.vue already links support@roofly.my — confirm it's monitored)
-    privacyEmail: null, // TODO(legal): privacy contact email for PDPA requests
-    phone: null, // TODO(legal): business phone number
+    email: "baihaqie@axelnova.tech",
+    privacyEmail: "baihaqie@axelnova.tech", // TODO(legal): confirm inbox for Roofly PDPA requests
+    phone: "+60183173103", // TODO(legal): confirm current business number
   },
   documents: {
-    privacy: { version: "0.1", effectiveDate: null }, // TODO(legal): effective date once reviewed
-    terms: { version: "0.1", effectiveDate: null }, // TODO(legal): effective date once reviewed
-    billing: { version: "0.1", effectiveDate: null }, // TODO(legal): effective date once reviewed
-    "acceptable-use": { version: "0.1", effectiveDate: null }, // TODO(legal): effective date once reviewed
-    beta: { version: "0.1", effectiveDate: null }, // TODO(legal): effective date once reviewed
+    privacy: {
+      version: "0.1",
+      effectiveDate: null,
+    },
+    terms: {
+      version: "0.1",
+      effectiveDate: null,
+    },
+    billing: {
+      version: "0.1",
+      effectiveDate: null,
+    },
+    "acceptable-use": {
+      version: "0.1",
+      effectiveDate: null,
+    },
+    beta: {
+      version: "0.1",
+      effectiveDate: null,
+    },
   },
 };
