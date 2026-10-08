@@ -3,7 +3,9 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\TenantInvite as TenantInviteModel;
+use App\Http\Resources\Admin\AuditEntryResource;
 use App\Models\User;
+use App\Support\PrivacyMask;
 use App\Notifications\TenantInvite;
 use App\Support\AdminPermissions;
 use Database\Seeders\AdminPermissionSeeder;
@@ -28,16 +30,21 @@ class AdminTenantTest extends TestCase
 
     public function test_list_search_and_filters(): void
     {
-        $o1 = User::factory()->owner()->create();
+        $o1 = User::factory()->owner()->create(['name' => 'Farid Kamal']);
         $o2 = User::factory()->owner()->create();
-        User::factory()->tenant()->create(['name' => 'Aminah Yusof', 'invited_by' => $o1->id]);
+        User::factory()->tenant()->create(['name' => 'Aminah Yusof', 'email' => 'aminah.yusof@example.com', 'phone' => '+60 12-345 6789', 'invited_by' => $o1->id]);
         User::factory()->invitedTenant()->create(['name' => 'Lim Li Wei', 'invited_by' => $o2->id]);
         User::factory()->owner()->create(['name' => 'Aminah Owner']);
 
         $res = $this->getJson('/api/admin/tenants')->assertOk();
         $this->assertSame(2, $res->json('meta.total'));
         $this->assertSame(AdminResourcesTest::TENANT_KEYS, array_keys($res->json('data.0')));
-        $this->assertSame(1, $this->getJson('/api/admin/tenants?q=aminah')->json('meta.total'));
+        // Exact email or owner/property name only — a partial tenant name, email or phone finds nothing.
+        $this->assertSame(1, $this->getJson('/api/admin/tenants?q=AMINAH.YUSOF@example.com')->json('meta.total'));
+        $this->assertSame(1, $this->getJson('/api/admin/tenants?q=farid')->json('meta.total'));
+        $this->assertSame(0, $this->getJson('/api/admin/tenants?q=aminah')->json('meta.total'));
+        $this->assertSame(0, $this->getJson('/api/admin/tenants?q=yusof@')->json('meta.total'));
+        $this->assertSame(0, $this->getJson('/api/admin/tenants?q=345')->json('meta.total'));
         $this->assertSame(1, $this->getJson('/api/admin/tenants?status=invited')->json('meta.total'));
         $this->assertSame(1, $this->getJson("/api/admin/tenants?ownerId={$o2->id}")->json('meta.total'));
     }
@@ -58,7 +65,10 @@ class AdminTenantTest extends TestCase
         $this->postJson("/api/admin/tenants/{$invited->id}/resend-invite")->assertNoContent();
 
         $this->assertTrue($invited->fresh()->invited_at->isToday());
-        $this->assertSame('tenant.invite_resent', Activity::inLog('admin')->latest('id')->first()->event);
+        $entry = Activity::inLog('admin')->latest('id')->with(['causer', 'subject'])->first();
+        $this->assertSame('tenant.invite_resent', $entry->event);
+        // The audit trail masks the tenant like every other admin surface.
+        $this->assertSame(PrivacyMask::name($invited->name), (new AuditEntryResource($entry))->resolve()['subjectName']);
         Notification::assertSentTo($invited, TenantInvite::class);
         $this->assertNotNull($old->fresh()->accepted_at); // the old link is voided — only the newest works
         $this->assertSame(1, TenantInviteModel::where('user_id', $invited->id)->whereNull('accepted_at')->count());

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ShieldCheck } from "lucide-vue-next";
 import { onMounted } from "vue";
+import SiteFooter from "~/components/layout/SiteFooter.vue";
 
 const { t } = useI18n();
 // Admin is English-only (internal ops tool): pin the locale and hide the switcher.
@@ -30,8 +31,6 @@ onMounted(() => { if (locale.value !== "en") setLocale("en"); });
       </div>
     </main>
 
-    <footer class="px-6 py-4 text-center text-micro" style="color: rgba(247, 244, 237, 0.6)">
-      © {{ new Date().getFullYear() }} Roofly.my · {{ t("common.tagline") }}
-    </footer>
+    <SiteFooter tone="dark" variant="admin" />
   </div>
 </template>

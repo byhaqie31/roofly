@@ -41,11 +41,14 @@ export interface AdminOwnerCounts {
   ticketsOpen: number;
 }
 
+/**
+ * Owner tier — Roofly's own customer, so name + email + business name are
+ * shown; phone, money and property detail are not (AdminResourcesTest pins it).
+ */
 export interface AdminOwner {
   id: string;
   name: string;
   email: string;
-  phone: string | null;
   businessName: string | null;
   planTier: PlanTier;
   unitsUsed: number;
@@ -61,18 +64,24 @@ export interface AdminOwner {
 export interface AdminPropertySummary {
   id: string;
   name: string;
-  address: { line: string | null; postcode: string | null; city: string | null; state: string | null };
+  /** City + state only — never the street address or postcode. */
+  location: { city: string | null; state: string | null };
   type: "condo" | "landed" | "shoplot" | "room" | null;
   unitsTotal: number;
   unitsOccupied: number;
   createdAt: string;
 }
 
+/**
+ * Tenant tier — placement only. Tenant details are owner-controlled, so the
+ * API masks them (backend App\Support\PrivacyMask, utils/privacyMask.ts):
+ * "Aminah Y." / "am•••@example.com". No phone, MyKad, personal info or
+ * emergency contact ever reaches admin.
+ */
 export interface AdminTenant {
   id: string;
-  name: string;
-  email: string;
-  phone: string | null;
+  displayName: string;
+  emailMasked: string;
   status: TenantStatus;
   ownerId: string | null;
   ownerName: string | null;
@@ -165,6 +174,7 @@ export interface OwnerListQuery {
 }
 
 export interface TenantListQuery {
+  /** Exact tenant email, or part of a property / owner name. */
   q?: string;
   status?: TenantStatus;
   ownerId?: string;

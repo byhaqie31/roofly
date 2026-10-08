@@ -1,4 +1,4 @@
-import { isTrackedPath } from "~/composables/useTrack";
+import { isTrackedPath } from "~/utils/trackedPaths";
 
 /** page_view on every client-side navigation to a public/marketing path (spec § 3). */
 export default defineNuxtPlugin((nuxtApp) => {

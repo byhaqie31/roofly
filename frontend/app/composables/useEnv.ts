@@ -66,6 +66,8 @@ export const useEnv = () => {
     showDemoShortcuts: isDemo,
     showFloatingFeedback: isDemo && Boolean(config.public.demoFeedbackUrl),
     showEnvBanner: isUat,
+    // Beta terms (/legal/beta + footer link) apply only where testers sign up.
+    showBetaTerms: isUat,
     // In-app help button (owner + tenant shells → admin Enquiries → Messages).
     // Demo keeps its Google Form button instead: demo never reaches the backend.
     showSupportWidget: !isDemo,

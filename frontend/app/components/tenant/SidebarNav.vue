@@ -5,6 +5,7 @@ import {
   Receipt,
   Wrench,
   User as UserIcon,
+  LifeBuoy,
 } from "lucide-vue-next";
 
 const { t } = useI18n();
@@ -16,6 +17,7 @@ const items = computed(() => [
   { to: "/tenant/agreement", label: t("tenant.nav.agreement"), icon: FileText },
   { to: "/tenant/payments", label: t("tenant.nav.payments"), icon: Receipt },
   { to: "/tenant/tickets", label: t("tenant.nav.tickets"), icon: Wrench },
+  { to: "/tenant/help", label: t("tenant.nav.help"), icon: LifeBuoy },
 ]);
 </script>
 

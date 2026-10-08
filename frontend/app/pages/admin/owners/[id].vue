@@ -101,7 +101,7 @@ const countKeys = ["properties", "units", "unitsOccupied", "tenants", "agreement
             <h1 class="text-display-sub font-semibold tracking-snug">{{ owner.name }}</h1>
             <OwnerStatusPill :status="owner.status" />
           </div>
-          <p class="mt-1 text-caption text-ink-muted">{{ owner.businessName ? `${owner.businessName} · ` : "" }}{{ owner.email }}{{ owner.phone ? ` · ${owner.phone}` : "" }}</p>
+          <p class="mt-1 text-caption text-ink-muted">{{ owner.businessName ? `${owner.businessName} · ` : "" }}{{ owner.email }}</p>
         </div>
         <div class="flex gap-2 self-start">
           <Button v-if="can('owners.warn')" variant="ghost" size="sm" @click="showWarn = true">
@@ -154,7 +154,7 @@ const countKeys = ["properties", "units", "unitsOccupied", "tenants", "agreement
             <Card v-for="p in properties" :key="p.id" padding="standard">
               <div class="flex items-center gap-2"><Pill tone="neutral">{{ p.type ?? "—" }}</Pill><span class="text-micro text-ink-faint tabular-nums">{{ p.unitsOccupied }} / {{ p.unitsTotal }} {{ t("admin.owners.detail.occupied") }}</span></div>
               <p class="mt-1 text-body font-medium text-ink">{{ p.name }}</p>
-              <p class="text-caption text-ink-muted">{{ [p.address.line, p.address.postcode, p.address.city, p.address.state].filter(Boolean).join(", ") }}</p>
+              <p class="text-caption text-ink-muted">{{ [p.location.city, p.location.state].filter(Boolean).join(", ") || "—" }}</p>
             </Card>
           </div>
         </TabsContent>
@@ -167,8 +167,8 @@ const countKeys = ["properties", "units", "unitsOccupied", "tenants", "agreement
               <li v-for="tn in tenants" :key="tn.id" class="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <NuxtLink :to="`/admin/tenants/${tn.id}`" class="min-w-0 flex-1">
                   <div class="flex items-center gap-2"><Pill :tone="tenantTone(tn.status)">{{ t(`admin.status.tenant.${tn.status}`) }}</Pill><span class="text-micro text-ink-faint">{{ tn.propertyName ?? "—" }} · {{ tn.unitLabel ?? "—" }}</span></div>
-                  <p class="mt-1 text-body font-medium text-ink">{{ tn.name }}</p>
-                  <p class="text-caption text-ink-muted">{{ tn.email }}</p>
+                  <p class="mt-1 text-body font-medium text-ink">{{ tn.displayName }}</p>
+                  <p class="text-caption text-ink-muted">{{ tn.emailMasked }}</p>
                 </NuxtLink>
                 <Button v-if="tn.status === 'invited' && can('tenants.view')" variant="ghost" size="sm" class="self-start" :loading="resendingId === tn.id" @click="resend(tn)">{{ t("admin.tenants.resendInvite") }}</Button>
               </li>

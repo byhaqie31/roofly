@@ -20,9 +20,18 @@ class TenantController extends Controller
         $perPage = min(100, max(1, (int) $request->integer('perPage', 20)));
         $query = User::query()->where('role', UserRole::TENANT)->with(self::WITH);
 
+        // Admins only see masked tenant identities, so search can't be a way to
+        // probe them: an exact email (to find "the tenant who never got the
+        // invite"), or a partial property / owner name — never a partial
+        // tenant name, email or phone.
         if ($q = trim((string) $request->query('q', ''))) {
             $like = '%' . $q . '%';
-            $query->where(fn ($w) => $w->where('name', 'like', $like)->orWhere('email', 'like', $like)->orWhere('phone', 'like', $like));
+            $query->where(fn ($w) => $w
+                ->whereRaw('LOWER(email) = ?', [mb_strtolower($q)])
+                ->orWhereHas('agreements.unit.property', fn ($p) => $p
+                    ->where('name', 'like', $like)
+                    ->orWhereHas('owner', fn ($o) => $o->where('name', 'like', $like)))
+                ->orWhereHas('inviter', fn ($o) => $o->where('name', 'like', $like)));
         }
         if ($status = $request->query('status')) {
             $query->where('status', $status);

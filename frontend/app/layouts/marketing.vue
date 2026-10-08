@@ -37,6 +37,6 @@ import SiteFooter from "~/components/layout/SiteFooter.vue";
       <slot />
     </main>
 
-    <SiteFooter tone="dark" />
+    <SiteFooter tone="dark" variant="full" />
   </div>
 </template>

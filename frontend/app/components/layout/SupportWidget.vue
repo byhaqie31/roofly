@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { Bug, CircleCheck, Headset, Lightbulb, MessageCircleQuestion } from "lucide-vue-next";
 import Modal from "~/components/ui/Modal.vue";
 import Button from "~/components/ui/Button.vue";
@@ -37,6 +37,9 @@ const openForm = () => {
   error.value = null;
   open.value = true;
 };
+
+// The Help and support page's "Send a message" button opens this same form.
+watch(useSupportWidget().openRequests, openForm);
 
 const send = async () => {
   submitted.value = true;

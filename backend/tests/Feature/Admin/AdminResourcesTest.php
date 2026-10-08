@@ -24,14 +24,14 @@ class AdminResourcesTest extends TestCase
 {
     use RefreshDatabase;
 
-    public const OWNER_KEYS = ['id', 'name', 'email', 'phone', 'businessName', 'planTier', 'unitsUsed', 'unitsCap', 'status', 'suspendedAt', 'suspensionReason', 'createdAt', 'lastActiveAt', 'counts'];
+    public const OWNER_KEYS = ['id', 'name', 'email', 'businessName', 'planTier', 'unitsUsed', 'unitsCap', 'status', 'suspendedAt', 'suspensionReason', 'createdAt', 'lastActiveAt', 'counts'];
     public const COUNT_KEYS = ['properties', 'units', 'unitsOccupied', 'tenants', 'agreementsActive', 'agreementsExpiring30d', 'invoicesOverdue', 'ticketsOpen'];
-    public const PROPERTY_KEYS = ['id', 'name', 'address', 'type', 'unitsTotal', 'unitsOccupied', 'createdAt'];
-    public const TENANT_KEYS = ['id', 'name', 'email', 'phone', 'status', 'ownerId', 'ownerName', 'propertyName', 'unitLabel', 'invitedAt', 'acceptedAt', 'createdAt'];
+    public const PROPERTY_KEYS = ['id', 'name', 'location', 'type', 'unitsTotal', 'unitsOccupied', 'createdAt'];
+    public const TENANT_KEYS = ['id', 'displayName', 'emailMasked', 'status', 'ownerId', 'ownerName', 'propertyName', 'unitLabel', 'invitedAt', 'acceptedAt', 'createdAt'];
 
     public function test_owner_resource_emits_exactly_the_summary_tier(): void
     {
-        $owner = User::factory()->owner()->create(['plan_tier' => 'starter', 'bank_account_last4' => '4521']);
+        $owner = User::factory()->owner()->create(['plan_tier' => 'starter', 'bank_account_last4' => '4521', 'phone' => '+60 12-777 0001']);
         $property = Property::factory()->create(['owner_id' => $owner->id]);
         Unit::factory()->create(['property_id' => $property->id, 'status' => 'occupied']);
         Unit::factory()->create(['property_id' => $property->id, 'status' => 'vacant']);
@@ -43,6 +43,7 @@ class AdminResourcesTest extends TestCase
         $this->assertSame(2, $json['unitsUsed']);
         $this->assertSame(5, $json['unitsCap']);
         $this->assertStringNotContainsString('4521', json_encode($json));
+        $this->assertStringNotContainsString('777', json_encode($json));
     }
 
     public function test_owner_resource_reports_suspension_and_unlimited_cap(): void
@@ -74,13 +75,18 @@ class AdminResourcesTest extends TestCase
 
     public function test_property_summary_resource(): void
     {
-        $property = Property::factory()->create(['ownership' => ['purchasePrice' => 123], 'utilities' => ['tnb' => 'x']]);
+        $property = Property::factory()->create([
+            'ownership' => ['purchasePrice' => 123], 'utilities' => ['tnb' => 'x'],
+            'address' => '12 Jalan Rahsia', 'postcode' => '50450', 'city' => 'Kuala Lumpur', 'state' => 'W.P. Kuala Lumpur',
+        ]);
         Unit::factory()->create(['property_id' => $property->id, 'status' => 'occupied']);
         $json = (new AdminPropertySummaryResource($property->load('units')))->resolve();
         $this->assertSame(self::PROPERTY_KEYS, array_keys($json));
-        $this->assertSame(['line', 'postcode', 'city', 'state'], array_keys($json['address']));
+        $this->assertSame(['city' => 'Kuala Lumpur', 'state' => 'W.P. Kuala Lumpur'], $json['location']);
         $this->assertSame(1, $json['unitsTotal']);
         $this->assertStringNotContainsString('purchasePrice', json_encode($json));
+        $this->assertStringNotContainsString('Rahsia', json_encode($json));
+        $this->assertStringNotContainsString('50450', json_encode($json));
     }
 
     public function test_tenant_resource(): void
@@ -88,7 +94,11 @@ class AdminResourcesTest extends TestCase
         $owner = User::factory()->owner()->create(['name' => 'Owner One']);
         $property = Property::factory()->create(['owner_id' => $owner->id, 'name' => 'Suria']);
         $unit = Unit::factory()->create(['property_id' => $property->id, 'label' => 'A-1']);
-        $tenant = User::factory()->tenant()->create(['invited_by' => $owner->id, 'first_login_at' => now(), 'personal_info' => ['icNumber' => '880314-14-5687']]);
+        $tenant = User::factory()->tenant()->create([
+            'name' => 'Aminah Binti Yusof', 'email' => 'aminah.yusof@example.com', 'phone' => '+60 12-345 6789',
+            'invited_by' => $owner->id, 'first_login_at' => now(),
+            'personal_info' => ['icNumber' => '880314-14-5687'], 'emergency_contact' => ['name' => 'Yusof Ali', 'phone' => '+60 13-000 1111'],
+        ]);
         Agreement::factory()->create(['unit_id' => $unit->id, 'tenant_id' => $tenant->id, 'status' => 'active']);
 
         $json = (new AdminTenantResource($tenant->load(['inviter:id,name', 'agreements.unit.property:id,name,owner_id'])))->resolve();
@@ -97,7 +107,12 @@ class AdminResourcesTest extends TestCase
         $this->assertSame('Suria', $json['propertyName']);
         $this->assertSame('A-1', $json['unitLabel']);
         $this->assertNotNull($json['acceptedAt']);
-        $this->assertStringNotContainsString('880314', json_encode($json));
+        $this->assertSame('Aminah Y.', $json['displayName']);
+        $this->assertSame('am•••@example.com', $json['emailMasked']);
+        $encoded = json_encode($json, JSON_UNESCAPED_UNICODE);
+        foreach (['880314', 'Binti', 'Yusof', 'aminah.yusof', '345 6789', 'Yusof Ali', '000 1111'] as $secret) {
+            $this->assertStringNotContainsString($secret, $encoded);
+        }
     }
 
     public function test_plan_caps(): void

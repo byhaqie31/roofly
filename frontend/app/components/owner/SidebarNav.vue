@@ -8,6 +8,7 @@ import {
   Wrench,
   ChartBar,
   Settings,
+  LifeBuoy,
 } from "lucide-vue-next";
 
 const { t } = useI18n();
@@ -21,6 +22,7 @@ const items = computed(() => [
   { to: "/owner/maintenance", label: t("owner.nav.maintenance"), icon: Wrench },
   { to: "/owner/reports", label: t("owner.nav.reports"), icon: ChartBar },
   { to: "/owner/settings", label: t("owner.nav.settings"), icon: Settings },
+  { to: "/owner/help", label: t("owner.nav.help"), icon: LifeBuoy },
 ]);
 </script>
 

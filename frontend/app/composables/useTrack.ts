@@ -4,8 +4,8 @@ import { apiTrack } from "~/services/api/track";
 
 const VID_KEY = "roofly_vid";
 const UTM_KEY = "roofly_utm";
-export const TRACKED_PREFIXES = ["/coming-soon", "/demo", "/auth"];
-export const isTrackedPath = (path: string) => path === "/" || TRACKED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
+// Which paths are tracked lives in utils/trackedPaths.ts (pure, tested).
+import { isTrackedPath } from "~/utils/trackedPaths";
 
 const read = (k: string) => { try { return localStorage.getItem(k); } catch { return null; } };
 const write = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } };

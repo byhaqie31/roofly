@@ -2,9 +2,11 @@
 // backend/app/Http/Resources/Admin/AuditEntryResource.php
 namespace App\Http\Resources\Admin;
 
+use App\Enums\UserRole;
 use App\Models\Enquiry;
 use App\Models\Lead;
 use App\Models\User;
+use App\Support\PrivacyMask;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
 
@@ -23,6 +25,8 @@ class AuditEntryResource extends JsonResource
             'subjectType' => $this->subject_type ? Str::lower(class_basename($this->subject_type)) : null,
             'subjectId'   => $this->subject_id,
             'subjectName' => match (true) {
+                // Tenants are owner-controlled data: masked here like everywhere else in admin.
+                $this->subject instanceof User && $this->subject->role === UserRole::TENANT => PrivacyMask::name($this->subject->name),
                 $this->subject instanceof User => $this->subject->name,
                 $this->subject instanceof Lead => $this->subject->email,
                 $this->subject instanceof Enquiry => $this->subject->name,
