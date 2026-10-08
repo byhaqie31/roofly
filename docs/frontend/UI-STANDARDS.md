@@ -830,6 +830,10 @@ See [components/marketing/HeroSection.vue](../../frontend/app/components/marketi
 
 **Floating buttons own a corner each** — bottom-left: the UAT `EnvBanner`; bottom-right: the owner/tenant **Help & feedback** button (`SupportWidget`, icon-only on mobile, label slides out on hover/focus from `md:`) or, in demo, the Google Form `FloatingFeedback` (never both — `showSupportWidget` is `!isDemo`). Don't add a third floating control in either corner.
 
+### 11.22a Coming-soon hero CTAs on mobile
+
+Below `sm` the two hero buttons stack full width with **"Explore demo" first** — on a phone the demo is the strongest next step, and "Get notified" only scrolls down to the waitlist form. The demo link comes first in the DOM, so tab order matches what's on screen; `sm:order-1` / `sm:order-2` put "Get notified" back on the left from `sm:` up. The "Try me" badge stays pinned to the demo button.
+
 ### 11.22 Legal documents and footers
 
 **Legal pages** (`/legal/*`, `layouts/legal.vue` + `components/legal/LegalDocument.vue`) read as calm editorial pages:
