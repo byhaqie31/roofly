@@ -9,6 +9,7 @@ import { agreementsMock } from "~/demo/data/agreements";
 import { unitsMock } from "~/demo/data/units";
 import { propertiesMock } from "~/demo/data/properties";
 import { tenantsMock } from "~/demo/data/tenants";
+import { resolvePayoutAccount } from "~/demo/services/payoutAccounts";
 
 const hydrate = (inv: Invoice): InvoiceWithRefs => {
   const agreement =
@@ -30,7 +31,20 @@ const hydrate = (inv: Invoice): InvoiceWithRefs => {
     property: property ? structuredClone(property) : null,
     tenant: tenant ? structuredClone(tenant) : null,
     payments: structuredClone(payments),
+    payoutAccount: agreement ? resolvePayoutAccount(agreement.payoutAccountId) : null,
   };
+};
+
+/** Same 409/422 rules as the API, as thrown Errors carrying the API's `code`. */
+const claimError = (code: string) => Object.assign(new Error(code), { code });
+
+const findPayment = (paymentId: string) => {
+  const payment = paymentsMock.find((p) => p.id === paymentId);
+  if (!payment) throw new Error(`Payment ${paymentId} not found`);
+  if (payment.status !== "pending") throw claimError("claim_not_pending");
+  const idx = invoicesMock.findIndex((i) => i.id === payment.invoiceId);
+  if (idx === -1) throw new Error(`Invoice ${payment.invoiceId} not found`);
+  return { payment, idx };
 };
 
 export const demoInvoices: InvoicesService = {
@@ -110,5 +124,48 @@ export const demoInvoices: InvoicesService = {
       payment: structuredClone(payment),
       invoice: structuredClone(invoicesMock[idx]!),
     };
+  },
+
+  async claimTransferForTenant(invoiceId, input) {
+    const inv = invoicesMock.find((i) => i.id === invoiceId);
+    if (!inv) throw new Error(`Invoice ${invoiceId} not found`);
+    if (inv.status !== "pending" && inv.status !== "overdue") throw claimError("not_payable");
+    if (paymentsMock.some((p) => p.invoiceId === invoiceId && p.status === "pending")) {
+      throw claimError("claim_pending");
+    }
+    const agreement = agreementsMock.find((a) => a.id === inv.agreementId);
+    const account = resolvePayoutAccount(agreement?.payoutAccountId);
+    if (!account) throw claimError("no_payout_account");
+    const now = new Date().toISOString();
+    const payment: Payment = {
+      id: crypto.randomUUID(),
+      invoiceId,
+      amount: inv.amount + inv.lateFee,
+      method: "transfer",
+      status: "pending",
+      paidAt: new Date(`${input.paidAt}T00:00:00`).toISOString(),
+      reference: input.reference,
+      note: input.note || null,
+      payoutAccountId: account.id,
+      createdAt: now,
+    };
+    paymentsMock.push(payment);
+    return { payment: structuredClone(payment), invoice: structuredClone(inv) };
+  },
+
+  async confirmClaim(paymentId, input = {}) {
+    const { payment, idx } = findPayment(paymentId);
+    payment.status = "successful";
+    payment.confirmedAt = new Date().toISOString();
+    if (input.paidAt) payment.paidAt = new Date(`${input.paidAt}T00:00:00`).toISOString();
+    invoicesMock[idx] = { ...invoicesMock[idx]!, status: "paid" };
+    return { payment: structuredClone(payment), invoice: structuredClone(invoicesMock[idx]!) };
+  },
+
+  async rejectClaim(paymentId, reason) {
+    const { payment, idx } = findPayment(paymentId);
+    payment.status = "failed";
+    payment.rejectionReason = reason;
+    return { payment: structuredClone(payment), invoice: structuredClone(invoicesMock[idx]!) };
   },
 };

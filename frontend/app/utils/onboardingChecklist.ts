@@ -3,6 +3,7 @@ import type { Property } from "~/types/property";
 import type { Unit } from "~/types/unit";
 import type { Tenant } from "~/types/tenant";
 import type { Agreement } from "~/types/agreement";
+import type { PayoutAccount } from "~/types/payout";
 import { tabCompletion } from "~/utils/propertyCompletion";
 
 /**
@@ -17,6 +18,7 @@ export type ChecklistKey =
   | "fill_utilities"
   | "add_unit"
   | "invite_tenant"
+  | "add_payout"
   | "create_agreement";
 
 export interface ChecklistStep {
@@ -34,9 +36,10 @@ export interface ChecklistInput {
   units: Unit[];
   tenants: Tenant[];
   agreements: Agreement[];
+  payoutAccounts: PayoutAccount[];
 }
 
-const RENTAL_ONLY: ChecklistKey[] = ["add_unit", "invite_tenant", "create_agreement"];
+const RENTAL_ONLY: ChecklistKey[] = ["add_unit", "invite_tenant", "add_payout", "create_agreement"];
 const ORDER: ChecklistKey[] = ["add_property", "fill_ownership", "fill_utilities", ...RENTAL_ONLY];
 
 export const buildChecklist = (input: ChecklistInput): ChecklistStep[] => {
@@ -74,6 +77,13 @@ export const buildChecklist = (input: ChecklistInput): ChecklistStep[] => {
       propertyId: unitless?.id,
     },
     invite_tenant: { key: "invite_tenant", done: input.tenants.length > 0, enabled: hasProperty, to: "/owner/tenants?invite=1" },
+    // Before the agreement: tenants are told where to send rent from the agreement's payout account.
+    add_payout: {
+      key: "add_payout",
+      done: input.payoutAccounts.length > 0,
+      enabled: hasProperty,
+      to: "/owner/settings?tab=payouts",
+    },
     create_agreement: {
       key: "create_agreement",
       done: input.agreements.some((a) => a.status === "active"),

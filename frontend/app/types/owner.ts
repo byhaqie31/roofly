@@ -14,7 +14,6 @@ export interface OwnerProfile {
   phone: string;
   photoUrl?: string;                // Phase 4+ (file storage)
   businessName?: string;            // optional — landlord operating as a sole prop
-  bankAccountLast4?: string;        // shown read-only; full account managed elsewhere
 }
 
 export interface OwnerPreferences {

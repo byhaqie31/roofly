@@ -41,6 +41,17 @@ class Invoice extends Model
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
+    /** Eager-loads for InvoiceWithRefsResource (incl. the resolved payout account). */
+    public static function refsRelations(): array
+    {
+        return [
+            'agreement.unit.property.coOwners',
+            'agreement.tenant',
+            'payments',
+            ...array_map(fn (string $r) => "agreement.{$r}", Agreement::PAYOUT_RELATIONS),
+        ];
+    }
+
     public function totalDueCents(): int
     {
         return $this->amount_cents + $this->late_fee_cents;
@@ -62,5 +73,12 @@ class Invoice extends Model
     {
         return $this->hasOne(Payment::class, 'invoice_id')
             ->where('status', 'successful');
+    }
+
+    /** A tenant's transfer claim awaiting the owner (at most one, spec 2026-10-08 § 3.3). */
+    public function pendingPayment(): HasOne
+    {
+        return $this->hasOne(Payment::class, 'invoice_id')
+            ->where('status', 'pending');
     }
 }

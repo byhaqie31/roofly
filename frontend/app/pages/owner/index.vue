@@ -46,6 +46,7 @@ const attentionTone: Record<
   AttentionKind,
   "overdue" | "maintenance" | "draft" | "pending"
 > = {
+  payment_claim: "pending",
   overdue: "overdue",
   expiring: "maintenance",
   notice_given: "draft",

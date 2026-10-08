@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { inlineSegments } from "~/utils/legal";
+import { inlineSegments, scopeLegalHref } from "~/utils/legal";
 
 // One line of legal copy with its `[label](href)` links turned into real links.
-const props = defineProps<{ text: string }>();
-const segments = computed(() => inlineSegments(props.text));
+// `basePath` keeps links to other legal documents inside the app being read in.
+const props = defineProps<{ text: string; basePath?: string }>();
+const segments = computed(() =>
+  inlineSegments(props.text).map((s) => (s.href ? { ...s, href: scopeLegalHref(s.href, props.basePath) } : s)),
+);
 </script>
 
 <template>

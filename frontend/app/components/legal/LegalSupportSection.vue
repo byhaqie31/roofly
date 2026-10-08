@@ -18,7 +18,7 @@ const privacyEmail = LEGAL.contact.privacyEmail;
 const docs = computed(() =>
   availableLegalSlugs({ showBetaTerms }).map((slug) => ({
     slug,
-    to: legalPath(slug),
+    to: legalPath(slug, `/${props.audience}/legal`), // in-app copy — stay inside the shell
     label: t(legalLabelKey(slug)),
     effective: formatLegalDate(LEGAL.documents[slug].effectiveDate, locale.value),
   })),

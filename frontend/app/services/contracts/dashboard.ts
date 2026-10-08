@@ -1,4 +1,5 @@
 export type AttentionKind =
+  | "payment_claim"
   | "overdue"
   | "expiring"
   | "notice_given"

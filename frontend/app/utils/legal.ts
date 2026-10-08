@@ -3,11 +3,23 @@
 // returned `labelKey`s and render; the decisions about *what* shows live here.
 
 import type { LegalConfig, LegalSlug } from "~/config/legal";
+import { whatsappShareUrl } from "~/utils/whatsapp";
 
 /** Display order everywhere a full list of documents is shown. */
 export const LEGAL_SLUGS: readonly LegalSlug[] = ["privacy", "terms", "billing", "acceptable-use", "beta"];
 
-export const legalPath = (slug: LegalSlug) => `/legal/${slug}`;
+/** Public legal pages live at /legal/*; the owner + tenant apps have in-app copies at /owner/legal/* and /tenant/legal/*. */
+export const PUBLIC_LEGAL_BASE = "/legal";
+
+export const legalPath = (slug: LegalSlug, base: string = PUBLIC_LEGAL_BASE) => `${base}/${slug}`;
+
+/**
+ * Keeps a document's own `/legal/<slug>` links inside the app it's read in:
+ * with base "/owner/legal", "/legal/terms" → "/owner/legal/terms". Anything
+ * else (mailto:, other paths) is left alone.
+ */
+export const scopeLegalHref = (href: string, base: string = PUBLIC_LEGAL_BASE): string =>
+  base !== PUBLIC_LEGAL_BASE && href.startsWith(`${PUBLIC_LEGAL_BASE}/`) ? `${base}${href.slice(PUBLIC_LEGAL_BASE.length)}` : href;
 
 export const isLegalPath = (path: string) => path === "/legal" || path.startsWith("/legal/");
 
@@ -24,7 +36,8 @@ export const availableLegalSlugs = (opts: { showBetaTerms: boolean }) =>
 // ── Footers ────────────────────────────────────────────────────────────────
 
 /**
- * full  — marketing, coming-soon and legal pages
+ * full  — marketing, coming-soon and legal pages (contact details sit beside
+ *         the links, so there's no separate Contact link)
  * slim  — auth pages and other first-run screens
  * shell — owner + tenant app shells (adds the help page)
  * admin — admin back office (English only, no beta terms: staff aren't testers)
@@ -39,20 +52,18 @@ export interface FooterLink {
   external: boolean;
 }
 
-const docLink = (slug: LegalSlug): FooterLink => ({ key: slug, labelKey: legalLabelKey(slug), to: legalPath(slug), external: false });
+const docLink = (slug: LegalSlug, base?: string): FooterLink => ({ key: slug, labelKey: legalLabelKey(slug), to: legalPath(slug, base), external: false });
 
 export const footerLinks = (
   variant: FooterVariant,
-  opts: { showBetaTerms: boolean; helpTo?: string | null; contactEmail?: string | null },
+  /** `legalBase`: where document links point — the in-app copies ("/owner/legal") in the shells. */
+  opts: { showBetaTerms: boolean; helpTo?: string | null; legalBase?: string },
 ): FooterLink[] => {
   const slugs: LegalSlug[] = variant === "full" ? ["privacy", "terms", "billing", "acceptable-use"] : ["privacy", "terms"];
-  const links = slugs.map(docLink);
-  if (opts.showBetaTerms && variant !== "admin") links.push(docLink("beta"));
+  const links = slugs.map((s) => docLink(s, opts.legalBase));
+  if (opts.showBetaTerms && variant !== "admin") links.push(docLink("beta", opts.legalBase));
   if (variant === "shell" && opts.helpTo) {
     links.push({ key: "help", labelKey: "legal.links.help", to: opts.helpTo, external: false });
-  }
-  if (variant === "full" && opts.contactEmail) {
-    links.push({ key: "contact", labelKey: "legal.links.contact", to: `mailto:${opts.contactEmail}`, external: true });
   }
   return links;
 };
@@ -92,6 +103,36 @@ export const operatorLines = (
     );
   }
   return lines.filter((l): l is OperatorLine => l !== null && l.value.trim() !== "");
+};
+
+// ── Contact us ─────────────────────────────────────────────────────────────
+
+export type ContactOptionKey = "email" | "call" | "whatsapp";
+
+export interface ContactOption {
+  key: ContactOptionKey;
+  /** What the row shows under its label (the address / number). */
+  value: string;
+  href: string;
+  /** Opens in a new tab (WhatsApp); mailto:/tel: stay in place. */
+  external: boolean;
+}
+
+/**
+ * The "Contact us" pop-up's options, from config/legal.ts: email, call and
+ * WhatsApp (same number as call, with `whatsappText` prefilled). Anything
+ * unset drops out; an empty list hides the "Contact us" link.
+ */
+export const contactOptions = (config: LegalConfig, opts: { whatsappText?: string } = {}): ContactOption[] => {
+  const out: ContactOption[] = [];
+  const email = config.contact.email?.trim();
+  const phone = config.contact.phone?.trim();
+  if (email) out.push({ key: "email", value: email, href: `mailto:${email}`, external: false });
+  if (phone) {
+    out.push({ key: "call", value: phone, href: `tel:${phone.replace(/[^\d+]/g, "")}`, external: false });
+    out.push({ key: "whatsapp", value: phone, href: whatsappShareUrl(phone, opts.whatsappText ?? ""), external: true });
+  }
+  return out;
 };
 
 // ── Inline copy ────────────────────────────────────────────────────────────

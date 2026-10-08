@@ -19,7 +19,7 @@ const { isDemo, showSupportWidget } = useEnv();
     <!-- Desktop sidebar -->
     <aside
       data-tour="sidebar"
-      class="hidden md:flex w-60 shrink-0 flex-col border-r border-line-passive px-3 py-4"
+      class="hidden md:flex w-60 shrink-0 flex-col border-r border-line-passive px-3 py-4 md:sticky md:top-0 md:h-dvh md:overflow-y-auto"
     >
       <NuxtLink
         to="/tenant"
@@ -79,6 +79,7 @@ const { isDemo, showSupportWidget } = useEnv();
         tone="theme"
         variant="shell"
         help-to="/tenant/help"
+        legal-base="/tenant/legal"
         :class="showSupportWidget ? 'pb-20 md:pb-4' : ''"
       />
     </div>

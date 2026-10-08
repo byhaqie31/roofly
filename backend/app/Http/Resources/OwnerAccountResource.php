@@ -30,7 +30,6 @@ class OwnerAccountResource extends JsonResource
                 'phone'            => $this->phone,
                 'photoUrl'         => null, // Phase 4 — file storage
                 'businessName'     => $this->business_name,
-                'bankAccountLast4' => $this->bank_account_last4,
             ],
             'preferences' => $this->owner_preferences ?? self::defaultPreferences(),
             'notifications' => $this->notification_preferences ?? self::defaultNotifications(),

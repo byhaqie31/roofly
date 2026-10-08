@@ -176,4 +176,52 @@ class InvoiceGeneratorTest extends TestCase
         $this->assertSame(0, $gen->markOverdue(Carbon::parse('2026-10-02'))); // idempotent
         $this->assertSame(5000, $due->fresh()->late_fee_cents);                 // fee not stacked
     }
+
+    // ── Pending transfer claims hold off the overdue flip (spec 2026-10-08 § 5) ──
+
+    private function claimOn(Invoice $invoice, string $paidAt, string $status = 'pending'): void
+    {
+        \App\Models\Payment::factory()->create([
+            'invoice_id' => $invoice->id, 'method' => 'transfer', 'status' => $status, 'paid_at' => $paidAt,
+        ]);
+    }
+
+    public function test_on_time_pending_claim_skips_the_overdue_flip(): void
+    {
+        $a = $this->agreement(['late_fee_cents' => 5000]);
+        $onTime   = Invoice::factory()->create(['agreement_id' => $a->id, 'due_date' => '2026-09-01', 'status' => 'pending']);
+        $sameDay  = Invoice::factory()->create(['agreement_id' => $a->id, 'due_date' => '2026-10-01', 'status' => 'pending']);
+        $this->claimOn($onTime, '2026-08-30 14:00:00');
+        $this->claimOn($sameDay, '2026-10-01 23:30:00'); // later in the day still counts as on time
+
+        $this->assertSame(0, app(InvoiceGenerator::class)->markOverdue(Carbon::parse('2026-10-07')));
+        $this->assertSame('pending', $onTime->fresh()->status->value);
+        $this->assertSame(0, $onTime->fresh()->late_fee_cents);
+        $this->assertSame('pending', $sameDay->fresh()->status->value);
+    }
+
+    public function test_rejected_claim_lets_the_next_roll_flip_it_with_the_fee(): void
+    {
+        $a = $this->agreement(['late_fee_cents' => 5000]);
+        $inv = Invoice::factory()->create(['agreement_id' => $a->id, 'due_date' => '2026-10-01', 'status' => 'pending']);
+        $this->claimOn($inv, '2026-09-30');
+        $gen = app(InvoiceGenerator::class);
+
+        $this->assertSame(0, $gen->markOverdue(Carbon::parse('2026-10-03')));
+
+        $inv->payments()->update(['status' => 'failed', 'rejection_reason' => 'Not received']);
+        $this->assertSame(1, $gen->markOverdue(Carbon::parse('2026-10-04')));
+        $this->assertSame('overdue', $inv->fresh()->status->value);
+        $this->assertSame(5000, $inv->fresh()->late_fee_cents);
+    }
+
+    public function test_claim_dated_after_the_due_date_does_not_block_the_flip(): void
+    {
+        $a = $this->agreement(['late_fee_cents' => 5000]);
+        $inv = Invoice::factory()->create(['agreement_id' => $a->id, 'due_date' => '2026-10-01', 'status' => 'pending']);
+        $this->claimOn($inv, '2026-10-02');
+
+        $this->assertSame(1, app(InvoiceGenerator::class)->markOverdue(Carbon::parse('2026-10-03')));
+        $this->assertSame('overdue', $inv->fresh()->status->value);
+    }
 }

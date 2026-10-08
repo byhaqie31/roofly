@@ -6,7 +6,7 @@ export const agreementsMock: Agreement[] = [
     unitId: "u-suria-1",
     tenantId: "t-aminah",
     startDate: "2025-09-01",
-    endDate: "2026-08-31",
+    endDate: "2027-08-31",         // renewed for a second year — keeps the demo tenant's rent live
     rentAmount: 350_000,         // RM 3,500
     depositAmount: 700_000,      // 2 months
     lateFee: 5_000,              // RM 50
@@ -26,6 +26,7 @@ export const agreementsMock: Agreement[] = [
     rentDueDay: 5,
     status: "active",
     createdAt: "2025-11-20T09:30:00Z",
+    payoutAccountId: "pa-cimb",  // commercial unit → business account; the rest use the default
   },
   {
     id: "a-ttdi-liwei",

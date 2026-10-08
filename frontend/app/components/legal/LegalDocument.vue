@@ -6,13 +6,20 @@ import LegalContactDetails from "~/components/legal/LegalContactDetails.vue";
 import LegalPlansTable from "~/components/legal/LegalPlansTable.vue";
 import { LEGAL, type LegalSlug } from "~/config/legal";
 import { getLegalDocument } from "~/content/legal";
-import { availableLegalSlugs, formatLegalDate, legalLabelKey, legalPath } from "~/utils/legal";
+import { PUBLIC_LEGAL_BASE, availableLegalSlugs, formatLegalDate, legalLabelKey, legalPath } from "~/utils/legal";
 
 // Shared reading layout for every legal document (UI-STANDARDS § 11.22):
 // narrow column, title + effective date + version, a section list (sticky
 // aside on lg, inline list on sm–lg, dropdown under sm), operator details.
 // Static copy — no motion, no data fetching.
-const props = defineProps<{ slug: LegalSlug }>();
+//
+// `basePath` + `embedded`: the owner/tenant apps render the same document at
+// /owner/legal/* and /tenant/legal/* inside their own layout — links to other
+// documents stay in the app, and the page drops its standalone outer padding.
+const props = withDefaults(defineProps<{ slug: LegalSlug; basePath?: string; embedded?: boolean }>(), {
+  basePath: PUBLIC_LEGAL_BASE,
+  embedded: false,
+});
 
 const { t, locale, setLocale } = useI18n();
 const { showBetaTerms } = useEnv();
@@ -36,7 +43,10 @@ const toggleLocale = () => setLocale(locale.value === "ms" ? "en" : "ms");
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-[1000px] px-4 py-10 sm:px-6 sm:py-16 lg:grid lg:grid-cols-[200px_minmax(0,680px)] lg:justify-center lg:gap-16">
+  <div
+    class="mx-auto w-full max-w-[1000px] lg:grid lg:grid-cols-[200px_minmax(0,680px)] lg:justify-center lg:gap-16"
+    :class="embedded ? '' : 'px-4 py-10 sm:px-6 sm:py-16'"
+  >
     <!-- lg+: sticky section list beside the text -->
     <aside class="hidden lg:block">
       <nav :aria-label="t('legal.onThisPage')" class="sticky top-8">
@@ -68,7 +78,7 @@ const toggleLocale = () => setLocale(locale.value === "ms" ? "en" : "ms");
             @click="toggleLocale"
           >{{ t("legal.readIn") }}</button>
         </p>
-        <p class="mt-5 text-body-lg text-ink-body"><LegalInline :text="doc.summary" /></p>
+        <p class="mt-5 text-body-lg text-ink-body"><LegalInline :text="doc.summary" :base-path="basePath" /></p>
       </header>
 
       <!-- <sm: section dropdown (UI-STANDARDS § 11.1 pattern) -->
@@ -90,9 +100,9 @@ const toggleLocale = () => setLocale(locale.value === "ms" ? "en" : "ms");
         <h2 class="text-card-title font-semibold text-ink">{{ s.heading }}</h2>
         <div class="mt-3 space-y-4 text-body leading-relaxed text-ink-body">
           <template v-for="(block, i) in s.blocks" :key="i">
-            <p v-if="block.type === 'p'"><LegalInline :text="block.text" /></p>
+            <p v-if="block.type === 'p'"><LegalInline :text="block.text" :base-path="basePath" /></p>
             <ul v-else-if="block.type === 'ul'" class="list-disc space-y-2 pl-5 marker:text-ink-faint">
-              <li v-for="(item, j) in block.items" :key="j"><LegalInline :text="item" /></li>
+              <li v-for="(item, j) in block.items" :key="j"><LegalInline :text="item" :base-path="basePath" /></li>
             </ul>
             <LegalContactDetails v-else-if="block.type === 'contact'" :channel="block.channel" />
             <LegalPlansTable v-else-if="block.type === 'plans'" />
@@ -109,7 +119,7 @@ const toggleLocale = () => setLocale(locale.value === "ms" ? "en" : "ms");
           <h2 class="mb-3 text-caption text-ink-muted">{{ t("legal.otherDocs") }}</h2>
           <ul class="flex flex-wrap gap-x-5 gap-y-2 text-caption">
             <li v-for="s in otherDocs" :key="s">
-              <NuxtLink :to="legalPath(s)" class="text-ink underline underline-offset-2 hover:text-accent focus-visible:shadow-focus">
+              <NuxtLink :to="legalPath(s, basePath)" class="text-ink underline underline-offset-2 hover:text-accent focus-visible:shadow-focus">
                 {{ t(legalLabelKey(s)) }}
               </NuxtLink>
             </li>

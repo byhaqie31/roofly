@@ -122,26 +122,6 @@ const onSubmit = handleSubmit(async (values) => {
       </p>
     </section>
 
-    <section
-      v-if="account.profile.bankAccountLast4"
-      class="space-y-4 border-t border-line-passive pt-6"
-    >
-      <header>
-        <h2 class="text-card-title font-semibold text-ink">
-          {{ t("owner.settings.profile.payout") }}
-        </h2>
-        <p class="mt-1 text-caption text-ink-muted">
-          {{ t("owner.settings.profile.payoutHelp") }}
-        </p>
-      </header>
-      <p class="text-body text-ink">
-        {{ t("owner.settings.profile.bankMasked") }}
-        <span class="font-semibold tabular-nums">
-          •••• {{ account.profile.bankAccountLast4 }}
-        </span>
-      </p>
-    </section>
-
     <div class="flex justify-end">
       <Button type="submit" variant="primary" :loading="submitting">
         {{ t("owner.settings.save") }}

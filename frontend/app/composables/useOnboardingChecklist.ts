@@ -2,7 +2,7 @@ import { computed, ref } from "vue";
 import { buildChecklist, type ChecklistStep } from "~/utils/onboardingChecklist";
 
 /**
- * Loads the four lists the checklist needs and exposes the computed steps.
+ * Loads the five lists the checklist needs and exposes the computed steps.
  * Skips the network entirely when the card wouldn't render (dismissed).
  */
 export const useOnboardingChecklist = () => {
@@ -19,15 +19,16 @@ export const useOnboardingChecklist = () => {
     if (dismissed.value || !auth.isOwner) return;
     loading.value = true;
     try {
-      const [properties, units, tenants, agreements] = await Promise.all([
+      const [properties, units, tenants, agreements, payoutAccounts] = await Promise.all([
         useProperties().getProperties(),
         useUnits().getUnits(),
         useTenants().getTenants(),
         useAgreements().getAgreements(),
+        usePayoutAccounts().list(),
       ]);
       steps.value = buildChecklist({
         purposes: auth.user?.purposes ?? [],
-        properties, units, tenants, agreements,
+        properties, units, tenants, agreements, payoutAccounts,
       });
     } finally {
       loading.value = false;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { House } from "lucide-vue-next";
 import LangSwitcher from "~/components/topbar/LangSwitcher.vue";
 import SiteFooter from "~/components/layout/SiteFooter.vue";
+import SiteHeader from "~/components/layout/SiteHeader.vue";
 </script>
 
 <template>
@@ -12,18 +12,9 @@ import SiteFooter from "~/components/layout/SiteFooter.vue";
        visual experience stays continuous rather than snapping to whatever
        theme they had set previously. -->
   <div data-theme="light" class="min-h-dvh flex flex-col bg-surface-page text-ink">
-    <header class="flex items-center justify-between px-6 py-4">
-      <NuxtLink
-        to="/"
-        class="inline-flex items-center gap-2 text-card-title font-semibold tracking-tight"
-      >
-        <House :size="22" :stroke-width="1.75" class="text-accent" />
-        <span>Roofly.my</span>
-      </NuxtLink>
-      <div class="flex items-center gap-1">
-        <LangSwitcher />
-      </div>
-    </header>
+    <SiteHeader>
+      <LangSwitcher />
+    </SiteHeader>
 
     <main class="flex-1 flex items-center justify-center px-6 py-10 sm:py-16">
       <div class="w-full max-w-2xl">

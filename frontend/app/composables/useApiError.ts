@@ -20,5 +20,15 @@ export const useApiError = () => {
     return Object.keys(out).length > 0 ? out : null;
   };
 
-  return { toFieldErrors };
+  /**
+   * The machine-readable `code` of a refused request (`{ code: "claim_pending" }`
+   * from the API, or the `code` a demo adapter attaches to its thrown Error).
+   */
+  const toErrorCode = (error: unknown): string | null => {
+    const e = error as { data?: { code?: unknown }; code?: unknown } | undefined;
+    const code = e?.data?.code ?? e?.code;
+    return typeof code === "string" ? code : null;
+  };
+
+  return { toFieldErrors, toErrorCode };
 };

@@ -73,6 +73,23 @@ const buildFromDemoData = (): DashboardData => {
 
   const needsAttention: AttentionItem[] = [];
 
+  // Tenant "I've paid" claims first — the owner's quickest win (spec 2026-10-08).
+  const claimedIds = new Set(
+    paymentsMock.filter((p) => p.status === "pending").map((p) => p.invoiceId),
+  );
+  rentalInvoices
+    .filter((i) => claimedIds.has(i.id))
+    .forEach((inv) => {
+      const ag = agreementsMock.find((a) => a.id === inv.agreementId);
+      const tenant = ag ? tenantsMock.find((t) => t.id === ag.tenantId) : null;
+      needsAttention.push({
+        kind: "payment_claim",
+        title: inv.invoiceNumber,
+        meta: tenant?.name ?? "—",
+        link: "/owner/payments?status=awaiting",
+      });
+    });
+
   rentalInvoices
     .filter((i) => i.status === "overdue")
     .forEach((inv) => {

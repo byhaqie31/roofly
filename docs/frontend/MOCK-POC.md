@@ -529,6 +529,14 @@ Late-fee accrual is a backend concern (cron job per [PROJECT.md § Flow 3 step 6
 
 Generation (shipped 2026-10-07): no create endpoint. `InvoiceGenerator` creates the next-due-date invoice when an agreement is activated — **never back-fills past months** — and `invoices:roll` extends it daily within a 30-day horizon, flipping unpaid ones to `overdue` with the flat late fee the day after `due_date`. `invoices(agreement_id, due_date)` is unique. The demo generator in § 6.2 stays as the curated-history source for demo and `DemoSeeder`; it is not what production runs.
 
+### 6.8 Manual DuitNow claims + payout accounts (2026-10-08)
+
+No gateway yet, so tenants pay by DuitNow / bank transfer and then tell the owner. Spec: [2026-10-08-payout-accounts-duitnow-design.md](../superpowers/specs/2026-10-08-payout-accounts-duitnow-design.md).
+
+- **A claim is a `Payment`** `{method: "transfer", status: "pending", reference, paidAt, note, payoutAccountId}`; the invoice status does not change. *Awaiting confirmation* is derived (`utils/paymentClaim.ts`). Owner **Confirm** → `successful` + invoice `paid`; **Reject** (reason required) → `failed`, tenant sees the reason and can claim again. One pending claim per invoice.
+- **Gateway** (`payForTenant`) stays on the contract behind `useEnv().features.onlinePayments` (off everywhere → "Coming soon"); the backend 403s `/me/invoices/{id}/pay` unless `ONLINE_PAYMENTS`.
+- **Schema impact (brief):** new `payout_accounts` (owner-scoped, one default), `agreements.payout_account_id` (null = default), `payments` += `payout_account_id`, `note`, `rejection_reason`, `confirmed_at`; `users.bank_account_last4` dropped. Overdue roll skips an invoice whose pending claim is dated on/before its due date. Later, for the gateway: `payout_accounts.gateway_ref` / `verified_at` (settlement target).
+
 ---
 
 ## 7. Maintenance tickets
@@ -733,7 +741,6 @@ export interface OwnerProfile {
   phone: string;
   photoUrl?: string;                // Phase 4+
   businessName?: string;
-  bankAccountLast4?: string;        // display-only; bank linkage lives elsewhere
 }
 
 export interface OwnerPreferences {
@@ -761,11 +768,12 @@ export interface OwnerAccount {
 
 ### 9.2 Tab structure
 
-Same Reka-UI Tabs primitive as the property/tenant detail pages. Four tabs:
+Same Reka-UI Tabs primitive as the property/tenant detail pages. Five tabs (`?tab=` deep-links):
 
 | Tab | Content | State source |
 |---|---|---|
-| **Profile** | Identity (name, email read-only, phone, business name), photo placeholder, masked bank account. | `OwnerAccount.profile` |
+| **Profile** | Identity (name, email read-only, phone, business name), photo placeholder. | `OwnerAccount.profile` |
+| **Payouts** | Payout accounts (bank, holder, account number and/or DuitNow ID; one default) + an "Online payments — Coming soon" card. See § 6.8. | `usePayoutAccounts().list()` |
 | **Preferences** | Language radio (English / Bahasa Melayu) + theme radio (Light / Dark / System) — applied to the live UI on save via `setLocale()` and `setTheme()`. | `OwnerAccount.preferences` (cookie-backed for theme + locale, Pinia for the rest) |
 | **Notifications** | Five event toggles + a Phase-4 banner explaining channels (email + WhatsApp) ship later. In-app notifications are documented as always-on. | `OwnerAccount.notifications.events` |
 | **Plan** | Four-tier ladder (Free / Starter / Pro / Business), current tier highlighted, upgrade CTAs toast a Phase-7 stub. | `Plan[]` from `useOwnerSettings().listPlans()` + `OwnerAccount.planTier` |
@@ -784,7 +792,7 @@ The Preferences form is special — it applies its values to the live app *immed
 
 ### 9.5 Schema impact for backend
 
-- **`users` table** already covers `name` / `email` / `phone` (Tier 1 per § 5.4). Add `business_name`, `photo_path` (Phase 4), and a nullable `bank_account_last4` snapshot.
+- **`users` table** already covers `name` / `email` / `phone` (Tier 1 per § 5.4). Add `business_name`, `photo_path` (Phase 4). (`bank_account_last4` was dropped 2026-10-08 — payout details live in `payout_accounts`, § 6.8.)
 - **`owner_preferences` JSON** column on `users` (or sibling table) — `{ locale, theme, money_locale }`. Could also be a kv-store; small enough to stay JSON.
 - **`notification_preferences` JSON** column on `users` — `{ events: {...}, channels: {...} }`. Phase 4 may promote channels into a per-event matrix; the JSON shape absorbs that without a migration.
 - **Subscription / plan** is its own concern in Phase 7 — likely a `subscriptions` table joined to `users.id`. The frontend currently reads `account.planTier` from the same payload as profile.

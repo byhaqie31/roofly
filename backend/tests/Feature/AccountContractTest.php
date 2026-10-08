@@ -22,7 +22,7 @@ class AccountContractTest extends TestCase
         $res = $this->getJson('/api/account')->assertOk();
         $this->assertSame(['profile', 'preferences', 'notifications', 'planTier'], array_keys($res->json()));
         $this->assertSame(
-            ['id', 'name', 'email', 'phone', 'photoUrl', 'businessName', 'bankAccountLast4'],
+            ['id', 'name', 'email', 'phone', 'photoUrl', 'businessName'], // bankAccountLast4 dropped → payout accounts (spec 2026-10-08)
             array_keys($res->json('profile'))
         );
         $this->assertSame(['locale' => 'en', 'theme' => 'system', 'moneyLocale' => 'en-MY'], $res->json('preferences'));

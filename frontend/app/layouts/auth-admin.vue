@@ -2,6 +2,7 @@
 import { ShieldCheck } from "lucide-vue-next";
 import { onMounted } from "vue";
 import SiteFooter from "~/components/layout/SiteFooter.vue";
+import SiteHeader from "~/components/layout/SiteHeader.vue";
 
 const { t } = useI18n();
 // Admin is English-only (internal ops tool): pin the locale and hide the switcher.
@@ -15,12 +16,7 @@ onMounted(() => { if (locale.value !== "en") setLocale("en"); });
     class="min-h-dvh flex flex-col"
     style="background-color: #1c1a17; color: #f7f4ed"
   >
-    <header class="flex items-center justify-between px-6 py-4">
-      <NuxtLink to="/admin/login" class="inline-flex items-center gap-2 text-card-title font-semibold tracking-tight">
-        <ShieldCheck :size="22" :stroke-width="1.75" style="color: #7fa6c9" />
-        <span>Roofly.my · {{ t("auth.admin.title") }}</span>
-      </NuxtLink>
-    </header>
+    <SiteHeader to="/admin/login" :icon="ShieldCheck" icon-color="#7fa6c9" :label="`Roofly.my · ${t('auth.admin.title')}`" />
 
     <main class="flex-1 flex items-center justify-center px-6 py-10">
       <div

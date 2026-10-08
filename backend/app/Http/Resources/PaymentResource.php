@@ -17,6 +17,11 @@ class PaymentResource extends JsonResource
             'paidAt'    => $this->paid_at?->toISOString(),
             'reference' => $this->reference,
             'createdAt' => $this->created_at?->toISOString(),
+            // Transfer claims (spec 2026-10-08 § 3.3)
+            'payoutAccountId' => $this->payout_account_id,
+            'note'            => $this->note,
+            'rejectionReason' => $this->rejection_reason,
+            'confirmedAt'     => $this->confirmed_at?->toISOString(),
         ];
     }
 }

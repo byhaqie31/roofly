@@ -29,7 +29,7 @@ class TenantAgreementController extends Controller
         }
 
         if ($request->filled('expand')) {
-            $agreement->load(['unit.property.coOwners', 'tenant']);
+            $agreement->load(['unit.property.coOwners', 'tenant', ...Agreement::PAYOUT_RELATIONS]);
 
             return new AgreementWithRefsResource($agreement);
         }

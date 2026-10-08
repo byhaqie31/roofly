@@ -60,7 +60,7 @@ const send = async () => {
 <template>
   <button
     type="button"
-    class="group fixed bottom-6 right-6 z-40 inline-flex h-12 items-center gap-2 rounded-pill bg-ink pl-3.5 pr-3.5 text-caption font-medium text-surface-page shadow-lg outline-none transition-all hover:bg-ink-strong hover:pr-5 focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+    class="group fixed bottom-6 right-6 z-40 inline-flex h-12 items-center gap-0 rounded-pill bg-ink px-3.5 text-caption font-medium text-surface-page shadow-lg outline-none transition-all duration-200 hover:bg-ink-strong focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 md:hover:gap-2 md:hover:pr-5 md:focus-visible:gap-2 md:focus-visible:pr-5"
     :aria-label="t('support.button')"
     @click="openForm"
   >

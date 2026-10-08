@@ -15,6 +15,8 @@ describe("pageLabelFor", () => {
     ["/owner/maintenance/t-7", "Owner app · Maintenance ticket"],
     ["/owner/help", "Owner app · Help and support"],
     ["/tenant/help", "Tenant app · Help and support"],
+    ["/owner/legal/privacy", "Owner app · Legal"],
+    ["/tenant/legal/terms", "Tenant app · Legal"],
   ])("%s → %s", (path, label) => {
     expect(pageLabelFor(path)).toBe(label);
   });

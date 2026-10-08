@@ -19,6 +19,9 @@ export interface Agreement {
   acceptedAt?: string | null;
   changesRequestedAt?: string | null;
   reviewNote?: string | null;
+  // null = the owner's default payout account (spec 2026-10-08). Not a term:
+  // changing it never sends a sent/accepted agreement back to draft.
+  payoutAccountId?: string | null;
 }
 
 export type AgreementInput = Pick<
@@ -32,6 +35,6 @@ export type AgreementInput = Pick<
   | "lateFee"
   | "rentDueDay"
   | "status"
->;
+> & { payoutAccountId?: string | null };
 
 export type AgreementUpdate = Partial<AgreementInput>;

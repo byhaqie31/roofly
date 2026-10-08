@@ -155,22 +155,14 @@ onBeforeUnmount(() => {
       data-enter
       class="relative mt-10 w-full max-w-md sm:max-w-none sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3 opacity-0"
     >
-      <button
-        type="button"
-        class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-pill text-body font-semibold transition-all hover:scale-[1.02] active:scale-100"
-        style="background-color: #e76a3f; color: #1c1a17"
-        @click="onPrimaryCta"
-      >
-        {{ t("marketing.hero.ctaPrimary") }}
-        <ArrowDown :size="18" :stroke-width="2" />
-      </button>
-
+      <!-- Mobile: "Explore demo" first (DOM + tab order); from sm: the
+           primary "Get notified" sits on the left again (UI-STANDARDS § 11.22a). -->
       <a
         ref="demoCta"
         href="https://demo.roofly.my"
         target="_blank"
         rel="noopener noreferrer"
-        class="relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-pill text-body font-medium will-change-transform"
+        class="relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-pill text-body font-medium will-change-transform sm:order-2"
         style="
           background-color: #f7f4ed;
           color: #1c1a17;
@@ -188,6 +180,16 @@ onBeforeUnmount(() => {
           {{ t("marketing.hero.ctaSecondaryBadge") }}
         </span>
       </a>
+
+      <button
+        type="button"
+        class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-pill text-body font-semibold sm:order-1 transition-all hover:scale-[1.02] active:scale-100"
+        style="background-color: #e76a3f; color: #1c1a17"
+        @click="onPrimaryCta"
+      >
+        {{ t("marketing.hero.ctaPrimary") }}
+        <ArrowDown :size="18" :stroke-width="2" />
+      </button>
     </div>
   </section>
 </template>

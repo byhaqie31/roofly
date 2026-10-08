@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { House } from "lucide-vue-next";
 import LangSwitcher from "~/components/topbar/LangSwitcher.vue";
 import RotatingUspCard from "~/components/demo/RotatingUspCard.vue";
 import AnimatedStatBand from "~/components/demo/AnimatedStatBand.vue";
 import AudienceFlipCard from "~/components/demo/AudienceFlipCard.vue";
 import AuthPromoVideo from "~/components/auth/AuthPromoVideo.vue";
 import SiteFooter from "~/components/layout/SiteFooter.vue";
+import SiteHeader from "~/components/layout/SiteHeader.vue";
 
 // Falls back to the old headline + USP deck if the promo file is missing.
 const promoUnavailable = ref(false);
@@ -18,7 +18,7 @@ const promoUnavailable = ref(false);
     <div class="flex-1 flex flex-col md:flex-row">
       <!-- Marketing pane — always charcoal, hidden on mobile -->
       <aside
-        class="hidden md:flex md:w-1/2 lg:w-3/5 relative flex-col justify-between p-10 lg:p-14"
+        class="hidden md:flex md:w-1/2 lg:w-3/5 relative flex-col justify-between"
         style="background-color: #1c1a17; color: #f7f4ed"
       >
         <!-- Subtle warm gradient wash -->
@@ -31,25 +31,19 @@ const promoUnavailable = ref(false);
           "
         />
 
-        <!-- Top: wordmark -->
-        <NuxtLink
-          to="/"
-          class="relative inline-flex items-center gap-2 text-card-title font-semibold tracking-tight w-fit"
-        >
-          <House :size="22" :stroke-width="1.75" style="color: #c44d26" />
-          <span>Roofly.my</span>
-        </NuxtLink>
+        <!-- Top: wordmark, in the same spot as every public page (SiteHeader). -->
+        <SiteHeader icon-color="#c44d26" />
 
         <!-- Center: the promo reel (AuthPromoVideo). If its file is missing,
              fall back to the audience-flipping headline. -->
-        <div class="relative py-10">
+        <div class="relative px-10 py-10 lg:px-14">
           <AuthPromoVideo v-if="!promoUnavailable" class="w-full" @unavailable="promoUnavailable = true" />
           <AudienceFlipCard v-else />
         </div>
 
         <!-- Bottom: animated stat cards, same width as the reel (plus the rotating
              USP deck when the reel is unavailable) — same on demo, uat, and prod. -->
-        <div class="relative">
+        <div class="relative px-10 pb-10 lg:px-14 lg:pb-14">
           <RotatingUspCard v-if="promoUnavailable" class="mb-8" />
           <AnimatedStatBand class="w-full max-w-3xl mx-auto" />
         </div>
@@ -57,19 +51,10 @@ const promoUnavailable = ref(false);
 
       <!-- Form pane — always light, no theme toggle -->
       <div class="flex-1 flex flex-col bg-surface-page text-ink">
-        <header class="flex items-center justify-between px-6 py-4">
-          <!-- Mobile-only wordmark -->
-          <NuxtLink
-            to="/"
-            class="md:hidden inline-flex items-center gap-2 text-card-title font-semibold tracking-tight"
-          >
-            <House :size="22" :stroke-width="1.75" class="text-accent" />
-            <span>Roofly.my</span>
-          </NuxtLink>
-          <div class="flex items-center gap-1 ml-auto">
-            <LangSwitcher />
-          </div>
-        </header>
+        <!-- Wordmark shows here on mobile only (the charcoal pane has it from md:). -->
+        <SiteHeader wordmark-class="md:hidden">
+          <LangSwitcher />
+        </SiteHeader>
 
         <main class="flex-1 flex items-center justify-center px-6 py-10">
           <div class="w-full max-w-auth-card">

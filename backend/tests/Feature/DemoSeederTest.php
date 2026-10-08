@@ -59,6 +59,18 @@ class DemoSeederTest extends TestCase
         // Anchor: a notice_given tenant exists (dashboard needs-attention feed)
         $this->assertTrue(User::where('status', 'notice_given')->exists());
 
+        // Payout accounts (spec 2026-10-08): Aminah has two, Maybank default; Arif's
+        // commercial agreement pays into the CIMB business account, the rest use the default.
+        $owner = User::where('email', 'aminah@roofly.my')->first();
+        $this->assertSame(2, \App\Models\PayoutAccount::where('owner_id', $owner->id)->count());
+        $default = \App\Models\PayoutAccount::where('owner_id', $owner->id)->where('is_default', true)->sole();
+        $this->assertSame('maybank', $default->bank);
+        $arif = User::where('email', 'arif.hakim@example.com')->first();
+        $this->assertSame('cimb', Agreement::where('tenant_id', $arif->id)->where('status', 'active')->first()->payoutAccount?->bank);
+        $this->assertSame(1, Agreement::whereNotNull('payout_account_id')->count());
+        // Exactly one transfer claim awaiting confirmation.
+        $this->assertSame(1, \App\Models\Payment::where('status', 'pending')->count());
+
         // Idempotent-ish: reseeding must not crash on unique constraints
         $this->seed(DemoSeeder::class);
 
@@ -67,5 +79,7 @@ class DemoSeederTest extends TestCase
         $this->assertSame(4, Agreement::count());
         $this->assertSame(7, Ticket::count());
         $this->assertSame(40, \App\Models\Lead::count());
+        $this->assertSame(2, \App\Models\PayoutAccount::count());
+        $this->assertSame(1, \App\Models\Payment::where('status', 'pending')->count());
     }
 }

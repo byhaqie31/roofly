@@ -39,7 +39,7 @@ class ResourcesTest extends TestCase
         $out = (new AgreementResource($agreement))->resolve();
 
         $this->assertSame(
-            ['id', 'unitId', 'tenantId', 'startDate', 'endDate', 'rentAmount', 'depositAmount', 'lateFee', 'rentDueDay', 'status', 'sentAt', 'acceptedAt', 'changesRequestedAt', 'reviewNote', 'createdAt'],
+            ['id', 'unitId', 'tenantId', 'startDate', 'endDate', 'rentAmount', 'depositAmount', 'lateFee', 'rentDueDay', 'status', 'sentAt', 'acceptedAt', 'changesRequestedAt', 'reviewNote', 'payoutAccountId', 'createdAt'],
             array_keys($out)
         );
         $this->assertSame(180000, $out['rentAmount']);

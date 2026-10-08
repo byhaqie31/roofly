@@ -316,8 +316,16 @@
       "beta": "Terma beta"
     },
     "links": {
-      "help": "Bantuan dan sokongan",
-      "contact": "Hubungi kami"
+      "help": "Bantuan dan sokongan"
+    },
+    "contactUs": {
+      "link": "Hubungi kami",
+      "title": "Hubungi kami",
+      "description": "Hubungi pasukan Roofly dengan cara yang paling sesuai untuk anda.",
+      "email": "E-mel",
+      "call": "Panggil",
+      "whatsapp": "WhatsApp",
+      "whatsappText": "Hai Roofly, saya ada soalan."
     },
     "footerProductOf": "Produk hebat {name}",
     "footerNav": "Perundangan",
@@ -388,7 +396,8 @@
         "periodAriaActive": "Penapis tempoh: {label}. Ketik untuk tukar.",
         "year": "Tahun",
         "month": "Bulan",
-        "clear": "Padam penapis"
+        "clear": "Padam penapis",
+        "awaiting": "Menunggu pengesahan"
       },
       "pagination": {
         "showing": "Menunjukkan {from}–{to} daripada {total}",
@@ -408,7 +417,8 @@
         "pending": "Belum dibayar",
         "paid": "Telah dibayar",
         "overdue": "Tertunggak",
-        "cancelled": "Dibatalkan"
+        "cancelled": "Dibatalkan",
+        "awaiting": "Menunggu pengesahan"
       },
       "methods": {
         "fpx": "FPX",
@@ -440,6 +450,32 @@
         "send": "Hantar kepada penyewa",
         "downloadToast": "Akan datang — muat turun PDF tiba dalam fasa seterusnya.",
         "sentToast": "Invois dihantar kepada {email}"
+      },
+      "reviewCta": "Semak",
+      "paymentStatus": {
+        "pending": "Menunggu pengesahan",
+        "successful": "Disahkan",
+        "failed": "Ditolak"
+      },
+      "claim": {
+        "title": "Penyewa anda kata mereka sudah bayar",
+        "help": "Semak penyata bank anda untuk pindahan ini, kemudian sahkan atau tolak.",
+        "amount": "Jumlah",
+        "paidAt": "Tarikh bayar",
+        "reference": "Rujukan",
+        "sentTo": "Dibayar kepada",
+        "note": "Nota penyewa",
+        "receiptPlaceholder": "Muat naik resit tiba dalam fasa seterusnya, setelah storan fail siap.",
+        "confirmDate": "Tarikh diterima",
+        "confirm": "Sahkan bayaran",
+        "reject": "Tolak",
+        "reasonLabel": "Kenapa anda menolaknya?",
+        "reasonPlaceholder": "cth. Belum ada pindahan dengan rujukan ini dalam akaun saya.",
+        "reasonRequired": "Beritahu penyewa sebabnya supaya mereka boleh betulkan.",
+        "rejectConfirm": "Tolak bayaran",
+        "confirmedToast": "Bayaran disahkan. Invois kini sudah dibayar.",
+        "rejectedToast": "Bayaran ditolak. Penyewa akan nampak sebab anda.",
+        "rejectedBecause": "Ditolak: {reason}"
       }
     },
     "agreements": {
@@ -566,6 +602,16 @@
             }
           }
         }
+      },
+      "payout": {
+        "title": "Sewa dibayar kepada",
+        "help": "Akaun penerimaan yang penyewa nampak untuk perjanjian ini.",
+        "useDefault": "Guna akaun lalai saya",
+        "useDefaultNamed": "Guna akaun lalai saya ({label})",
+        "defaultHint": "akaun lalai anda",
+        "change": "Tukar",
+        "none": "Belum ada akaun penerimaan, jadi penyewa tidak tahu ke mana hendak membayar.",
+        "addLink": "Tambah dalam Tetapan"
       }
     },
     "tenants": {
@@ -719,7 +765,8 @@
           "expiring": "Akan tamat",
           "notice_given": "Notis diberi",
           "ticket_new": "Aduan baharu",
-          "ticket_reopened": "Dibuka semula"
+          "ticket_reopened": "Dibuka semula",
+          "payment_claim": "Bayaran untuk disahkan"
         }
       },
       "emptyState": {
@@ -739,7 +786,11 @@
         "fill_utilities": { "title": "Isi utiliti dan yuran", "hint": "Yuran penyelenggaraan, cukai tanah, akaun TNB dan air." },
         "add_unit": { "title": "Tambah unit", "hint": "Penyewa dan perjanjian dikaitkan dengan unit." },
         "invite_tenant": { "title": "Jemput penyewa pertama anda", "hint": "Nama, e-mel dan telefon — mereka akan terima pautan." },
-        "create_agreement": { "title": "Cipta perjanjian", "hint": "Kaitkan penyewa dengan unit, sewa dan tarikh." }
+        "create_agreement": { "title": "Cipta perjanjian", "hint": "Kaitkan penyewa dengan unit, sewa dan tarikh." },
+        "add_payout": {
+          "title": "Tambah akaun penerimaan",
+          "hint": "Tempat penyewa membayar sewa melalui DuitNow atau pindahan bank."
+        }
       }
     },
     "reports": {
@@ -875,7 +926,8 @@
         "profile": "Profil",
         "preferences": "Keutamaan",
         "notifications": "Notifikasi",
-        "plan": "Pelan"
+        "plan": "Pelan",
+        "payouts": "Pembayaran"
       },
       "profile": {
         "identity": "Identiti",
@@ -894,9 +946,6 @@
         "photoHelp": "Akan datang — foto profil tiba dalam fasa seterusnya, setelah storan fail siap.",
         "photoPlaceholderTitle": "Akan datang",
         "photoPlaceholderHelp": "Foto profil tiba dalam fasa seterusnya, setelah storan fail siap.",
-        "payout": "Akaun bayaran",
-        "payoutHelp": "Tempat kutipan sewa akan dimasukkan. Akaun bank diuruskan melalui tetapan kewangan.",
-        "bankMasked": "Akaun Maybank berakhir dengan",
         "passwordTitle": "Tetapkan kata laluan",
         "passwordHelp": "Anda mendaftar dengan Google. Tambah kata laluan untuk log masuk dengan e-mel juga.",
         "setPassword": "Tetapkan kata laluan",
@@ -978,6 +1027,58 @@
             "name": "Perniagaan",
             "description": "Untuk ejen dan pengendali pelbagai organisasi."
           }
+        }
+      },
+      "payouts": {
+        "title": "Akaun penerimaan",
+        "help": "Penyewa membayar sewa ke akaun ini melalui DuitNow atau pindahan bank. Setiap perjanjian guna akaun lalai anda melainkan anda pilih akaun lain.",
+        "add": "Tambah akaun penerimaan",
+        "addTitle": "Tambah akaun penerimaan",
+        "editTitle": "Sunting akaun penerimaan",
+        "formHelp": "Penyewa nampak butiran ini semasa membayar, jadi mereka boleh pindahkan terus dari aplikasi bank.",
+        "emptyTitle": "Belum ada akaun penerimaan",
+        "emptyHelp": "Tambah akaun yang penyewa patut bayar sewa. Anda boleh tambah lagi kemudian dan pilih satu untuk setiap perjanjian.",
+        "default": "Lalai",
+        "setDefault": "Jadikan lalai",
+        "edit": "Sunting",
+        "delete": "Padam akaun penerimaan",
+        "duitnowLine": "DuitNow ({type}): {id}",
+        "usedBy": "Perjanjian yang menggunakannya: {count}",
+        "defaultToast": "{label} kini akaun penerimaan lalai anda",
+        "createdToast": "Akaun penerimaan ditambah",
+        "deletedToast": "Akaun penerimaan dipadam",
+        "bankOther": "Bank lain",
+        "accountNumberHint": "Tambah nombor akaun, ID DuitNow, atau kedua-duanya.",
+        "fields": {
+          "label": "Nama",
+          "bank": "Bank",
+          "accountHolderName": "Nama pemegang akaun",
+          "accountNumber": "Nombor akaun",
+          "duitnowIdType": "Jenis ID DuitNow",
+          "duitnowId": "ID DuitNow"
+        },
+        "placeholders": {
+          "label": "cth. Maybank peribadi"
+        },
+        "duitnowTypes": {
+          "none": "Tiada ID DuitNow",
+          "phone": "Nombor telefon bimbit",
+          "mykad": "MyKad",
+          "brn": "Pendaftaran perniagaan (SSM)",
+          "passport": "Pasport"
+        },
+        "deleteConfirm": {
+          "title": "Padam akaun penerimaan?",
+          "body": "{label} akan dibuang. Penyewa tidak akan nampak lagi.",
+          "agreements": "{count} perjanjian menggunakan akaun ini. Ia akan bertukar ke akaun lalai anda.",
+          "confirm": "Padam"
+        },
+        "online": {
+          "title": "Bayaran dalam talian",
+          "comingSoon": "Akan datang",
+          "help": "Penyewa akan membayar melalui perbankan dalam talian FPX atau kad dalam Roofly, dan wang dimasukkan ke akaun penerimaan lalai anda. Tiada apa perlu disediakan lagi.",
+          "fpx": "Perbankan dalam talian FPX",
+          "card": "Kad debit dan kredit"
         }
       }
     },
@@ -1203,7 +1304,8 @@
         "allPaidHelp": "Sewa seterusnya perlu dibayar pada {date}.",
         "noUpcoming": "Tiada sewa akan datang buat masa ini.",
         "dueOn": "Perlu dibayar {date}",
-        "overdueOn": "Sepatutnya dibayar {date}"
+        "overdueOn": "Sepatutnya dibayar {date}",
+        "awaiting": "Anda kata anda bayar pada {date}. Menunggu tuan rumah mengesahkan."
       },
       "stats": {
         "monthlyRent": "Sewa bulanan",
@@ -1285,7 +1387,8 @@
         "pending": "Belum dijelaskan",
         "paid": "Dibayar",
         "overdue": "Tertunggak",
-        "cancelled": "Dibatalkan"
+        "cancelled": "Dibatalkan",
+        "awaiting": "Menunggu pengesahan"
       },
       "methods": {
         "fpx": "FPX",
@@ -1304,8 +1407,39 @@
         "receipt": "Resit",
         "payCta": "Bayar {amount}",
         "processing": "Memproses pembayaran…",
-        "successToast": "Pembayaran berjaya — resit dihantar ke emel anda."
-      }
+        "successToast": "Pembayaran berjaya — resit dihantar ke emel anda.",
+        "methodLabel": "Bagaimana anda mahu membayar?",
+        "transfer": {
+          "title": "DuitNow atau pindahan bank",
+          "help": "Pindahkan dari aplikasi bank anda, kemudian beritahu tuan rumah.",
+          "steps": "Pindahkan jumlah penuh dalam aplikasi bank anda, guna nombor invois sebagai rujukan. Kemudian isi borang di bawah."
+        },
+        "online": {
+          "title": "Perbankan dalam talian atau kad",
+          "comingSoon": "Akan datang",
+          "help": "Bayar melalui FPX atau kad tanpa meninggalkan Roofly."
+        },
+        "claim": {
+          "title": "Saya sudah bayar",
+          "reference": "Rujukan pindahan",
+          "referencePlaceholder": "Daripada resit bank anda",
+          "paidAt": "Tarikh bayar",
+          "note": "Nota untuk tuan rumah (pilihan)",
+          "notePlaceholder": "cth. Dibayar dari akaun pasangan saya",
+          "receiptPlaceholder": "Muat naik resit tiba dalam fasa seterusnya, setelah storan fail siap.",
+          "submit": "Saya sudah bayar"
+        },
+        "claimedToast": "Dihantar. Tuan rumah akan mengesahkan setelah wang diterima.",
+        "awaitingTitle": "Menunggu tuan rumah mengesahkan",
+        "awaitingHelp": "Anda kata anda bayar pada {date} (rujukan {reference}). Kami akan tandakan sebagai dibayar setelah tuan rumah mengesahkan.",
+        "rejectedTitle": "Tuan rumah tidak menjumpai bayaran terakhir anda",
+        "errors": {
+          "claimPending": "Anda sudah memberitahu tuan rumah tentang bayaran untuk invois ini.",
+          "noPayoutAccount": "Tuan rumah belum menambah butiran pembayaran."
+        }
+      },
+      "awaitingHint": "Menunggu tuan rumah mengesahkan",
+      "rejectedHint": "Tuan rumah tidak menjumpai bayaran ini"
     },
     "tickets": {
       "subtitle": "Lapor dan jejak aduan penyelenggaraan.",
@@ -1396,6 +1530,25 @@
       "placeholders": {
         "icNumber": "YYMMDD-PB-####"
       }
+    },
+    "payTo": {
+      "title": "Bayar sewa kepada",
+      "help": "Akaun tuan rumah untuk perjanjian ini. Bayar melalui DuitNow atau pindahan bank.",
+      "none": "Tuan rumah belum menambah butiran pembayaran.",
+      "bank": "Bank",
+      "holder": "Pemegang akaun",
+      "accountNumber": "Nombor akaun",
+      "duitnow": "ID DuitNow ({type})",
+      "duitnowTypes": {
+        "phone": "nombor telefon bimbit",
+        "mykad": "MyKad",
+        "brn": "SSM",
+        "passport": "pasport"
+      },
+      "reference": "Rujukan",
+      "copy": "Salin",
+      "copied": "Disalin",
+      "copyLabel": "Salin {what}"
     }
   }
 }

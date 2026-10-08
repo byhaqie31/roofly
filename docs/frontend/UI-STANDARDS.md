@@ -270,6 +270,8 @@ One pill per row; never stack pills.
 - Right-aligned controls: language switcher, dark-mode toggle, user menu
 - User menu trigger: 36px circle, `var(--accent-soft)` bg, `var(--accent)` foreground. Shows the account photo when `AuthUser.avatarUrl` is set (Google sign-in stores it; falls back on load error), otherwise the Lucide `User` icon at 18px. Never render name initials — one glyph for every account keeps owner / tenant / admin shells consistent.
 
+**Help and support is pinned to the bottom** of the owner + tenant sidebars (and the mobile drawer), below a `border-t` divider — it's a utility link, not a section of the product, so it never sits among the main items. The desktop sidebar is `md:sticky md:top-0 md:h-dvh` so the pinned link stays in view on long pages; the drawer body is a flex column for the same reason.
+
 ### 3.8 Empty states
 
 Every list view (properties, units, tenants, agreements, invoices, tickets) needs an empty state. Critical for Cik Aminah's first hour.
@@ -828,7 +830,11 @@ See [components/marketing/HeroSection.vue](../../frontend/app/components/marketi
 - **Overlay stays.** Keep the `#1c1a17` top/bottom gradient (≈0.76 at 35 %, ≈0.64 at 65 %) above the stack (`z-[3]`) so the headline keeps AA contrast over any photo — the photos are a glimpse, not the subject. If a photo still reads too bright under it, darken the photo, not the copy.
 - Same behaviour on mobile and desktop — no responsive switch; the crop and the overlay do the work.
 
-**Floating buttons own a corner each** — bottom-left: the UAT `EnvBanner`; bottom-right: the owner/tenant **Help & feedback** button (`SupportWidget`, icon-only on mobile, label slides out on hover/focus from `md:`) or, in demo, the Google Form `FloatingFeedback` (never both — `showSupportWidget` is `!isDemo`). Don't add a third floating control in either corner.
+**Floating buttons own a corner each** — bottom-left: the UAT `EnvBanner`; bottom-right: the owner/tenant **Help & feedback** button (`SupportWidget`: a 48px circle at rest — no gap until the label shows — and the label slides out on hover/focus from `md:`) or, in demo, the Google Form `FloatingFeedback` (never both — `showSupportWidget` is `!isDemo`). Don't add a third floating control in either corner.
+
+### 11.22a Coming-soon hero CTAs on mobile
+
+Below `sm` the two hero buttons stack full width with **"Explore demo" first** — on a phone the demo is the strongest next step, and "Get notified" only scrolls down to the waitlist form. The demo link comes first in the DOM, so tab order matches what's on screen; `sm:order-1` / `sm:order-2` put "Get notified" back on the left from `sm:` up. The "Try me" badge stays pinned to the demo button.
 
 ### 11.22 Legal documents and footers
 
@@ -845,12 +851,16 @@ See [components/marketing/HeroSection.vue](../../frontend/app/components/marketi
 
 | Variant | Where | Links |
 |---|---|---|
-| `full` | marketing, coming-soon, legal pages | Legal links centred **above** the footer line: Privacy · Terms · Billing · Acceptable use · Contact (only if `contact.email` set). Then the edge-to-edge divider, then one full-width row from `md:` — left: © Roofly.my · "A great product of Axel Nova Ventures" (`legal.footerProductOf`) · SSM / address / email / phone (nulls dropped); right: the Qie credit. Legal pages keep the formal "Roofly is a product of…" (`legal.operator.productOf`) in their operator block. Stacks and centres below `md`. |
-| `slim` | auth, onboarding, suspended | © · Privacy · Terms |
-| `shell` | owner + tenant layouts | © · Privacy · Terms · Help and support |
+| `full` | marketing, coming-soon, legal pages | Row 1, above the footer line: the legal links (Privacy · Terms · Billing · Acceptable use). Then the edge-to-edge divider, then row 2: © Roofly.my · "A great product of Axel Nova Ventures" (`legal.footerProductOf`) on the left; on the right the Qie credit, a thin divider, then the operator contact as 16px icon links — `MapPin` (Google Maps search), `Mail` (mailto), `Phone` (tel) — each with the value as `aria-label` + `title`. One line per row from `md:`, stacked and centred below. Values from `config/legal.ts`, nulls dropped; the SSM number and full contact details live in the legal pages' operator block ("Roofly is a product of…", `legal.operator.productOf`), not the footer. On UAT row 2 is indented `md:pl-16` so the fixed bottom-left `EnvBanner` toggle never covers the © — no extra height. |
+| `slim` | auth, onboarding, suspended | © Roofly.my on the left, Privacy · Terms (· Beta terms) · **Contact us** at the right edge from `md:`. "Contact us" opens `components/legal/ContactUsModal.vue` (email · call · WhatsApp rows from `utils/legal.ts contactOptions()`, WhatsApp prefilled with `legal.contactUs.whatsappText`; hidden when no contact details are set); below `md` the links stack on top and © underneath (`flex-col-reverse`), centred. Indented `md:pl-16` on UAT so the `EnvBanner` toggle never covers the ©. |
+| `shell` | owner + tenant layouts | © · Privacy · Terms · Help and support. Document links point at the **in-app copies** (`legal-base="/owner/legal"` / `"/tenant/legal"`, `pages/{owner,tenant}/legal/[doc].vue` → `LegalDocument` with `base-path` + `embedded`), so reading a document never drops out of the app; links between documents stay in-app via `scopeLegalHref()`. |
 | `admin` | admin layout + admin sign-in | © · Privacy · Terms, admin accent, never Beta |
 
 Beta terms joins every non-admin variant when `useEnv().showBetaTerms` (UAT). Links are a `flex-wrap gap-x-4 gap-y-1.5` list with **no `·` separators**, so the longer BM labels wrap cleanly on mobile. `tone="dark"`/`"light"` keep the brand-orange palette for charcoal panes; `tone="theme"` uses tokens so it follows dark mode. In the owner/tenant shells the footer gets `pb-20 md:pb-4` while the floating help button is shown, so the button never covers the links.
+
+### 11.23 Public header: one wordmark position
+
+Every public surface — coming-soon (`layouts/marketing.vue`), auth (both panes), legal, onboarding, admin sign-in — renders `components/layout/SiteHeader.vue`, so the wordmark never drifts between pages: `px-6` → `lg:px-12` from the left, `py-5` from the top, in an `h-9` row (the height of `LangSwitcher` / `ThemeToggle`, so rows with and without controls line up). 22px icon, `text-card-title font-semibold tracking-tight`. The wordmark links to `useEnv().publicHomePath` (`/coming-soon`, or `/demo` on the demo build) — never `/`, which sends a signed-in visitor to their dashboard; admin sign-in passes `to="/admin/login"`. Controls go in the default slot (right side); `icon-color` pins the icon colour on charcoal panes, `wordmark-class="md:hidden"` hides it on the auth form pane where the charcoal pane already shows it, `:icon` swaps in `ShieldCheck` for admin. **Don't hand-roll a header in a public layout — extend SiteHeader.** The auth charcoal pane has no outer padding for this reason: its header sits flush like the others and only the reel + stats below keep `px-10 lg:px-14`. App shells (owner / tenant / admin) keep their sidebar wordmark.
 
 ## 12. Hard rules — do not break
 

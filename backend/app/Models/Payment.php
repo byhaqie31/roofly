@@ -23,6 +23,10 @@ class Payment extends Model
         'reference',
         'status',
         'paid_at',
+        'payout_account_id',
+        'note',
+        'rejection_reason',
+        'confirmed_at',
     ];
 
     protected function casts(): array
@@ -30,7 +34,8 @@ class Payment extends Model
         return [
             'method'  => PaymentMethod::class,
             'status'  => PaymentStatus::class,
-            'paid_at' => 'datetime',
+            'paid_at'      => 'datetime',
+            'confirmed_at' => 'datetime',
         ];
     }
 
@@ -44,5 +49,11 @@ class Payment extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class, 'invoice_id');
+    }
+
+    /** The account resolved when the tenant claimed the transfer (spec 2026-10-08 § 3.3). */
+    public function payoutAccount(): BelongsTo
+    {
+        return $this->belongsTo(PayoutAccount::class, 'payout_account_id');
     }
 }

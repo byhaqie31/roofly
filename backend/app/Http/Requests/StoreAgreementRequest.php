@@ -23,6 +23,8 @@ class StoreAgreementRequest extends FormRequest
             'lateFee'       => 'nullable|integer|min:0',
             'rentDueDay'    => 'required|integer|min:1|max:28',
             'status'        => 'nullable|in:draft,active,expired,terminated',
+            // Not a term column — null = the owner's default (spec 2026-10-08 § 3.2). Ownership checked in the controller.
+            'payoutAccountId' => 'sometimes|nullable|uuid',
         ];
     }
 
@@ -39,6 +41,7 @@ class StoreAgreementRequest extends FormRequest
             'depositAmount' => 'deposit_amount_cents',
             'lateFee'       => 'late_fee_cents',
             'rentDueDay'    => 'rent_due_day',
+            'payoutAccountId' => 'payout_account_id',
         ];
         $out = [];
         foreach ($v as $key => $value) {

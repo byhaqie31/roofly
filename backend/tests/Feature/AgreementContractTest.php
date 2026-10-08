@@ -35,7 +35,7 @@ class AgreementContractTest extends TestCase
         Agreement::factory()->create(['unit_id' => $this->unit->id]);
         $res = $this->getJson('/api/agreements')->assertOk();
         $this->assertSame(
-            ['id', 'unitId', 'tenantId', 'startDate', 'endDate', 'rentAmount', 'depositAmount', 'lateFee', 'rentDueDay', 'status', 'sentAt', 'acceptedAt', 'changesRequestedAt', 'reviewNote', 'createdAt'],
+            ['id', 'unitId', 'tenantId', 'startDate', 'endDate', 'rentAmount', 'depositAmount', 'lateFee', 'rentDueDay', 'status', 'sentAt', 'acceptedAt', 'changesRequestedAt', 'reviewNote', 'payoutAccountId', 'createdAt'],
             array_keys($res->json()[0])
         );
     }
@@ -45,7 +45,7 @@ class AgreementContractTest extends TestCase
         Agreement::factory()->create(['unit_id' => $this->unit->id]);
         $res = $this->getJson('/api/agreements?expand=unit,property,tenant')->assertOk();
         $row = $res->json()[0];
-        $this->assertSame(['agreement', 'unit', 'property', 'tenant'], array_keys($row));
+        $this->assertSame(['agreement', 'unit', 'property', 'tenant', 'payoutAccount'], array_keys($row));
         $this->assertSame($this->unit->id, $row['unit']['id']);
         $this->assertArrayHasKey('coOwners', $row['property']);
         $this->assertArrayHasKey('status', $row['tenant']);

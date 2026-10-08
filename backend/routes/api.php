@@ -102,6 +102,17 @@ Route::middleware(['auth:sanctum', 'touch-active'])->group(function () {
         Route::post('invoices/{invoice}/send',         [\App\Http\Controllers\Api\Owner\InvoiceController::class, 'send']);
         Route::post('invoices/{invoice}/payments',     [\App\Http\Controllers\Api\Owner\InvoiceController::class, 'recordPayment']);
 
+        // Tenant transfer claims → confirm / reject (spec 2026-10-08 payout-accounts-duitnow)
+        Route::post('payments/{payment}/confirm',      [\App\Http\Controllers\Api\Owner\PaymentClaimController::class, 'confirm']);
+        Route::post('payments/{payment}/reject',       [\App\Http\Controllers\Api\Owner\PaymentClaimController::class, 'reject']);
+
+        // Payout accounts (spec 2026-10-08 payout-accounts-duitnow)
+        Route::get('payout-accounts',                          [\App\Http\Controllers\Api\Owner\PayoutAccountController::class, 'index']);
+        Route::post('payout-accounts',                         [\App\Http\Controllers\Api\Owner\PayoutAccountController::class, 'store']);
+        Route::patch('payout-accounts/{payoutAccount}',        [\App\Http\Controllers\Api\Owner\PayoutAccountController::class, 'update']);
+        Route::post('payout-accounts/{payoutAccount}/default', [\App\Http\Controllers\Api\Owner\PayoutAccountController::class, 'setDefault']);
+        Route::delete('payout-accounts/{payoutAccount}',       [\App\Http\Controllers\Api\Owner\PayoutAccountController::class, 'destroy']);
+
         // Maintenance tickets
         Route::apiResource('tickets', \App\Http\Controllers\Api\Owner\TicketController::class);
         Route::patch('tickets/{ticket}/status',        [\App\Http\Controllers\Api\Owner\TicketController::class, 'updateStatus']);
@@ -124,7 +135,8 @@ Route::middleware(['auth:sanctum', 'touch-active'])->group(function () {
 
         // Invoices scoped to the tenant
         Route::get('invoices',             [\App\Http\Controllers\Api\Tenant\TenantInvoiceController::class, 'index']);
-        Route::post('invoices/{invoice}/pay', [\App\Http\Controllers\Api\Tenant\TenantInvoiceController::class, 'pay']);
+        Route::post('invoices/{invoice}/claim', [\App\Http\Controllers\Api\Tenant\TenantInvoiceController::class, 'claim']); // "I've paid" by transfer
+        Route::post('invoices/{invoice}/pay', [\App\Http\Controllers\Api\Tenant\TenantInvoiceController::class, 'pay']);     // simulated gateway, 403 unless ONLINE_PAYMENTS
 
         // Tickets filed by this tenant
         Route::get('tickets',              [\App\Http\Controllers\Api\Tenant\TenantTicketController::class, 'index']);

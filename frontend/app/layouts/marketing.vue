@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { House } from "lucide-vue-next";
 import LangSwitcher from "~/components/topbar/LangSwitcher.vue";
 import SiteFooter from "~/components/layout/SiteFooter.vue";
+import SiteHeader from "~/components/layout/SiteHeader.vue";
 </script>
 
 <template>
@@ -22,16 +22,9 @@ import SiteFooter from "~/components/layout/SiteFooter.vue";
       "
     />
 
-    <header class="relative z-10 flex items-center justify-between px-6 lg:px-12 py-5">
-      <NuxtLink
-        to="/coming-soon"
-        class="inline-flex items-center gap-2 text-card-title font-semibold tracking-tight"
-      >
-        <House :size="22" :stroke-width="1.75" style="color: #c44d26" />
-        <span>Roofly.my</span>
-      </NuxtLink>
+    <SiteHeader icon-color="#c44d26">
       <LangSwitcher />
-    </header>
+    </SiteHeader>
 
     <main class="relative z-10">
       <slot />

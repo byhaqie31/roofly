@@ -23,7 +23,10 @@ class InvoiceController extends Controller
             $q->where('owner_id', $request->user()->id)
         );
 
-        if ($request->filled('status')) {
+        if ($request->input('status') === 'awaiting') {
+            // Derived, not stored: has a tenant transfer claim pending (spec 2026-10-08 § 3.3).
+            $query->whereHas('pendingPayment');
+        } elseif ($request->filled('status')) {
             $query->where('status', $request->status);
         }
         if ($request->filled('year')) {
@@ -37,7 +40,7 @@ class InvoiceController extends Controller
 
         if ($request->filled('expand')) {
             return InvoiceWithRefsResource::collection(
-                $query->with(['agreement.unit.property.coOwners', 'agreement.tenant', 'payments'])->get()
+                $query->with(Invoice::refsRelations())->get()
             );
         }
 
@@ -49,7 +52,7 @@ class InvoiceController extends Controller
         $this->authorizeOwner($request, $invoice);
 
         if ($request->filled('expand')) {
-            $invoice->load(['agreement.unit.property.coOwners', 'agreement.tenant', 'payments']);
+            $invoice->load(Invoice::refsRelations());
 
             return new InvoiceWithRefsResource($invoice);
         }
