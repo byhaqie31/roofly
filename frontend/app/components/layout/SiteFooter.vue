@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { Mail, MapPin, Phone } from "lucide-vue-next";
 import { LEGAL } from "~/config/legal";
 import { footerLinks, operatorLines, type FooterVariant } from "~/utils/legal";
 
@@ -32,14 +33,27 @@ const props = withDefaults(
 );
 
 const { t } = useI18n();
-const { showBetaTerms } = useEnv();
+const { showBetaTerms, showEnvBanner } = useEnv();
 const year = new Date().getFullYear();
 
 const links = computed(() =>
-  footerLinks(props.variant, { showBetaTerms, helpTo: props.helpTo, contactEmail: LEGAL.contact.email }),
+  footerLinks(props.variant, { showBetaTerms, helpTo: props.helpTo }),
 );
-// Name first (rendered with its own sentence), then SSM / address / email / phone — nulls dropped.
-const operatorExtras = computed(() => operatorLines(LEGAL).filter((l) => l.key !== "name"));
+// Full footer: address / email / phone as icon links on the right of the legal
+// links (nulls dropped). The value is the accessible name + hover title. The
+// SSM number lives on the legal pages' operator block, not here.
+const contactIcons = { registeredAddress: MapPin, email: Mail, phone: Phone } as const;
+const contactLinks = computed(() =>
+  operatorLines(LEGAL)
+    .filter((l): l is typeof l & { key: keyof typeof contactIcons } => l.key in contactIcons)
+    .map((l) => ({
+      key: l.key,
+      value: l.value,
+      icon: contactIcons[l.key],
+      href: l.href ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l.value)}`,
+      external: !l.href,
+    })),
+);
 
 // Brand-orange on the charcoal/cream marketing panes; admin's own blue on its
 // charcoal sign-in page. `theme` tone uses token classes instead (see below).
@@ -58,6 +72,9 @@ const footerClass = computed(() => [
   props.variant === "full" ? "mt-16 pt-8" : "border-t px-4 py-4 sm:px-6 lg:px-12",
   palette.value ? "" : "border-line-passive text-ink-muted",
 ]);
+// UAT's fixed bottom-left EnvBanner toggle would cover the start of the © line,
+// so both full-footer rows share this indent from md: up (no extra height).
+const rowIndent = computed(() => (showEnvBanner ? "md:pl-16 lg:pl-16" : ""));
 const dividerStyle = computed(() => (palette.value ? { borderColor: palette.value.border } : undefined));
 
 const linkClass = computed(() => [
@@ -72,15 +89,29 @@ const linkStyle = computed(() => (palette.value ? { color: palette.value.link } 
     :class="footerClass"
     :style="palette ? { borderColor: palette.border, color: palette.text } : undefined"
   >
-    <!-- Legal links (+ © on the slim variants). flex-wrap + gap, no "·"
-         separators, so longer BM labels break cleanly on narrow screens. -->
-    <nav
-      :aria-label="t('legal.footerNav')"
-      class="mx-auto max-w-app text-center text-micro"
-      :class="variant === 'full' ? 'px-4 pb-6 sm:px-6 lg:px-12' : ''"
+    <!-- Full variant, row 1: the legal links, above the footer line. Same left
+         edge as row 2 (including its UAT indent) so both rows start together. -->
+    <div
+      v-if="variant === 'full'"
+      class="flex flex-col items-center gap-3 px-4 pb-6 text-center text-micro sm:px-6 md:flex-row md:items-start md:justify-between md:gap-8 md:text-left lg:px-12"
+      :class="rowIndent"
     >
+      <nav :aria-label="t('legal.footerNav')">
+        <ul class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 md:justify-start">
+          <li v-for="link in links" :key="link.key">
+            <NuxtLink :to="link.to" :external="link.external" :class="linkClass" :style="linkStyle">
+              {{ t(link.labelKey) }}
+            </NuxtLink>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Slim variants: © and the legal links on one centred line. flex-wrap +
+         gap, no "·" separators, so longer BM labels break cleanly. -->
+    <nav v-else :aria-label="t('legal.footerNav')" class="mx-auto max-w-app text-center text-micro">
       <ul class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">
-        <li v-if="variant !== 'full'">© {{ year }} Roofly.my</li>
+        <li>© {{ year }} Roofly.my</li>
         <li v-for="link in links" :key="link.key">
           <NuxtLink :to="link.to" :external="link.external" :class="linkClass" :style="linkStyle">
             {{ t(link.labelKey) }}
@@ -89,14 +120,14 @@ const linkStyle = computed(() => (palette.value ? { color: palette.value.link } 
       </ul>
     </nav>
 
-    <!-- Full variant: the footer line, then one full-width row — © and the
-         operator identity on the left (Consumer Protection (E-Trade)
-         Regulations 2024 disclosures; every value from config/legal.ts, nulls
-         never render), designer credit on the right. Stacks and centres below md. -->
+    <!-- Full variant, row 2: the footer line, then © · operator on the left and
+         the designer credit | contact icons on the right. On UAT the fixed bottom-left EnvBanner
+         toggle would cover the ©, so the row is indented past it from md: up
+         (no extra height). -->
     <div
       v-if="variant === 'full'"
       class="flex flex-col items-center gap-1.5 border-t px-4 py-5 text-center text-micro sm:px-6 md:flex-row md:items-start md:justify-between md:gap-6 md:text-left lg:px-12"
-      :class="palette ? '' : 'border-line-passive'"
+      :class="[palette ? '' : 'border-line-passive', rowIndent]"
       :style="dividerStyle"
     >
       <ul class="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 md:justify-start">
@@ -118,24 +149,44 @@ const linkStyle = computed(() => (palette.value ? { color: palette.value.link } 
             </template>
           </i18n-t>
         </li>
-        <li v-for="line in operatorExtras" :key="line.key" class="tabular-nums">
-          <span aria-hidden="true" class="mr-1.5">·</span>
-          <template v-if="line.key === 'ssmNumber'">{{ t("legal.operator.ssmNumber", { value: line.value }) }}</template>
-          <a v-else-if="line.href" :href="line.href" :class="linkClass" :style="linkStyle">{{ line.value }}</a>
-          <template v-else>{{ line.value }}</template>
-        </li>
       </ul>
-      <p class="shrink-0 md:text-right">
-        Designed and developed with care and love by
-        <a
-          href="https://baihaqie.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="font-medium underline underline-offset-2 hover:opacity-80 transition-opacity"
-          :class="palette ? '' : 'text-ink-body'"
-          :style="linkStyle"
-        >Qie</a>
-      </p>
+      <div class="flex shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1.5 md:justify-end">
+        <p>
+          Designed and developed with care and love by
+          <a
+            href="https://baihaqie.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-medium underline underline-offset-2 hover:opacity-80 transition-opacity"
+            :class="palette ? '' : 'text-ink-body'"
+            :style="linkStyle"
+          >Qie</a>
+        </p>
+        <!-- Operator contact (Consumer Protection (E-Trade) Regulations 2024
+             disclosures) as icon links — every value from config/legal.ts,
+             nulls never render. The full values are also on every legal page. -->
+        <template v-if="contactLinks.length">
+          <span aria-hidden="true" class="h-3 w-px bg-current opacity-40" />
+          <address class="not-italic">
+            <ul class="flex items-center gap-3">
+              <li v-for="c in contactLinks" :key="c.key">
+                <a
+                  :href="c.href"
+                  :target="c.external ? '_blank' : undefined"
+                  :rel="c.external ? 'noopener noreferrer' : undefined"
+                  :aria-label="c.value"
+                  :title="c.value"
+                  class="inline-flex rounded-sm hover:opacity-80 focus-visible:shadow-focus transition-opacity"
+                  :class="palette ? '' : 'text-ink-body hover:text-ink'"
+                  :style="linkStyle"
+                >
+                  <component :is="c.icon" :size="16" :stroke-width="1.75" aria-hidden="true" />
+                </a>
+              </li>
+            </ul>
+          </address>
+        </template>
+      </div>
     </div>
   </footer>
 </template>

@@ -24,7 +24,8 @@ export const availableLegalSlugs = (opts: { showBetaTerms: boolean }) =>
 // ── Footers ────────────────────────────────────────────────────────────────
 
 /**
- * full  — marketing, coming-soon and legal pages
+ * full  — marketing, coming-soon and legal pages (contact details sit beside
+ *         the links, so there's no separate Contact link)
  * slim  — auth pages and other first-run screens
  * shell — owner + tenant app shells (adds the help page)
  * admin — admin back office (English only, no beta terms: staff aren't testers)
@@ -43,16 +44,13 @@ const docLink = (slug: LegalSlug): FooterLink => ({ key: slug, labelKey: legalLa
 
 export const footerLinks = (
   variant: FooterVariant,
-  opts: { showBetaTerms: boolean; helpTo?: string | null; contactEmail?: string | null },
+  opts: { showBetaTerms: boolean; helpTo?: string | null },
 ): FooterLink[] => {
   const slugs: LegalSlug[] = variant === "full" ? ["privacy", "terms", "billing", "acceptable-use"] : ["privacy", "terms"];
   const links = slugs.map(docLink);
   if (opts.showBetaTerms && variant !== "admin") links.push(docLink("beta"));
   if (variant === "shell" && opts.helpTo) {
     links.push({ key: "help", labelKey: "legal.links.help", to: opts.helpTo, external: false });
-  }
-  if (variant === "full" && opts.contactEmail) {
-    links.push({ key: "contact", labelKey: "legal.links.contact", to: `mailto:${opts.contactEmail}`, external: true });
   }
   return links;
 };

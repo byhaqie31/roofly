@@ -24,12 +24,6 @@ describe("footerLinks", () => {
     expect(keys(footerLinks("full", { showBetaTerms: false }))).toEqual(["privacy", "terms", "billing", "acceptable-use"]);
   });
 
-  it("full footer adds Contact only when a contact email is configured", () => {
-    expect(keys(footerLinks("full", { showBetaTerms: false, contactEmail: null }))).not.toContain("contact");
-    const withEmail = footerLinks("full", { showBetaTerms: false, contactEmail: "hello@example.com" });
-    expect(withEmail.at(-1)).toMatchObject({ key: "contact", to: "mailto:hello@example.com", external: true });
-  });
-
   it("slim footer: privacy and terms only", () => {
     expect(keys(footerLinks("slim", { showBetaTerms: false }))).toEqual(["privacy", "terms"]);
   });

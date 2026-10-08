@@ -845,7 +845,7 @@ See [components/marketing/HeroSection.vue](../../frontend/app/components/marketi
 
 | Variant | Where | Links |
 |---|---|---|
-| `full` | marketing, coming-soon, legal pages | Legal links centred **above** the footer line: Privacy · Terms · Billing · Acceptable use · Contact (only if `contact.email` set). Then the edge-to-edge divider, then one full-width row from `md:` — left: © Roofly.my · "A great product of Axel Nova Ventures" (`legal.footerProductOf`) · SSM / address / email / phone (nulls dropped); right: the Qie credit. Legal pages keep the formal "Roofly is a product of…" (`legal.operator.productOf`) in their operator block. Stacks and centres below `md`. |
+| `full` | marketing, coming-soon, legal pages | Row 1, above the footer line: the legal links (Privacy · Terms · Billing · Acceptable use). Then the edge-to-edge divider, then row 2: © Roofly.my · "A great product of Axel Nova Ventures" (`legal.footerProductOf`) on the left; on the right the Qie credit, a thin divider, then the operator contact as 16px icon links — `MapPin` (Google Maps search), `Mail` (mailto), `Phone` (tel) — each with the value as `aria-label` + `title`. One line per row from `md:`, stacked and centred below. Values from `config/legal.ts`, nulls dropped; the SSM number and full contact details live in the legal pages' operator block ("Roofly is a product of…", `legal.operator.productOf`), not the footer. On UAT row 2 is indented `md:pl-16` so the fixed bottom-left `EnvBanner` toggle never covers the © — no extra height. |
 | `slim` | auth, onboarding, suspended | © · Privacy · Terms |
 | `shell` | owner + tenant layouts | © · Privacy · Terms · Help and support |
 | `admin` | admin layout + admin sign-in | © · Privacy · Terms, admin accent, never Beta |
