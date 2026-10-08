@@ -7,14 +7,17 @@ definePageMeta({ layout: "auth" });
 const { t } = useI18n();
 useHead({ title: () => t("demo.landing.pageTitle") });
 
-// Tenant shell isn't ready yet — gate the tenant button visually but keep
-// its handler wired so it's a one-character flip when the shell lands.
-const TENANT_ENABLED = false;
+// Tenant shell is live — both audiences can enter the demo.
+const TENANT_ENABLED = true;
 
 const auth = useAuthStore();
 const loadingRole = ref<"owner" | "tenant" | null>(null);
+const { track } = useTrack();
+
+onMounted(() => track("demo_enter", { role: "landing" }));
 
 const enter = async (role: "owner" | "tenant") => {
+  track("demo_enter", { role });
   loadingRole.value = role;
   await auth.login(`${role}@roofly.my`, "password");
   await navigateTo(role === "owner" ? "/owner" : "/tenant");

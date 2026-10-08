@@ -1,45 +1,26 @@
 import { defineStore } from "pinia";
+import type { AuthUser } from "~/types/auth";
+import type { AuthAdapter, RegisterPayload } from "~/services/contracts/auth";
+import { demoAuth } from "~/demo/auth";
+import { apiAuth } from "~/services/api/auth";
 
-export type UserRole = "owner" | "tenant" | "admin";
-
-export interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  role: UserRole;
-}
+export type { AuthUser, UserRole } from "~/types/auth";
 
 interface AuthState {
   user: AuthUser | null;
   loading: boolean;
+  /** False until the boot `fetchMe()` has settled — the route guard waits on this. */
+  authReady: boolean;
 }
 
-/**
- * Phase 1 auth store. Backend wiring lands in the Laravel install commit.
- * Until then, login/register are mocked + the user is persisted to
- * localStorage so refreshes don't drop the session. When Sanctum lands,
- * `restoreSession` will swap to a `/auth/me` call.
- */
-const STORAGE_KEY = "roofly_auth";
-
-const persist = (user: AuthUser | null) => {
-  if (!import.meta.client) return;
-  try {
-    if (user) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  } catch {
-    // Quota / private-mode etc — non-fatal in mock-mode.
-  }
-};
+/** Demo → localStorage-backed stub; otherwise Sanctum SPA cookie auth. */
+const adapter = (): AuthAdapter => (useEnv().useMock ? demoAuth : apiAuth);
 
 export const useAuthStore = defineStore("auth", {
   state: (): AuthState => ({
     user: null,
     loading: false,
+    authReady: false,
   }),
 
   getters: {
@@ -50,62 +31,100 @@ export const useAuthStore = defineStore("auth", {
   },
 
   actions: {
-    /** TEMP: mock until backend is up. */
-    async login(email: string, _password: string) {
+    async login(email: string, password: string) {
       this.loading = true;
-      await new Promise((r) => setTimeout(r, 300));
-      const role: UserRole = email.startsWith("tenant")
-        ? "tenant"
-        : email.startsWith("admin")
-          ? "admin"
-          : "owner";
-      this.user = {
-        id: "stub-" + role,
-        name: role === "tenant" ? "Adi" : role === "admin" ? "Admin" : "Cik Aminah",
-        email,
-        phone: null,
-        role,
-      };
-      persist(this.user);
-      this.loading = false;
-    },
-
-    async register(payload: { name: string; email: string; phone: string; password: string }) {
-      this.loading = true;
-      await new Promise((r) => setTimeout(r, 300));
-      this.user = {
-        id: "stub-owner",
-        name: payload.name,
-        email: payload.email,
-        phone: payload.phone,
-        role: "owner",
-      };
-      persist(this.user);
-      this.loading = false;
-    },
-
-    async logout() {
-      this.user = null;
-      persist(null);
-    },
-
-    /**
-     * Hydrate auth state from localStorage on client boot. Run once via
-     * the `.client` plugin so SSR is unaffected (server has no localStorage).
-     */
-    restoreSession() {
-      if (!import.meta.client) return;
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
       try {
-        this.user = JSON.parse(raw) as AuthUser;
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
+        this.user = await adapter().login(email, password);
+      } finally {
+        this.loading = false;
       }
     },
 
+    async register(payload: RegisterPayload) {
+      this.loading = true;
+      try {
+        this.user = await adapter().register(payload);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async loginWithGoogle(credential: string) {
+      this.loading = true;
+      try {
+        this.user = await adapter().loginWithGoogle(credential);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    /** Replace the session user after an account mutation (onboarding, checklist, password). */
+    setUser(user: AuthUser) {
+      this.user = user;
+    },
+
+    async loginAdmin(email: string, password: string) {
+      this.loading = true;
+      try {
+        this.user = await adapter().loginAdmin(email, password);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async acceptAdminInvite(token: string, password: string) {
+      this.loading = true;
+      try {
+        this.user = await adapter().acceptAdminInvite(token, password);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async forgotPassword(email: string) {
+      this.loading = true;
+      try {
+        await adapter().forgotPassword(email);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async resetPassword(input: { token: string; email: string; password: string }) {
+      this.loading = true;
+      try {
+        this.user = await adapter().resetPassword(input);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async acceptInvite(input: { token: string; email: string; password: string }) {
+      this.loading = true;
+      try {
+        this.user = await adapter().acceptInvite(input);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async logout() {
+      await adapter().logout();
+      this.user = null;
+    },
+
+    /**
+     * Boot hydration. Always marks the session ready so the route guard can
+     * proceed; a signed-out result is `user = null`, not an error.
+     */
     async fetchMe() {
-      // Real impl will call /api/auth/me when backend exists.
+      try {
+        this.user = await adapter().fetchMe();
+      } catch {
+        this.user = null;
+      } finally {
+        this.authReady = true;
+      }
     },
   },
 });

@@ -106,6 +106,8 @@ Each status color has a paired `-soft` variant at 8% opacity for pill background
 
 Both `:root` (default) and `[data-theme="light"]` (explicit override) carry the light values; `[data-theme="dark"]` carries the lifted ones. Keep the semantic mapping identical across themes — only the perceptual lightness changes.
 
+**Admin shell accent:** `--admin-accent` (#2f4f6b light / #7fa6c9 dark) + `--admin-accent-soft`. Used only in `layouts/admin.vue`, `layouts/auth-admin.vue` and `components/admin/*` for active nav, wordmark and primary emphasis. Never in owner/tenant surfaces. Everything else in the admin (pills, buttons, cards) uses the shared tokens.
+
 ### 1.6 Shadows
 
 ```css
@@ -219,6 +221,10 @@ focus: border var(--border-interactive) + var(--shadow-focus)
 
 VeeValidate error messages: 14px, `var(--accent)`, 4px below the field. Pair with a Lucide `alert-circle` icon — never color-only.
 
+**Placeholders show an example, not the label again** — `e.g. Aminah Yusof`, `e.g. +60 12 345 6789` (BM `cth. …`), or a rule for password fields (`At least 8 characters`). Keep them in i18n under the form's `placeholders` group; escape the `@` in example emails as `{'@'}`.
+
+**Password fields use `ui/PasswordInput.vue`** — `Input` plus a show/hide eye button in the suffix slot (`aria-label` "Show password"/"Hide password", `aria-pressed`). Any form that sets a new password also asks for it twice ("Retype password") and shows "Passwords do not match." inline on the second field, live once the user has tried to submit.
+
 ### 3.4 Status pills
 
 ```
@@ -262,6 +268,9 @@ One pill per row; never stack pills.
 **Topbar:**
 - 64px tall, `1px solid var(--border-passive)` on bottom
 - Right-aligned controls: language switcher, dark-mode toggle, user menu
+- User menu trigger: 36px circle, `var(--accent-soft)` bg, `var(--accent)` foreground. Shows the account photo when `AuthUser.avatarUrl` is set (Google sign-in stores it; falls back on load error), otherwise the Lucide `User` icon at 18px. Never render name initials — one glyph for every account keeps owner / tenant / admin shells consistent.
+
+**Help and support is pinned to the bottom** of the owner + tenant sidebars (and the mobile drawer), below a `border-t` divider — it's a utility link, not a section of the product, so it never sits among the main items. The desktop sidebar is `md:sticky md:top-0 md:h-dvh` so the pinned link stays in view on long pages; the drawer body is a flex column for the same reason.
 
 ### 3.8 Empty states
 
@@ -480,7 +489,7 @@ PDFs are the **only** place we deviate from cream.
 | CSS tokens | `frontend/assets/css/tokens.css` |
 | Tailwind config (token mirror) | `frontend/tailwind.config.ts` |
 | Inter font | `frontend/plugins/fonts.client.ts` via `@fontsource-variable/inter` |
-| UI primitives | `frontend/components/ui/` — `Button.vue`, `Card.vue`, `Input.vue`, `Pill.vue`, `EmptyState.vue`, `Icon.vue`, `MoneyDisplay.vue` |
+| UI primitives | `frontend/components/ui/` — `Button.vue`, `Card.vue`, `Input.vue`, `PasswordInput.vue`, `Pill.vue`, `EmptyState.vue`, `Icon.vue`, `MoneyDisplay.vue` |
 | Storybook (Phase 6) | `frontend/.storybook/` |
 | PDF templates | `backend/resources/views/pdfs/agreement.blade.php`, `.../receipt.blade.php` |
 | Money format helper | `frontend/composables/useMoney.ts` |
@@ -689,7 +698,7 @@ When the UI exposes a feature that ships in a later phase (file storage, billing
 
 - **Empty-state titles / placeholder titles** → exactly `"Coming soon"`. Same wording in EN ("Coming soon") and MS ("Akan datang").
 - **Body / help text** → lead with `"Coming soon — "` then describe what arrives, ending with `"in the next phase"` (EN) or `"dalam fasa seterusnya"` (MS).
-- **Toasts** → same lead-with `"Coming soon — "` form, kept short.
+- **Toasts** → same lead-with `"Coming soon — "` form, kept short. Toasts render **top-centre** (`top-20`, horizontally centred), **filled** (solid `bg-status-active` / `bg-status-overdue` / `bg-surface-dark` with white/on-dark text + a leading icon), and wiggle once on entry (`toast-wiggle` keyframes in `ui/Toaster.vue`, disabled under reduced-motion). Never the soft/transparent variants — they're too easy to miss.
 
 The pill in §11.10 uses the same `"Coming soon"` wording for visual consistency across the app.
 
@@ -724,7 +733,134 @@ Pattern (see [pages/owner/payments.vue](../../frontend/app/pages/owner/payments.
 
 The table is the truth; the cards are a presentation. Don't fork the data shape or duplicate the column definitions in two places.
 
----
+### 11.15 Admin data tables
+
+Every admin list page (Owners, Tenants, Audit) follows the same shell so the desktop/mobile split and pagination don't get re-invented per page. See [components/admin/DataTableShell.vue](../../frontend/app/components/admin/DataTableShell.vue) + [pages/admin/owners/index.vue](../../frontend/app/pages/admin/owners/index.vue).
+
+- **`DataTableShell` owns loading / empty / table-vs-cards / pagination footer.** It renders a `#table` slot inside `hidden sm:block` and a `#cards` slot inside `sm:hidden` — same split as § 11.14, but centralized in one component instead of repeated per page. Loading and empty states are handled once, inside the shell.
+- **TanStack table from `sm:` up**, card rows under `sm` — same underlying `result.data`, no forked fetch.
+- **Table rows are keyboard-accessible**, not just clickable `<div>`s: `<tr tabindex="0" role="link" @click="open(row)" @keydown.enter.prevent="open(row)" @keydown.space.prevent="open(row)">`. Card rows use a real `<button type="button">` wrapping the card content instead.
+- **Server-side pagination footer** — `DataTableShell` takes `page` / `last-page` / `total` and emits `update:page`; it doesn't do client-side slicing. The page owns the `page` ref and re-fetches on change.
+- **Filters live in a card above the shell**, laid out `grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5` — search input spans `lg:col-span-2`, the rest are one filter control per column. A "Clear filters" ghost button appears only when a filter is active.
+- **Filter watchers reset page OR load — never both** (double-fetch otherwise): `watch([...filters], () => { if (page.value !== 1) page.value = 1; else load(); })` paired with a separate `watch(page, load)`. Resetting `page` to 1 triggers the `page` watcher, which loads; if `page` was already 1, the filter watcher loads directly. Text search debounces (~300ms) before applying the same reset-or-load logic.
+- **Filter state round-trips through the URL** (`router.replace({ query })`) so a reload or shared link preserves search/filters/page — omit defaults (`page: 1`, unchecked booleans) from the query string to keep URLs clean.
+
+### 11.16 Funnel strip
+
+- **One `Card padding="loose"`, four columns** — `grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4`. Steps wrap two-per-row under `lg`, one row of four from `lg:` up. No horizontal scroll.
+- **Each step is label → count → share bar → step %.** Label `text-caption text-ink-muted`, count `text-display-sub font-semibold tabular-nums`, then a `h-2 rounded-pill bg-line-passive` track whose `bg-ink` fill is the step's share of the *top* step (so bars shrink left-to-right like a real funnel; non-zero counts get a 1.5% minimum so they stay visible), then the percent-of-previous line (`text-micro text-ink-muted`). The first step says "Top of funnel" instead of 100%.
+- **Don't render the funnel as four `StatTile` clones** — when the same counts already sit in the tile row above, identical tiles read as a duplicate, not a funnel. The proportional bar is what makes it one.
+
+### 11.17 Charts: x-axis ticks and label collisions
+
+- **`MiniAreaChart` prints one label per point only while the series is short** (≤ `maxTicks`, default 12 — the owner 12-month charts). Longer daily series get evenly spaced ticks, first and last always shown, absolutely positioned at the point's x with the first left-anchored and the last right-anchored so nothing clips at the card edge. Admin daily charts pass `:max-ticks="6"`.
+- **The tick budget is width-aware** — roughly one label per 70px, measured with a `ResizeObserver`, so a 30-day series shows ~4 ticks in a mobile card and 6 on desktop without a breakpoint.
+- **Sparse integer counts use `variant="bars"`** (registrations per day), continuous series use the default area. Bars sit in column centres with a surface gap; zero-days render as a faint 1-unit stub so the day is still visibly "there".
+- **Avg label lives at the left end of the average line; the latest-value badge at the right** — they can no longer collide. Badges and tooltips hug the edge when within 10% of either end.
+- **Share lists (top pages / referrers)** — each row is name + `count · pct%` on one line, then a `h-1 rounded-pill` track whose fill is relative to the top row (first row spans the track; the rest read proportionally). `pct` is the share of the range total.
+
+### 11.x Marketing motion (GSAP)
+
+- GSAP (`gsap` 3.x) is used **only on the marketing surface** (`/coming-soon`, `layouts/marketing.vue` descendants). Product shells keep CSS transitions.
+- All marketing motion goes through `composables/useHeroMotion.ts` — `enter` (staggered entrance via `[data-enter]` targets), `slideshow` (hero background crossfade + drift, § 11.21), `drift` (single-image Ken-Burns, kept for one-off backdrops), `rotateWords` (brand-word flip on the headline accent, words from `marketing.hero.headlineWords[]` per locale, `words[0]` rendered server-side so first paint is never blank), `revealOnScroll` (IntersectionObserver + one-shot fade-up for card grids), `hoverExpand` (card lift + grow, `[data-watermark]` icon swell, `[data-body]` brighten; binds only on `(hover: hover) and (pointer: fine)` so touch is untouched).
+- Every helper collapses to an instant state under `prefers-reduced-motion: reduce`. Content must never be gated on an animation finishing.
+- Hero backdrop is the § 11.21 slideshow. `public/marketing/hero-skyline.svg` (self-drawn Malaysian residential skyline) is no longer used by the hero but still feeds `scripts/og/og-card.html` — don't delete it.
+
+### 11.18 Checklist card (getting-started)
+
+See [components/owner/GettingStartedCard.vue](../../frontend/app/components/owner/GettingStartedCard.vue).
+
+- **Row = numbered circle + title + one-line hint, whole row is the link.** Undone/enabled steps render as `<NuxtLink>` wrapping the whole row (`hover:bg-surface-hover`, trailing chevron); done or not-yet-enabled steps render the same markup as a plain `<div>` (no link, no hover, no chevron) so the row shape never shifts between states.
+- **Three visual states per step** — done: filled circle with a check icon, `bg-status-paid-soft`/`text-status-paid`, title `line-through text-ink-muted`, hint hidden; enabled-not-done: `bg-ink` circle with the step number, title `text-ink`, hint `text-ink-muted`; disabled (no property yet): `bg-line-passive` circle, title + hint both `text-ink-faint` — muted, not hidden, so the owner sees the whole path up front.
+- **Card hides itself entirely** once every step is done or the owner has dismissed it (✕ in the header) — it never renders a "you're all set" empty version. Dismiss/restore is a single persisted flag (`checklistDismissedAt`), not per-step state.
+- **Same row layout on mobile and desktop** — no card-vs-table split needed here; the row already degrades cleanly at narrow widths (title/hint stack naturally under the fixed-width circle + icon).
+
+### 11.19 Full-screen onboarding layout
+
+See [layouts/onboarding.vue](../../frontend/app/layouts/onboarding.vue) + [pages/owner/onboarding.vue](../../frontend/app/pages/owner/onboarding.vue).
+
+- **Own layout, no product chrome** — no sidebar, no topbar, no `UserMenu`. Just a slim header (wordmark + language switcher only — no theme toggle), a centered `max-w-2xl` content column, and a footer tagline. Mirrors the structure of `layouts/auth.vue`'s form pane, not the owner shell.
+- **Pinned to light theme** (`data-theme="light"` on the layout root) — the owner arrives here straight from the (always-light) auth/signup flow, and onboarding is still part of that first-run moment, so the visual experience stays continuous rather than snapping to a previously-set dark preference.
+- **One question, one primary action, one skip.** A single picker (`OwnerPurposePicker`), a full-width primary button that's disabled until at least one purpose is chosen, and a muted underlined "skip" text-link beneath it that submits a sensible default rather than leaving the screen with no way forward.
+
+### 11.19a Multi-step onboarding (tenant)
+
+See [pages/tenant/onboarding.vue](../../frontend/app/pages/tenant/onboarding.vue). Same `onboarding` layout as 11.19, with three short steps instead of one picker.
+
+- **Step indicator is text + segments, not a numbered stepper.** A `text-micro` uppercase "Step 1 of 3" above the title, and a row of `h-1` pill segments (filled `bg-ink` up to the current step, `bg-line-passive` after). No labels on the segments — the title changes per step instead.
+- **Each step validates only its own fields** before Continue advances; the final step's button becomes Finish and submits everything. Server-side field errors are mapped back onto the flat form and the view jumps to the earliest step that has one.
+- **Action row stacks on mobile** (`flex-col-reverse gap-3`) so the primary button is thumb-reachable at the bottom, and goes `sm:flex-row sm:justify-between` with Back on the left from `sm:` up. Back is rendered `invisible` (not removed) on step 1 so the primary button doesn't jump.
+- **Mandatory flows have no skip link.** When the data is required for the product to work (here, what the landlord needs for the agreement), don't offer "skip for now" — mark optional fields with "· Optional" in their label instead.
+- **Identity numbers format themselves.** MyKad fields accept bare digits (`inputmode="numeric"`), insert the dashes live via `utils/mykad.ts`'s `formatMyKadInput`, and derive dependent fields (date of birth) instead of asking twice. The derived field stays editable for the rare mismatch.
+
+### 11.19b Detail-page action group with icon-only destructive action
+
+See [pages/owner/agreements/[id].vue](../../frontend/app/pages/owner/agreements/[id].vue) header.
+
+- **One primary state action, then the destructive one as an icon.** The header's right side is a `flex flex-wrap gap-2` group: the single most useful next step for the record's current status (Send / Withdraw / Activate) rendered as a real labelled button, followed by Delete as a `ghost` `size="sm"` **icon-only** button (`Trash2`, `!px-2`, `aria-label` + `title`). Delete never competes visually with the forward action.
+- **Same group on every width** — it wraps under the title on mobile (`mt-4 sm:mt-0`) instead of a second mobile-only copy in the top bar.
+- **State banner lives in the content, not the header.** Where the record is in a flow (sent on…, agreed on…, changes requested + note) is a bordered `role="status"` strip at the top of the Overview tab using the matching status soft tokens; the header pill stays a one-word status.
+
+### 11.19c Preset chips that fill a dependent field
+
+See the term chooser in [components/owner/AgreementTermsForm.vue](../../frontend/app/components/owner/AgreementTermsForm.vue).
+
+- **Chips, not a select, for 3–4 common values + Custom.** A `role="radiogroup"` row of pill buttons (`rounded-pill border px-3.5 py-1.5 text-caption font-medium`), selected = `border-ink bg-ink text-surface-page`, others = `border-line-passive bg-surface-page` with `hover:bg-surface-hover`; `aria-checked` on each. Wraps on mobile.
+- **The dependent field stays visible and editable.** The preset writes into the real input (here `endDate`) rather than hiding it, and a one-line caption under the chips restates the outcome ("Ends 31/12/2026"). Editing the dependent field by hand flips the chooser to Custom — never silently overwrite a manual value.
+- **Pre-select on edit** when the stored values match a preset exactly; otherwise land on Custom.
+
+### 11.20 Auth pages: social button above the form
+
+See [pages/auth/login.vue](../../frontend/app/pages/auth/login.vue) / [pages/auth/register.vue](../../frontend/app/pages/auth/register.vue) + [components/auth/GoogleSignInButton.vue](../../frontend/app/components/auth/GoogleSignInButton.vue).
+
+- **Social sign-in renders above the email/password form**, followed by an `or` divider (`h-px` line either side of a small uppercase `or` label) before the form starts — never interleaved with form fields, never below the submit button.
+- **Gated by `features.googleLogin`** (`!isDemo && Boolean(googleClientId)`) — the whole block, divider included, is absent when the flag is off, so a build with no client id configured shows a plain email/password form with no dead space where the button would have been.
+- **Never shown in demo.** `demo-roofly` always has `isDemo: true`, so this block never renders there; `components/auth/DemoLoginShortcuts.vue`'s "Continue with Google (demo)" button on `/demo` is the demo-mode substitute, and it is a separate component, not a themed variant of this one.
+- **Renders Google's own button** (via GIS's `renderButton`, not a custom-styled button) so it stays visually consistent with Google's own branding requirements; theme (`filled_black` dark / `outline` light) and locale are kept in sync with the app's own theme/language state, re-rendered on change.
+
+### 11.21 Hero background slideshow
+
+See [components/marketing/HeroSection.vue](../../frontend/app/components/marketing/HeroSection.vue) + `slideshow()` in [composables/useHeroMotion.ts](../../frontend/app/composables/useHeroMotion.ts).
+
+- **Images** live in `public/marketing/hero/` as `<subject>.webp` — 16:9, up to 1920 wide (never upscaled), each kept under ~250 KB. Currently five (`bungalow`, `terrace`, `condo`, `semid`, `apartment`); add more by packing the photo (`scripts/hero/pack.py`) and appending its name to `slides`. Blue-hour / dusk exposure with warm window light, subject centred with breathing room on both sides so `object-cover object-center` crops cleanly on portrait phones. No people, text or signage. The component's `slides` array is the playback order.
+- **First slide is SSR-visible and eager** (`loading="eager" fetchpriority="high"`), the rest render `opacity-0 invisible` with `loading="lazy" fetchpriority="low"` so first paint always has an image and LCP isn't split across five downloads. Always set `width`/`height` on the `<img>`s so there's no layout shift.
+- **Crossfade, not carousel.** Every 6 s the next slide fades in *on top* (z-index bump) over 1.4 s while the outgoing slide stays opaque underneath, then the outgoing one is hidden. Fading both at once dips to the page background mid-transition — don't. Each visible slide drifts Ken-Burns style (scale 1.04 → 1.12, ±1.2 % x) for its whole on-screen life, alternating direction per slide.
+- **Reduced motion** → static first slide, no timer. **Hidden tab** → the timer pauses and resumes on return. Cleanup kills tweens and the listener on unmount.
+- **The stack wrapper is `isolate`.** `slideshow()` sets `z-index` 0 / 1 / 2 on the slides and the gradient is `z-[3]`; without `isolation: isolate` on the wrapper those values escape to the page stacking context and paint over the headline (which is plain `relative`). Keep the hero copy free of z-index hacks — scope the stack instead.
+- **Overlay stays.** Keep the `#1c1a17` top/bottom gradient (≈0.76 at 35 %, ≈0.64 at 65 %) above the stack (`z-[3]`) so the headline keeps AA contrast over any photo — the photos are a glimpse, not the subject. If a photo still reads too bright under it, darken the photo, not the copy.
+- Same behaviour on mobile and desktop — no responsive switch; the crop and the overlay do the work.
+
+**Floating buttons own a corner each** — bottom-left: the UAT `EnvBanner`; bottom-right: the owner/tenant **Help & feedback** button (`SupportWidget`: a 48px circle at rest — no gap until the label shows — and the label slides out on hover/focus from `md:`) or, in demo, the Google Form `FloatingFeedback` (never both — `showSupportWidget` is `!isDemo`). Don't add a third floating control in either corner.
+
+### 11.22a Coming-soon hero CTAs on mobile
+
+Below `sm` the two hero buttons stack full width with **"Explore demo" first** — on a phone the demo is the strongest next step, and "Get notified" only scrolls down to the waitlist form. The demo link comes first in the DOM, so tab order matches what's on screen; `sm:order-1` / `sm:order-2` put "Get notified" back on the left from `sm:` up. The "Try me" badge stays pinned to the demo button.
+
+### 11.22 Legal documents and footers
+
+**Legal pages** (`/legal/*`, `layouts/legal.vue` + `components/legal/LegalDocument.vue`) read as calm editorial pages:
+
+- Theme-following cream/charcoal page (not the always-dark marketing layout), wordmark + theme toggle + language switcher in a bordered header, full footer.
+- Narrow reading column (`max-w-[680px]`), `text-body leading-relaxed text-ink-body`, `h2` at `text-card-title font-semibold`, sections `scroll-mt-6`. Title is 30px under `sm`, `text-display-sub` from `sm:` (negative tracking only at ≥36px).
+- Meta line under the title — effective date · version · "Baca dalam Bahasa Malaysia" / "Read in English" toggle — in `tabular-nums`. A `null` effective date simply drops out.
+- Section list: sticky aside at `lg:`, bordered two-column list `sm:`–`lg:`, `<Select>` dropdown under `sm` (§ 11.1 pattern) that jumps straight to the section — no smooth scroll, no GSAP, no motion on these pages.
+- Every document ends with "Who operates Roofly" (`LegalContactDetails`) and links to the other documents.
+- Copy lives in `content/legal/<slug>.<locale>.ts` (typed blocks: `p`, `ul`, `contact`, `plans`; inline `[label](href)` links only). Contact details never go in the copy — use a `contact` block so null config values drop out. `TODO(legal)` goes in source comments only; `registry.test.ts` fails on "TODO" in rendered strings.
+
+**Footers** — one component, `components/layout/SiteFooter.vue`, links decided by `utils/legal.ts footerLinks()`:
+
+| Variant | Where | Links |
+|---|---|---|
+| `full` | marketing, coming-soon, legal pages | Row 1, above the footer line: the legal links (Privacy · Terms · Billing · Acceptable use). Then the edge-to-edge divider, then row 2: © Roofly.my · "A great product of Axel Nova Ventures" (`legal.footerProductOf`) on the left; on the right the Qie credit, a thin divider, then the operator contact as 16px icon links — `MapPin` (Google Maps search), `Mail` (mailto), `Phone` (tel) — each with the value as `aria-label` + `title`. One line per row from `md:`, stacked and centred below. Values from `config/legal.ts`, nulls dropped; the SSM number and full contact details live in the legal pages' operator block ("Roofly is a product of…", `legal.operator.productOf`), not the footer. On UAT row 2 is indented `md:pl-16` so the fixed bottom-left `EnvBanner` toggle never covers the © — no extra height. |
+| `slim` | auth, onboarding, suspended | © Roofly.my on the left, Privacy · Terms (· Beta terms) · **Contact us** at the right edge from `md:`. "Contact us" opens `components/legal/ContactUsModal.vue` (email · call · WhatsApp rows from `utils/legal.ts contactOptions()`, WhatsApp prefilled with `legal.contactUs.whatsappText`; hidden when no contact details are set); below `md` the links stack on top and © underneath (`flex-col-reverse`), centred. Indented `md:pl-16` on UAT so the `EnvBanner` toggle never covers the ©. |
+| `shell` | owner + tenant layouts | © · Privacy · Terms · Help and support. Document links point at the **in-app copies** (`legal-base="/owner/legal"` / `"/tenant/legal"`, `pages/{owner,tenant}/legal/[doc].vue` → `LegalDocument` with `base-path` + `embedded`), so reading a document never drops out of the app; links between documents stay in-app via `scopeLegalHref()`. |
+| `admin` | admin layout + admin sign-in | © · Privacy · Terms, admin accent, never Beta |
+
+Beta terms joins every non-admin variant when `useEnv().showBetaTerms` (UAT). Links are a `flex-wrap gap-x-4 gap-y-1.5` list with **no `·` separators**, so the longer BM labels wrap cleanly on mobile. `tone="dark"`/`"light"` keep the brand-orange palette for charcoal panes; `tone="theme"` uses tokens so it follows dark mode. In the owner/tenant shells the footer gets `pb-20 md:pb-4` while the floating help button is shown, so the button never covers the links.
+
+### 11.23 Public header: one wordmark position
+
+Every public surface — coming-soon (`layouts/marketing.vue`), auth (both panes), legal, onboarding, admin sign-in — renders `components/layout/SiteHeader.vue`, so the wordmark never drifts between pages: `px-6` → `lg:px-12` from the left, `py-5` from the top, in an `h-9` row (the height of `LangSwitcher` / `ThemeToggle`, so rows with and without controls line up). 22px icon, `text-card-title font-semibold tracking-tight`. The wordmark links to `useEnv().publicHomePath` (`/coming-soon`, or `/demo` on the demo build) — never `/`, which sends a signed-in visitor to their dashboard; admin sign-in passes `to="/admin/login"`. Controls go in the default slot (right side); `icon-color` pins the icon colour on charcoal panes, `wordmark-class="md:hidden"` hides it on the auth form pane where the charcoal pane already shows it, `:icon` swaps in `ShieldCheck` for admin. **Don't hand-roll a header in a public layout — extend SiteHeader.** The auth charcoal pane has no outer padding for this reason: its header sits flush like the others and only the reel + stats below keep `px-10 lg:px-14`. App shells (owner / tenant / admin) keep their sidebar wordmark.
 
 ## 12. Hard rules — do not break
 

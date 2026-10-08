@@ -21,6 +21,7 @@ const initialValues = {
   name: props.property.name,
   internalLabel: props.property.internalLabel ?? "",
   type: props.property.type,
+  purpose: props.property.purpose,
   notes: props.property.notes ?? "",
   address: props.property.address,
   city: props.property.city,
@@ -35,14 +36,16 @@ const initialValues = {
   furnishing: props.property.furnishing,
 };
 
-const { defineField, handleSubmit, errors } = useForm({
+const { defineField, handleSubmit, errors, setErrors } = useForm({
   validationSchema: toTypedSchema(propertyDetailsFormSchema),
   initialValues,
 });
+const { toFieldErrors } = useApiError();
 
 const [name] = defineField("name");
 const [internalLabel] = defineField("internalLabel");
 const [type] = defineField("type");
+const [purpose] = defineField("purpose");
 const [notes] = defineField("notes");
 const [address] = defineField("address");
 const [city] = defineField("city");
@@ -61,6 +64,12 @@ const typeOptions = computed(() => [
   { value: "landed", label: t("owner.properties.types.landed") },
   { value: "shoplot", label: t("owner.properties.types.shoplot") },
   { value: "room", label: t("owner.properties.types.room") },
+]);
+
+const purposeOptions = computed(() => [
+  { value: "rental", label: t("owner.purposes.rental.title") },
+  { value: "own_stay", label: t("owner.purposes.own_stay.title") },
+  { value: "investment", label: t("owner.purposes.investment.title") },
 ]);
 
 const stateOptions = MY_STATES.map((s) => ({ value: s, label: s }));
@@ -91,6 +100,7 @@ const onSubmit = handleSubmit(async (values) => {
       name: values.name,
       internalLabel: values.internalLabel || undefined,
       type: values.type,
+      purpose: values.purpose,
       notes: values.notes || undefined,
       address: values.address,
       city: values.city,
@@ -106,6 +116,13 @@ const onSubmit = handleSubmit(async (values) => {
     });
     show(t("common.savedToast"), "success");
     emit("saved", updated);
+  } catch (err) {
+    const fieldErrors = toFieldErrors(err);
+    if (fieldErrors) {
+      setErrors(fieldErrors);
+      return;
+    }
+    show(t("common.genericError"), "danger");
   } finally {
     submitting.value = false;
   }
@@ -139,6 +156,12 @@ const sectionHeading =
           :options="typeOptions"
           :label="t('owner.properties.addModal.fields.type')"
           :error="errors.type"
+        />
+        <Select
+          v-model="purpose"
+          :options="purposeOptions"
+          :label="t('owner.properties.addModal.fields.purpose')"
+          :error="errors.purpose"
         />
       </div>
       <label class="block">

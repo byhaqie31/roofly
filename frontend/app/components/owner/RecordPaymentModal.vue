@@ -39,10 +39,11 @@ const buildInitialValues = () => {
   };
 };
 
-const { defineField, handleSubmit, errors, resetForm } = useForm({
+const { defineField, handleSubmit, errors, resetForm, setErrors } = useForm({
   validationSchema: toTypedSchema(recordPaymentFormSchema),
   initialValues: buildInitialValues(),
 });
+const { toFieldErrors } = useApiError();
 
 const [amount] = defineField("amount");
 const [method] = defineField("method");
@@ -70,6 +71,13 @@ const onSubmit = handleSubmit(async (values) => {
     show(t("owner.payments.recordedToast"), "success");
     emit("recorded", props.row.invoice.id);
     emit("update:open", false);
+  } catch (err) {
+    const fieldErrors = toFieldErrors(err);
+    if (fieldErrors) {
+      setErrors(fieldErrors);
+      return;
+    }
+    show(t("common.genericError"), "danger");
   } finally {
     submitting.value = false;
   }

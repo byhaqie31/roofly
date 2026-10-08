@@ -14,6 +14,8 @@ import TenantIdentityForm from "~/components/owner/TenantIdentityForm.vue";
 import TenantPersonalForm from "~/components/owner/TenantPersonalForm.vue";
 import TenantEmergencyContactForm from "~/components/owner/TenantEmergencyContactForm.vue";
 import { useToast } from "~/composables/useToast";
+import { copyToClipboard } from "~/utils/clipboard";
+import { whatsappShareUrl } from "~/utils/whatsapp";
 import type { Tenant, TenantStatus } from "~/types/tenant";
 
 definePageMeta({ layout: "owner" });
@@ -38,7 +40,7 @@ const tabOptions = computed(() => [
 
 onMounted(async () => {
   try {
-    tenant.value = await useTenants().get(route.params.id as string);
+    tenant.value = await useTenants().getTenant(route.params.id as string);
   } finally {
     loading.value = false;
   }
@@ -50,6 +52,36 @@ useHead({
 
 const onSaved = (updated: Tenant) => {
   tenant.value = updated;
+};
+
+// Backup for a lost invite email (spec 2026-10-07 § 4.3): mint a fresh link
+// (earlier ones stop working — only a hash is stored, so it can't be re-read),
+// then copy it or hand it to WhatsApp. Only offered while status is `invited`.
+const linking = ref(false);
+const freshInviteLink = async (): Promise<string | null> => {
+  if (!tenant.value) return null;
+  linking.value = true;
+  try {
+    return (await useTenants().createInviteLink(tenant.value.id)).inviteUrl;
+  } catch {
+    show(t("common.genericError"), "danger");
+    return null;
+  } finally {
+    linking.value = false;
+  }
+};
+const copyInviteLink = async () => {
+  const url = await freshInviteLink();
+  if (!url) return;
+  const ok = await copyToClipboard(url);
+  show(t(ok ? "owner.tenants.newLinkCopied" : "owner.tenants.copyFailed"), ok ? "success" : "danger");
+};
+const shareInviteOnWhatsApp = async () => {
+  const url = await freshInviteLink();
+  if (!url || !tenant.value) return;
+  const href = whatsappShareUrl(tenant.value.phone, t("owner.tenants.whatsappMessage", { name: tenant.value.name, url }));
+  window.open(href, "_blank", "noopener,noreferrer");
+  show(t("owner.tenants.newLinkShared"), "default");
 };
 
 const confirmDelete = async () => {
@@ -128,6 +160,16 @@ const tabTriggerClass =
           <p class="mt-2 text-caption text-ink-muted">
             {{ tenant.email }} · {{ tenant.phone }}
           </p>
+          <div v-if="tenant.status === 'invited'" class="mt-3 flex flex-wrap gap-2">
+            <Button variant="cream" size="sm" :loading="linking" @click="copyInviteLink">
+              <Icon name="Copy" :size="14" class="mr-1" />
+              {{ t("owner.tenants.newInviteLink") }}
+            </Button>
+            <Button variant="ghost" size="sm" :disabled="linking" @click="shareInviteOnWhatsApp">
+              <Icon name="MessageCircle" :size="14" class="mr-1" />
+              {{ t("owner.tenants.shareWhatsApp") }}
+            </Button>
+          </div>
         </div>
         <!-- Desktop: delete sits next to the title's supporting line -->
         <Button

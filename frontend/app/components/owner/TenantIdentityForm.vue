@@ -23,10 +23,11 @@ const initialValues = {
   status: props.tenant.status,
 };
 
-const { defineField, handleSubmit, errors } = useForm({
+const { defineField, handleSubmit, errors, setErrors } = useForm({
   validationSchema: toTypedSchema(tenantIdentitySchema),
   initialValues,
 });
+const { toFieldErrors } = useApiError();
 
 const [name] = defineField("name");
 const [email] = defineField("email");
@@ -46,6 +47,13 @@ const onSubmit = handleSubmit(async (values) => {
     const updated = await useTenants().update(props.tenant.id, values);
     show(t("common.savedToast"), "success");
     emit("saved", updated);
+  } catch (err) {
+    const fieldErrors = toFieldErrors(err);
+    if (fieldErrors) {
+      setErrors(fieldErrors);
+      return;
+    }
+    show(t("common.genericError"), "danger");
   } finally {
     submitting.value = false;
   }

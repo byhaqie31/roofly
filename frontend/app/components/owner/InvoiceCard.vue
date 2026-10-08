@@ -5,6 +5,7 @@ import type { InvoiceWithRefs } from "~/services/useInvoices";
 import Pill from "~/components/ui/Pill.vue";
 import Icon from "~/components/ui/Icon.vue";
 import Button from "~/components/ui/Button.vue";
+import { pendingClaim } from "~/utils/paymentClaim";
 
 const props = defineProps<{ row: InvoiceWithRefs }>();
 
@@ -22,6 +23,9 @@ const statusToneMap = {
   overdue: "overdue",
   cancelled: "cancelled",
 } as const satisfies Record<InvoiceStatus, string>;
+
+// A tenant's "I've paid" awaiting the owner — derived, never a stored status.
+const awaiting = computed(() => pendingClaim(props.row.payments) !== null);
 
 const total = computed(
   () => props.row.invoice.amount + props.row.invoice.lateFee,
@@ -81,7 +85,8 @@ const onRecord = (e: Event) => {
     @keydown="onCardKeydown"
   >
     <div class="flex items-start justify-between gap-3">
-      <Pill :tone="statusToneMap[row.invoice.status]">
+      <Pill v-if="awaiting" tone="pending">{{ t("owner.payments.status.awaiting") }}</Pill>
+      <Pill v-else :tone="statusToneMap[row.invoice.status]">
         {{ t(`owner.payments.status.${row.invoice.status}`) }}
       </Pill>
       <div class="text-right">
@@ -137,7 +142,15 @@ const onRecord = (e: Event) => {
       </span>
       <span v-else />
       <Button
-        v-if="isUnpaid"
+        v-if="isUnpaid && awaiting"
+        variant="primary"
+        size="sm"
+        @click.stop="onCardClick"
+      >
+        {{ t("owner.payments.reviewCta") }}
+      </Button>
+      <Button
+        v-else-if="isUnpaid"
         variant="primary"
         size="sm"
         @click="onRecord"

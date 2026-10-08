@@ -2,6 +2,7 @@ import { z } from "zod";
 import { MY_STATES, type MalaysianState } from "~/types/property";
 
 const propertyTypeSchema = z.enum(["condo", "landed", "shoplot", "room"]);
+const propertyPurposeSchema = z.enum(["rental", "own_stay", "investment"]);
 const furnishingSchema = z.enum(["unfurnished", "partial", "fully"]);
 const titleTypeSchema = z.enum(["freehold", "leasehold"]);
 const valuationSourceSchema = z.enum(["bank", "agent", "self"]);
@@ -21,6 +22,7 @@ export const propertyInputSchema = z.object({
   state: z.enum([...MY_STATES] as [MalaysianState, ...MalaysianState[]]),
   postcode: z.string().regex(/^\d{5}$/, "Postcode must be 5 digits"),
   type: propertyTypeSchema,
+  purpose: propertyPurposeSchema,
 });
 
 // Details tab — combined Identity + Location + Specifications
@@ -29,6 +31,7 @@ export const propertyDetailsFormSchema = z.object({
   name: z.string().min(2).max(80),
   internalLabel: z.string().max(40).optional(),
   type: propertyTypeSchema,
+  purpose: propertyPurposeSchema,
   notes: z.string().max(2000).optional(),
   // Location
   address: z.string().min(5).max(200),

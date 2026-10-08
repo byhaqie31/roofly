@@ -5,6 +5,8 @@ const auth = useAuthStore();
 
 if (!auth.isAuthenticated) {
   await navigateTo("/auth/login");
+} else if (auth.isAdmin) {
+  await navigateTo("/admin");
 } else if (auth.isOwner) {
   await navigateTo("/owner");
 } else if (auth.isTenant) {

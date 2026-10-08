@@ -1,13 +1,46 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import type { AgreementWithRefs } from "~/services/useAgreements";
+import type { Agreement } from "~/types/agreement";
+import { bankLabel } from "~/config/banks";
+import { maskAccountNumber } from "~/utils/paymentClaim";
+import { useToast } from "~/composables/useToast";
 import Pill from "~/components/ui/Pill.vue";
 import Icon from "~/components/ui/Icon.vue";
+import Button from "~/components/ui/Button.vue";
+import AgreementPayoutSelect from "~/components/owner/AgreementPayoutSelect.vue";
 
 const props = defineProps<{ row: AgreementWithRefs }>();
+const emit = defineEmits<{ updated: [agreement: Agreement] }>();
 
 const { t } = useI18n();
 const { formatRM } = useMoney();
+const { show } = useToast();
+
+// Payout account (spec 2026-10-08 § 3.2) — not a term, so it's changed here,
+// at any status, without sending a sent/accepted agreement back to draft.
+const editingPayout = ref(false);
+const payoutDraft = ref<string | null>(null);
+const savingPayout = ref(false);
+
+const startPayoutEdit = () => {
+  payoutDraft.value = props.row.agreement.payoutAccountId ?? null;
+  editingPayout.value = true;
+};
+
+const savePayout = async () => {
+  savingPayout.value = true;
+  try {
+    const updated = await useAgreements().update(props.row.agreement.id, { payoutAccountId: payoutDraft.value });
+    show(t("common.savedToast"), "success");
+    editingPayout.value = false;
+    emit("updated", updated);
+  } catch {
+    show(t("common.genericError"), "danger");
+  } finally {
+    savingPayout.value = false;
+  }
+};
 
 const formatDate = (iso: string) => {
   if (!iso) return "—";
@@ -16,6 +49,25 @@ const formatDate = (iso: string) => {
 };
 
 const today = new Date();
+
+const formatStamp = (iso: string | null | undefined) => (iso ? formatDate(iso.slice(0, 10)) : "");
+
+/** Banner copy for the review flow; null for statuses with nothing to say (active/expired/terminated). */
+const review = computed(() => {
+  const a = props.row.agreement;
+  switch (a.status) {
+    case "pending_review":
+      return { tone: "warn", icon: "Send" as const, text: t("owner.agreements.review.sentOn", { date: formatStamp(a.sentAt) }), note: null };
+    case "accepted":
+      return { tone: "good", icon: "CircleCheck" as const, text: t("owner.agreements.review.acceptedOn", { date: formatStamp(a.acceptedAt) }), note: null };
+    case "draft":
+      return a.reviewNote
+        ? { tone: "warn", icon: "MessageSquare" as const, text: t("owner.agreements.review.changesRequestedOn", { date: formatStamp(a.changesRequestedAt) }), note: a.reviewNote }
+        : { tone: "muted", icon: "EyeOff" as const, text: t("owner.agreements.review.draftHint"), note: null };
+    default:
+      return null;
+  }
+});
 today.setHours(0, 0, 0, 0);
 const startMs = computed(() => new Date(props.row.agreement.startDate).getTime());
 const endMs = computed(() => new Date(props.row.agreement.endDate).getTime());
@@ -87,6 +139,27 @@ const tilesPillToneClass = (tone: TermStatus["tone"]) => {
     <p class="text-caption text-ink-muted">
       {{ t("owner.agreements.detail.overviewHelp") }}
     </p>
+
+    <!-- Review state (spec 2026-10-07 agreement-review): where the tenant's answer stands -->
+    <div
+      v-if="review"
+      class="flex items-start gap-3 rounded-md border px-4 py-3"
+      :class="review.tone === 'warn'
+        ? 'border-status-pending bg-status-pending-soft'
+        : review.tone === 'good'
+          ? 'border-status-paid bg-status-paid-soft'
+          : 'border-line-passive bg-surface-page'"
+      role="status"
+    >
+      <Icon :name="review.icon" :size="16" class="mt-0.5 shrink-0" />
+      <div class="min-w-0">
+        <p class="text-body font-medium text-ink">{{ review.text }}</p>
+        <p v-if="review.note" class="mt-1 text-caption text-ink-muted">
+          <span class="font-medium text-ink">{{ t("owner.agreements.review.noteLabel") }}:</span>
+          “{{ review.note }}”
+        </p>
+      </div>
+    </div>
 
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
       <div class="rounded-md border border-line-passive bg-surface-page p-4">
@@ -213,6 +286,49 @@ const tilesPillToneClass = (tone: TermStatus["tone"]) => {
           <div class="mt-1 text-body font-medium text-ink tabular-nums">
             {{ formatDate(row.agreement.endDate) }}
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="space-y-3">
+      <h3 class="text-caption font-semibold uppercase tracking-wide text-ink-muted">
+        {{ t("owner.agreements.payout.title") }}
+      </h3>
+      <div class="rounded-md border border-line-passive bg-surface-page p-4">
+        <div v-if="editingPayout" class="space-y-3">
+          <div class="sm:max-w-md">
+            <AgreementPayoutSelect v-model="payoutDraft" />
+          </div>
+          <div class="flex gap-2">
+            <Button variant="primary" size="sm" :loading="savingPayout" @click="savePayout">
+              {{ t("common.save") }}
+            </Button>
+            <Button variant="ghost" size="sm" :disabled="savingPayout" @click="editingPayout = false">
+              {{ t("common.cancel") }}
+            </Button>
+          </div>
+        </div>
+        <div v-else class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div v-if="row.payoutAccount" class="min-w-0">
+            <div class="text-body font-medium text-ink">
+              {{ row.payoutAccount.label }}
+              <span v-if="!row.agreement.payoutAccountId" class="text-caption font-normal text-ink-muted">
+                · {{ t("owner.agreements.payout.defaultHint") }}
+              </span>
+            </div>
+            <div class="mt-0.5 text-caption text-ink-muted tabular-nums">
+              {{ [bankLabel(row.payoutAccount.bank), maskAccountNumber(row.payoutAccount.accountNumber)].filter(Boolean).join(" · ") }}
+            </div>
+          </div>
+          <p v-else class="text-caption text-ink-muted">
+            {{ t("owner.agreements.payout.none") }}
+            <NuxtLink to="/owner/settings?tab=payouts" class="text-ink underline underline-offset-2">
+              {{ t("owner.agreements.payout.addLink") }}
+            </NuxtLink>
+          </p>
+          <Button v-if="row.payoutAccount" variant="ghost" size="sm" class="self-start" @click="startPayoutEdit">
+            {{ t("owner.agreements.payout.change") }}
+          </Button>
         </div>
       </div>
     </section>

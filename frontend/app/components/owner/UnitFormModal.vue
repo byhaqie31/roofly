@@ -42,10 +42,11 @@ const buildInitialValues = (): UnitInput => ({
   status: props.unit?.status ?? "vacant",
 });
 
-const { defineField, handleSubmit, errors, resetForm } = useForm<UnitInput>({
+const { defineField, handleSubmit, errors, resetForm, setErrors } = useForm<UnitInput>({
   validationSchema: toTypedSchema(unitInputSchema),
   initialValues: buildInitialValues(),
 });
+const { toFieldErrors } = useApiError();
 
 const [label] = defineField("label");
 const [bedrooms] = defineField("bedrooms");
@@ -85,6 +86,13 @@ const onSubmit = handleSubmit(async (values) => {
       emit("saved", created);
     }
     emit("update:open", false);
+  } catch (err) {
+    const fieldErrors = toFieldErrors(err);
+    if (fieldErrors) {
+      setErrors(fieldErrors);
+      return;
+    }
+    show(t("common.genericError"), "danger");
   } finally {
     submitting.value = false;
   }

@@ -3,6 +3,14 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
 
+  // Admin is client-rendered. The session is restored by a client-only plugin, so an SSR
+  // pass has no user and every admin page would server-render <NoAccess>'s Card — Vue then
+  // hydrates the real page *into* that Card's <div> (same tag, mismatched classes), leaving
+  // the whole page wrapped in a stray raised panel. There is no anonymous SSR value here.
+  routeRules: {
+    "/admin/**": { ssr: false },
+  },
+
   modules: [
     "@nuxtjs/tailwindcss",
     "@pinia/nuxt",
@@ -51,6 +59,7 @@ export default defineNuxtConfig({
 
   i18n: {
     strategy: "no_prefix",
+    vueI18n: "i18n.config.ts",
     defaultLocale: "en",
     locales: [
       { code: "en", name: "English", file: "en.json" },
@@ -85,6 +94,15 @@ export default defineNuxtConfig({
         // owners see during demos that file uploads are on the way. Set
         // NUXT_PUBLIC_FEATURE_DOCUMENTS=false to hide the placeholder if needed.
         documents: process.env.NUXT_PUBLIC_FEATURE_DOCUMENTS !== "false",
+        // Admin back office (spec 2026-08-23). Default on for uat/prod; useEnv()
+        // forces it off in demo regardless of this value.
+        admin: process.env.NUXT_PUBLIC_FEATURE_ADMIN !== "false",
+        // Online rent payments (FPX / card through a gateway, spec 2026-10-08).
+        // Off by default everywhere — tenants pay by manual DuitNow transfer and
+        // the gateway option shows as "Coming soon". Flip with
+        // NUXT_PUBLIC_FEATURE_ONLINE_PAYMENTS=true together with the backend's
+        // ONLINE_PAYMENTS once the gateway lands.
+        onlinePayments: process.env.NUXT_PUBLIC_FEATURE_ONLINE_PAYMENTS === "true",
       },
       // App environment identifier — drives all UI feature flags via useEnv().
       // Values: "demo" | "uat" | "production". Defaults to production when unset.
@@ -92,10 +110,14 @@ export default defineNuxtConfig({
       // Demo subdomain's floating feedback widget opens this URL in a new tab.
       // Set per-env in docker-compose; empty string hides the widget.
       demoFeedbackUrl: process.env.NUXT_PUBLIC_DEMO_FEEDBACK_URL ?? "",
-      // Web3Forms access key for the coming-soon waitlist email capture.
-      // Empty = falls back to mock submit (console log only). Get a key at
-      // https://web3forms.com — free tier covers 250 submissions/month.
-      waitlistAccessKey: process.env.NUXT_PUBLIC_WAITLIST_ACCESS_KEY ?? "",
+      // Marketing/analytics tracking (spec 2026-08-23). Default on for
+      // uat/prod; useEnv() forces it off in demo (useMock) regardless.
+      tracking: process.env.NUXT_PUBLIC_TRACKING !== "false",
+      // Canonical origin for absolute URLs in social meta (og:image must be
+      // absolute). Override per env: https://uat.roofly.my, https://demo.roofly.my.
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL ?? "https://roofly.my",
+      // Google sign-in (owners only, spec 2026-08-23). Empty ⇒ button hidden.
+      googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID ?? "",
     },
   },
 

@@ -8,38 +8,27 @@ import TicketCard from "~/components/owner/TicketCard.vue";
 import TicketCreateModal from "~/components/owner/TicketCreateModal.vue";
 import type { Ticket, TicketStatus } from "~/types/ticket";
 import type { TicketWithRefs } from "~/services/useTickets";
-import type { Unit } from "~/types/unit";
-import type { Property } from "~/types/property";
-import type { Tenant } from "~/types/tenant";
 
 definePageMeta({ layout: "owner" });
 
 const { t } = useI18n();
 useHead({ title: () => t("owner.nav.maintenance") });
 
+// The expanded ticket list carries unit/property/reporter refs, so it feeds
+// the whole board on its own — no separate units/properties/tenants fetches.
+// The create modal lazy-loads its own dropdown data when it opens.
 const rows = ref<TicketWithRefs[]>([]);
-const units = ref<Unit[]>([]);
-const properties = ref<Property[]>([]);
-const tenants = ref<Tenant[]>([]);
 const loading = ref(true);
 const showCreate = ref(false);
 
 const load = async () => {
   loading.value = true;
   try {
-    const [withRefs, us, props, ts] = await Promise.all([
-      useTickets().listWithRefs(),
-      useUnits().list(),
-      useProperties().list(),
-      useTenants().list(),
-    ]);
+    const withRefs = await useTickets().getTicketsWithRefs();
     // Newest activity first within each column.
     rows.value = withRefs.sort((a, b) =>
       b.ticket.updatedAt.localeCompare(a.ticket.updatedAt),
     );
-    units.value = us;
-    properties.value = props;
-    tenants.value = ts;
   } finally {
     loading.value = false;
   }
@@ -144,12 +133,6 @@ const onCreated = (ticket: Ticket) => {
       </section>
     </div>
 
-    <TicketCreateModal
-      v-model:open="showCreate"
-      :units="units"
-      :properties="properties"
-      :tenants="tenants"
-      @created="onCreated"
-    />
+    <TicketCreateModal v-model:open="showCreate" @created="onCreated" />
   </div>
 </template>

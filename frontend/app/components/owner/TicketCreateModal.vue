@@ -15,10 +15,28 @@ import Button from "~/components/ui/Button.vue";
 
 const props = defineProps<{
   open: boolean;
-  units: Unit[];
-  properties: Property[];
-  tenants: Tenant[];
 }>();
+
+// Dropdown data is fetched lazily when the modal opens — the maintenance
+// board itself doesn't need units/properties/tenants, so we don't make it
+// pay for them on page load.
+const units = ref<Unit[]>([]);
+const properties = ref<Property[]>([]);
+const tenants = ref<Tenant[]>([]);
+const optionsLoaded = ref(false);
+
+const loadOptions = async () => {
+  if (optionsLoaded.value) return;
+  const [us, props_, ts] = await Promise.all([
+    useUnits().getUnits(),
+    useProperties().getProperties(),
+    useTenants().getTenants(),
+  ]);
+  units.value = us;
+  properties.value = props_;
+  tenants.value = ts;
+  optionsLoaded.value = true;
+};
 
 const emit = defineEmits<{
   "update:open": [value: boolean];
@@ -39,11 +57,12 @@ const initialValues: TicketInput = {
   description: "",
 };
 
-const { defineField, handleSubmit, errors, resetForm, setFieldValue } =
+const { defineField, handleSubmit, errors, resetForm, setFieldValue, setErrors } =
   useForm<TicketInput>({
     validationSchema: toTypedSchema(ticketCreateFormSchema),
     initialValues,
   });
+const { toFieldErrors } = useApiError();
 
 const [unitId] = defineField("unitId");
 const [reporterId] = defineField("reporterId");
@@ -53,8 +72,8 @@ const [title] = defineField("title");
 const [description] = defineField("description");
 
 const unitOptions = computed(() =>
-  props.units.map((u) => {
-    const property = props.properties.find((p) => p.id === u.propertyId);
+  units.value.map((u) => {
+    const property = properties.value.find((p) => p.id === u.propertyId);
     return {
       value: u.id,
       label: property ? `${property.name} · ${u.label}` : u.label,
@@ -66,7 +85,7 @@ const unitOptions = computed(() =>
 // per-unit auto-derivation; demo flexibility wins over realism.
 const reporterOptions = computed(() => [
   { value: "owner-1", label: t("owner.tickets.create.reporterOwner") },
-  ...props.tenants.map((tn) => ({
+  ...tenants.value.map((tn) => ({
     value: tn.id,
     label: tn.name,
   })),
@@ -100,6 +119,13 @@ const onSubmit = handleSubmit(async (values) => {
     emit("created", created);
     emit("update:open", false);
     show(t("owner.tickets.create.createdToast"), "success");
+  } catch (err) {
+    const fieldErrors = toFieldErrors(err);
+    if (fieldErrors) {
+      setErrors(fieldErrors);
+      return;
+    }
+    show(t("common.genericError"), "danger");
   } finally {
     submitting.value = false;
   }
@@ -108,7 +134,11 @@ const onSubmit = handleSubmit(async (values) => {
 watch(
   () => props.open,
   (isOpen) => {
-    if (!isOpen) resetForm({ values: initialValues });
+    if (isOpen) {
+      loadOptions();
+    } else {
+      resetForm({ values: initialValues });
+    }
   },
 );
 </script>

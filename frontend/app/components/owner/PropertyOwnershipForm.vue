@@ -63,10 +63,11 @@ const initialValues = {
   coOwners: props.property.coOwners.map((co) => ({ ...co })),
 };
 
-const { defineField, handleSubmit, errors, values } = useForm({
+const { defineField, handleSubmit, errors, values, setErrors } = useForm({
   validationSchema: toTypedSchema(propertyOwnershipFormSchema),
   initialValues,
 });
+const { toFieldErrors } = useApiError();
 
 const [titleType] = defineField("titleType");
 const [titleNumber] = defineField("titleNumber");
@@ -201,6 +202,13 @@ const onSubmit = handleSubmit(async (vals) => {
     });
     show(t("common.savedToast"), "success");
     emit("saved", updated);
+  } catch (err) {
+    const fieldErrors = toFieldErrors(err);
+    if (fieldErrors) {
+      setErrors(fieldErrors);
+      return;
+    }
+    show(t("common.genericError"), "danger");
   } finally {
     submitting.value = false;
   }

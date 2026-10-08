@@ -1,6 +1,8 @@
 {
   "common": {
     "appName": "Roofly.my",
+    "envBannerLabel": "Beta preview",
+    "envBanner": "You’re trying an early version of Roofly. Data may be reset during testing.",
     "tagline": "Rent management, simplified.",
     "marketing": {
       "headlineLead": "Rent management,",
@@ -15,6 +17,7 @@
     "close": "Close",
     "delete": "Delete",
     "savedToast": "Saved",
+    "genericError": "Something went wrong. Please try again.",
     "months": {
       "jan": "January",
       "feb": "February",
@@ -47,6 +50,10 @@
     "register": "Sign up",
     "email": "Email address",
     "password": "Password",
+    "confirmPassword": "Retype password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "passwordMismatch": "Passwords do not match.",
     "forgotPassword": "Forgot your password?",
     "noAccount": "Don't have an account?",
     "haveAccount": "Already have an account?",
@@ -56,7 +63,66 @@
     "loginTitle": "Welcome back",
     "loginSubtitle": "Log in to manage your properties.",
     "registerTitle": "Start with Roofly",
-    "registerSubtitle": "Create an owner account to manage your rentals."
+    "registerSubtitle": "Create an owner account to manage your rentals.",
+    "invalidCredentials": "Invalid email or password.",
+    "placeholders": {
+      "fullName": "e.g. Aminah Yusof",
+      "email": "e.g. aminah{'@'}gmail.com",
+      "phone": "e.g. +60 12 345 6789",
+      "newPassword": "At least 8 characters",
+      "confirmPassword": "Type the same password again"
+    },
+    "google": {
+      "or": "or",
+      "unavailable": "Google sign-in is unavailable right now — use your email below.",
+      "failed": "Google sign-in failed. Please try again.",
+      "notOwner": "This email is a tenant account. Ask your landlord for your invite link."
+    },
+    "admin": {
+      "title": "Admin portal",
+      "subtitle": "Sign in with your Roofly team account.",
+      "login": "Sign in",
+      "acceptTitle": "Set your password",
+      "acceptSubtitle": "Choose a password to finish setting up your admin account.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "passwordMismatch": "Passwords do not match.",
+      "passwordTooShort": "Use at least 8 characters.",
+      "inviteInvalid": "This invite link is invalid or has expired.",
+      "accept": "Set password and sign in",
+      "notCustomer": "Not a Roofly team member?",
+      "customerLogin": "Go to the customer login"
+    },
+    "forgot": {
+      "title": "Forgot your password?",
+      "subtitle": "Enter your email and we'll send you a reset link.",
+      "submit": "Send reset link",
+      "sentTitle": "Check your inbox",
+      "sentHelp": "If {email} has an account, a reset link is on its way. It expires in 60 minutes.",
+      "backToLogin": "Back to log in"
+    },
+    "reset": {
+      "title": "Set a new password",
+      "subtitle": "Choose a password with at least 8 characters.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "mismatch": "Passwords do not match.",
+      "submit": "Save password and log in",
+      "invalid": "This reset link is invalid or has expired.",
+      "requestNew": "Request a new link"
+    },
+    "acceptInvite": {
+      "title": "Welcome to Roofly",
+      "subtitle": "Set a password to see your rent, pay it and report issues.",
+      "submit": "Set password and continue",
+      "invalid": "This invite link is invalid or has expired. Ask your landlord to resend it, or use forgot password with the same email.",
+      "forgotInstead": "Use forgot password instead"
+    }
+  },
+  "suspended": {
+    "title": "Account suspended",
+    "body": "Your Roofly account has been suspended. Your tenants can still sign in and pay as usual.",
+    "contact": "Contact support to restore access"
   },
   "demo": {
     "shortcuts": {
@@ -64,7 +130,10 @@
       "eyebrow": "For demo purposes only",
       "continueAsOwner": "Continue as owner",
       "continueAsTenant": "Continue as tenant",
-      "comingSoon": "Coming soon"
+      "continueWithGoogle": "Continue with Google (demo)",
+      "comingSoon": "Coming soon",
+      "tryFirst": "Want to try it first?",
+      "exploreDemo": "Explore the demo"
     },
     "tour": {
       "ctaLabel": "Take a tour",
@@ -100,15 +169,41 @@
           "title": "Tell us what you think",
           "description": "Done exploring? Tap here anytime to share feedback — what worked, what didn't, what's missing. It opens a short form in a new tab."
         }
+      },
+      "tenantSteps": {
+        "welcome": {
+          "title": "Welcome to your tenant portal",
+          "description": "A quick tour of everything you can do here — pay rent, track issues, and manage your details. Re-run it anytime from the top right."
+        },
+        "sidebar": {
+          "title": "Everything in one place",
+          "description": "Home, agreement, payments, issues, and your profile — all reachable from this menu."
+        },
+        "mobileMenu": {
+          "title": "Your menu, one tap away",
+          "description": "Tap the menu to reach your agreement, payments, issues, and profile."
+        },
+        "rent": {
+          "title": "Your rent at a glance",
+          "description": "See what's due and pay online in a few taps. Paid invoices turn into receipts you can revisit."
+        },
+        "actions": {
+          "title": "Jump to what you need",
+          "description": "Quick links to view your agreement, see all payments, or report an issue."
+        },
+        "issues": {
+          "title": "Report and track issues",
+          "description": "Raise a maintenance issue and follow the conversation with your landlord right here."
+        }
       }
     },
     "landing": {
       "pageTitle": "Demo · Roofly.my",
       "eyebrow": "Demo environment",
-      "title": "Welcome to the Roofly demo",
+      "title": "Welcome to the Roofly.my",
       "subtitle": "Pick a role to start exploring. All data shown is sample data — nothing you do here is saved.",
       "footerPrefix": "Want the real thing? Visit",
-      "footerSuffix": "when we launch."
+      "footerSuffix": "when we launch and wait for our launch notification email."
     },
     "audience": {
       "owner": {
@@ -170,10 +265,21 @@
     "hero": {
       "eyebrow": "Coming soon",
       "headlineLead": "Property management,",
-      "headlineAccent": "reimagined.",
+      "headlineWords": [
+        "reimagined.",
+        "simplified.",
+        "automated."
+      ],
       "subhead": "The modern home for Malaysian landlords and their tenants. Properties, agreements, payments, maintenance — finally, all in one place.",
       "ctaPrimary": "Get notified",
-      "ctaSecondary": "Explore demo"
+      "ctaSecondary": "Explore demo",
+      "ctaSecondaryBadge": "Try me"
+    },
+    "promo": {
+      "eyebrow": "Sneak peek",
+      "title": "Preview Roofly before it launches.",
+      "unmute": "Unmute video",
+      "mute": "Mute video"
     },
     "usps": {
       "eyebrow": "What's coming",
@@ -187,9 +293,93 @@
       "submit": "Notify me",
       "success": "Thanks! We'll let you know when we go live.",
       "invalid": "Please enter a valid email address.",
-      "submitError": "Couldn't reach the waitlist service. Please try again.",
-      "submitting": "Sending…"
+      "submitError": "Couldn't save your email. Please try again.",
+      "submitting": "Sending…",
+      "privacyNote": "By joining the waitlist you agree to our {link}.",
+      "privacyLink": "privacy notice"
     }
+  },
+  "support": {
+    "button": "Help & feedback",
+    "title": "How can we help?",
+    "description": "Your message goes straight to the Roofly team. We'll reply by email to {email}.",
+    "typeLabel": "What's this about?",
+    "types": {
+      "issue": "Report an issue",
+      "feedback": "Feedback",
+      "question": "Question"
+    },
+    "messageLabel": "Message",
+    "placeholders": {
+      "issue": "What went wrong, and what did you expect to happen?",
+      "feedback": "What do you like, or what would make Roofly better?",
+      "question": "Ask us anything about using Roofly."
+    },
+    "pageNote": "We'll include the page you're on so we can see the problem.",
+    "tooShort": "Please write a little more (at least 5 characters).",
+    "send": "Send message",
+    "sentTitle": "Message sent",
+    "sentBody": "Thanks! The Roofly team will get back to you at {email}."
+  },
+  "legal": {
+    "eyebrow": "Legal",
+    "docs": {
+      "privacy": "Privacy notice",
+      "terms": "Terms of service",
+      "billing": "Billing and refunds",
+      "acceptable-use": "Acceptable use",
+      "beta": "Beta terms"
+    },
+    "links": {
+      "help": "Help and support"
+    },
+    "contactUs": {
+      "link": "Contact us",
+      "title": "Contact us",
+      "description": "Reach the Roofly team the way that suits you.",
+      "email": "Email",
+      "call": "Call",
+      "whatsapp": "WhatsApp",
+      "whatsappText": "Hi Roofly, I have a question."
+    },
+    "footerProductOf": "A great product of {name}",
+    "footerNav": "Legal",
+    "effective": "Effective {date}",
+    "version": "Version {version}",
+    "onThisPage": "On this page",
+    "jumpTo": "Jump to a section",
+    "readIn": "Baca dalam Bahasa Malaysia",
+    "otherDocs": "Other legal documents",
+    "operator": {
+      "heading": "Who operates Roofly",
+      "productOf": "Roofly is a product of {name}",
+      "ssmNumber": "SSM registration no. {value}",
+      "email": "Email",
+      "privacyEmail": "Privacy contact",
+      "phone": "Phone"
+    },
+    "plans": {
+      "plan": "Plan",
+      "units": "Units",
+      "price": "Price per month",
+      "unlimited": "Unlimited"
+    },
+    "support": {
+      "title": "Legal",
+      "description": "The documents that cover how Roofly works and how we handle your data.",
+      "yourDataTitle": "Your data",
+      "yourDataBody": "You can ask for a copy of the personal data we hold about you, or ask us to correct it. Much of it you can also update yourself on your profile or settings page.",
+      "yourDataPrivacyEmail": "Email our privacy contact:",
+      "yourDataWidget": "Or send us a message with Help & feedback and tell us what you need.",
+      "yourDataTenant": "Your landlord manages the details on your tenancy, so you can also ask them."
+    }
+  },
+  "help": {
+    "title": "Help and support",
+    "subtitle": "Get in touch with the Roofly team, and find our legal documents.",
+    "contactTitle": "Contact the Roofly team",
+    "contactBody": "Report a problem, share feedback or ask a question. We reply by email.",
+    "contactCta": "Send a message"
   },
   "validation": {
     "required": "This field is required",
@@ -221,7 +411,8 @@
         "periodAriaActive": "Period filter: {label}. Tap to change.",
         "year": "Year",
         "month": "Month",
-        "clear": "Clear filters"
+        "clear": "Clear filters",
+        "awaiting": "Awaiting confirmation"
       },
       "pagination": {
         "showing": "Showing {from}–{to} of {total}",
@@ -241,7 +432,8 @@
         "pending": "Pending",
         "paid": "Paid",
         "overdue": "Overdue",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "awaiting": "Awaiting confirmation"
       },
       "methods": {
         "fpx": "FPX",
@@ -273,9 +465,56 @@
         "send": "Send to tenant",
         "downloadToast": "Coming soon — PDF download arrives in the next phase.",
         "sentToast": "Invoice sent to {email}"
+      },
+      "reviewCta": "Review",
+      "paymentStatus": {
+        "pending": "Awaiting confirmation",
+        "successful": "Confirmed",
+        "failed": "Rejected"
+      },
+      "claim": {
+        "title": "Your tenant says they've paid",
+        "help": "Check your bank statement for this transfer, then confirm or reject it.",
+        "amount": "Amount",
+        "paidAt": "Date paid",
+        "reference": "Reference",
+        "sentTo": "Paid to",
+        "note": "Tenant's note",
+        "receiptPlaceholder": "Receipt uploads arrive in the next phase, once file storage is wired.",
+        "confirmDate": "Date received",
+        "confirm": "Confirm payment",
+        "reject": "Reject",
+        "reasonLabel": "Why are you rejecting it?",
+        "reasonPlaceholder": "e.g. No transfer with this reference in my account yet.",
+        "reasonRequired": "Tell your tenant why, so they can fix it.",
+        "rejectConfirm": "Reject payment",
+        "confirmedToast": "Payment confirmed. The invoice is now paid.",
+        "rejectedToast": "Payment rejected. Your tenant will see your reason.",
+        "rejectedBecause": "Rejected: {reason}"
       }
     },
     "agreements": {
+      "term": {
+        "months": "{n} months",
+        "custom": "Custom",
+        "endsOn": "Ends {date}"
+      },
+      "review": {
+        "send": "Send to tenant",
+        "sending": "Sending…",
+        "sentToast": "Agreement sent to {name} for review",
+        "withdraw": "Withdraw",
+        "withdrawnToast": "Agreement withdrawn — back to draft",
+        "activate": "Activate agreement",
+        "activatedToast": "Agreement active — first invoice created",
+        "backToDraftToast": "Terms changed — the agreement is back in draft. Send it to the tenant again.",
+        "deleteAria": "Delete agreement",
+        "sentOn": "Sent on {date} · waiting for the tenant",
+        "acceptedOn": "Agreed by the tenant on {date} · activate to start the tenancy",
+        "changesRequestedOn": "Tenant asked for changes on {date}",
+        "noteLabel": "Tenant's note",
+        "draftHint": "The tenant can't see this agreement until you send it."
+      },
       "addCta": "Add agreement",
       "addTitle": "Add agreement",
       "editTitle": "Edit agreement",
@@ -298,6 +537,7 @@
         "unit": "Unit",
         "tenant": "Tenant",
         "startDate": "Start date",
+        "term": "Term",
         "endDate": "End date",
         "rentAmount": "Monthly rent (RM)",
         "depositAmount": "Security deposit (RM)",
@@ -313,6 +553,8 @@
       },
       "status": {
         "draft": "Draft",
+      "pending_review": "Awaiting tenant",
+      "accepted": "Agreed by tenant",
         "active": "Active",
         "expired": "Expired",
         "terminated": "Terminated"
@@ -375,16 +617,37 @@
             }
           }
         }
+      },
+      "payout": {
+        "title": "Rent is paid to",
+        "help": "The payout account your tenant sees for this agreement.",
+        "useDefault": "Use my default",
+        "useDefaultNamed": "Use my default ({label})",
+        "defaultHint": "your default",
+        "change": "Change",
+        "none": "No payout account yet, so your tenant can't see where to pay.",
+        "addLink": "Add one in Settings"
       }
     },
     "tenants": {
       "inviteCta": "Invite tenant",
       "inviteTitle": "Invite tenant",
-      "inviteHelp": "We'll record this contact. Magic-link invites land when authentication ships.",
+      "inviteHelp": "They'll get an email with a link to set their password. The link expires in 7 days.",
       "editTitle": "Edit tenant",
       "save": "Save",
       "delete": "Remove tenant",
       "invitedToast": "Tenant invited",
+      "inviteSentTitle": "Invite sent to {email}",
+      "inviteSentHelp": "If the email doesn't arrive, share this link with them instead. It expires in 7 days.",
+      "inviteLinkLabel": "Invite link",
+      "copyLink": "Copy link",
+      "linkCopied": "Link copied",
+      "copyFailed": "Couldn't copy. Select the link and copy it by hand.",
+      "shareWhatsApp": "Send via WhatsApp",
+      "whatsappMessage": "Hi {name}, your landlord has set up your tenancy on Roofly. Set your password here: {url}",
+      "newInviteLink": "Copy invite link",
+      "newLinkCopied": "New invite link copied. Earlier links no longer work. It expires in 7 days.",
+      "newLinkShared": "New invite link handed to WhatsApp. Earlier links no longer work.",
       "deletedToast": "Tenant removed",
       "emptyTitle": "No tenants yet.",
       "emptyDescription": "Tenants appear here once you invite them. Each tenant attaches to a unit via an agreement.",
@@ -486,7 +749,8 @@
       "payments": "Payments",
       "maintenance": "Maintenance",
       "reports": "Reports",
-      "settings": "Settings"
+      "settings": "Settings",
+      "help": "Help and support"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -516,13 +780,32 @@
           "expiring": "Expiring",
           "notice_given": "Notice given",
           "ticket_new": "New ticket",
-          "ticket_reopened": "Reopened"
+          "ticket_reopened": "Reopened",
+          "payment_claim": "Payment to confirm"
         }
       },
       "emptyState": {
         "title": "Add your first property",
         "description": "Properties hold the units you rent out. Start with one and we'll guide you from there.",
         "cta": "Add property"
+      }
+    },
+    "checklist": {
+      "title": "Getting started",
+      "progress": "{done} of {total} done",
+      "dismiss": "Hide checklist",
+      "dismissedToast": "Hidden. Bring it back from Settings → Preferences.",
+      "steps": {
+        "add_property": { "title": "Add your first property", "hint": "Name, address and type — takes a minute." },
+        "fill_ownership": { "title": "Fill in ownership details", "hint": "Title, purchase price, valuation and loan." },
+        "fill_utilities": { "title": "Fill in utilities and fees", "hint": "Maintenance fee, quit rent, TNB and water accounts." },
+        "add_unit": { "title": "Add a unit", "hint": "Tenants and agreements attach to units." },
+        "invite_tenant": { "title": "Invite your first tenant", "hint": "Name, email and phone — they get a link." },
+        "create_agreement": { "title": "Create an agreement", "hint": "Link a tenant to a unit with rent and dates." },
+        "add_payout": {
+          "title": "Add a payout account",
+          "hint": "Where your tenants pay rent by DuitNow or bank transfer."
+        }
       }
     },
     "reports": {
@@ -552,6 +835,10 @@
           "outstanding": "Outstanding",
           "netGain": "Net gain (RPGT)"
         }
+      },
+      "notForRent": {
+        "title": "Not for rent",
+        "help": "Own-stay and investment properties — capital position only, no rental income."
       },
       "csv": {
         "property": "Property",
@@ -654,7 +941,8 @@
         "profile": "Profile",
         "preferences": "Preferences",
         "notifications": "Notifications",
-        "plan": "Plan"
+        "plan": "Plan",
+        "payouts": "Payouts"
       },
       "profile": {
         "identity": "Identity",
@@ -673,16 +961,26 @@
         "photoHelp": "Coming soon — profile photos arrive in the next phase, once file storage is wired up.",
         "photoPlaceholderTitle": "Coming soon",
         "photoPlaceholderHelp": "Profile photos arrive in the next phase, once file storage is wired.",
-        "payout": "Payout account",
-        "payoutHelp": "Where rent collections will be deposited. Bank linkage is managed via your finance settings.",
-        "bankMasked": "Maybank account ending in"
+        "passwordTitle": "Set a password",
+        "passwordHelp": "You signed up with Google. Add a password to also log in with email.",
+        "setPassword": "Set password",
+        "newPassword": "New password",
+        "confirmPassword": "Confirm password",
+        "passwordTooShort": "Use at least 8 characters.",
+        "passwordMismatch": "Passwords do not match.",
+        "passwordSetToast": "Password set. You can now log in with email too."
       },
       "preferences": {
         "languageHelp": "Affects every label, date format, and translated message in the app.",
         "themeHelp": "Pick a fixed theme or follow your operating system.",
         "themeLightHelp": "Always use the light token set.",
         "themeDarkHelp": "Always use the dark token set.",
-        "themeSystemHelp": "Follow your OS preference."
+        "themeSystemHelp": "Follow your OS preference.",
+        "purposesTitle": "What you manage",
+        "purposesHelp": "Drives the getting-started checklist and the default for new properties.",
+        "purposesMin": "Pick at least one.",
+        "checklistToggle": "Show the getting-started checklist on the dashboard",
+        "checklistHelp": "It hides itself once every step is done."
       },
       "notifications": {
         "channelTitle": "Delivery channels",
@@ -745,6 +1043,58 @@
             "description": "For agents and multi-org operators."
           }
         }
+      },
+      "payouts": {
+        "title": "Payout accounts",
+        "help": "Tenants pay rent to these accounts by DuitNow or bank transfer. Each agreement uses your default unless you pick another on it.",
+        "add": "Add payout account",
+        "addTitle": "Add payout account",
+        "editTitle": "Edit payout account",
+        "formHelp": "Tenants see these details when they pay, so they can transfer straight from their banking app.",
+        "emptyTitle": "No payout account yet",
+        "emptyHelp": "Add the account your tenants should pay rent into. You can add more later and pick one per agreement.",
+        "default": "Default",
+        "setDefault": "Set as default",
+        "edit": "Edit",
+        "delete": "Delete payout account",
+        "duitnowLine": "DuitNow ({type}): {id}",
+        "usedBy": "Agreements using it: {count}",
+        "defaultToast": "{label} is now your default payout account",
+        "createdToast": "Payout account added",
+        "deletedToast": "Payout account deleted",
+        "bankOther": "Other bank",
+        "accountNumberHint": "Add an account number, a DuitNow ID, or both.",
+        "fields": {
+          "label": "Name",
+          "bank": "Bank",
+          "accountHolderName": "Account holder name",
+          "accountNumber": "Account number",
+          "duitnowIdType": "DuitNow ID type",
+          "duitnowId": "DuitNow ID"
+        },
+        "placeholders": {
+          "label": "e.g. Personal Maybank"
+        },
+        "duitnowTypes": {
+          "none": "No DuitNow ID",
+          "phone": "Mobile number",
+          "mykad": "MyKad",
+          "brn": "Business registration (SSM)",
+          "passport": "Passport"
+        },
+        "deleteConfirm": {
+          "title": "Delete payout account?",
+          "body": "{label} will be removed. Tenants won't see it any more.",
+          "agreements": "{count} agreement(s) use this account. They'll switch to your default.",
+          "confirm": "Delete"
+        },
+        "online": {
+          "title": "Online payments",
+          "comingSoon": "Coming soon",
+          "help": "Tenants will pay by FPX online banking or card inside Roofly, and the money settles to your default payout account. Nothing to set up yet.",
+          "fpx": "FPX online banking",
+          "card": "Debit and credit card"
+        }
       }
     },
     "properties": {
@@ -757,6 +1107,7 @@
         "fields": {
           "name": "Property name",
           "type": "Type",
+          "purpose": "This property is for",
           "address": "Address",
           "city": "City",
           "state": "State",
@@ -912,21 +1263,756 @@
           "placeholderHelp": "Document upload arrives in the next phase. You'll be able to attach title deeds, insurance policies, and tax receipts here."
         }
       }
+    },
+    "purposes": {
+      "rental": { "title": "Rental", "help": "Units with tenants, rent collection, agreements." },
+      "own_stay": { "title": "Own stay", "help": "The home you live in — ownership, loan, bills." },
+      "investment": { "title": "Investment", "help": "Held for value, not rented right now." }
+    },
+    "onboarding": {
+      "title": "What will you manage in Roofly?",
+      "subtitle": "Pick everything that applies. You can change this later in Settings.",
+      "continue": "Continue",
+      "skip": "Skip for now"
     }
   },
   "tenant": {
+    "onboarding": {
+      "title": "Set up your tenant profile",
+      "subtitle": "Your landlord needs these details for the tenancy agreement. It takes about two minutes.",
+      "step": "Step {n} of {total}",
+      "steps": {
+        "about": { "title": "About you", "hint": "As they appear on your MyKad." },
+        "work": { "title": "Work", "hint": "Optional. Helps your landlord with references." },
+        "emergency": { "title": "Emergency contact", "hint": "Someone we can reach if you can't be." }
+      },
+      "back": "Back",
+      "continue": "Continue",
+      "finish": "Finish and go to my home",
+      "optional": "Optional"
+    },
     "nav": {
       "home": "Home",
       "agreement": "Agreement",
       "payments": "Payments",
       "tickets": "Issues",
-      "profile": "Profile"
+      "profile": "Profile",
+      "help": "Help and support"
     },
     "home": {
+      "reviewCard": {
+        "title": "Your agreement is ready to review",
+        "hint": "Your landlord sent the tenancy terms. Agree, or ask for changes.",
+        "cta": "Review now"
+      },
       "title": "Welcome",
+      "greeting": "Hi, {name}",
+      "subtitle": "Everything about your tenancy, in one place.",
       "currentRent": "Current rent",
       "payNow": "Pay now",
-      "noActiveAgreement": "Your agreement is being prepared by your landlord."
+      "noActiveAgreement": "Your agreement is being prepared by your landlord.",
+      "noAgreementTitle": "No active tenancy yet",
+      "rentDue": {
+        "title": "Rent due",
+        "allPaidTitle": "Rent",
+        "allPaid": "You're all paid up",
+        "allPaidHelp": "Next rent is due {date}.",
+        "noUpcoming": "No upcoming rent right now.",
+        "dueOn": "Due {date}",
+        "overdueOn": "Was due {date}",
+        "awaiting": "You said you paid on {date}. Waiting for your landlord to confirm."
+      },
+      "stats": {
+        "monthlyRent": "Monthly rent",
+        "depositHeld": "Deposit held",
+        "agreementEnds": "Tenancy ends",
+        "openIssues": "Open issues",
+        "daysLeft": "{n} days left",
+        "endedAgo": "Ended {n} days ago"
+      },
+      "yourHome": "Your home",
+      "viewAgreement": "View agreement",
+      "viewPayments": "View payments",
+      "reportIssue": "Report an issue",
+      "openIssuesTitle": "Open issues",
+      "viewAll": "View all",
+      "noOpenIssues": "No open issues. Let your landlord know if something needs fixing.",
+      "profileCard": {
+        "title": "Complete your profile",
+        "hint": "Your landlord needs your MyKad number, phone and an emergency contact for the agreement.",
+        "progress": "{done} of {total} key details filled",
+        "cta": "Fill in now"
+      }
+    },
+    "agreement": {
+      "review": {
+        "title": "Your landlord sent you this agreement",
+        "subtitle": "Check the terms below. Agree to confirm them, or ask for changes and your landlord will get your note.",
+        "agree": "Agree to these terms",
+        "requestChanges": "Ask for changes",
+        "confirmTitle": "Agree to the agreement?",
+        "confirmBody": "You are agreeing to rent {unit} for {rent} a month, from {start} to {end}, with a deposit of {deposit}.",
+        "confirmCta": "Yes, I agree",
+        "agreedToast": "Thanks — your landlord has been told. They'll activate the tenancy next.",
+        "agreedTitle": "You agreed to this agreement",
+        "agreedBody": "Your landlord will activate the tenancy. Rent and your first invoice start then.",
+        "changesTitle": "What would you like changed?",
+        "changesHint": "Keep it short. Your landlord will edit the agreement and send it again.",
+        "noteLabel": "Your note",
+        "notePlaceholder": "e.g. Can the start date be the 15th instead?",
+        "sendNote": "Send to landlord",
+        "changesSentToast": "Your note was sent. The agreement goes back to your landlord."
+      },
+      "title": "Your agreement",
+      "subtitle": "The terms of your current tenancy.",
+      "none": "Your agreement is being prepared by your landlord.",
+      "term": "Term",
+      "months": "{n} months",
+      "years": "{n} years",
+      "monthlyRent": "Monthly rent",
+      "deposit": "Deposit",
+      "dueDay": "Rent due",
+      "dueOn": "Day {day} monthly",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "money": "Charges",
+      "lateFee": "Late fee",
+      "lateFeeHint": "Charged once rent passes the due date.",
+      "documents": "Documents",
+      "status": {
+        "draft": "Draft",
+        "pending_review": "Awaiting your review",
+        "accepted": "You agreed",
+        "active": "Active",
+        "expired": "Expired",
+        "terminated": "Terminated"
+      }
+    },
+    "payments": {
+      "subtitle": "Your invoices and receipts.",
+      "outstanding": "Outstanding",
+      "allSettled": "All settled",
+      "emptyTitle": "No invoices yet",
+      "emptyDescription": "Your rent invoices will show up here.",
+      "dueOn": "Due {date}",
+      "paidOn": "Paid {date}",
+      "pay": "Pay now",
+      "view": "View",
+      "status": {
+        "pending": "Pending",
+        "paid": "Paid",
+        "overdue": "Overdue",
+        "cancelled": "Cancelled",
+        "awaiting": "Awaiting confirmation"
+      },
+      "methods": {
+        "fpx": "FPX",
+        "card": "Card",
+        "cash": "Cash",
+        "transfer": "Transfer"
+      },
+      "payModal": {
+        "title": "Pay rent",
+        "period": "Billing period",
+        "rent": "Rent",
+        "lateFee": "Late fee",
+        "total": "Total",
+        "bank": "Pay with",
+        "simNote": "Demo only — no real payment is made.",
+        "receipt": "Receipt",
+        "payCta": "Pay {amount}",
+        "processing": "Processing payment…",
+        "successToast": "Payment successful — receipt sent to your email.",
+        "methodLabel": "How do you want to pay?",
+        "transfer": {
+          "title": "DuitNow or bank transfer",
+          "help": "Transfer from your banking app, then tell your landlord.",
+          "steps": "Transfer the total in your banking app, using the invoice number as the reference. Then fill in the form below."
+        },
+        "online": {
+          "title": "Online banking or card",
+          "comingSoon": "Coming soon",
+          "help": "Pay by FPX or card without leaving Roofly."
+        },
+        "claim": {
+          "title": "I've paid",
+          "reference": "Transfer reference",
+          "referencePlaceholder": "From your bank's receipt",
+          "paidAt": "Date paid",
+          "note": "Note for your landlord (optional)",
+          "notePlaceholder": "e.g. Paid from my spouse's account",
+          "receiptPlaceholder": "Receipt uploads arrive in the next phase, once file storage is wired.",
+          "submit": "I've paid"
+        },
+        "claimedToast": "Sent. Your landlord will confirm once they see the money.",
+        "awaitingTitle": "Waiting for your landlord to confirm",
+        "awaitingHelp": "You said you paid on {date} (reference {reference}). We'll mark it paid once your landlord confirms.",
+        "rejectedTitle": "Your landlord couldn't find your last payment",
+        "errors": {
+          "claimPending": "You've already told your landlord about a payment for this invoice.",
+          "noPayoutAccount": "Your landlord hasn't added payment details yet."
+        }
+      },
+      "awaitingHint": "Waiting for your landlord to confirm",
+      "rejectedHint": "Your landlord couldn't find this payment"
+    },
+    "tickets": {
+      "subtitle": "Report and track maintenance issues.",
+      "reportCta": "Report an issue",
+      "emptyTitle": "No issues reported",
+      "emptyDescription": "Report an issue any time and we'll notify your landlord.",
+      "updated": "Updated {date}",
+      "comments": "{n} comments",
+      "status": {
+        "new": "New",
+        "in_progress": "In progress",
+        "resolved": "Resolved",
+        "reopened": "Reopened"
+      },
+      "priority": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "urgent": "Urgent"
+      },
+      "category": {
+        "plumbing": "Plumbing",
+        "electrical": "Electrical",
+        "appliance": "Appliance",
+        "structural": "Structural",
+        "pest": "Pest",
+        "other": "Other"
+      },
+      "report": {
+        "title": "Report an issue",
+        "description": "Tell your landlord what needs fixing.",
+        "fields": {
+          "category": "Category",
+          "priority": "Priority",
+          "title": "Title",
+          "description": "Description"
+        },
+        "placeholders": {
+          "title": "Short summary of the issue",
+          "description": "What's wrong, when it started, and anything you've tried"
+        },
+        "submit": "Send report",
+        "createdToast": "Issue reported — your landlord has been notified."
+      },
+      "detail": {
+        "back": "Back to issues",
+        "notFound": "Issue not found.",
+        "description": "Description",
+        "reportedOn": "Reported {date}",
+        "statusNote": "Your landlord updates the status. You'll be notified of any changes.",
+        "comments": "Comments",
+        "noComments": "No comments yet.",
+        "addComment": "Add a comment",
+        "commentPlaceholder": "Write a message to your landlord…",
+        "post": "Post comment",
+        "commentToast": "Comment posted.",
+        "you": "You",
+        "landlord": "Landlord"
+      }
+    },
+    "profile": {
+      "subtitle": "Your details, shared with your landlord.",
+      "edit": "Edit",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "savedToast": "Profile updated.",
+      "notSet": "Not set",
+      "incomeHint": "Helps your landlord with affordability checks.",
+      "sections": {
+        "identity": "Identity",
+        "personal": "Personal",
+        "emergency": "Emergency contact"
+      },
+      "fields": {
+        "name": "Full name",
+        "email": "Email",
+        "phone": "Phone",
+        "icNumber": "MyKad number",
+        "dateOfBirth": "Date of birth",
+        "occupation": "Occupation",
+        "employer": "Employer",
+        "monthlyIncome": "Monthly income",
+        "nationality": "Nationality",
+        "ecName": "Contact name",
+        "ecPhone": "Contact phone",
+        "ecRelationship": "Relationship"
+      },
+      "placeholders": {
+        "icNumber": "YYMMDD-PB-####"
+      }
+    },
+    "payTo": {
+      "title": "Pay rent to",
+      "help": "Your landlord's account for this agreement. Pay by DuitNow or bank transfer.",
+      "none": "Your landlord hasn't added payment details yet.",
+      "bank": "Bank",
+      "holder": "Account holder",
+      "accountNumber": "Account number",
+      "duitnow": "DuitNow ID ({type})",
+      "duitnowTypes": {
+        "phone": "mobile number",
+        "mykad": "MyKad",
+        "brn": "SSM",
+        "passport": "passport"
+      },
+      "reference": "Reference",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copyLabel": "Copy {what}"
+    }
+  },
+  "admin": {
+    "nav": {
+      "badge": "Admin",
+      "dashboard": "Dashboard",
+      "owners": "Owners",
+      "tenants": "Tenants",
+      "enquiries": "Enquiries",
+      "analytics": "Analytics",
+      "audit": "Audit log",
+      "settings": "Settings"
+    },
+    "common": {
+      "search": "Search",
+      "filters": "Filters",
+      "clearFilters": "Clear filters",
+      "all": "All",
+      "pageOf": "Page {page} of {lastPage} · {total} total",
+      "noResults": "No results",
+      "noResultsHelp": "Try a different search or clear the filters.",
+      "back": "Back to list",
+      "notFound": "Not found",
+      "lastActive": "Last active",
+      "never": "Never",
+      "signedUp": "Signed up",
+      "reason": "Reason",
+      "confirm": "Confirm",
+      "actions": "Actions",
+      "exportCsv": "Export CSV",
+      "unlimited": "Unlimited",
+      "noAccess": "No access",
+      "noAccessHelp": "You need the {permission} permission to view this page. Ask a super-admin to grant it."
+    },
+    "status": {
+      "owner": {
+        "active": "Active",
+        "suspended": "Suspended"
+      },
+      "tenant": {
+        "invited": "Invited",
+        "active": "Active",
+        "notice_given": "Notice given",
+        "moved_out": "Moved out"
+      },
+      "admin": {
+        "invited": "Invited",
+        "active": "Active",
+        "disabled": "Disabled"
+      }
+    },
+    "plan": {
+      "free": "Free",
+      "starter": "Starter",
+      "pro": "Pro",
+      "business": "Business"
+    },
+    "dashboard": {
+      "title": "Platform dashboard",
+      "subtitle": "How Roofly is doing across every owner.",
+      "tiles": {
+        "owners": "Owners",
+        "ownersHelp": "{active} active · {suspended} suspended",
+        "tenants": "Tenants",
+        "tenantsHelp": "{pending} invites pending",
+        "properties": "Properties",
+        "propertiesHelp": "Across every owner",
+        "units": "Occupancy",
+        "unitsHelp": "{total} units",
+        "agreements": "Active agreements",
+        "agreementsHelp": "{expiring} ending within 30 days"
+      },
+      "charts": {
+        "signups": "Owner sign-ups — 12 months",
+        "invoicesPaid": "Invoices paid — 12 months",
+        "acceptance": "Invite acceptance rate"
+      },
+      "attention": {
+        "title": "Needs attention",
+        "help": "Owners to look at this week.",
+        "empty": "Nothing needs attention right now.",
+        "kinds": {
+          "over_cap": "Over plan cap",
+          "overdue_3plus": "3+ overdue",
+          "invite_stale_7d": "Stale invite",
+          "no_property_7d": "No property yet",
+          "suspended": "Suspended"
+        }
+      }
+    },
+    "owners": {
+      "title": "Owners",
+      "subtitle": "Every landlord on the platform — summaries only.",
+      "searchPlaceholder": "Search name, email or business",
+      "filters": {
+        "overCap": "Over cap",
+        "overdue": "Has overdue"
+      },
+      "columns": {
+        "owner": "Owner",
+        "plan": "Plan",
+        "units": "Units used / cap",
+        "properties": "Properties",
+        "tenants": "Tenants",
+        "overdue": "Overdue",
+        "status": "Status"
+      },
+      "detail": {
+        "tabs": {
+          "overview": "Overview",
+          "properties": "Properties",
+          "tenants": "Tenants",
+          "history": "History"
+        },
+        "actions": {
+          "warn": "Send warning",
+          "suspend": "Suspend",
+          "unsuspend": "Unsuspend"
+        },
+        "suspendedSince": "Suspended since {date}",
+        "plan": "Plan",
+        "unitsUsed": "units used",
+        "overCap": "Over the plan cap — upgrade or warn.",
+        "counts": "At a glance",
+        "countLabels": {
+          "properties": "Properties",
+          "units": "Units",
+          "unitsOccupied": "Occupied",
+          "tenants": "Tenants",
+          "agreementsActive": "Active agreements",
+          "agreementsExpiring30d": "Expiring 30d",
+          "invoicesOverdue": "Overdue invoices",
+          "ticketsOpen": "Open tickets"
+        },
+        "noProperties": "No properties yet",
+        "noTenants": "No tenants yet",
+        "occupied": "occupied",
+        "warn": {
+          "title": "Send payment warning",
+          "description": "Email {name} a notice on their enabled channels.",
+          "template": "Template",
+          "templates": {
+            "payment_overdue": "Subscription payment overdue"
+          },
+          "suspendOn": "Suspend on",
+          "extraLine": "Extra line (optional)",
+          "extraLinePlaceholder": "e.g. Reply to this email if you need help.",
+          "preview": "Preview",
+          "channels": "Sent by email. WhatsApp and SMS arrive with support channels.",
+          "send": "Send warning",
+          "sentToast": "Warning sent",
+          "dateFuture": "Pick a date after today."
+        },
+        "suspend": {
+          "title": "Suspend owner",
+          "description": "{name} will lose access to Roofly until unsuspended. Their tenants are unaffected.",
+          "help": "At least 10 characters. The reason is recorded in the audit log, not shown to the owner.",
+          "reasonMin": "Give a reason of at least 10 characters.",
+          "cta": "Suspend",
+          "doneToast": "Owner suspended"
+        },
+        "unsuspend": {
+          "title": "Unsuspend owner",
+          "description": "Restore {name}'s access to Roofly.",
+          "help": "The owner can sign in again immediately.",
+          "cta": "Unsuspend",
+          "doneToast": "Owner unsuspended"
+        }
+      }
+    },
+    "audit": {
+      "title": "Audit log",
+      "subtitleAll": "Every admin action on the platform, newest first.",
+      "subtitleOwn": "Your own actions, newest first. Ask a super-admin for audit.view to see everyone's.",
+      "filters": {
+        "action": "Action",
+        "actorId": "Actor id",
+        "subjectId": "Subject id",
+        "from": "From",
+        "to": "To"
+      },
+      "details": "Show details",
+      "actions": {
+        "admin": {
+          "login": "Admin signed in",
+          "invite_sent": "Admin invited",
+          "invite_accepted": "Invite accepted",
+          "permissions_changed": "Permissions changed",
+          "disabled": "Admin disabled",
+          "enabled": "Admin enabled"
+        },
+        "owner": {
+          "warned": "Warning sent",
+          "suspended": "Owner suspended",
+          "unsuspended": "Owner unsuspended",
+          "signup": "Owner signed up"
+        },
+        "tenant": {
+          "invite_resent": "Tenant invite resent"
+        },
+        "analytics": {
+          "exported": "Leads exported"
+        },
+        "lead": {
+          "invited": "Waitlist invitation sent"
+        },
+        "enquiry": {
+          "updated": "Enquiry updated"
+        }
+      }
+    },
+    "tenants": {
+      "title": "Tenants",
+      "subtitle": "Every tenant across every owner — contact and placement only. Names are shortened: tenant details belong to the owner.",
+      "searchPlaceholder": "Search email, phone, property or owner",
+      "filteredByOwner": "Filtered by owner",
+      "resendInvite": "Resend invite",
+      "resendToast": "Invite resent",
+      "columns": {
+        "tenant": "Tenant",
+        "phone": "Phone",
+        "status": "Status",
+        "owner": "Owner",
+        "propertyUnit": "Property / unit",
+        "invited": "Invited",
+        "accepted": "Accepted"
+      },
+      "detail": {
+        "placement": "Placement",
+        "history": "History",
+        "noHistory": "No admin actions on this tenant yet.",
+        "privacy": "Tenant details belong to the owner. Admins see a shortened name, contact details and the placement — never the full name, MyKad, personal details, emergency contacts, documents or payments."
+      }
+    },
+    "enquiries": {
+      "title": "Enquiries",
+      "subtitle": "Messages from owners and tenants, and everyone who joined the waitlist.",
+      "tabs": {
+        "messages": "Messages",
+        "waitlist": "Waitlist"
+      },
+      "messages": {
+        "searchPlaceholder": "Search name, email or message",
+        "allStatuses": "All statuses",
+        "allTypes": "All types",
+        "columns": {
+          "received": "Received",
+          "from": "From",
+          "type": "Type",
+          "message": "Message",
+          "status": "Status"
+        },
+        "status": {
+          "new": "New",
+          "replied": "Replied",
+          "closed": "Closed"
+        },
+        "types": {
+          "issue": "Issue",
+          "feedback": "Feedback",
+          "question": "Question"
+        },
+        "roles": {
+          "owner": "Owner",
+          "tenant": "Tenant"
+        },
+        "empty": "No messages yet",
+        "emptyHelp": "Messages appear when an owner or tenant uses the Help & feedback button.",
+        "detail": {
+          "page": "Sent from",
+          "handledBy": "Last handled by",
+          "status": "Status",
+          "note": "Internal note",
+          "notePlaceholder": "Only admins see this.",
+          "reply": "Reply by email",
+          "savedToast": "Message updated"
+        }
+      },
+      "searchPlaceholder": "Search email",
+      "columns": {
+        "email": "Email",
+        "signedUp": "Signed up",
+        "lastSeen": "Last seen",
+        "status": "Status",
+        "actions": "Invitation"
+      },
+      "status": {
+        "waiting": "Waiting",
+        "invited": "Invited",
+        "registered": "Registered"
+      },
+      "invite": {
+        "send": "Invite",
+        "resend": "Resend",
+        "invitedOn": "Invited {date}",
+        "title": "Send sign-up invitation",
+        "resendTitle": "Resend sign-up invitation",
+        "description": "Emails {email} the \"Your Roofly invitation is here\" message with a link to create their account.",
+        "lastSent": "Last sent {date}.",
+        "confirm": "Send invitation",
+        "sentToast": "Invitation sent to {email}"
+      },
+      "empty": "No enquiries yet",
+      "emptyHelp": "Enquiries appear when someone submits the notify-me form on the coming-soon page."
+    },
+    "analytics": {
+      "title": "Analytics",
+      "subtitle": "Who looks at roofly.my, who tries the demo, who leaves an email, who signs up.",
+      "range": {
+        "label": "Range",
+        "d7": "Last 7 days",
+        "d30": "Last 30 days",
+        "d90": "Last 90 days",
+        "custom": "Custom",
+        "from": "From",
+        "to": "To",
+        "invalid": "Pick a start date on or before the end date, at most 366 days apart."
+      },
+      "tiles": {
+        "views": "Page views",
+        "visitors": "Visitors",
+        "visitorsHelp": "{n} new",
+        "demo": "Demo entries",
+        "leads": "Leads",
+        "registrations": "Registrations",
+        "conversion": "Conversion",
+        "conversionHelp": "Registrations ÷ visitors"
+      },
+      "charts": {
+        "title": "Traffic",
+        "help": "Daily page views and sign-ups across the range.",
+        "views": "Page views per day",
+        "registrations": "Registrations per day"
+      },
+      "funnel": {
+        "title": "Funnel",
+        "help": "Each step as a share of the one before it.",
+        "top": "Top of funnel",
+        "visitors": "Visitors",
+        "demo": "Tried the demo",
+        "leads": "Left an email",
+        "registered": "Registered",
+        "pctOfPrevious": "{pct}% of previous"
+      },
+      "topPages": "Top pages",
+      "topPagesHelp": "Share of page views",
+      "referrers": "Top referrers",
+      "referrersHelp": "Share of visitors",
+      "direct": "Direct / unknown",
+      "leads": {
+        "title": "Leads",
+        "searchPlaceholder": "Search email",
+        "columns": {
+          "email": "Email",
+          "source": "Source",
+          "firstSeen": "First seen",
+          "lastSeen": "Last seen",
+          "views": "Views",
+          "demo": "Demo",
+          "converted": "Converted"
+        },
+        "filters": {
+          "converted": "Converted only"
+        },
+        "empty": "No leads yet",
+        "emptyHelp": "Leads appear when someone joins the waitlist or registers."
+      },
+      "sources": {
+        "waitlist": "Waitlist",
+        "demo": "Demo",
+        "register": "Registered"
+      },
+      "events": {
+        "page_view": "Page view",
+        "demo_enter": "Entered demo",
+        "demo_feedback_click": "Clicked feedback",
+        "waitlist_signup": "Joined waitlist",
+        "register": "Registered"
+      },
+      "drawer": {
+        "title": "Lead",
+        "recent": "Recent activity",
+        "noEvents": "No events recorded for this lead."
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Who on the team can do what.",
+      "tabs": {
+        "admins": "Admins"
+      },
+      "noAccess": "No access",
+      "noAccessHelp": "Ask a super-admin for the admins.manage permission.",
+      "admins": {
+        "help": "Admins sign in at the admin portal. New admins get an email link to set their password.",
+        "create": "Invite admin",
+        "createTitle": "Invite an admin",
+        "editTitle": "Edit admin",
+        "permissions": "Permissions",
+        "applyPreset": "Use Operations preset",
+        "sendInvite": "Send invite",
+        "superAdmin": "Super-admin",
+        "superAdminHelp": "bypasses every permission",
+        "permissionCount": "{n} permissions",
+        "edit": "Edit",
+        "resend": "Resend invite",
+        "disable": "Disable",
+        "enable": "Enable",
+        "you": "(you)",
+        "invitedToast": "Invite sent",
+        "updatedToast": "Admin updated",
+        "resentToast": "Invite resent",
+        "keys": {
+          "dashboard": {
+            "view": "View platform dashboard"
+          },
+          "owners": {
+            "view": "View owners",
+            "warn": "Send payment warnings",
+            "suspend": "Suspend / unsuspend owners",
+            "plan": "Change owner plans"
+          },
+          "tenants": {
+            "view": "View tenants"
+          },
+          "analytics": {
+            "view": "View analytics"
+          },
+          "support": {
+            "manage": "Manage support inbox"
+          },
+          "broadcast": {
+            "send": "Send broadcasts"
+          },
+          "settings": {
+            "channels": "Manage channel providers",
+            "flags": "Manage feature flags"
+          },
+          "admins": {
+            "manage": "Manage admins"
+          },
+          "audit": {
+            "view": "View full audit log"
+          },
+          "users": {
+            "delete": "Delete / anonymise users"
+          }
+        }
+      }
     }
   }
 }

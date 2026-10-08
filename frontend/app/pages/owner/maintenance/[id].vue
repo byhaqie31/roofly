@@ -22,6 +22,7 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const { show } = useToast();
+const { toFieldErrors } = useApiError();
 const { public: { features } } = useRuntimeConfig();
 const photosEnabled = features.documents;
 
@@ -34,7 +35,7 @@ const newComment = ref("");
 const load = async () => {
   loading.value = true;
   try {
-    data.value = await useTickets().getWithRefs(route.params.id as string);
+    data.value = await useTickets().getTicketWithRefs(route.params.id as string);
   } finally {
     loading.value = false;
   }
@@ -83,6 +84,9 @@ const onTransition = async (next: TicketStatus) => {
       }),
       "success",
     );
+  } catch (err) {
+    const fieldErrors = toFieldErrors(err);
+    show(fieldErrors ? Object.values(fieldErrors)[0]! : t("common.genericError"), "danger");
   } finally {
     transitioning.value = false;
   }
@@ -101,6 +105,9 @@ const onSubmitComment = async () => {
     data.value.comments.push(created);
     newComment.value = "";
     show(t("owner.tickets.detail.commentToast"), "success");
+  } catch (err) {
+    const fieldErrors = toFieldErrors(err);
+    show(fieldErrors ? Object.values(fieldErrors)[0]! : t("common.genericError"), "danger");
   } finally {
     submittingComment.value = false;
   }

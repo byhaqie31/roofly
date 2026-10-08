@@ -8,6 +8,7 @@ import { useToast } from "~/composables/useToast";
 import Input from "~/components/ui/Input.vue";
 import Button from "~/components/ui/Button.vue";
 import EmptyState from "~/components/ui/EmptyState.vue";
+import SettingsSetPasswordForm from "~/components/owner/SettingsSetPasswordForm.vue";
 
 const props = defineProps<{ account: OwnerAccount }>();
 const emit = defineEmits<{ saved: [account: OwnerAccount] }>();
@@ -17,6 +18,7 @@ const { show } = useToast();
 const { public: { features } } = useRuntimeConfig();
 const photosEnabled = features.documents;
 const submitting = ref(false);
+const auth = useAuthStore();
 
 const initialValues = {
   name: props.account.profile.name,
@@ -24,10 +26,11 @@ const initialValues = {
   businessName: props.account.profile.businessName ?? "",
 };
 
-const { defineField, handleSubmit, errors } = useForm({
+const { defineField, handleSubmit, errors, setErrors } = useForm({
   validationSchema: toTypedSchema(ownerProfileFormSchema),
   initialValues,
 });
+const { toFieldErrors } = useApiError();
 
 const [name] = defineField("name");
 const [phone] = defineField("phone");
@@ -43,6 +46,13 @@ const onSubmit = handleSubmit(async (values) => {
     });
     emit("saved", updated);
     show(t("common.savedToast"), "success");
+  } catch (err) {
+    const fieldErrors = toFieldErrors(err);
+    if (fieldErrors) {
+      setErrors(fieldErrors);
+      return;
+    }
+    show(t("common.genericError"), "danger");
   } finally {
     submitting.value = false;
   }
@@ -112,30 +122,22 @@ const onSubmit = handleSubmit(async (values) => {
       </p>
     </section>
 
-    <section
-      v-if="account.profile.bankAccountLast4"
-      class="space-y-4 border-t border-line-passive pt-6"
-    >
-      <header>
-        <h2 class="text-card-title font-semibold text-ink">
-          {{ t("owner.settings.profile.payout") }}
-        </h2>
-        <p class="mt-1 text-caption text-ink-muted">
-          {{ t("owner.settings.profile.payoutHelp") }}
-        </p>
-      </header>
-      <p class="text-body text-ink">
-        {{ t("owner.settings.profile.bankMasked") }}
-        <span class="font-semibold tabular-nums">
-          •••• {{ account.profile.bankAccountLast4 }}
-        </span>
-      </p>
-    </section>
-
     <div class="flex justify-end">
       <Button type="submit" variant="primary" :loading="submitting">
         {{ t("owner.settings.save") }}
       </Button>
     </div>
   </form>
+
+  <section v-if="!auth.user?.hasPassword" class="mt-8 space-y-4 border-t border-line-passive pt-6">
+    <header>
+      <h2 class="text-card-title font-semibold text-ink">
+        {{ t("owner.settings.profile.passwordTitle") }}
+      </h2>
+      <p class="mt-1 text-caption text-ink-muted">
+        {{ t("owner.settings.profile.passwordHelp") }}
+      </p>
+    </header>
+    <SettingsSetPasswordForm />
+  </section>
 </template>

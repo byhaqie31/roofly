@@ -27,11 +27,17 @@ export const useEnv = () => {
   const isUat = env === "uat";
   const isProduction = env === "production";
 
+  // Hostname rule, not a separate app: admin.roofly.my serves the same build
+  // and env.global.ts sends "/" to "/admin" there. SSR-safe via useRequestURL.
+  const hostname = useRequestURL().hostname;
+  const isAdminHost = hostname === "admin.roofly.my" || hostname.startsWith("admin.");
+
   return {
     env,
     isDemo,
     isUat,
     isProduction,
+    isAdminHost,
 
     // Data layer — demo uses curated mocks forever; uat/prod follow the
     // service-level useMock flag (which itself flips off per-endpoint as the
@@ -39,10 +45,44 @@ export const useEnv = () => {
     // its mock data even if NUXT_PUBLIC_USE_MOCK is left at "false".
     useMock: isDemo || config.public.useMock,
 
+    // Google OAuth web client id (empty ⇒ button hidden). See features.googleLogin.
+    googleClientId: config.public.googleClientId as string,
+
+    // Feature flags. `admin` is never on in demo — demo-roofly must not show
+    // the back office (spec § 2).
+    features: {
+      documents: config.public.features.documents,
+      admin: !isDemo && config.public.features.admin,
+      // Google sign-in needs a client id and is never shown in demo (demo has
+      // its own "Continue with Google (demo)" shortcut instead).
+      googleLogin: !isDemo && Boolean(config.public.googleClientId),
+      // Gateway payments (FPX / card). Off ⇒ "Coming soon" beside manual DuitNow.
+      onlinePayments: Boolean(config.public.features.onlinePayments),
+    },
+
+    // Marketing/analytics tracking — off in demo (useMock) and when the
+    // runtime flag is explicitly disabled. See composables/useTrack.ts.
+    trackingEnabled: !(isDemo || config.public.useMock) && config.public.tracking !== false,
+
     // UI feature flags
     showDemoShortcuts: isDemo,
     showFloatingFeedback: isDemo && Boolean(config.public.demoFeedbackUrl),
     showEnvBanner: isUat,
+    // Beta terms (/legal/beta + footer link) apply only where testers sign up.
+    showBetaTerms: isUat,
+    // In-app help button (owner + tenant shells → admin Enquiries → Messages).
+    // Demo keeps its Google Form button instead: demo never reaches the backend.
+    showSupportWidget: !isDemo,
     redirectRootToDemo: isDemo,
+    // Where the public wordmark (SiteHeader) goes: the public home page, never
+    // "/" — "/" sends a signed-in visitor to their own dashboard (pages/index.vue).
+    publicHomePath: isDemo ? "/demo" : "/coming-soon",
+
+    // Beta-tester hunt: production's public site is only /coming-soon (every
+    // other non-admin route redirects there; the admin back office stays up to
+    // work the Enquiries inbox). Beta testers sign up on UAT. Flip to `false`
+    // at launch, together with the backend's REGISTRATION_OPEN. See
+    // middleware/env.global.ts.
+    comingSoonOnly: isProduction,
   };
 };

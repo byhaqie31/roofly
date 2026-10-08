@@ -21,6 +21,7 @@ import InvoicePeriodFilter from "~/components/owner/InvoicePeriodFilter.vue";
 import InvoiceCard from "~/components/owner/InvoiceCard.vue";
 import type { InvoiceStatus } from "~/types/invoice";
 import type { InvoiceWithRefs } from "~/services/useInvoices";
+import { pendingClaim } from "~/utils/paymentClaim";
 
 definePageMeta({ layout: "owner" });
 const { t } = useI18n();
@@ -31,9 +32,13 @@ useHead({ title: () => t("owner.nav.payments") });
 const DESKTOP_PAGE_SIZE = 20;
 const MOBILE_PAGE_SIZE = 8;
 
+type StatusFilter = InvoiceStatus | "all" | "awaiting";
+
 const rows = ref<InvoiceWithRefs[]>([]);
 const loading = ref(true);
-const statusFilter = ref<InvoiceStatus | "all">("all");
+// `?status=awaiting` deep-links from the dashboard + the claim email.
+const route = useRoute();
+const statusFilter = ref<StatusFilter>(route.query.status === "awaiting" ? "awaiting" : "all");
 const filterMonth = ref<string>("all");
 const filterYear = ref<string>("all");
 const sorting = ref<SortingState>([{ id: "dueDate", desc: true }]);
@@ -43,7 +48,7 @@ const selectedRow = ref<InvoiceWithRefs | null>(null);
 const viewingRow = ref<InvoiceWithRefs | null>(null);
 
 const refresh = async () => {
-  rows.value = await useInvoices().listWithRefs();
+  rows.value = await useInvoices().getInvoicesWithRefs();
 };
 
 onMounted(async () => {
@@ -61,8 +66,12 @@ const statusToneMap: Record<InvoiceStatus, string> = {
   cancelled: "cancelled",
 };
 
-const statusFilters: { value: InvoiceStatus | "all"; key: string }[] = [
+/** A tenant's "I've paid" waiting on the owner (spec 2026-10-08) — derived from a pending payment. */
+const isAwaiting = (r: InvoiceWithRefs) => pendingClaim(r.payments) !== null;
+
+const statusFilters: { value: StatusFilter; key: string }[] = [
   { value: "all", key: "all" },
+  { value: "awaiting", key: "awaiting" },
   { value: "pending", key: "pending" },
   { value: "overdue", key: "overdue" },
   { value: "paid", key: "paid" },
@@ -94,17 +103,16 @@ const counts = computed(() => {
   const out: Record<string, number> = { all: dateFilteredRows.value.length };
   dateFilteredRows.value.forEach((r) => {
     out[r.invoice.status] = (out[r.invoice.status] ?? 0) + 1;
+    if (isAwaiting(r)) out.awaiting = (out.awaiting ?? 0) + 1;
   });
   return out;
 });
 
-const filteredRows = computed(() =>
-  statusFilter.value === "all"
-    ? dateFilteredRows.value
-    : dateFilteredRows.value.filter(
-        (r) => r.invoice.status === statusFilter.value,
-      ),
-);
+const filteredRows = computed(() => {
+  if (statusFilter.value === "all") return dateFilteredRows.value;
+  if (statusFilter.value === "awaiting") return dateFilteredRows.value.filter(isAwaiting);
+  return dateFilteredRows.value.filter((r) => r.invoice.status === statusFilter.value);
+});
 
 const filtersActive = computed(
   () =>
@@ -232,6 +240,9 @@ const columns = computed<ColumnDef<InvoiceWithRefs>[]>(() => [
     accessorFn: (row) => row.invoice.status,
     header: () => t("owner.payments.columns.status"),
     cell: (info) => {
+      if (isAwaiting(info.row.original)) {
+        return h(Pill, { tone: "pending" }, () => t("owner.payments.status.awaiting"));
+      }
       const status = info.getValue() as InvoiceStatus;
       return h(
         Pill,
@@ -257,6 +268,20 @@ const columns = computed<ColumnDef<InvoiceWithRefs>[]>(() => [
                 date: formatDate(r.payments[0].paidAt.slice(0, 10)),
               })
             : "—",
+        );
+      }
+      if (isAwaiting(r)) {
+        return h(
+          Button,
+          {
+            variant: "primary",
+            size: "sm",
+            onClick: (e: Event) => {
+              e.stopPropagation();
+              onViewInvoice(r);
+            },
+          },
+          () => t("owner.payments.reviewCta"),
         );
       }
       return h(
@@ -551,6 +576,7 @@ const sortIcon = (id: string) => {
     <InvoiceViewModal
       v-model:open="showViewModal"
       :row="viewingRow"
+      @changed="refresh"
     />
   </div>
 </template>

@@ -2,10 +2,10 @@
 import { Mail, Bell, CheckCircle2, Loader2 } from "lucide-vue-next";
 
 const { t } = useI18n();
-const config = useRuntimeConfig();
-const accessKey = config.public.waitlistAccessKey as string;
 
 const email = ref("");
+// Honeypot (see WaitlistService): rendered off-screen, never filled by a person.
+const website = ref("");
 const submitted = ref(false);
 const submitting = ref(false);
 const error = ref<string | null>(null);
@@ -21,34 +21,12 @@ const onSubmit = async () => {
     return;
   }
 
-  // No key configured (e.g., local dev without .env value) → mock submit so
-  // the UX is still testable. Production deploys must set the env var.
-  if (!accessKey) {
-    // eslint-disable-next-line no-console
-    console.log("[Roofly waitlist] no key configured, mock submit:", email.value.trim());
-    submitted.value = true;
-    return;
-  }
-
   submitting.value = true;
   try {
-    const formData = new FormData();
-    formData.append("access_key", accessKey);
-    formData.append("email", email.value.trim());
-    formData.append("subject", "Roofly waitlist signup");
-    formData.append("from_name", "Roofly Coming Soon");
-
-    const res = await fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      body: formData,
-    });
-    const body = (await res.json()) as { success?: boolean; message?: string };
-
-    if (res.ok && body.success) {
-      submitted.value = true;
-    } else {
-      error.value = body.message || t("marketing.emailCapture.submitError");
-    }
+    // First-party store (POST /waitlist). The backend records the lead and,
+    // when tracking is on, the waitlist_signup event — no client beacon here.
+    await useWaitlist().join({ email: email.value.trim(), website: website.value });
+    submitted.value = true;
   } catch {
     error.value = t("marketing.emailCapture.submitError");
   } finally {
@@ -89,6 +67,13 @@ const onSubmit = async () => {
         class="mt-10 flex flex-col items-center gap-3"
         @submit.prevent="onSubmit"
       >
+        <!-- Honeypot: off-screen, out of the tab order and autofill; bots that fill every field trip it -->
+        <div class="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden="true">
+          <label>
+            Website
+            <input v-model="website" type="text" name="website" tabindex="-1" autocomplete="off" />
+          </label>
+        </div>
         <div class="w-full max-w-md flex flex-col sm:flex-row items-stretch gap-3 sm:gap-0 sm:rounded-pill sm:overflow-hidden sm:bg-[rgba(247,244,237,0.06)] sm:shadow-[inset_0_0_0_1px_rgba(247,244,237,0.15)]">
           <label
             class="flex flex-1 min-w-0 items-stretch rounded-pill sm:rounded-none overflow-hidden bg-[rgba(247,244,237,0.06)] shadow-[inset_0_0_0_1px_rgba(247,244,237,0.15)] sm:bg-transparent sm:shadow-none"
@@ -132,6 +117,21 @@ const onSubmit = async () => {
         >
           {{ error }}
         </p>
+        <i18n-t
+          keypath="marketing.emailCapture.privacyNote"
+          tag="p"
+          scope="global"
+          class="max-w-md text-micro"
+          style="color: rgba(247, 244, 237, 0.6)"
+        >
+          <template #link>
+            <NuxtLink
+              to="/legal/privacy"
+              class="underline underline-offset-2 hover:opacity-80 transition-opacity"
+              style="color: #f7f4ed"
+            >{{ t("marketing.emailCapture.privacyLink") }}</NuxtLink>
+          </template>
+        </i18n-t>
       </form>
 
       <!-- Success view -->

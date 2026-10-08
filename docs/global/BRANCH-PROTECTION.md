@@ -163,28 +163,36 @@ JSON
 
 > The actor_id `5` is the built-in **Maintain** role bypass — repo admins can override the rule when needed. To remove all bypass, set `"bypass_actors": []`.
 
-## Adding required CI status checks (later)
+## CI gate (`.github/workflows/ci.yml`)
 
-Once `.github/workflows/ci.yml` exists and has run on at least one PR, you can require it.
+Runs on every push to every branch except `demo-roofly` (it only merges already-gated UAT, and its `backend/` is an empty placeholder). A PR's required checks are satisfied by the push run on its head commit. Two jobs, both required on `protect-UAT` + `protect-main`:
 
-1. Look up the ruleset id: `gh api repos/byhaqie31/roofly/rulesets`
-2. Note the exact job names from the CI run (e.g. `frontend`, `backend`)
-3. PUT the ruleset back with an extra rule appended:
+| Job | What it runs |
+|---|---|
+| `backend` | `composer install` → `php artisan test` (sqlite in-memory, no services) |
+| `frontend` | `npm ci` → `npm test` (Vitest) → `npm run build` |
 
-```json
-{
-  "type": "required_status_checks",
-  "parameters": {
-    "strict_required_status_checks_policy": true,
-    "required_status_checks": [
-      { "context": "frontend" },
-      { "context": "backend" }
-    ]
-  }
-}
+Not in CI yet (each has a backlog to clear first): `pint --test` (163 files drift), `npm run typecheck` (5 known errors), `composer audit` / `npm audit`. `protect-main` also requires `only-from-uat` (from `guard-main.yml`). **No Dependabot.** The config was tried on 2026-10-07 and removed the same day: seven bot PRs in ten minutes is noise for a solo build. Dependency bumps are done deliberately, by hand, in a normal feature → UAT PR.
+
+CI is a merge gate, not a deploy gate: `deploy.yml` fires on push, so the gate only works because direct pushes are blocked. Admin bypass (below) skips it — use it for emergencies only.
+
+### Requiring the checks on a ruleset
+
+The commands re-PUT each ruleset with its current rules plus the checks, so nothing else changes:
+
+```bash
+# protect-UAT — add a required_status_checks rule
+gh api repos/byhaqie31/roofly/rulesets/16134423 \
+  --jq '{name,target,enforcement,conditions,bypass_actors,rules: (.rules + [{type:"required_status_checks",parameters:{strict_required_status_checks_policy:true,do_not_enforce_on_create:false,required_status_checks:[{context:"backend"},{context:"frontend"}]}}])}' \
+  | gh api -X PUT repos/byhaqie31/roofly/rulesets/16134423 --input -
+
+# protect-main — append to the existing rule (keeps only-from-uat)
+gh api repos/byhaqie31/roofly/rulesets/16140859 \
+  --jq '{name,target,enforcement,conditions,bypass_actors,rules: [.rules[] | if .type=="required_status_checks" then .parameters.required_status_checks += [{context:"backend"},{context:"frontend"}] else . end]}' \
+  | gh api -X PUT repos/byhaqie31/roofly/rulesets/16140859 --input -
 ```
 
-> A check's `context` must match the workflow job name **exactly**. If the job is `jobs.build-frontend`, the context is `build-frontend`, not `frontend`. Mismatched names = the check is never satisfied and PRs can never merge.
+> A check's `context` must match the workflow job name **exactly**. Renaming `jobs.backend` in `ci.yml` without updating both rulesets = the check is never satisfied and PRs can never merge.
 
 ## Verify the live state
 

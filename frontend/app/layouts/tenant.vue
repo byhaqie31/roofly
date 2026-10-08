@@ -6,15 +6,20 @@ import ThemeToggle from "~/components/topbar/ThemeToggle.vue";
 import LangSwitcher from "~/components/topbar/LangSwitcher.vue";
 import UserMenu from "~/components/topbar/UserMenu.vue";
 import MobileNavDrawer from "~/components/layout/MobileNavDrawer.vue";
+import DemoTourButton from "~/components/demo/DemoTourButton.vue";
+import SupportWidget from "~/components/layout/SupportWidget.vue";
+import SiteFooter from "~/components/layout/SiteFooter.vue";
 
 const drawerOpen = ref(false);
+const { isDemo, showSupportWidget } = useEnv();
 </script>
 
 <template>
   <div class="min-h-dvh bg-surface-page text-ink flex">
     <!-- Desktop sidebar -->
     <aside
-      class="hidden md:flex w-60 shrink-0 flex-col border-r border-line-passive px-3 py-4"
+      data-tour="sidebar"
+      class="hidden md:flex w-60 shrink-0 flex-col border-r border-line-passive px-3 py-4 md:sticky md:top-0 md:h-dvh md:overflow-y-auto"
     >
       <NuxtLink
         to="/tenant"
@@ -39,6 +44,7 @@ const drawerOpen = ref(false);
         <div class="flex items-center gap-2 md:hidden">
           <button
             type="button"
+            data-tour="mobile-menu"
             class="inline-flex items-center justify-center w-9 h-9 rounded-sm text-ink-strong hover:bg-[rgba(28,28,28,0.04)] focus-visible:shadow-focus transition"
             aria-label="Open menu"
             @click="drawerOpen = true"
@@ -54,7 +60,8 @@ const drawerOpen = ref(false);
           </NuxtLink>
         </div>
 
-        <div class="flex items-center gap-1 ml-auto">
+        <div class="flex items-center gap-2 ml-auto">
+          <DemoTourButton v-if="isDemo" shell="tenant" />
           <div class="hidden md:inline-flex md:items-center md:gap-1">
             <LangSwitcher />
             <ThemeToggle />
@@ -63,10 +70,20 @@ const drawerOpen = ref(false);
         </div>
       </header>
       <main class="flex-1 px-4 md:px-6 py-8 overflow-auto">
-        <div class="max-w-form-readable mx-auto">
+        <div class="max-w-app mx-auto">
           <slot />
         </div>
       </main>
+      <!-- Extra bottom room on mobile so the floating help button never covers the links. -->
+      <SiteFooter
+        tone="theme"
+        variant="shell"
+        help-to="/tenant/help"
+        legal-base="/tenant/legal"
+        :class="showSupportWidget ? 'pb-20 md:pb-4' : ''"
+      />
     </div>
+    <!-- Help & feedback → admin Enquiries → Messages (hidden in demo). -->
+    <SupportWidget v-if="showSupportWidget" />
   </div>
 </template>

@@ -15,7 +15,7 @@ const showModal = ref(false);
 const editingUnit = ref<Unit | null>(null);
 
 const refresh = async () => {
-  units.value = await useUnits().listByProperty(props.propertyId);
+  units.value = await useUnits().getUnitsByProperty(props.propertyId);
 };
 
 onMounted(async () => {

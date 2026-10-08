@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { Sparkles } from "lucide-vue-next";
+import type { TourShell } from "~/composables/useDemoTour";
 
 /**
  * Topbar trigger to (re-)play the demo product tour. Mount only on demo
- * surfaces — gated by useEnv().isDemo at the mount site.
+ * surfaces — gated by useEnv().isDemo at the mount site. `shell` scopes the
+ * tour to the owner or tenant walkthrough.
  */
+const { shell = "owner" } = defineProps<{ shell?: TourShell }>();
+
 const { t } = useI18n();
-const { start } = useDemoTour();
+const { start } = useDemoTour(shell);
 </script>
 
 <template>

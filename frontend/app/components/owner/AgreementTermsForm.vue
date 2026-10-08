@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import { agreementFormSchema } from "~/schemas/agreement";
@@ -8,9 +8,11 @@ import type { Property } from "~/types/property";
 import type { Unit } from "~/types/unit";
 import type { Tenant } from "~/types/tenant";
 import { useToast } from "~/composables/useToast";
+import { AGREEMENT_TERM_PRESETS, endDateForTerm, termMonthsBetween, type AgreementTermPreset } from "~/utils/agreementTerm";
 import Input from "~/components/ui/Input.vue";
 import Select from "~/components/ui/Select.vue";
 import Button from "~/components/ui/Button.vue";
+import AgreementPayoutSelect from "~/components/owner/AgreementPayoutSelect.vue";
 
 const props = defineProps<{
   agreement?: Agreement | null;
@@ -29,6 +31,10 @@ const allProperties = ref<Property[]>([]);
 const allUnits = ref<Unit[]>([]);
 const allTenants = ref<Tenant[]>([]);
 const formPropertyId = ref<string>("");
+// Create only — on an existing agreement it's changed from the Overview tab,
+// since it isn't a term (spec 2026-10-08 § 3.2).
+const payoutAccountId = ref<string | null>(null);
+const payoutError = ref<string | undefined>(undefined);
 
 const senToRinggit = (sen: number) => sen / 100;
 const ringgitToSen = (rm: number) => Math.round(rm * 100);
@@ -60,11 +66,12 @@ const buildInitialValues = (): FormValues => {
   };
 };
 
-const { defineField, handleSubmit, errors, resetForm, setFieldValue } =
+const { defineField, handleSubmit, errors, resetForm, setFieldValue, setErrors } =
   useForm<FormValues>({
     validationSchema: toTypedSchema(agreementFormSchema),
     initialValues: buildInitialValues(),
   });
+const { toFieldErrors } = useApiError();
 
 const [unitId] = defineField("unitId");
 const [tenantId] = defineField("tenantId");
@@ -75,6 +82,29 @@ const [depositAmount] = defineField("depositAmount");
 const [lateFee] = defineField("lateFee");
 const [rentDueDay] = defineField("rentDueDay");
 const [status] = defineField("status");
+
+// ── Term presets: 6 / 12 / 24 months fill the end date from the start date ──
+// (same day N months on, minus a day). Editing the end date by hand switches
+// to Custom; an existing agreement pre-selects the preset its dates match.
+type TermChoice = AgreementTermPreset | "custom";
+const termChoice = ref<TermChoice>(
+  termMonthsBetween(startDate.value ?? "", endDate.value ?? "") ?? (endDate.value ? "custom" : 12),
+);
+const termOptions = computed<{ value: TermChoice; label: string }[]>(() => [
+  ...AGREEMENT_TERM_PRESETS.map((months) => ({ value: months, label: t("owner.agreements.term.months", { n: months }) })),
+  { value: "custom", label: t("owner.agreements.term.custom") },
+]);
+const dmy = (iso: string) => iso.split("-").reverse().join("/");
+
+watch([startDate, termChoice], () => {
+  if (termChoice.value === "custom") return;
+  const end = endDateForTerm(startDate.value ?? "", termChoice.value);
+  if (end && end !== endDate.value) setFieldValue("endDate", end);
+});
+watch(endDate, (end) => {
+  if (termChoice.value === "custom") return;
+  if (termMonthsBetween(startDate.value ?? "", end ?? "") !== termChoice.value) termChoice.value = "custom";
+});
 
 const propertyOptions = computed(() =>
   allProperties.value.map((p) => ({ value: p.id, label: p.name })),
@@ -92,6 +122,10 @@ const tenantOptions = computed(() =>
 
 const statusOptions = computed(() => [
   { value: "draft", label: t("owner.agreements.status.draft") },
+  // Reached only by Send / the tenant agreeing — shown so the current value
+  // renders, disabled so it can't be picked by hand (API refuses it too).
+  { value: "pending_review", label: t("owner.agreements.status.pending_review"), disabled: true },
+  { value: "accepted", label: t("owner.agreements.status.accepted"), disabled: true },
   { value: "active", label: t("owner.agreements.status.active") },
   { value: "expired", label: t("owner.agreements.status.expired") },
   { value: "terminated", label: t("owner.agreements.status.terminated") },
@@ -111,9 +145,9 @@ const onPropertyChange = (newPropertyId: string) => {
 
 onMounted(async () => {
   [allProperties.value, allUnits.value, allTenants.value] = await Promise.all([
-    useProperties().list(),
-    useUnits().list(),
-    useTenants().list(),
+    useProperties().getProperties(),
+    useUnits().getUnits(),
+    useTenants().getTenants(),
   ]);
   resetForm({ values: buildInitialValues() });
   if (props.agreement) {
@@ -124,6 +158,7 @@ onMounted(async () => {
 
 const onSubmit = handleSubmit(async (values) => {
   submitting.value = true;
+  payoutError.value = undefined;
   try {
     const payload: AgreementInput = {
       unitId: values.unitId,
@@ -136,6 +171,7 @@ const onSubmit = handleSubmit(async (values) => {
       rentDueDay: values.rentDueDay,
       status: values.status,
     };
+    if (props.mode === "create") payload.payoutAccountId = payoutAccountId.value;
     if (props.mode === "edit" && props.agreement) {
       const updated = await useAgreements().update(props.agreement.id, payload);
       show(t("common.savedToast"), "success");
@@ -145,6 +181,14 @@ const onSubmit = handleSubmit(async (values) => {
       show(t("owner.agreements.createdToast"), "success");
       emit("saved", created);
     }
+  } catch (err) {
+    const fieldErrors = toFieldErrors(err);
+    if (fieldErrors) {
+      setErrors(fieldErrors);
+      payoutError.value = fieldErrors.payoutAccountId;
+      return;
+    }
+    show(t("common.genericError"), "danger");
   } finally {
     submitting.value = false;
   }
@@ -199,6 +243,29 @@ const onSubmit = handleSubmit(async (values) => {
       >
         {{ t("owner.agreements.detail.sections.term") }}
       </h3>
+      <div>
+        <p class="mb-2 text-caption font-medium text-ink">{{ t("owner.agreements.fields.term") }}</p>
+        <div class="flex flex-wrap gap-2" role="radiogroup" :aria-label="t('owner.agreements.fields.term')">
+          <button
+            v-for="opt in termOptions"
+            :key="String(opt.value)"
+            type="button"
+            role="radio"
+            :aria-checked="termChoice === opt.value"
+            class="rounded-pill border px-3.5 py-1.5 text-caption font-medium transition focus:outline-none focus-visible:shadow-focus"
+            :class="termChoice === opt.value
+              ? 'border-ink bg-ink text-surface-page'
+              : 'border-line-passive bg-surface-page text-ink hover:bg-surface-hover'"
+            @click="termChoice = opt.value"
+          >
+            {{ opt.label }}
+          </button>
+        </div>
+        <p v-if="termChoice !== 'custom' && endDate" class="mt-2 text-caption text-ink-muted">
+          {{ t("owner.agreements.term.endsOn", { date: dmy(endDate) }) }}
+        </p>
+      </div>
+
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           v-model="startDate"
@@ -263,6 +330,16 @@ const onSubmit = handleSubmit(async (values) => {
           :label="t('owner.agreements.fields.status')"
           :error="errors.status"
         />
+      </div>
+    </section>
+
+    <section v-if="mode === 'create'" class="space-y-3">
+      <h3 class="text-caption font-semibold uppercase tracking-wide text-ink-muted">
+        {{ t("owner.agreements.payout.title") }}
+      </h3>
+      <p class="text-caption text-ink-muted">{{ t("owner.agreements.payout.help") }}</p>
+      <div class="sm:max-w-md">
+        <AgreementPayoutSelect v-model="payoutAccountId" :error="payoutError" />
       </div>
     </section>
 

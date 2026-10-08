@@ -7,9 +7,11 @@ import LangSwitcher from "~/components/topbar/LangSwitcher.vue";
 import UserMenu from "~/components/topbar/UserMenu.vue";
 import MobileNavDrawer from "~/components/layout/MobileNavDrawer.vue";
 import DemoTourButton from "~/components/demo/DemoTourButton.vue";
+import SupportWidget from "~/components/layout/SupportWidget.vue";
+import SiteFooter from "~/components/layout/SiteFooter.vue";
 
 const drawerOpen = ref(false);
-const { isDemo } = useEnv();
+const { isDemo, showSupportWidget } = useEnv();
 </script>
 
 <template>
@@ -17,7 +19,7 @@ const { isDemo } = useEnv();
     <!-- Desktop sidebar -->
     <aside
       data-tour="sidebar"
-      class="hidden md:flex w-64 shrink-0 flex-col border-r border-line-passive px-3 py-4"
+      class="hidden md:flex w-64 shrink-0 flex-col border-r border-line-passive px-3 py-4 md:sticky md:top-0 md:h-dvh md:overflow-y-auto"
     >
       <NuxtLink
         to="/owner"
@@ -72,6 +74,16 @@ const { isDemo } = useEnv();
           <slot />
         </div>
       </main>
+      <!-- Extra bottom room on mobile so the floating help button never covers the links. -->
+      <SiteFooter
+        tone="theme"
+        variant="shell"
+        help-to="/owner/help"
+        legal-base="/owner/legal"
+        :class="showSupportWidget ? 'pb-20 md:pb-4' : ''"
+      />
     </div>
+    <!-- Help & feedback → admin Enquiries → Messages (hidden in demo). -->
+    <SupportWidget v-if="showSupportWidget" />
   </div>
 </template>

@@ -18,26 +18,23 @@
 
 ## 2. Folder layout
 
+> **Updated 2026-08-23.** The demo layer and the API layer are now separate adapters selected once per service — see [specs/2026-08-23-demo-adapter-split-design.md](../superpowers/specs/2026-08-23-demo-adapter-split-design.md). The layout below supersedes the original `mocks/` + `if (useMock)` pattern described in the rest of this doc; entity sections still apply for types, seed content, and UX.
+
 ```
 frontend/app/
 ├── types/                ← single source of truth for entity shapes
-│   ├── property.ts
-│   ├── unit.ts
-│   ├── tenant.ts
-│   └── ...
-├── mocks/                ← seed data, only imported by services
-│   ├── properties.ts
-│   ├── units.ts
-│   └── ...
-├── services/             ← the swap point: today returns mocks, tomorrow calls useApi()
-│   ├── useProperties.ts
-│   ├── useUnits.ts
-│   └── ...
-└── composables/
-    └── useApi.ts         ← unchanged; services will start using it post-swap
+├── demo/                 ← demo-only; never imports useApi
+│   ├── auth.ts           ← demoAuth (localStorage session) + DEMO_TENANT_ID
+│   ├── data/             ← seed arrays (was mocks/)
+│   └── services/         ← demoX: XService, one per entity + dashboard
+├── services/
+│   ├── contracts/        ← XService interfaces + *WithRefs types
+│   ├── api/              ← apiX: XService, Laravel calls via useApi(); never imports ~/demo
+│   └── useX.ts           ← auto-imported: useEnv().useMock ? demoX : apiX
+└── composables/useApi.ts ← CSRF / 401 / 422 handling for the API adapters
 ```
 
-**Rule:** pages and components import from `services/` only. They must never `import { propertiesMock } from "~/mocks/..."`. That single boundary is what makes the swap painless.
+**Rule:** pages and components import from `services/useX` only — never from `~/demo/**` or `~/services/api/**`. Adding a method = add it to the contract, implement it in both adapters.
 
 ---
 
@@ -321,6 +318,7 @@ The PROJECT.md `properties` table currently covers Tier 1 only. Recommended exte
   - `properties.owner_id` continues to point at the primary co-owner's `user_id`; the table just makes the joint-ownership picture explicit and queryable ("show all properties where user X is any kind of owner" becomes a simple join).
 - **Mortgage stays nested in `ownership` JSON for now.** TODO: extract to a `property_mortgages` table when we add payment history, refinancing events, or multi-mortgage support.
 - Photos and document uploads (Documents tab) are deferred to Phase 4+ when storage is wired; reuse the polymorphic `documents` table already in PROJECT.md.
+- **`purpose` string column** (default `"rental"`, `rental|own_stay|investment`) shipped in `2026_08_25_000002_add_purpose_to_properties_table.php` — a plain string, not a DB enum, so sqlite `ALTER TABLE` stays simple; `App\Enums\PropertyPurpose` + an Eloquent cast give it type safety in PHP. Non-rental properties are excluded from occupancy stats, the dashboard attention feed, and the Reports income table — they surface only in a separate "not for rent" capital-position group. The Add Property modal only shows a purpose picker once the owner has more than one purpose selected in onboarding; otherwise the value is implied.
 
 ---
 
@@ -397,6 +395,8 @@ PROJECT.md's `users` table covers Tier 1 (with `role="tenant"`). Tier 2/3 are ex
 - `emergency_contact JSON` — Tier 3.
 
 Photo + document uploads are Phase 4+; they reuse the polymorphic `documents` table already in PROJECT.md.
+
+Invite delivery (shipped 2026-10-07): `tenant_invites` (`user_id`, `token_hash`, `expires_at`, `accepted_at`) + `POST /auth/accept-invite`. Accepting sets the password and flips `users.status` `invited → active`; so does the forgot-password path. Spec: [2026-10-07-invoice-generation-tenant-invite-design.md](../superpowers/specs/2026-10-07-invoice-generation-tenant-invite-design.md).
 
 ### 5.5 Mock seed
 
@@ -526,6 +526,16 @@ UX rules locked in here:
 - `POST /invoices/:id/send` — dispatch invoice via email / WhatsApp. Returns `{ sentAt }`.
 
 Late-fee accrual is a backend concern (cron job per [PROJECT.md § Flow 3 step 6](../global/PROJECT.md#L184)). The mock just snapshots `agreement.lateFee` onto overdue invoices for display.
+
+Generation (shipped 2026-10-07): no create endpoint. `InvoiceGenerator` creates the next-due-date invoice when an agreement is activated — **never back-fills past months** — and `invoices:roll` extends it daily within a 30-day horizon, flipping unpaid ones to `overdue` with the flat late fee the day after `due_date`. `invoices(agreement_id, due_date)` is unique. The demo generator in § 6.2 stays as the curated-history source for demo and `DemoSeeder`; it is not what production runs.
+
+### 6.8 Manual DuitNow claims + payout accounts (2026-10-08)
+
+No gateway yet, so tenants pay by DuitNow / bank transfer and then tell the owner. Spec: [2026-10-08-payout-accounts-duitnow-design.md](../superpowers/specs/2026-10-08-payout-accounts-duitnow-design.md).
+
+- **A claim is a `Payment`** `{method: "transfer", status: "pending", reference, paidAt, note, payoutAccountId}`; the invoice status does not change. *Awaiting confirmation* is derived (`utils/paymentClaim.ts`). Owner **Confirm** → `successful` + invoice `paid`; **Reject** (reason required) → `failed`, tenant sees the reason and can claim again. One pending claim per invoice.
+- **Gateway** (`payForTenant`) stays on the contract behind `useEnv().features.onlinePayments` (off everywhere → "Coming soon"); the backend 403s `/me/invoices/{id}/pay` unless `ONLINE_PAYMENTS`.
+- **Schema impact (brief):** new `payout_accounts` (owner-scoped, one default), `agreements.payout_account_id` (null = default), `payments` += `payout_account_id`, `note`, `rejection_reason`, `confirmed_at`; `users.bank_account_last4` dropped. Overdue roll skips an invoice whose pending claim is dated on/before its due date. Later, for the gateway: `payout_accounts.gateway_ref` / `verified_at` (settlement target).
 
 ---
 
@@ -731,7 +741,6 @@ export interface OwnerProfile {
   phone: string;
   photoUrl?: string;                // Phase 4+
   businessName?: string;
-  bankAccountLast4?: string;        // display-only; bank linkage lives elsewhere
 }
 
 export interface OwnerPreferences {
@@ -759,11 +768,12 @@ export interface OwnerAccount {
 
 ### 9.2 Tab structure
 
-Same Reka-UI Tabs primitive as the property/tenant detail pages. Four tabs:
+Same Reka-UI Tabs primitive as the property/tenant detail pages. Five tabs (`?tab=` deep-links):
 
 | Tab | Content | State source |
 |---|---|---|
-| **Profile** | Identity (name, email read-only, phone, business name), photo placeholder, masked bank account. | `OwnerAccount.profile` |
+| **Profile** | Identity (name, email read-only, phone, business name), photo placeholder. | `OwnerAccount.profile` |
+| **Payouts** | Payout accounts (bank, holder, account number and/or DuitNow ID; one default) + an "Online payments — Coming soon" card. See § 6.8. | `usePayoutAccounts().list()` |
 | **Preferences** | Language radio (English / Bahasa Melayu) + theme radio (Light / Dark / System) — applied to the live UI on save via `setLocale()` and `setTheme()`. | `OwnerAccount.preferences` (cookie-backed for theme + locale, Pinia for the rest) |
 | **Notifications** | Five event toggles + a Phase-4 banner explaining channels (email + WhatsApp) ship later. In-app notifications are documented as always-on. | `OwnerAccount.notifications.events` |
 | **Plan** | Four-tier ladder (Free / Starter / Pro / Business), current tier highlighted, upgrade CTAs toast a Phase-7 stub. | `Plan[]` from `useOwnerSettings().listPlans()` + `OwnerAccount.planTier` |
@@ -782,11 +792,16 @@ The Preferences form is special — it applies its values to the live app *immed
 
 ### 9.5 Schema impact for backend
 
-- **`users` table** already covers `name` / `email` / `phone` (Tier 1 per § 5.4). Add `business_name`, `photo_path` (Phase 4), and a nullable `bank_account_last4` snapshot.
+- **`users` table** already covers `name` / `email` / `phone` (Tier 1 per § 5.4). Add `business_name`, `photo_path` (Phase 4). (`bank_account_last4` was dropped 2026-10-08 — payout details live in `payout_accounts`, § 6.8.)
 - **`owner_preferences` JSON** column on `users` (or sibling table) — `{ locale, theme, money_locale }`. Could also be a kv-store; small enough to stay JSON.
 - **`notification_preferences` JSON** column on `users` — `{ events: {...}, channels: {...} }`. Phase 4 may promote channels into a per-event matrix; the JSON shape absorbs that without a migration.
 - **Subscription / plan** is its own concern in Phase 7 — likely a `subscriptions` table joined to `users.id`. The frontend currently reads `account.planTier` from the same payload as profile.
-- **Endpoints the frontend mocks today**: `GET /account`, `PATCH /account/profile`, `PATCH /account/preferences`, `PATCH /account/notifications`, `GET /plans`.
+- **Endpoints the frontend mocks today**: `GET /account`, `PATCH /account/profile`, `PATCH /account/preferences`, `PATCH /account/notifications`, `GET /plans`, `PATCH /account/onboarding`, `PATCH /account/checklist`, `POST /account/password`.
+- **New `users` columns** (`2026_08_25_000001_add_google_and_onboarding_to_users_table.php`): `google_id` (nullable unique, owner-only Google sign-in), `avatar_url`, `purposes` (json, e.g. `["rental","own_stay"]`), `onboarded_at` (nullable timestamp — backfilled to `created_at` for every pre-existing owner so no one is retroactively forced through onboarding), `checklist_dismissed_at` (nullable timestamp).
+
+### 9.6 Owner onboarding & getting-started checklist
+
+One-screen `/owner/onboarding` (full-screen `layouts/onboarding.vue`, no sidebar) asks a new owner to pick one or more purposes (`rental` / `own_stay` / `investment`) via `OwnerPurposePicker`; submits to `completeOnboarding`. A route guard in `middleware/auth.global.ts` routes any owner with a falsy `onboardedAt` here before anything else in `/owner/*`. The dashboard's `GettingStartedCard` shows a computed, **not stored**, checklist (`utils/onboardingChecklist.ts`'s `buildChecklist()`) derived fresh each load from the owner's real properties/units/tenants/agreements — steps can never drift out of sync with reality the way a stored "completed steps" list could. Only `checklistDismissedAt` (dismiss/restore) and `purposes`/`onboardedAt` (the one-time gate) are persisted.
 
 ---
 
@@ -833,3 +848,51 @@ Entities migrate independently; we don't need a big-bang swap.
 7. **Maintenance tickets** — types + status transition map + Zod schemas + `useTickets` service + Kanban + detail page with comment thread + create modal. See § 7.
 8. **Cross-entity views** — `useDashboard` + `useReports` composables → dashboard tiles, 12-month chart, "Needs attention" feed → reports page (year picker, per-property breakdown, CSV export, PDF stub). See § 8.
 9. **Settings** — `useOwnerSettings` composable + 4-tab page (Profile / Preferences / Notifications / Plan). Closes the owner shell. See § 9.
+
+---
+
+## 13. Tenant shell
+
+The tenant-facing app reuses the owner entities and services rather than introducing new ones — it's a **read-mostly view onto the same mocks, scoped to one tenant**. No new types or mock seed data; the only additions are tenant-scoped service reads and a binding composable.
+
+**Binding.** [composables/useTenantSession.ts](../../frontend/app/composables/useTenantSession.ts) resolves the signed-in tenant to a record id. In mock/demo mode it returns the seeded `t-aminah` (richest tenant: active agreement, paid + outstanding invoices, open + resolved issues). This is the **single swap point**: when Sanctum lands, a real tenant's auth-user id *is* their tenant id and the mock branch drops.
+
+**Service reads** (mock filters now, `/me/*` endpoints later):
+- `useAgreements().getActiveForTenant(tenantId)` → the tenant's current `AgreementWithRefs`.
+- `useInvoices().listForTenant(tenantId)` → invoices across the tenant's agreements.
+- `useTickets().listForTenant(tenantId)` → issues the tenant reported.
+
+**Surfaces** (`pages/tenant/`): Home (rent-due hero + stats + open-issues), Agreement (read-only summary + Phase-4 documents card, reuses owner `AgreementDocumentsPanel`), Payments (invoice cards + `PayInvoiceModal` simulating an FPX pay→paid round-trip via the existing `recordPayment`), Issues (list + detail with comment thread, `ReportIssueModal` filing against the tenant's own unit; **status stays owner-controlled** — tenants comment but don't transition), Profile (view + single-form edit of identity / personal / emergency, writing through `useTenants().update`).
+
+**Schema impact:** none beyond the owner entities. The backend adds tenant-scoped `/me/agreement`, `/me/invoices`, `/me/tickets` read endpoints (server already knows the caller), plus a real rent-payment flow behind `PayInvoiceModal` (currently a mocked FPX success). Profile edits hit the same tenant `PATCH` as the owner-side tenant detail.
+
+---
+
+## 14. Admin back office (SP1)
+
+A third shell alongside owner/tenant — Roofly staff, not customers. Gated by `useEnv().features.admin`, always off in demo, separate `/admin/login` auth. Own demo data (`app/demo/data/admin.ts`) and own contracts/services (`services/contracts/admin/`, `services/api/admin/`, `demo/services/admin/`), not a reuse of the owner/tenant entities — admin reads are cross-tenant summaries, never the full owner/tenant records.
+
+**Surfaces:**
+- **Dashboard** (`pages/admin/index.vue`) — platform-wide stat tiles + an attention list (over-cap owners, overdue-heavy owners, etc.), via `useAdminDashboardData`.
+- **Owners** (`pages/admin/owners/index.vue` + `[id].vue`) — searchable/filterable list + detail (properties, tenants, warn/suspend actions).
+- **Tenants** (`pages/admin/tenants/index.vue` + `[id].vue`) — searchable/filterable list + detail.
+- **Enquiries** (`pages/admin/enquiries.vue`) — the coming-soon inbox: `leads` rows with `source = waitlist`, written by the first-party `POST /waitlist` that `components/marketing/EmailCapture.vue` posts to through `useWaitlist()` (no Web3Forms, no client beacon). Reuses the analytics leads endpoints with the source pinned; email search, CSV export, `LeadDrawer` on row click; gated by `analytics.view`.
+- **Settings → Admins** (`pages/admin/settings.vue`) — invite/edit admin users, assign permissions from the fixed `AdminPermissions` catalogue (13 keys, incl. an Operations preset).
+- **Audit** (`pages/admin/audit.vue`) — paginated, filterable log of admin actions.
+
+**Types** (`app/types/admin.ts` — link, not duplicated here):
+- `AdminOwner` / `AdminOwnerCounts` — summary-only (property/unit/tenant/agreement/invoice/ticket counts), never money, never the owner's full property/tenant graph.
+- `AdminTenant`
+- `AdminPropertySummary`
+- `AdminUser` / `AdminPermission` (mirrors backend `App\Support\AdminPermissions::ALL`) / `PermissionCatalogue`
+- `AuditEntry`
+- `Paginated<T>` — the shared `{ data, meta: { page, perPage, total, lastPage } }` envelope every admin list endpoint returns.
+
+**Schema impact:**
+- `users` table gains admin-only columns: `is_super_admin`, `suspended_at`, `suspension_reason`, `last_active_at`, `first_login_at`, `disabled_at`.
+- New `admin_invites` table (`user_id`, `token_hash`, `expires_at`, `accepted_at` — no email, no permissions snapshot; consumed by `/admin/auth/accept-invite`).
+- Spatie `permissions` seeded from `App\Support\AdminPermissions` (13 keys), via `AdminPermissionSeeder`; an admin's permission set is direct Spatie permission assignments (`syncPermissions`), not roles, and not a JSON column.
+- `ActivityLog` entries written by `App\Services\AuditLogger` use `log_name = admin` — the Audit surface reads this log, it isn't a bespoke table.
+- Admin API Resources are key-set-pinned by `AdminResourcesTest` (backend) — summaries only, see CLAUDE.md's "Admin sees summaries only" convention.
+
+**Future-phase hooks (not built yet, noted so SP1 doesn't box them out):** owner-warning delivery channels beyond mail (`App\Notifications\OwnerWarning::via` returns `['mail']` only in SP1 — SP2 may add whatsapp/sms, configurable per owner or per template); a `settings.flags` permission already exists in the catalogue for a future admin-controlled feature-flag surface; `owners.plan` / subscription management is stubbed as a permission key ahead of the Phase 7 subscriptions work in § 9.5.

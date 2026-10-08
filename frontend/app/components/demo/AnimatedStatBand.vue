@@ -61,8 +61,17 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="root" class="grid grid-cols-3 gap-5">
-    <div v-for="(stat, i) in stats" :key="i">
+  <div ref="root" class="grid grid-cols-3 gap-3 lg:gap-4">
+    <div
+      v-for="(stat, i) in stats"
+      :key="i"
+      class="rounded-lg px-3 py-5 lg:px-5 text-center"
+      style="
+        background: rgba(247, 244, 237, 0.04);
+        border: 1px solid rgba(247, 244, 237, 0.1);
+        box-shadow: 0 1px 0 rgba(247, 244, 237, 0.04) inset;
+      "
+    >
       <p
         class="text-display-sub font-semibold tracking-tight tabular-nums leading-none"
         style="color: #e76a3f"

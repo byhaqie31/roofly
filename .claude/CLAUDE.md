@@ -6,7 +6,7 @@ Quick orientation for any new Claude Code session in this repo. Read this before
 
 ## What this is
 
-**Roofly.my** — a rent-management SaaS for Malaysian landlords. Solo build, currently in the **frontend mock-first phase** (Phase 2). No backend exists yet; the entire owner shell is implemented against typed TypeScript mocks behind a single `useMock` runtime toggle, ready to swap to a Laravel + Sanctum backend per-entity when that lands.
+**Roofly.my** — a rent-management SaaS for Malaysian landlords. Solo build. The Nuxt frontend runs against either the **Laravel + Sanctum API** (UAT/prod) or a self-contained **demo layer** (`app/demo/` — in-memory seed data, never touches the network), selected once per service by `useEnv().useMock`. Demo is also the live prototype surface: new features are built demo-adapter-first, shipped to UAT behind a `features.*` flag, and get their API adapter when the backend catches up. Design: [docs/superpowers/specs/2026-08-23-demo-adapter-split-design.md](docs/superpowers/specs/2026-08-23-demo-adapter-split-design.md).
 
 ---
 
@@ -18,6 +18,9 @@ Quick orientation for any new Claude Code session in this repo. Read this before
 | [docs/frontend/MOCK-POC.md](docs/frontend/MOCK-POC.md) | The frontend mock-first plan, entity-by-entity. Section per surface (Properties, Tenants, Payments, Maintenance, Dashboard & Reports, Settings) with types, mocks, services, and **brief** schema impact for the future backend. **Frontend-first by intent — keep schema-impact subsections forward-looking, not exhaustive.** |
 | [docs/frontend/UI-STANDARDS.md](docs/frontend/UI-STANDARDS.md) | Design tokens, components, layout, dark mode, mobile patterns. Section 11 (Mobile patterns) is a living section — add new responsive guidelines there. |
 | [docs/global/BRANCH-PROTECTION.md](docs/global/BRANCH-PROTECTION.md) | Git workflow / merge rules. |
+| [docs/backend/API-SPEC.md](docs/backend/API-SPEC.md) | Backend contract per shell → module → endpoint (middleware, request rules, response shapes, audit actions, stubs). Update whenever `routes/api.php`, a FormRequest, or a Resource changes. |
+| [docs/frontend/API-MAP.md](docs/frontend/API-MAP.md) | Per shell → page → service method → endpoint, with the demo-adapter equivalent. Update with every new contract method. |
+
 
 If a question is answered by one of these, defer to that doc and don't re-derive.
 
@@ -26,7 +29,7 @@ If a question is answered by one of these, defer to that doc and don't re-derive
 ## Stack
 
 - **Frontend** — Nuxt 4 + Vue 3, Pinia, vee-validate + Zod, Reka UI primitives, Tailwind v3, `@nuxtjs/i18n` (en + ms). Lives in [frontend/](frontend/).
-- **Backend** — Laravel 11 + Sanctum + Spatie (Permission, MediaLibrary, ActivityLog), MySQL, Redis, RabbitMQ. **Not yet scaffolded** — slot lives in [backend/](backend/) but is empty.
+- **Backend** — Laravel 13 + Sanctum + Spatie (Permission, MediaLibrary, ActivityLog), MySQL, Redis, RabbitMQ. Lives in [backend/](backend/); serves the frontend's camelCase contract via API Resources + FormRequests (design: [docs/superpowers/specs/2026-07-21-backend-api-contract-alignment-design.md](docs/superpowers/specs/2026-07-21-backend-api-contract-alignment-design.md)). Tests: `docker exec roofly-backend php artisan test` (sqlite in-memory).
 - **Dev** — Docker Compose ([docker-compose.yml](docker-compose.yml)). Frontend container is `roofly-frontend`, exposes :3000 and HMRs against the host.
 
 ---
@@ -37,15 +40,38 @@ If a question is answered by one of these, defer to that doc and don't re-derive
 - Dashboard ([pages/owner/index.vue](frontend/app/pages/owner/index.vue)) — 4 stat tiles, 12-month income area chart, "Needs attention" feed combining overdue invoices + expiring agreements + notice-given tenants + new-urgent + reopened tickets.
 - Properties ([pages/owner/properties/](frontend/app/pages/owner/properties/)) — list + detail with 5-tab structure (Overview, Details, Ownership, Utilities, Documents), nested UnitsPanel, co-owner repeater with sum=100 + single-primary invariants.
 - Tenants ([pages/owner/tenants/](frontend/app/pages/owner/tenants/)) — list + 3-tab detail (Identity, Personal, Emergency contact). 4-state status enum incl. `notice_given`.
-- Agreements ([pages/owner/agreements/](frontend/app/pages/owner/agreements/)) — list ([index.vue](frontend/app/pages/owner/agreements/index.vue)) + create ([new.vue](frontend/app/pages/owner/agreements/new.vue)) + 3-tab detail ([[id].vue](frontend/app/pages/owner/agreements/[id].vue): Overview, Terms, Documents). Documents tab gated by `features.documents` and shows the legal-section slot list (signed lease, addendums, inspection, inventory, exit letter) with a Phase-4 upload placeholder.
-- Payments ([pages/owner/payments.vue](frontend/app/pages/owner/payments.vue)) — TanStack Table, status pills + month/year filters, record-payment + invoice-view modals, CSV-friendly.
+- Agreements ([pages/owner/agreements/](frontend/app/pages/owner/agreements/)) — list ([index.vue](frontend/app/pages/owner/agreements/index.vue)) + create ([new.vue](frontend/app/pages/owner/agreements/new.vue)) + 3-tab detail ([[id].vue](frontend/app/pages/owner/agreements/[id].vue): Overview, Terms, Documents). **Review flow (2026-10-07):** `draft → pending_review (Send to tenant) → accepted (tenant agrees on /tenant/agreement, or asks for changes with a note → back to draft) → active (owner clicks Activate; invoices start)`. Term edits while sent/accepted drop back to draft. `pending_review`/`accepted` are never set by hand (API 422). Spec: [docs/superpowers/specs/2026-10-07-agreement-review-design.md](docs/superpowers/specs/2026-10-07-agreement-review-design.md). Documents tab gated by `features.documents` and shows the legal-section slot list (signed lease, addendums, inspection, inventory, exit letter) with a Phase-4 upload placeholder.
+- Payments ([pages/owner/payments.vue](frontend/app/pages/owner/payments.vue)) — TanStack Table, status pills + month/year filters, record-payment + invoice-view modals, CSV-friendly. Tenant DuitNow claims show as *Awaiting confirmation* + **Review** (confirm / reject in `PaymentClaimPanel`).
 - Maintenance ([pages/owner/maintenance/](frontend/app/pages/owner/maintenance/)) — Kanban (4 columns: New / In progress / Resolved / Reopened) + detail page with comment thread + status transitions + Phase-4 photo stub.
 - Reports ([pages/owner/reports.vue](frontend/app/pages/owner/reports.vue)) — year picker, monthly area chart, per-property breakdown with RPGT net gain, working CSV download + Phase-4 PDF stub.
-- Settings ([pages/owner/settings.vue](frontend/app/pages/owner/settings.vue)) — 4-tab (Profile, Preferences, Notifications, Plan).
+- Settings ([pages/owner/settings.vue](frontend/app/pages/owner/settings.vue)) — 5-tab (Profile, Payouts, Preferences, Notifications, Plan; `?tab=` deep-links).
 
-**Tenant shell** — placeholder pages exist but not yet built out.
+**Tenant shell — complete in mock form (5 surfaces):**
+- Home ([pages/tenant/index.vue](frontend/app/pages/tenant/index.vue)) — rent-due hero (earliest unpaid invoice + Pay now), 4 stat tiles (rent / deposit / tenancy-ends / open-issues), "Your home" property card + quick actions, open-issues preview.
+- Agreement ([pages/tenant/agreement.vue](frontend/app/pages/tenant/agreement.vue)) — read-only term/money summary + Documents card (reuses owner `AgreementDocumentsPanel`, gated by `features.documents`).
+- Payments ([pages/tenant/payments.vue](frontend/app/pages/tenant/payments.vue)) — outstanding summary + invoice cards; `PayInvoiceModal` is a method picker — **DuitNow / bank transfer** (payout details with Copy buttons → "I've paid" claim) and **Online banking / card** (Coming soon; the old simulated FPX round-trip, only with `features.onlinePayments`) — and doubles as the receipt view.
+- Issues ([pages/tenant/tickets/](frontend/app/pages/tenant/tickets/)) — list ([index.vue](frontend/app/pages/tenant/tickets/index.vue)) + detail ([[id].vue](frontend/app/pages/tenant/tickets/[id].vue)) with comment thread (tenant comments; status is owner-controlled / read-only here) + `ReportIssueModal` (files against the tenant's own unit).
+- Profile ([pages/tenant/profile.vue](frontend/app/pages/tenant/profile.vue)) — view + single-form edit of Identity / Personal / Emergency contact.
 
-**Backend** — not started.
+[composables/useTenantSession.ts](frontend/app/composables/useTenantSession.ts) resolves the current tenant id — `DEMO_TENANT_ID` (Aminah) in demo, `auth.user.id` against the API. Tenant-scoped service methods are the `…ForTenant` / `getProfile` / `updateProfile` ones on the contracts; they map to `/me/*` in the API adapter and ignore the id there. The "Continue as tenant" demo shortcut is now enabled (`TENANT_ENABLED` in `DemoLoginShortcuts.vue`). **Tenant onboarding (2026-10-07):** a tenant with a falsy `onboardedAt` is routed by the same guard to the full-screen `/tenant/onboarding` (three steps, mandatory core fields: phone, MyKad, emergency contact name + phone) which calls `PATCH /me/onboarding`; the tenant home shows `ProfileNudgeCard` while `utils/tenantProfileCompletion.ts` reports a missing core field, and the sidebar order is Home, Profile, Agreement, Payments, Issues.
+
+**Backend** — Laravel 13, contract-aligned to the frontend types (Phase 1), owner shell wired to it with Sanctum cookie auth, CSRF/401/422 handling, and a global auth/role route guard (Phase 2). `DemoSeeder` mirrors the frontend demo data. Tenant shell is wired end-to-end too: reads via `/me/agreement|invoices|tickets`, writes via `payForTenant`, `createForTenant`, `addCommentForTenant`, `getProfile`/`updateProfile` (`/me/*`), all in both adapters. Tenant email is read-only on the profile (login identity).
+
+**Invoices + tenant invites (2026-10-07)** — `App\Services\InvoiceGenerator` creates rent invoices from the **next due date onward** (never back-fills past months) when an owner activates an agreement, and the daily `invoices:roll` command (00:30 MYT, `scheduler` container) rolls them forward within a 30-day horizon and flips unpaid ones to `overdue` with the agreement's flat late fee. `invoices(agreement_id, due_date)` is unique, so re-runs are safe — **in tests, give each invoice on one agreement its own `due_date`**. Owner `POST /tenants/invite` and admin resend queue `App\Notifications\TenantInvite`; the tenant sets a password at `/auth/accept-invite` (`POST /auth/accept-invite`, `tenant_invites` table, 7-day links) and becomes `active`; the forgot-password path does the same flip. Because only the token hash is stored, the plain link is returned exactly once: `POST /tenants/invite` → `{tenant, inviteUrl, inviteExpiresAt}` (shown in `TenantInviteModal`'s sent panel with Copy + WhatsApp), and `POST /tenants/{id}/invite-link` mints a fresh one for the detail page's **Copy invite link** backup (voids earlier links, no mail, 409 once active). Hooks live in the controllers, not model observers, so `DemoSeeder`/factories keep seeding their own curated invoice history. Spec: [docs/superpowers/specs/2026-10-07-invoice-generation-tenant-invite-design.md](docs/superpowers/specs/2026-10-07-invoice-generation-tenant-invite-design.md).
+
+**Payout accounts + manual DuitNow rent (2026-10-08)** — no gateway yet, so owners keep **payout accounts** in Settings → Payouts (`payout_accounts`, bank + holder + account number and/or DuitNow ID, exactly one default; `PayoutAccountsService`), each agreement points at one (`agreements.payout_account_id`, **null = the owner's default**, not a term — changeable at any status from the Overview tab without resetting the review). Tenants transfer, then **claim** "I've paid" (`POST /me/invoices/{id}/claim` → a `pending` transfer `Payment`; the invoice status never changes until the owner **confirms** → `paid` or **rejects** with a reason, `POST /payments/{id}/confirm|reject`; one pending claim per invoice). "Awaiting confirmation" is derived (`utils/paymentClaim.ts`), surfaces as the dashboard's first attention kind `payment_claim`, and emails `PaymentClaimSubmitted` (owner, respects `payment_received`) / `PaymentClaimRejected` (tenant). `invoices:roll` won't mark overdue an invoice whose pending claim is dated on/before its due date. The gateway is prepared, not built: `useEnv().features.onlinePayments` (`NUXT_PUBLIC_FEATURE_ONLINE_PAYMENTS`, default off everywhere incl. demo) + backend `ONLINE_PAYMENTS` (default off → `/me/invoices/{id}/pay` 403 `online_payments_unavailable`) — flip both when a gateway lands. Admin never sees payout accounts. `users.bank_account_last4` is gone. Spec: [docs/superpowers/specs/2026-10-08-payout-accounts-duitnow-design.md](docs/superpowers/specs/2026-10-08-payout-accounts-duitnow-design.md).
+
+**Admin shell — complete in mock + API form (7 surfaces):** Dashboard ([pages/admin/index.vue](frontend/app/pages/admin/index.vue)) — stat tiles + attention list. Owners ([pages/admin/owners/](frontend/app/pages/admin/owners/)) — list + detail (summary counts only, never money). Tenants ([pages/admin/tenants/](frontend/app/pages/admin/tenants/)) — list + detail. Analytics ([pages/admin/analytics.vue](frontend/app/pages/admin/analytics.vue)) — marketing-site funnel (visitors → demo → leads → registered) + daily views/registrations charts + top pages/referrers + a searchable/filterable leads table with CSV export and a per-lead event-history drawer; reads the `analytics_events`/`leads` tables the public `POST /track` beacon writes to. Enquiries ([pages/admin/enquiries.vue](frontend/app/pages/admin/enquiries.vue)) — two tabs. **Messages** (`support.manage`): the `enquiries` table fed by the owner/tenant **Help & feedback** button (`components/layout/SupportWidget.vue`, `POST /support/enquiries`, hidden in demo via `showSupportWidget`) — issue/feedback/question, status new → replied → closed, internal note, mailto reply (track only), super admins emailed per message. **Waitlist** (`analytics.view`, `components/admin/WaitlistPanel.vue`): `leads` rows with `source = waitlist`, same leads endpoints as Analytics with the source pinned; admins with `broadcast.send` also get an **Invite / Resend** action (`POST /admin/analytics/leads/{lead}/invite` → `WaitlistInvitation` email, `leads.invited_at`, audit `lead.invited`). The invite button links to `config('app.invite_signup_url')` + `?email=…` (prefills the form) — this environment's own `/auth/register` unless `INVITE_SIGNUP_URL` overrides it (production → UAT during the beta hunt). `DEMO_URL` (default demo.roofly.my) feeds the confirmation email's demo button. Settings → Admins ([pages/admin/settings.vue](frontend/app/pages/admin/settings.vue)) — invite/edit admin users against `App\Support\AdminPermissions` (14 keys + an Operations preset). Audit ([pages/admin/audit.vue](frontend/app/pages/admin/audit.vue)) — reads `AuditLogger`-written ActivityLog entries (`log_name = admin`). Auth is separate from owner/tenant: `/admin/login` + `/admin/accept-invite`, backed by `layouts/admin.vue` + `layouts/auth-admin.vue`. Gated by `useEnv().features.admin` (env `NUXT_PUBLIC_FEATURE_ADMIN`) — always off in demo, so `demo-roofly` never shows it. Demo admin logins: `admin@roofly.my` (super-admin, all permissions) / `ops@roofly.my` (Operations preset), both password `password`.
+
+**Production during the beta-tester hunt (2026-10-07)** — production runs the full stack, but `useEnv().comingSoonOnly` (= `isProduction`) makes `env.global.ts` redirect every non-admin route to `/coming-soon` (admin.roofly.my stays up for Enquiries), and prod's `.env` sets `REGISTRATION_OPEN=false` (`config('app.registration_open')`: `/auth/register` and Google auto-create → `403 {code: "registration_closed"}`; existing owners can still sign in) plus `INVITE_SIGNUP_URL=https://uat.roofly.my/auth/register` (`config('app.invite_signup_url')`, default `FRONTEND_URL/auth/register`), so waitlist invites send beta testers to UAT. At launch: flip the flag, drop both env lines, swap the waitlist form for a contact form, migrate testers' UAT accounts to prod. Once testers exist, never `migrate:fresh`/reseed UAT. Steps: README § "Production during the beta-tester hunt".
+
+**Promo reel** — `frontend/public/marketing/promo/` (landscape + portrait cuts, WebP posters; README there). `composables/usePromoVideo.ts` owns playback (one cut per device, muted in-view autoplay, none for reduced motion, missing-file flag). Used by the coming-soon `PromoVideo` section and by `components/auth/AuthPromoVideo.vue`, the centrepiece of `layouts/auth.vue`'s charcoal pane (login + register; md+ only, falls back to `AudienceFlipCard` + `RotatingUspCard` if the file is missing).
+
+**Legal baseline (2026-10-08, drafts for legal review)** — public `/legal/privacy|terms|billing|acceptable-use` and UAT-only `/legal/beta` (`pages/legal/[doc].vue`, `layouts/legal.vue`, `components/legal/LegalDocument.vue`; 404 unless `useEnv().showBetaTerms`). Copy lives in `content/legal/<slug>.<en|ms>.ts` (typed blocks, registry in `content/legal/index.ts`), not i18n JSON; operator name / SSM / address / emails / phone and each document's version + effective date live in **`config/legal.ts`** — `null` values never render, and every unknown is a `TODO(legal)`. Plan prices moved to `config/plans.ts` (demo `plansMock` copies it; backend `AccountController` still has its own copy). `SiteFooter` is the one footer everywhere, `variant` = `full` / `slim` / `shell` / `admin` (UI-STANDARDS § 11.22). `/legal/*` is exempt from the production coming-soon redirect (`utils/comingSoonGate.ts`). The owner + tenant shells have a **Help and support** page (`/owner/help`, `/tenant/help`) with a Legal section and a button that opens the existing widget via `useSupportWidget()`, plus **in-app legal pages** (`/owner/legal/*`, `/tenant/legal/*`) that the shell footer and help page link to — signed-in users never get bounced out to the public `/legal/*` layout. The coming-soon waitlist form carries a one-line privacy-notice consent. Phase 2 (consent at sign-up / invite / MyKad / agreement accept, RPGT + simulated-payment labels, email footer) reuses these links.
+
+**Tracking** — `composables/useTrack.ts` fires a `POST /track` beacon (guest, `throttle:track`) on tracked marketing/auth/legal paths only (`/`, `/coming-soon`, `/demo`, `/auth/*`, `/legal/*` — `utils/trackedPaths.ts`; the privacy notice describes this list, so change both together). **Tracking calls never belong inside `/owner`, `/tenant`, or `/admin` pages/components** — those are authenticated product surfaces, not the marketing funnel the beacon measures; `plugins/track.client.ts` and the four explicit call sites (demo entry, feedback click, register) are the only places `useTrack()`/`track()` should ever be called. The coming-soon waitlist form is **not** a tracking call site: it posts to the first-party `POST /waitlist` (`services/useWaitlist.ts` → `WaitlistService`; guest, `throttle:waitlist` 5/min/IP, honeypot field `website`, CSRF-exempt like `/track`) and the backend's `AnalyticsRecorder::recordWaitlist()` writes the lead plus the `waitlist_signup` event itself — nothing goes to Web3Forms any more. A brand-new lead (never a repeat) gets the queued `App\Notifications\WaitlistConfirmation` email, sent from `WaitlistController`; a new owner (password register or first Google sign-in) gets `App\Notifications\OwnerWelcome`. Both events also email every active super admin via `App\Support\SuperAdminAlerts` (`AdminNewEnquiry` / `AdminNewOwnerSignup`, template `emails/admin-alert`); it never throws, so a queue outage can't fail the visitor's request. Both use the branded table-layout Blade shell `resources/views/emails/layout.blade.php` (+ a `-text` plain view each) — reuse it for future marketing-style emails. Gated by `useEnv().trackingEnabled` (env `NUXT_PUBLIC_TRACKING`, default on) — always `false` in demo, so `demo-roofly` never generates `/api/track` rows even though `AnalyticsDemoSeeder` gives the admin page 90 days of seeded story data (40 leads, 8 converted to real property-less owner users `lead05@example.com`…, password `password`; refuses to run in production).
+
+**Google sign-in + owner onboarding** — owners only, gated by `useEnv().features.googleLogin` (`!isDemo && Boolean(NUXT_PUBLIC_GOOGLE_CLIENT_ID)`; backend needs its own `GOOGLE_CLIENT_ID`, same OAuth web client id). `POST /auth/google` verifies a Google Identity Services ID token via `App\Support\GoogleIdToken` (no Composer package — `laravel/socialite` was rejected, it expects an OAuth access token, not an ID token) and auto-links/creates an owner by verified email; a tenant/admin email 403s with `code: "not_owner"`. `GoogleSignInButton.vue` renders above the login/register form with an `or` divider, never in demo (demo gets a "Continue with Google (demo)" shortcut instead). A new owner (Google or password) with a falsy `onboardedAt` is routed to the full-screen `/owner/onboarding` (`layouts/onboarding.vue`) by a guard in `middleware/auth.global.ts`, picks one or more `Property.purpose` values (`rental`/`own_stay`/`investment`, now required on the type) via `OwnerPurposePicker`, then never sees it again — existing owners were back-filled with `onboardedAt`/`purposes: ["rental"]` so nobody live is retroactively gated. The dashboard's `GettingStartedCard` shows a computed (never stored) getting-started checklist — `utils/onboardingChecklist.ts`'s pure `buildChecklist()`, covered by this repo's first Vitest suite (`docker exec roofly-frontend npm test`). Non-rental properties are excluded from occupancy/dashboard/income and instead show under a "Not for rent" capital-position group in Reports.
 
 ---
 
@@ -54,22 +80,37 @@ If a question is answered by one of these, defer to that doc and don't re-derive
 ```
 frontend/app/
 ├── types/         # entity shapes (single source of truth, post-swap stays put)
+├── config/        # legal.ts (operator/contact/doc versions — TODO(legal) nulls), plans.ts (plan ladder), banks.ts (MalaysianBank labels)
+├── content/legal/ # legal document copy per locale (privacy/terms/billing/acceptable-use/beta × en/ms) + registry
 ├── schemas/       # Zod (vee-validate) — shared between create modals & edit forms
-├── mocks/         # in-memory seed data, only imported by services
-├── services/      # the swap point — `if (useMock) ... else useApi()` per method
-├── composables/   # useDashboard, useReports, useTheme, useToast, useMoney, useApi
+├── demo/          # demo-only — NEVER imports useApi
+│   ├── auth.ts    #   demoAuth (localStorage session, email prefix → role), DEMO_TENANT_ID
+│   ├── data/      #   in-memory seed arrays (propertiesMock, unitsMock, …), admin.ts, analytics.ts
+│   ├── services/  #   demoX: XService — one per entity + dashboard, admin/ subfolder (incl. admin/analytics.ts)
+│   └── track.ts   #   demoTrack: TrackAdapter — hard no-op, demo-roofly must generate zero /api/track rows
+├── services/
+│   ├── contracts/ # XService interfaces + *WithRefs types (both adapters implement these); admin/ subfolder (incl. analytics.ts)
+│   ├── api/       # apiX: XService — Laravel calls via useApi(); NEVER imports ~/demo; admin/ subfolder (+ query.ts helper); track.ts (sendBeacon/$fetch)
+│   └── useX.ts    # auto-imported selector: useEnv().useMock ? demoX : apiX (+ type re-exports); useAdminAnalytics.ts
+├── composables/   # useDashboard, useReports, useTheme, useToast, useMoney, useApi, useApiError, useAdminPermissions,
+│                  # useAdminDashboardData, useTrack (visitorId + first-touch UTM, gated by trackingEnabled + isTrackedPath),
+│                  # useGoogleSignIn, useOnboardingChecklist (wraps utils/onboardingChecklist.ts's pure buildChecklist())
 ├── components/
 │   ├── ui/        # Card, Pill, Button, Input, Select, Modal, Icon, MoneyDisplay,
 │   │              # MiniAreaChart, EmptyState, Toaster
 │   ├── owner/     # owner-specific (PropertyCard, TenantInviteModal, TicketCard, etc.)
 │   ├── tenant/    # tenant-specific (sidebar nav, etc.)
+│   ├── admin/     # admin-specific (SidebarNav, StatTile, DataTableShell, AuditTable, WarnOwnerModal, SuspendOwnerModal,
+│   │              # AdminFormModal, SourcePill, FunnelStrip, EventList, LeadDrawer, etc.)
 │   ├── topbar/    # ThemeToggle, LangSwitcher, UserMenu
 │   └── layout/    # MobileNavDrawer
 ├── pages/         # routing (Nuxt file-based)
-├── layouts/       # owner.vue, tenant.vue, auth.vue, default.vue
-├── stores/        # auth.ts (Pinia, localStorage-backed)
-├── plugins/       # theme.ts, auth-restore.client.ts
-└── utils/         # rpgt.ts, propertyCompletion.ts, csv.ts
+├── layouts/       # owner.vue, tenant.vue, admin.vue, auth.vue, auth-admin.vue, onboarding.vue (full-screen, /owner/onboarding only), default.vue
+├── stores/        # auth.ts (Pinia; delegates to demoAuth / apiAuth)
+├── plugins/       # theme.ts, auth-restore.client.ts, track.client.ts (page_view on tracked-path navigation)
+├── middleware/    # env.global.ts (renamed from the old demo-only middleware — now also drives the admin-host redirect), auth.global.ts (also the onboarding-screen guard)
+└── utils/         # rpgt.ts, propertyCompletion.ts, csv.ts, warningText.ts, gisLoader.ts, onboardingChecklist.ts,
+                   # legal.ts (footer links/operator lines), comingSoonGate.ts, trackedPaths.ts (Vitest-covered)
 ```
 
 **Routing rule:** for tab-style detail pages, use `pages/owner/<entity>/index.vue` + `[id].vue` (NOT `<entity>.vue` + `<entity>/[id].vue` — the latter requires `<NuxtPage />` in the parent and silently fails to render the child if you forget).
@@ -78,16 +119,18 @@ frontend/app/
 
 ## Locked-in conventions
 
-- **Git flow: feature → `UAT` → `main`. Never feature → `main`.** All `gh pr create` calls in this repo use `--base UAT`. The only `--base main` PR is a release promotion with `--head UAT`. Enforced by [.github/workflows/guard-main.yml](.github/workflows/guard-main.yml) (required check on `protect-main`). Full rules in [docs/global/BRANCH-PROTECTION.md](docs/global/BRANCH-PROTECTION.md).
+- **Git flow: feature → `UAT` → `main`. Never feature → `main`.** All `gh pr create` calls in this repo use `--base UAT`. The only `--base main` PR is a release promotion with `--head UAT`. Enforced by [.github/workflows/guard-main.yml](.github/workflows/guard-main.yml) (required check on `protect-main`). [.github/workflows/ci.yml](.github/workflows/ci.yml)'s `backend` (`php artisan test`) and `frontend` (Vitest + `nuxt build`) jobs run on every push (all branches except `demo-roofly`) and are required checks on both rulesets — keep those job names stable. Full rules in [docs/global/BRANCH-PROTECTION.md](docs/global/BRANCH-PROTECTION.md).
 - **Money is integer sen everywhere.** Format only at the render edge via `useMoney().formatRM` or `<MoneyDisplay>`. Never store formatted strings.
-- **Mock toggle is single source of truth.** All services read `useEnv().useMock` inside the composable — never module-level constants. Flip per-environment via `NUXT_PUBLIC_USE_MOCK=false`. Demo (`NUXT_PUBLIC_APP_ENV=demo`) always uses mocks regardless of the flag, because `useEnv` derives `useMock = isDemo || config.public.useMock`. See `composables/useEnv.ts`.
+- **Mock toggle is single source of truth.** Every `services/useX.ts` selector reads `useEnv().useMock` at call time — never module-level constants. Flip per-environment via `NUXT_PUBLIC_USE_MOCK=false`. Demo (`NUXT_PUBLIC_APP_ENV=demo`) always uses the demo layer regardless of the flag, because `useEnv` derives `useMock = isDemo || config.public.useMock`. See `composables/useEnv.ts`.
+- **Demo and API are separate adapters, not branches.** `app/demo/**` never imports `useApi`; `services/api/**` never imports `~/demo`; pages/components only import `services/useX`. Never write `if (useMock)` inside a method — add the method to the contract and implement it in both adapters (TypeScript enforces parity). New feature recipe: contract → demo adapter (full) → API adapter (stub throwing `Not implemented` until the backend lands) → UI behind a `features.*` flag in `useEnv`. `demo-roofly` never gets feature commits of its own; it only merges UAT.
 - **Per-environment behaviour goes through `useEnv()`.** One env var (`NUXT_PUBLIC_APP_ENV` = `"demo" | "uat" | "production"`) drives all UI feature flags (`isDemo`, `showDemoShortcuts`, `showFloatingFeedback`, `showEnvBanner`, `redirectRootToDemo`, etc.). Components ask for derived flags by name, not for the raw env. Add new env-driven features as one new derived field in `composables/useEnv.ts`, not a new env var per feature.
 - **Documents tab + tenant photos + reports PDF are gated** by `runtimeConfig.public.features.documents`. Currently default-on so demos signal Phase-4 file storage is coming; flip semantics will switch to gating real storage when it lands.
 - **Field tiers** (Properties, Tenants): Tier 1 captured in the create modal; Tier 2/3 edited on the detail page. JSON sub-objects (`ownership`, `utilities`, `personal`, `emergencyContact`) on the model map 1:1 to detail-page tabs and to backend JSON columns.
 - **Co-owners are a separate `property_co_owners` table** on the backend (DB-enforced sum=100 + exactly-one `is_primary`). On the frontend they're a top-level `Property.coOwners[]` with the same invariants validated by Zod.
 - **MalaysianState enum from day one** — never `state: string`.
-- **Sentence case** in all strings, BM and EN. Two font weights only (400 / 600). See [UI-STANDARDS.md § 12](docs/frontend/UI-STANDARDS.md).
+- **Sentence case** in all strings, BM and EN. **Exception: the admin shell is English-only** — `admin.*` and `auth.admin.*` keys live in `en.json` only, `layouts/admin.vue` / `auth-admin.vue` pin the locale to `en` and hide the language switcher. Two font weights only (400 / 600). See [UI-STANDARDS.md § 12](docs/frontend/UI-STANDARDS.md).
 - **i18n: never put a literal `@` in a translation value** — vue-i18n treats it as a linked-message marker and crashes the compiler. Avoid or escape with `{'@'}`.
+- **Admin sees summaries only** — `AdminResourcesTest` (backend) pins the key sets on every admin API Resource. Widen deliberately, never by adding a field to a Resource without updating that test first (money and PII stay out of admin owner/tenant list+detail responses). **Tenant data is the owner's** (Roofly is their processor): admin gets a shortened `displayName` from `App\Support\PrivacyMask` ("Aminah Y.", mirrored by `utils/privacyMask.ts` for the demo adapter) plus email + phone for support, never the full name/MyKad/personal/emergency contact; tenant search covers email, phone, property and owner name but never the tenant's name; audit `subjectName` shortens tenants too. Owners (Roofly's own customers) keep name, email, phone and business name; property summaries are city + state, no street/postcode. The privacy notice's "Who at Roofly can see it" section describes this — change both together.
 
 ---
 
@@ -126,6 +169,9 @@ open http://localhost:3000        # owner login lands at /auth/login
 # typecheck
 docker exec roofly-frontend npm run typecheck
 
+# unit tests (Vitest — pure .ts modules only, no jsdom/@vue-test-utils yet)
+docker exec roofly-frontend npm test
+
 # install a new package (must run inside the container)
 docker exec roofly-frontend npm install <pkg>
 
@@ -133,10 +179,17 @@ docker exec roofly-frontend npm install <pkg>
 docker logs -f roofly-frontend
 ```
 
-**Mock auth credentials** (no validation, mock-only):
-- Owner: any email NOT starting with `tenant`/`admin` (e.g. `aminah@roofly.my`)
+**Local email:** every email (waitlist confirmation, invitation, owner welcome, tenant invite, reset) is queued, so it only sends while `queue-worker` runs, and the dev override routes it to **Mailpit** — inbox at http://localhost:8025. Start both with `docker compose up -d mailpit queue-worker`. Templates: `backend/resources/views/emails/` on the shared `emails/layout.blade.php`.
+
+**API-mode credentials** (from `DemoSeeder`, all password `password`): owner `aminah@roofly.my`; tenants `aminah.yusof@example.com` (the richest record — active agreement, invoices, tickets), `arif.hakim@example.com`, `limlw@example.com`, `ravik@example.com`, `siti.khadijah@example.com`. There is no `tenant@roofly.my` in the DB.
+
+**Demo auth credentials** (demo mode only — `app/demo/auth.ts`):
+- Owner: any email NOT starting with `tenant`/`admin`/`ops` (e.g. `aminah@roofly.my`)
 - Tenant: any email starting with `tenant` (e.g. `tenant@example.com`)
+- `admin@…` / `ops@…` sign in at `/admin/login` only (`loginAdmin`, not the customer form — spec § 4).
 - Auth persists across refresh via `localStorage["roofly_auth"]`.
+
+**Admin credentials** (API mode, from `DemoSeeder`, password `password`, sign in at `/admin/login`): `admin@roofly.my` (super-admin) and `ops@roofly.my` (Operations preset). Admin is gated by `features.admin` and is always off in demo — there's no demo-mode admin login.
 
 ---
 

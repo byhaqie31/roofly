@@ -1,0 +1,333 @@
+# Roofly backend API spec
+
+First-cut reference for the Laravel API — organised per shell → per module → per endpoint. Accuracy over prose: every field/rule below was read from `backend/routes/api.php`, the controllers, FormRequests, and Resources, not invented. Cross-link: [docs/frontend/API-MAP.md](../frontend/API-MAP.md) — how the frontend consumes this contract, per page.
+
+Route count documented: **108** (`GET/POST /payout-accounts`, `PATCH/DELETE /payout-accounts/{payoutAccount}`, `POST /payout-accounts/{payoutAccount}/default`, `POST /payments/{payment}/confirm`, `POST /payments/{payment}/reject`, `POST /me/invoices/{invoice}/claim` from spec 2026-10-08 payout-accounts-duitnow + `POST /support/enquiries`, `GET /admin/enquiries`, `PATCH /admin/enquiries/{enquiry}` + `POST /admin/analytics/leads/{lead}/invite` + 90 above baseline + `POST /auth/google`, `POST /auth/forgot-password`, `POST /auth/reset-password`, `PATCH /account/onboarding`, `PATCH /account/checklist`, `POST /account/password` from `.superpowers/sdd/2026-08-23-google-login-owner-onboarding/`).
+
+---
+
+## Conventions
+
+- **JSON casing** — all request/response bodies are camelCase. FormRequests map camelCase → snake_case columns via a `toModelAttributes()` helper (e.g. `rentAmount` → `rent_amount_cents`). **Exception:** `Owner\ReportController@dashboard` / `@yearly` return raw snake_case keys (`income_this_month_cents`, `monthly_income`, …) straight from the query — this predates the camelCase convention and was not caught by contract tests. Flag for the owner to confirm whether the frontend's `useReports.ts` API adapter compensates or whether this is a live bug.
+- **Money** is integer sen (cents) everywhere in request/response bodies — `amount`, `rentAmount`, `depositAmount`, `lateFee`, etc. Never a formatted string.
+- **Response envelope** — `JsonResource::withoutWrapping()` is called once in `AppServiceProvider` (`app/Providers/AppServiceProvider.php:25`), so single-resource responses are the bare object (no `{data: …}` wrapper) and collection responses are a bare array — **except** endpoints that paginate, which return `{data: [...], meta: {page, perPage, total, lastPage}}` explicitly in the controller (admin audit, admin owners, admin tenants).
+- **Auth** — Sanctum. The owner/tenant surface uses `POST /api/auth/login` which returns a Bearer token (`createToken('api')->plainTextToken`) alongside the user; the admin portal (`POST /api/admin/auth/login`) uses session/cookie auth (`Auth::attempt` + `Auth::guard('web')`), no token in the response. Both surfaces sit behind `auth:sanctum`. `GET /sanctum/csrf-cookie` is Laravel Sanctum's standard cookie-auth bootstrap route (not custom, not in `routes/api.php` — provided by the Sanctum package) and is needed before any cookie-session (admin/SPA) write.
+- **Route middleware stack**, read left→right as applied: `api` (route prefix) → `Authenticate:sanctum` (all protected routes) → `TouchLastActive` (aliased `touch-active`, 10-minute-throttled `last_active_at` heartbeat write, `app/Http/Middleware/TouchLastActive.php`) → role guard (`role:owner`, `role:tenant`, `role:admin` — `App\Http\Middleware\EnsureRole`, compares `$user->role->value` to the route's string arg, `abort(403)` on mismatch, **plain Laravel `{message}` body, no `code`**) → `not-suspended` (owner shell only — `App\Http\Middleware\EnsureNotSuspended`, 403 with `{code:"account_suspended", message}` if `owner.suspended_at` is set) → `can:<permission>` (admin shell only — Laravel's built-in Gate middleware against Spatie permission names defined in `App\Support\AdminPermissions`).
+- **Trusted proxies** — `bootstrap/app.php` calls `$middleware->trustProxies(at: '*')`, since nginx/Cloudflare sit in front of every environment. Without this, the client IP used for per-IP throttling (`throttle:track`) and the analytics `ip_hash` would be the proxy's address instead of the real client's.
+- **Error shapes**:
+  - `401` — `{"message": "..."}` (unauthenticated, or login/admin-login with bad credentials — both return `401 {"message": "Invalid credentials."}` rather than 422, and an admin who successfully authenticates via the *customer* `/api/auth/login` form is logged out and also gets this 401 — admins are only allowed in through `/api/admin/auth/login`).
+  - `403` — bare `{"message": "..."}` from `abort_if`/`abort_unless` ownership checks (e.g. "you don't own this property") and from `EnsureRole`; **`{"code": "account_suspended", "message": "..."}`** specifically from `EnsureNotSuspended`.
+  - `404` — Laravel default (route-model-binding miss, or explicit `abort_if($x->role !== ..., 404)` to hide cross-role records — e.g. fetching a tenant id that is actually an owner 404s rather than 403s).
+  - `409` — used for state-conflict business rules: payment claims (`{code:"claim_pending"}` on a second tenant claim; plain `{message}` when the owner answers an already-answered claim), admin `admins/{admin}/resend-invite` when already accepted, admin `owners/{owner}/suspend` when already suspended / `unsuspend` when not suspended, admin `tenants/{tenant}/resend-invite` when status isn't `invited`.
+  - `422` — Laravel's default FormRequest validation failure shape: `{"message": "The given data was invalid.", "errors": {"field": ["message", ...]}}`. Also used for business-rule rejections that aren't pure field validation, e.g. ticket status transition rejected by `Ticket::canTransitionTo()`, tenant "no active agreement" when filing a ticket, co-owner sum≠100/not-exactly-one-primary (via a custom `after()` validator hook, still surfaces as the same `errors.coOwners` shape), and "cannot remove primary co-owner".
+  - `501` — used for genuinely unimplemented endpoints: `POST /api/auth/magic-link`, `GET /api/auth/magic-link/{token}`, `GET /api/reports/yearly/{year}/export`.
+- **Pagination** query params, where supported: `page` (1-based), `perPage` (clamped `min(100, max(1, n))`, default varies by endpoint — 20 or 25). Response `meta: {page, perPage, total, lastPage}`.
+- **UUIDs** — all model ids (`users`, `properties`, `units`, etc.) are UUID strings, not integers.
+- Every admin **write** (warn/suspend/unsuspend/admin CRUD/permission changes/tenant resend-invite) is logged via `App\Services\AuditLogger::record()` into Spatie ActivityLog under `log_name = 'admin'`, action constants listed in the Admin § Audit section below. Reads are not logged.
+
+---
+
+## Shell 1 — Public / Auth
+
+No auth required except where noted. Base path `/api`.
+
+| Method | Path | Middleware | Request | Response | Notes |
+|---|---|---|---|---|---|
+| POST | `/auth/register` | `api` | body: `name` (required, string≤255), `email` (required, email≤255, unique `users.email`), `phone` (nullable, string≤30), `password` (required, string≥8, `confirmed` → needs `password_confirmation`) | `201` `{user: AuthUserResource, token}` | Creates `role: owner`, then **logs the new owner into the `web` session** (`Auth::login` + session regenerate) before minting the token — the SPA relies on the cookie session, and without this a browser still carrying an earlier tenant/admin session made the next owner call fail `role:owner` with 403. `403 {message, code: "registration_closed"}` (before validation, nothing created) while `config('app.registration_open')` is false — env `REGISTRATION_OPEN`, production holds it closed during the beta-tester hunt. Then queues `App\Notifications\OwnerWelcome` and alerts active super admins with `App\Notifications\AdminNewOwnerSignup` (`method: password`, button to `FRONTEND_URL/admin/owners/{id}`) (branded "Welcome to Roofly" email, `emails/owner-welcome(-text)`, button to `FRONTEND_URL/owner`; a queue failure is reported, never fails the request). No email verification step exists yet. |
+| POST | `/auth/login` | `api` | body: `email` (required, email), `password` (required, string) | `200` `{user: AuthUserResource, token}` | `401 {message}` on bad credentials. If the account resolves to `role: admin`, the session is logged out and this endpoint also returns `401` — admins must use `/admin/auth/login`. **`422 {errors:{email:["This account signs in with Google."]}}`** if the resolved account is an owner with no password set (`hasPassword: false`) — a Google-only account; the check runs before `Auth::attempt`, so it never counts as a failed-credentials attempt. Sets `first_login_at` on first successful login. |
+| POST | `/auth/google` | `api`, `throttle:10,1` | body: `credential` (required, string — a Google Identity Services ID token, **not** an OAuth access token) | `201` `{user: AuthUserResource, token}` (new owner created) or `200` (existing owner linked/logged in); `401 {message}` if the token can't be verified (no user created); `403 {message, code: "not_owner"}` if the verified email belongs to a tenant or admin | Owner-only sign-in. Verifies via `App\Support\GoogleIdToken::verify()` — calls Google's `tokeninfo` endpoint directly; **no Composer package** (`laravel/socialite` was rejected — its `userFromToken` wants an OAuth access token, not an ID token). Auto-links an existing owner by Google-verified email (backfills `google_id`/`avatar_url`/`email_verified_at` if unset) or creates one (`password: null`, `email_verified_at: now()`). Starts a Sanctum session + token, same envelope as `/auth/login`. Audit `auth.google_register` (create) / `auth.google_login` (link). A create also queues `App\Notifications\OwnerWelcome` and the super-admin `AdminNewOwnerSignup` alert (`method: google`), same as `/auth/register`; linking an existing owner sends nothing. While `REGISTRATION_OPEN` is false, a would-be create returns `403 {message, code: "registration_closed"}` instead; existing owners still sign in. |
+| POST | `/auth/forgot-password` | `api`, `throttle:5,1` | body: `email` (required, email) | `200 {message}` — **always**, whether or not the email exists | Generic message never reveals account existence. The admin-skip check (`Password::sendResetLink`'s callback deletes the token and returns `RESET_LINK_SENT` without mailing) runs **inside** the callback deliberately — the whole method body, unknown-email branch included, shares Laravel's `Timebox`-padded ~200ms, so branching outside the callback would reintroduce a timing oracle. Reset link points at `{FRONTEND_URL}/auth/reset-password?token=…&email=…`. |
+| POST | `/auth/reset-password` | `api`, `throttle:5,1` | body: `token` (required, string), `email` (required, email), `password` (required, string≥8, `confirmed`) | `200 {user: AuthUserResource, token}` (same envelope as `/auth/login`) | `422 {errors:{email:["This reset link is invalid or has expired."]}}` on an invalid/expired token or an admin email. On success: sets the password, revokes all existing Sanctum tokens (`$user->tokens()->delete()`), logs the user in, mints a new token. Also the path by which a Google-only account (no password) gains one. **An invited tenant (`status: invited`) who resets this way is flipped to `active`** — same outcome as accepting the invite. |
+| POST | `/auth/accept-invite` | `api`, `throttle:5,1` | body: `token` (required, string), `email` (required, email), `password` (required, string≥8, `confirmed`) | `200 {user: AuthUserResource, token}` (same envelope as `/auth/login`) | Tenant invite acceptance (spec 2026-10-07 § 4). Looks up `tenant_invites` by `sha256(token)`; `422 {errors:{token:["This invite link is invalid or has expired."]}}` if missing / expired (7 days) / already used / the user isn't a tenant / `email` doesn't match the invited address (case-insensitive). On success: sets the password, `status: active`, `first_login_at` and `email_verified_at` (if unset), marks the invite `accepted_at`, logs in (`web` guard), mints a token. |
+| POST | `/auth/magic-link` | `api` | body: `email` (required, email) | `501 {message: "Magic link feature coming in Phase 2."}` | **Stub, superseded** — tenant invites now go through `POST /tenants/invite` → `/auth/accept-invite`. Left in place until the frontend has no reference to it. |
+| GET | `/auth/magic-link/{token}` | `api` | path: `token` | `501 {message: "Magic link feature coming in Phase 2."}` | **Stub.** `TODO Phase 2`: verify signed token, issue Sanctum token. |
+| POST | `/admin/auth/login` | `api` | body: `email` (required, email), `password` (required, string) | `200` `{user: AuthUserResource}` (no token — cookie session) | `401` on bad credentials, or if the resolved user isn't `role: admin` or is disabled (session torn down either way). Sets `first_login_at` if unset. Logs `admin.login` (`AuditLogger::ADMIN_LOGIN`). |
+| POST | `/admin/auth/accept-invite` | `api` | body: `token` (required, string), `password` (required, string≥8, `confirmed`) | `200` `{user: AuthUserResource}` | Looks up `AdminInvite` by `sha256(token)`; `422 {errors:{token:[...]}}` if missing/expired/used/target user not an admin/target disabled. Sets the user's password, `first_login_at`, marks the invite `accepted_at`, logs the caller in (`web` guard), logs `admin.invite_accepted`. |
+
+### Analytics beacon
+
+| Method | Path | Middleware | Request | Response | Notes |
+|---|---|---|---|---|---|
+| POST | `/track` | `api`, `throttle:track` (120/min/IP) | body (`TrackRequest`): `visitorId` (required, uuid), `event` (required, one of `App\Models\AnalyticsEvent::EVENTS`: `page_view\|demo_enter\|demo_feedback_click\|waitlist_signup\|register`), `path` (nullable, ≤255), `referrer` (nullable, ≤255), `utm` (nullable, array of `source\|medium\|campaign`, each ≤100), `props` (nullable, array, JSON-encoded size ≤2048 bytes; `props.email` nullable email≤255, `props.userId` nullable uuid, `props.role` nullable ≤20), `at` (nullable, date) | `204` on success, `422` on validation failure | Guest, no auth. **Exempted from CSRF** (`bootstrap/app.php`'s `validateCsrfTokens(except: ['api/track'])`) — as a `sendBeacon`/`fetch` call from a marketing page, it can be treated as a "stateful" frontend request by Sanctum without a matching CSRF token, which would otherwise 419. `App\Services\AnalyticsRecorder::record()` writes an `AnalyticsEvent` row (IP salted-hashed via `hash('sha256', ip.config('app.key'))`, never stored raw) and upserts a `Lead` by email when `props.email` is present. **`props.userId` is never trusted for conversion** — only the server's own `AnalyticsRecorder::linkRegistration()` (called from the trusted `/auth/register` flow with the authenticated user's own id) may set `Lead.converted_user_id`. |
+| POST | `/waitlist` | `api`, `throttle:waitlist` (5/min/IP) | body (`WaitlistRequest`): `email` (required, email ≤255), `visitorId` (nullable, uuid), `website` (nullable, ≤255 — honeypot, must stay empty) | `204` on success — a new signup, a repeat and a honeypot hit are indistinguishable to the caller; `422` on validation failure; `429` over the limit | Guest, no auth. **Exempted from CSRF** alongside `/track` (same `validateCsrfTokens(except: [...])` list) — a plain `fetch` from the coming-soon page. First-party replacement for the Web3Forms relay `EmailCapture.vue` used to post to; nothing leaves the stack. `App\Services\AnalyticsRecorder::recordWaitlist()` lowercases + trims the email, upserts the `Lead` by email (first-touch `source = waitlist`, `first_seen_at` kept, `last_seen_at` bumped, never a duplicate) and, **only when `visitorId` is present**, writes a `waitlist_signup` `AnalyticsEvent` (`props.email`, salted `ip_hash`) so the lead's timeline in the admin drawer still shows the signup. **When that call created the lead** (`recordWaitlist()` returns `true` from `Lead::wasRecentlyCreated`), the controller queues `App\Notifications\WaitlistConfirmation` on demand to the email (`Notification::route('mail', …)`, generic "Hi there," greeting — the form collects no name, EN copy + one BM paragraph, "Explore the demo" button to `config('app.demo_url')` (env `DEMO_URL`, default https://demo.roofly.my); branded Blade view `emails/waitlist-confirmation(-text)` on the shared `emails/layout`), and `App\Support\SuperAdminAlerts` emails every active super admin (`role = admin`, `is_super_admin`, `disabled_at` null) `App\Notifications\AdminNewEnquiry` (`emails/admin-alert`, button to `FRONTEND_URL/admin/enquiries`). Repeat sign-ups and honeypot hits alert nobody. A repeat signup never re-sends it, so the endpoint can't be used to mail someone else's address over and over; a queue failure is `report()`ed, not surfaced, since the lead is already saved. A filled `website` returns `204` without touching the database or sending mail. No audit entry (guest action). Tests: `tests/Feature/WaitlistTest.php`. |
+
+### Common protected (any authenticated role)
+
+| Method | Path | Middleware | Request | Response | Notes |
+|---|---|---|---|---|---|
+| POST | `/auth/logout` | `Authenticate:sanctum`, `touch-active` | — | `204` | Signs out every way the request could be authenticated: logs out the `web` guard, invalidates the session and regenerates the CSRF token (the SPA's cookie session — its Sanctum token is a `TransientToken`, which can't be deleted), and revokes the bearer token when the request used one (`PersonalAccessToken`). Same endpoint for owners, tenants and admins. `LogoutTest` covers all three roles plus a real admin sign-in → logout → `/auth/me` 401. |
+| GET | `/auth/me` | `Authenticate:sanctum`, `touch-active` | — | `200` `AuthUserResource` | Works for owner, tenant, and admin. Frontend/admin-portal use this to detect a suspended owner without a failed login. |
+| POST | `/support/enquiries` | `Authenticate:sanctum`, `touch-active`, `throttle:support` (20/hour/user) | body: `type` (required, `issue\|feedback\|question`), `message` (required, string 5–5000), `pageUrl` (nullable, ≤500), `pageLabel` (nullable, ≤120 — readable page name like `Owner app · Payments`, built client-side by `utils/pageLabel.ts`) | `201` `{id}` | The in-app **Help & feedback** button. Owner or tenant only (role checked in the controller, `403` otherwise) and deliberately **outside** `not-suspended`, so a suspended owner can still write in. Copies `name`/`email`/`role` from the session into the new `enquiries` row (`status: new`), then `SuperAdminAlerts` emails every active super admin `App\Notifications\AdminNewSupportEnquiry` (`emails/admin-alert`, a "Sent from" row = `pageLabel (pageUrl)`, `Reply-To` the sender, button to `FRONTEND_URL/admin/enquiries?tab=messages`). |
+
+---
+
+## Shell 2 — Owner (`role:owner`, `not-suspended`)
+
+Base path `/api`, all routes additionally gated by `EnsureNotSuspended` (403 `account_suspended` if the owner is suspended).
+
+### Dashboard
+
+| Method | Path | Request | Response | Notes |
+|---|---|---|---|---|
+| GET | `/dashboard` | — | `200` inline JSON: `{isEmpty, stats:{monthlyIncome, occupancyPct, occupiedCount, unitCount, outstanding, outstandingCount, expiringCount}, incomeSeries:[{key:"YYYY-MM", amount}] (12 entries, oldest first), needsAttention:[{kind, title, meta, link}]}` | One aggregated payload — no separate Resource class. `needsAttention.kind` ∈ `payment_claim \| overdue \| expiring \| notice_given \| ticket_new \| ticket_reopened`, in that priority order. `payment_claim` (spec 2026-10-08): one item per invoice with a `pending` payment (tenant transfer claim), oldest due first — `{title: invoiceNumber, meta: tenant name, link: "/owner/payments?status=awaiting"}`. An overdue invoice with a claim appears under both kinds. **Every stat and attention-feed item is scoped to `purpose: rental` properties only** (units/agreements/invoices/tickets are all derived from that rental-only property id set) — **except `isEmpty`, which counts ALL of the owner's properties** regardless of purpose, so an owner whose only property is an own-stay home never sees the "add your first property" empty state. Mirrors `frontend/app/composables/useDashboard.ts` mock computation; must be kept in lock-step by hand. |
+
+### Account / settings
+
+| Method | Path | Request | Response | Notes |
+|---|---|---|---|---|
+| GET | `/account` | — | `200` `OwnerAccountResource` | |
+| PATCH | `/account/profile` | body: `name` (sometimes, string≤255), `phone` (sometimes, string≤30), `businessName` (nullable, string≤255) | `200` `OwnerAccountResource` | `businessName` → `business_name`. |
+| PATCH | `/account/preferences` | body: `locale` (sometimes, `en\|ms`), `theme` (sometimes, `light\|dark\|system`), `moneyLocale` (sometimes, `en-MY`) | `200` `OwnerAccountResource` | Shallow-merges onto the existing `owner_preferences` JSON column (defaults: `{locale:"en", theme:"system", moneyLocale:"en-MY"}`). |
+| PATCH | `/account/notifications` | body: `events` (sometimes, array), `channels` (sometimes, array) | `200` `OwnerAccountResource` | Shallow-merges onto `notification_preferences` JSON (defaults: 5 event toggles all `true` except none disabled by default, `channels:{email:true, whatsapp:false, in_app:true}` — see `OwnerAccountResource::defaultNotifications()`). No field-level validation inside `events`/`channels` — any array is accepted. |
+| GET | `/plans` | — | `200` array of `{tier, priceRm, unitsCap, description}` (4 rows: free/starter/pro/business) | Static/hardcoded in the controller, not DB-backed. `description` is an i18n key, not literal text. `unitsCap` is `2\|5\|25\|"unlimited"`. Duplicates the cap logic in `App\Support\PlanCaps` (used server-side for enforcement) — the two are not read from one source. |
+| PATCH | `/account/onboarding` | body (`CompleteOnboardingRequest`): `purposes` (required, array, min 1, each ∈ `rental\|own_stay\|investment`) | `200` `AuthUserResource` | **Idempotent on `onboarded_at`** — `purposes` is overwritten every call, but `onboarded_at` is only set the first time (`$user->onboarded_at ?? now()`), never moved on a re-call. Audit `account.onboarded`. |
+| PATCH | `/account/checklist` | body: `dismissed` (required, boolean) | `200` `AuthUserResource` | Sets/clears `checklist_dismissed_at`. Audit `account.checklist_dismissed` (true) / `account.checklist_restored` (false). |
+| POST | `/account/password` | body: `password` (required, string≥8, `confirmed`) | `200` `AuthUserResource` | `422 {errors:{password:["A password is already set."]}}` if the owner already has one — this is an **add-a-password** path for Google-only accounts, never a change-password path. Audit `account.password_set`. |
+
+### Payout accounts (spec 2026-10-08 payout-accounts-duitnow)
+
+Where the owner gets paid. Many per owner; once the owner has any, exactly one is `isDefault` (kept by the controller inside a transaction). Owners see their own accounts in full; a tenant sees only the account resolved for their own agreement (via the `payoutAccount` key on the `…WithRefs` envelopes); **admin never sees payout accounts**. Not audited (no `AuditLogger` — owner-side data writes aren't, only account-level events are); the model has Spatie `LogsActivity` like the others.
+
+| Method | Path | Request | Response | Notes |
+|---|---|---|---|---|
+| GET | `/payout-accounts` | — | `200` array of `PayoutAccountResource`, default first, then oldest | `agreementCount` filled (`withCount`). |
+| POST | `/payout-accounts` | body (`StorePayoutAccountRequest`): `label` (required, ≤60), `bank` (required, `App\Enums\MalaysianBank` slug), `accountHolderName` (required, ≤120), `accountNumber` (nullable, ≤30, digits/spaces/dashes — **stored digits-only**), `duitnowIdType` (nullable, `phone\|mykad\|brn\|passport`), `duitnowId` (nullable, ≤40), `isDefault` (sometimes, bool) | `201` `PayoutAccountResource` | The owner's **first** account is always default; `isDefault: true` on a later one flips the rest off. `422` field errors: `accountNumber` when neither `accountNumber` nor `duitnowId` is set; `duitnowIdType` when `duitnowId` is set without a type; `duitnowId` when a type is set without an id. |
+| PATCH | `/payout-accounts/{payoutAccount}` | same fields, all `sometimes` | `200` `PayoutAccountResource` | `403` if another owner's. Cross-field rules are checked against the stored row merged with the body. `isDefault: true` promotes; `false` is ignored (default another account instead). |
+| POST | `/payout-accounts/{payoutAccount}/default` | — | `200` array of `PayoutAccountResource` (same order as GET) | `403` if another owner's. |
+| DELETE | `/payout-accounts/{payoutAccount}` | — | `204` | `403` if another owner's. Deleting the default promotes the **oldest remaining**. `agreements.payout_account_id` / `payments.payout_account_id` are FK `nullOnDelete` — those agreements fall back to the default. |
+
+### Properties
+
+| Method | Path | Request | Response | Notes |
+|---|---|---|---|---|
+| GET | `/properties` | — | `200` array of `PropertyResource` (with `coOwners` loaded) | |
+| POST | `/properties` | body (`StorePropertyRequest`): `name` (required, string≤255), `type` (required, `condo\|landed\|shoplot\|room`), `purpose` (`sometimes`, `in:rental,own_stay,investment`, defaults to `rental` at the DB column level if omitted), `address` (required, string≤500), `city` (required, string≤100), `state` (required, one of the 16 Malaysian states — see `StorePropertyRequest::MY_STATES`), `postcode` (required, `digits:5`) | `201` `PropertyResource` | Auto-creates one `PropertyCoOwner` row: the creating owner, `sharePct: 100`, `isPrimary: true`. |
+| GET | `/properties/{property}` | — | `200` `PropertyResource` | `403` if `property.owner_id !== auth user id`. |
+| PUT | `/properties/{property}` | body (`UpdatePropertyRequest`, all `sometimes`/`nullable`): Tier-1 fields as above plus `purpose` (`sometimes`, `in:rental,own_stay,investment`), `internalLabel`, `notes`, `yearBuilt` (1900–2100), `builtUpSqft`, `landSqft`, `bedrooms` (0–20), `bathrooms` (0–20), `parkingLots`, `furnishing` (`unfurnished\|partial\|fully`), `ownership` (array, stored verbatim), `utilities` (array, stored verbatim), and optionally `coOwners[]` (`{id?, name, sharePct, isPrimary}[]`, min 1) | `200` `PropertyResource` | If `coOwners` is present, invariants are enforced (sum of `sharePct` = 100 ± 0.01, exactly one `isPrimary`) via a shared static helper (`SyncCoOwnersRequest::coOwnerInvariantErrors`) also used by the dedicated co-owner sync endpoint below; violations surface as `422 {errors:{coOwners:[...]}}`. If `coOwners` present, existing rows are deleted and replaced. |
+| DELETE | `/properties/{property}` | — | `204` | Hard delete. |
+
+### Co-owners (nested under properties)
+
+| Method | Path | Request | Response | Notes |
+|---|---|---|---|---|
+| GET | `/properties/{property}/co-owners` | — | `200` array of `PropertyCoOwnerResource` | |
+| POST | `/properties/{property}/co-owners` | body: `name` (required, string≤255), `sharePct` (required, numeric 0.01–100), `isPrimary` (boolean), `userId` (nullable, uuid, exists `users.id`) | `201` `PropertyCoOwnerResource` | Validated inline in the controller (not a FormRequest class). Does **not** enforce the sum=100/one-primary invariant — that only happens on `PUT` (sync) and on `PUT /properties/{id}` with `coOwners`. |
+| PUT | `/properties/{property}/co-owners` | body (`SyncCoOwnersRequest`): `coOwners` (required array, min 1) of `{id? (nullable string), name (required, ≤255), sharePct (required, 0.01–100), isPrimary (required boolean)}` | `200` array of `PropertyCoOwnerResource` | Full replace: deletes all existing rows, recreates from the payload. Enforces sum=100 and exactly-one-primary via `after()` validator hook → `422 {errors:{coOwners:[...]}}`. |
+| DELETE | `/properties/{property}/co-owners/{coOwner}` | — | `204` | `422` if the target `coOwner.is_primary` — must reassign primary first. |
+
+### Units — flat list, nested create (mirrors `useUnits.ts`)
+
+| Method | Path | Request | Response | Notes |
+|---|---|---|---|---|
+| GET | `/units` | — | `200` array of `UnitResource` | All units across every property the owner owns. |
+| GET | `/properties/{property}/units` | — | `200` array of `UnitResource` | |
+| POST | `/properties/{property}/units` | body (`StoreUnitRequest`): `label` (required, string≤255), `bedrooms` (nullable, 0–20), `bathrooms` (nullable, 0–20), `sqft` (nullable, ≥1), `status` (nullable, `vacant\|occupied\|maintenance`) | `201` `UnitResource` | |
+| GET | `/units/{unit}` | — | `200` `UnitResource` | `403` if the unit's property isn't owned by the caller. |
+| PATCH | `/units/{unit}` | body (`UpdateUnitRequest`, same fields as store, all `sometimes`) | `200` `UnitResource` | |
+| DELETE | `/units/{unit}` | — | `204` | |
+
+### Tenants
+
+| Method | Path | Request | Response | Notes |
+|---|---|---|---|---|
+| GET | `/tenants` | — | `200` array of `TenantResource` | Visible set = tenants this owner invited, **or** who hold/held an agreement on one of the owner's units (`App\Support\OwnerTenantsQuery`-equivalent inline query). |
+| POST | `/tenants` | body (`InviteTenantRequest`): `name` (required, ≤255), `email` (required, email≤255, unique `users.email`), `phone` (required, ≤30) | `201` `{tenant: TenantResource, inviteUrl, inviteExpiresAt}` | Alias of `invite` below — same controller method. |
+| POST | `/tenants/invite` | same as above | `201` `{tenant: TenantResource, inviteUrl, inviteExpiresAt}` | Creates `role: tenant, status: invited, invited_at: now(), invited_by: <owner id>`, then `App\Services\TenantInvites::send()` voids any live `tenant_invites` row for the user, inserts a new one (`sha256` token hash, 7-day `expires_at`) and queues `App\Notifications\TenantInvite` — bilingual mail, action link `{FRONTEND_URL}/auth/accept-invite?token=…&email=…`, subject names the inviting owner. No password is set here; the tenant sets it on accept, which flips `status` to `active`. Queued ⇒ the `queue-worker` container must be running. **`inviteUrl` is the very same link the email carries, returned once** (only its hash is stored) so the owner can copy / WhatsApp it as a backup. |
+| POST | `/tenants/{tenant}/invite-link` | — | `200` `{inviteUrl, inviteExpiresAt}` | Owner backup for a lost invite email (spec 2026-10-07 § 4.3). `404` if not a tenant, `403` unless the tenant is visible to this owner (same rule as `GET /tenants/{tenant}`), `409` unless `status = invited`. Mints a **fresh** link via `TenantInvites::issue()` — earlier links (incl. the emailed one) are voided — and **sends no mail**; the owner shares it. |
+| GET | `/tenants/{tenant}` | — | `200` `TenantResource` | `404` if the id isn't a tenant; `403` if not visible to this owner (same rule as list). |
+| PUT | `/tenants/{tenant}` | body (`UpdateTenantRequest`, all `sometimes`): `name`, `email` (unique excluding self), `phone`, `status` (`invited\|active\|notice_given\|moved_out`), `personal` (nullable array → `personal_info`), `emergencyContact` (nullable array → `emergency_contact`) | `200` `TenantResource` | |
+| DELETE | `/tenants/{tenant}` | — | `204` | Hard delete. |
+
+### Agreements
+
+| Method | Path | Request | Response | Notes |
+|---|---|---|---|---|
+| GET | `/agreements` | query: `expand` (any truthy value) | `200` array of `AgreementResource`, or `AgreementWithRefsResource` (`{agreement, unit, property, tenant, payoutAccount}`) if `expand` present | Scoped to agreements on units the owner owns. |
+| POST | `/agreements` | body (`StoreAgreementRequest`): `unitId` (required, uuid, exists), `tenantId` (required, uuid, exists `users.id`), `startDate` (required, date), `endDate` (required, date, after `startDate`), `rentAmount` (required, int ≥1), `depositAmount` (required, int ≥0), `lateFee` (nullable, int ≥0), `rentDueDay` (required, int 1–28), `status` (nullable, `draft\|active\|expired\|terminated`), `payoutAccountId` (sometimes, nullable uuid) | `201` `AgreementResource` | `403` if the target unit's property isn't owned by the caller. `422 {errors:{payoutAccountId}}` if `payoutAccountId` isn't one of the caller's payout accounts; `null` = use the owner's default. **Side-effect:** when `status` is `active`, `App\Services\InvoiceGenerator::generateFor()` runs before the response (see Invoices § Generation) — the response itself is unchanged. |
+| GET | `/agreements/{agreement}` | — | `200` `AgreementResource` | `403` if not the owner's unit. |
+| PUT | `/agreements/{agreement}` | body (`UpdateAgreementRequest`, same fields all `sometimes`; `status` accepts only `draft\|active\|expired\|terminated` — `pending_review`/`accepted` are `422`, reachable only through the review flow) | `200` `AgreementResource` | If `unitId` changes, re-checks unit ownership (`403` on mismatch). **Review flow (spec 2026-10-07 agreement-review):** when the agreement was `pending_review` or `accepted` and any term column (`unit_id`, `tenant_id`, dates, money, `rent_due_day`) actually changed, it drops back to `draft` with `sent_at`/`accepted_at` cleared — the response shows `status: draft`. **Side-effects after save:** status `active` → `InvoiceGenerator::generateFor()` (idempotent, so activating or extending an agreement fills in missing periods); transition **to** `terminated` → `cancelFuture()` (this agreement's `pending` invoices with `due_date > today` become `cancelled`). Rent / due-day edits never rewrite existing invoices. `payoutAccountId` (same rule as POST) is **not** a term column — changing it never drops a sent/accepted agreement to draft, and it's editable at any status. |
+| DELETE | `/agreements/{agreement}` | — | `204` | |
+| POST | `/agreements/{agreement}/send` | — | `200` `AgreementResource` | **Review flow.** `409` unless `draft`. Sets `pending_review`, `sent_at = now`, clears `review_note`; queues `App\Notifications\AgreementSent` to the tenant (link `{FRONTEND_URL}/tenant/agreement`). |
+| POST | `/agreements/{agreement}/withdraw` | — | `200` `AgreementResource` | `409` unless `pending_review`. Back to `draft`, `sent_at = null`. No mail. |
+
+`AgreementResource` carries the review state: `sentAt`, `acceptedAt`, `changesRequestedAt`, `reviewNote` (all nullable), plus `payoutAccountId` (nullable — `null` means the owner's default). Status set: `draft → pending_review → accepted → active → expired | terminated`; `accepted → active` is the owner's normal `PUT {status: active}` (which still triggers invoice generation).
+
+### Invoices
+
+| Method | Path | Request | Response | Notes |
+|---|---|---|---|---|
+| GET | `/invoices` | query: `status`, `year`, `month`, `expand` | `200` array of `InvoiceResource` (or `InvoiceWithRefsResource` if `expand`), ordered `due_date desc` | `status=awaiting` is derived, not stored: invoices with a `pending` payment (tenant transfer claim). |
+| GET | `/invoices/{invoice}` | query: `expand` | `200` `InvoiceResource` / `InvoiceWithRefsResource` | `403` if not the owner's invoice. |
+| PATCH | `/invoices/{invoice}` | body (`UpdateInvoiceStatusRequest`): `status` (required, `pending\|paid\|overdue\|cancelled`) | `200` `InvoiceResource` | Same handler as the `/status` route below (`updateStatus` bound twice — a duplicate route, both present in `routes.txt`). |
+| PATCH | `/invoices/{invoice}/status` | same as above | `200` `InvoiceResource` | Duplicate of the route above; kept for frontend naming parity (`useInvoices.ts`). |
+| POST | `/invoices/{invoice}/send` | — | `200` `{sentAt: ISO8601}` | **Stub** — no actual email/WhatsApp dispatch. `TODO Phase 4`: `InvoiceSentNotification`. |
+| POST | `/invoices/{invoice}/payments` | body (`RecordPaymentRequest`): `amount` (required, int ≥1 → `amount_cents`), `method` (required, `fpx\|card\|cash\|transfer`), `paidAt` (required, date → `paid_at`), `reference` (nullable, string≤255) | `201` `{payment: PaymentResource, invoice: InvoiceResource}` | Creates a `Payment` with `status: successful` (owner-recorded payments are trusted, no gateway round-trip) and flips the invoice to `paid`. |
+| POST | `/payments/{payment}/confirm` | body: `paidAt` (sometimes, nullable date — corrects the date the money landed) | `200` `{payment: PaymentResource, invoice: InvoiceResource}` | Answers a tenant transfer claim (spec 2026-10-08). `403` unless payment → invoice → agreement → unit → property is the caller's; `409` unless the payment is `pending`. Payment → `successful`, `confirmedAt = now`; invoice → `paid`. |
+| POST | `/payments/{payment}/reject` | body: `reason` (required, ≤300) | `200` `{payment, invoice}` | Same `403`/`409`. Payment → `failed` + `rejectionReason`; **invoice untouched** (the tenant can claim again). Queues `App\Notifications\PaymentClaimRejected` to the tenant (reason included, link `{FRONTEND_URL}/tenant/payments`). |
+
+**Generation (ADR-006, spec 2026-10-07 § 3).** There is no create endpoint. Invoices come from `App\Services\InvoiceGenerator`:
+
+- `generateFor(agreement, today?)` — only for `status: active`. Creates every missing period whose `due_date` (the month's `rent_due_day`) lies in `[max(start_date, today), min(end_date, today + 30 days)]`. **Next due date onward, never back-filled** — a tenancy activated on 7 Oct with rent due on the 1st gets `2026-11-01`, not October. New rows: `amount_cents = rent_amount_cents`, `late_fee_cents = 0`, `status: pending`, `invoice_number` = next global `INV-NNNN` (same sequence as `DemoSeeder`). Periods that already exist (any status, incl. `cancelled`) are skipped; `invoices(agreement_id, due_date)` is unique (`2026_10_07_000001`).
+- `markOverdue(today?)` — `pending` with `due_date < today` → `overdue`, `late_fee_cents` snapshotted once from the agreement. **Skips** an invoice with a `pending` payment whose `date(paid_at) <= due_date` (a tenant who claimed an on-time transfer isn't fined while the owner hasn't looked — spec 2026-10-08 § 5). A rejected claim, or one dated after `due_date`, doesn't protect it.
+- `cancelFuture(agreement, today?)` — used on termination (see Agreements).
+- Triggers: `POST/PUT /agreements` (above) and `php artisan invoices:roll {--date=}`, scheduled daily at 00:30 Asia/Kuala_Lumpur (`routes/console.php`), which runs `generateFor` over every active agreement then one `markOverdue` pass. `--date` replays a given day. The `scheduler` compose service must be running.
+
+### Maintenance tickets
+
+| Method | Path | Request | Response | Notes |
+|---|---|---|---|---|
+| GET | `/tickets` | query: `expand` | `200` array of `TicketResource` (or `TicketWithRefsResource`) | Scoped to tickets on the owner's units. |
+| POST | `/tickets` | body (`StoreTicketRequest`): `unitId` (required, uuid, exists), `category` (required, `plumbing\|electrical\|appliance\|structural\|pest\|other`), `priority` (required, `low\|medium\|high\|urgent`), `title` (required, ≤100), `description` (required, string) | `201` `TicketResource` | `reporter_id`/`reporter_role` are server-set to the calling owner (`ReporterRole::OWNER`), never trusted from the body. |
+| GET | `/tickets/{ticket}` | query: `expand` | `200` `TicketResource` / `TicketWithRefsResource` | |
+| PUT | `/tickets/{ticket}` | body, validated **inline** (not a FormRequest class): `category` (sometimes), `priority` (sometimes), `title` (sometimes, ≤100), `description` (sometimes) | `200` `TicketResource` | Does not go through `status` — status is a separate endpoint (see below). |
+| DELETE | `/tickets/{ticket}` | — | `204` | |
+| PATCH | `/tickets/{ticket}/status` | body (`UpdateTicketStatusRequest`): `status` (required, `new\|in_progress\|resolved\|reopened`) | `200` `TicketResource`, or `422 {message}` | Enforced state machine — `TicketStatus::canTransitionTo()`: `new→{in_progress,resolved}`, `in_progress→{resolved,new}`, `resolved→{reopened}`, `reopened→{in_progress,resolved}`. Invalid transitions return `422` with a plain `message`, **not** the standard `errors{}` shape. Sets `resolved_at` on transition to `resolved`. |
+| POST | `/tickets/{ticket}/comments` | body (`StoreTicketCommentRequest`): `body` (required, string) | `201` `TicketCommentResource` | `author_role: owner` server-set. |
+
+### Reports
+
+| Method | Path | Request | Response | Notes |
+|---|---|---|---|---|
+| GET | `/reports/dashboard` | — | `200` **snake_case** inline JSON: `{income_this_month_cents, outstanding_cents, outstanding_invoice_count, expiring_agreement_count, monthly_income:[{month, income_cents}]×12, expiring_agreements: Agreement[] (raw Eloquent, not a Resource), outstanding_invoices: Invoice[] (raw Eloquent)}` | ⚠ **Not camelCase** — see Conventions note. `expiring_agreements`/`outstanding_invoices` are raw model arrays (all DB columns, snake_case, no Resource transform) — leaks internal column names. |
+| GET | `/reports/yearly/{year}` | path: `year` (int) | `200` **snake_case** inline JSON: `{year, monthly_income:[{month, income_cents}]×12, total_income_cents, properties: Property[] (raw Eloquent w/ nested units.agreements.invoices)}` | Same casing/leak caveat. |
+| GET | `/reports/yearly/{year}/export` | path: `year` | `501` | **Stub.** `TODO Phase 4`: generate + stream CSV. |
+
+---
+
+## Shell 3 — Tenant (`/api/me/*`, `role:tenant`)
+
+No `not-suspended` gate on this shell (a suspended owner's tenants keep working, per `EnsureNotSuspended`'s docblock).
+
+| Method | Path | Request | Response | Notes |
+|---|---|---|---|---|
+| POST | `/me/agreements/{agreement}/accept` | — | `200` `AgreementResource` | **Review flow.** `403` unless `agreement.tenant_id` is the caller, `409` unless `pending_review`. Sets `accepted`, `accepted_at = now`; queues `App\Notifications\AgreementReviewed` (accepted) to the owner via unit → property → owner, link `{FRONTEND_URL}/owner/agreements/{id}`. |
+| POST | `/me/agreements/{agreement}/request-changes` | body: `note` (required, string ≤500) | `200` `AgreementResource` | Same guards. Back to `draft` with `review_note`, `changes_requested_at = now`, `sent_at = null`; queues `AgreementReviewed` (changes, note included) to the owner. |
+| GET | `/me/agreement` | query: `expand` | `200` `AgreementResource` / `AgreementWithRefsResource`, or literal JSON `null` (status 200) if none | Resolves the tenant's active agreement, falling back to the most recent non-draft one. The controller deliberately calls `->setData(null)` to force a literal `null` body rather than Symfony's default `{}` coercion. **Precedence (review flow):** `active` first, then `pending_review`/`accepted` (latest updated), then the most recent non-draft — a pending agreement must outrank an old expired one. |
+| GET | `/me/invoices` | query: `expand` | `200` array of `InvoiceResource` / `InvoiceWithRefsResource`, ordered `due_date desc` | Scoped to invoices on the tenant's own agreements. |
+| POST | `/me/invoices/{invoice}/claim` | body (`ClaimPaymentRequest`): `reference` (required, ≤100), `paidAt` (required, date, ≤ today in Asia/Kuala_Lumpur), `note` (nullable, ≤500) | `201` `{payment: PaymentResource, invoice: InvoiceResource}` | **"I've paid" by DuitNow / bank transfer** (spec 2026-10-08). Creates `Payment {method: transfer, status: pending, reference, note, paid_at = paidAt, amount = invoice.totalDueCents() at claim time, payout_account_id = resolved account}`; the invoice status is unchanged ("awaiting confirmation" = has a pending payment). `403` not the caller's invoice; `422 {message}` unless the invoice is `pending`/`overdue`; `409 {code:"claim_pending", message}` if a pending payment already exists (max one per invoice); `422 {code:"no_payout_account", message}` when nothing resolves (agreement's account ?? owner's default). Queues `App\Notifications\PaymentClaimSubmitted` to the owner (link `{FRONTEND_URL}/owner/payments?status=awaiting`) unless the owner's `notification_preferences.events.payment_received` is explicitly `false`. |
+| POST | `/me/invoices/{invoice}/pay` | body: `method` (required, `fpx\|card\|cash\|transfer`) | `201` `{payment: PaymentResource, invoice: InvoiceResource}` | **Gated:** `403 {code:"online_payments_unavailable", message}` unless `config('app.online_payments')` (env `ONLINE_PAYMENTS`, default `false`) — so nobody can self-mark rent paid on UAT/prod. **Mock/simulated round-trip** — no real gateway call. `TODO Phase 3`: create a Billplz bill and redirect. Creates a `successful` `Payment` for `invoice.totalDueCents()` and flips the invoice to `paid` immediately. `403` if the invoice isn't the caller's; `422` if already paid. |
+| GET | `/me/tickets` | query: `expand` | `200` array of `TicketResource` / `TicketWithRefsResource` | Scoped to `reporter_id === auth user`. |
+| GET | `/me/tickets/{ticket}` | query: `expand` | `200` `TicketResource` / `TicketWithRefsResource` | `403` if not the caller's ticket. |
+| POST | `/me/tickets` | body, validated inline: `category` (required), `priority` (required), `title` (required, ≤100), `description` (required) | `201` `TicketResource` | **No `unitId` in the body** — the unit is derived server-side from the tenant's active agreement; `unitId`/`reporterId`/`reporterRole` in the request are ignored even if sent. `422` if the tenant has no active agreement. |
+| POST | `/me/tickets/{ticket}/comments` | body (`StoreTicketCommentRequest`): `body` (required) | `201` `TicketCommentResource` | `403` if not the caller's ticket. `author_role: tenant`. |
+| GET | `/me/profile` | — | `200` inline JSON: `{id, name, email, phone, personal, emergencyContact}` | Not a Resource class — hand-built in the controller. `email` is not editable via the PATCH below (login identity). |
+| PATCH | `/me/onboarding` | body (`CompleteTenantOnboardingRequest`): `name` (sometimes), `phone` (**required**), `personal` (**required** array) with `personal.icNumber` (**required**; 12 digits with or without dashes — `App\Support\MyKad::normalize()` stores the dashed `YYMMDD-PB-####` form, and `personal.dateOfBirth` defaults from it when blank), `personal.dateOfBirth` / `occupation` / `employer` / `monthlyIncome` (int sen) / `nationality` (nullable), `emergencyContact` (**required** array) with `.name` + `.phone` (**required**), `.relationship` (nullable) | `200` `AuthUserResource` | Tenant first-run (spec 2026-10-07 § 4.4). Saves the same columns as `/me/profile` **and** stamps `onboarded_at` (idempotent — a later call keeps the first timestamp). Logs `account.onboarded`. `GET /auth/me` exposes `onboardedAt` for tenants as well as owners; `null` ⇒ the frontend guard routes the tenant to `/tenant/onboarding`. Migration `2026_10_07_000003` back-fills existing non-invited tenants so nobody live is gated; pending invites stay `null`. |
+| PATCH | `/me/profile` | body (`UpdateTenantProfileRequest`, all `sometimes`/`nullable`): `name` (≤255), `phone` (≤30), `personal` (array → `personal_info`), `emergencyContact` (array → `emergency_contact`) | `200` same shape as GET | No `email`/`status` field accepted — those stay owner/admin-controlled. `personal.icNumber` is normalised to the dashed MyKad form when it is 12 digits in any spacing (free text is kept verbatim), and `personal.dateOfBirth` is defaulted from it when blank — same `MyKad::applyToPersonal()` as `/me/onboarding` and the owner's `PUT /tenants/{tenant}`. |
+
+---
+
+## Shell 4 — Admin (`/api/admin/*`, `role:admin` [+ `can:<permission>`])
+
+Every write listed here is recorded via `AuditLogger` (`log_name: admin`). Permission keys are `App\Support\AdminPermissions` constants; a super-admin (`is_super_admin: true`) implicitly has all of them (see `AuthUserResource`).
+
+### Permissions & dashboard
+
+| Method | Path | `can:` | Request | Response | Notes |
+|---|---|---|---|---|---|
+| GET | `/admin/permissions` | `admins.manage` | — | `200` `{permissions: [{key, preset}] (14 rows), preset: string[] (keys where preset=true)}` | The fixed catalogue — `dashboard.view, owners.view, tenants.view, analytics.view, owners.warn, owners.suspend, owners.plan, support.manage, broadcast.send, settings.channels, settings.flags, admins.manage, audit.view, users.delete`. "Operations preset" = 8 of the 14 (excludes `owners.plan`, `settings.channels`, `settings.flags`, `admins.manage`, `audit.view`, `users.delete`). |
+| GET | `/admin/dashboard` | `dashboard.view` | — | `200` inline JSON: `{tiles:{owners:{total,active,suspended}, tenants:{total,invitedPending}, properties, units:{total,occupiedPct}, agreementsActive, agreementsExpiring30d, supportOpen:0 /*SP2*/}, series:{months[12], ownerSignups[12], invoicesIssued[12], invoicesPaid[12], inviteAcceptanceRate[12]}, attention:[{kind, ownerId, ownerName, meta, link}]}` | Platform-wide, counts only — never a money amount. `attention.kind` ∈ `over_cap \| overdue_3plus \| invite_stale_7d \| no_property_7d \| suspended`. `supportOpen` is hardcoded `0`, deferred to a later phase (support tickets don't exist yet). Must be kept in lock-step with `frontend/app/demo/services/admin/dashboard.ts` (mock mirror) by hand — no shared source. |
+
+### Owners
+
+| Method | Path | `can:` | Request | Response | Notes |
+|---|---|---|---|---|---|
+| GET | `/admin/owners` | `owners.view` | query: `q` (name/email/businessName like-search), `plan`, `status` (`active\|suspended`), `overdue` (bool — has ≥1 overdue invoice), `overCap` (bool — units over the plan's cap), `page`, `perPage` (default 20) | `200` `{data: AdminOwnerResource[], meta:{page, perPage, total, lastPage}}` | `overCap` filtering happens in-memory after the DB query (loads all matches then slices) — not indexed/DB-level. |
+| GET | `/admin/owners/{owner}` | `owners.view` | — | `200` `AdminOwnerResource` | `404` if id isn't role `owner`. |
+| GET | `/admin/owners/{owner}/properties` | `owners.view` | — | `200` array of `AdminPropertySummaryResource` | No street address, postcode, ownership, utilities, documents or prices — name, city/state, type and unit counts only. |
+| GET | `/admin/owners/{owner}/tenants` | `owners.view` | — | `200` array of `AdminTenantResource` | Shortened names — see the resource note. |
+| GET | `/admin/owners/{owner}/history` | `owners.view` | — | `200` array of audit-entry-shaped rows (`AdminOwnerResource`... actually `AuditEntryResource[]`) **plus one synthetic `owner.signup` row appended** with `id: "signup-{ownerId}"`, `actorId: null`, `after: {planTier}` | The synthetic signup row is not a real `Activity` record — fabricated so the timeline has a start event even for owners who predate audit logging. |
+| POST | `/admin/owners/{owner}/warn` | `owners.warn` | body (`WarnOwnerRequest`): `template` (required, one of `App\Notifications\OwnerWarning::TEMPLATES`), `suspendOn` (required, `Y-m-d`, must be after today), `extraLine` (nullable, ≤500) | `204` | Sends an `OwnerWarning` notification — **mail only in SP1** (`via()` returns `['mail']`; queued, so the `queue-worker` container must be running; SP2 adds WhatsApp/SMS channels without touching callers) — and logs `owner.warned` with the composed warning text in `after`. |
+| POST | `/admin/owners/{owner}/suspend` | `owners.suspend` | body (`SuspendOwnerRequest`): `reason` (required, string, 10–1000 chars) | `200` `AdminOwnerResource` | `409` if already suspended. Sets `suspended_at`, `suspension_reason`. Logs `owner.suspended` with the reason. This flips `not-suspended` for the owner shell going forward. |
+| POST | `/admin/owners/{owner}/unsuspend` | `owners.suspend` | — | `200` `AdminOwnerResource` | `409` if not suspended. Logs `owner.unsuspended`. |
+
+### Analytics
+
+Read-only platform analytics (marketing-site funnel + leads). Counts only — never money, never PII beyond a lead's email.
+
+| Method | Path | `can:` | Request | Response | Notes |
+|---|---|---|---|---|---|
+| GET | `/admin/analytics/overview` | `analytics.view` | query (`AnalyticsRangeRequest`): `from`/`to` (nullable, `Y-m-d`, `to` defaults to now, `from` defaults to `to - 29 days`; range capped at 366 days, else `422`) | `200` `{range:{from, to, days}, tiles:{views, visitors, newVisitors, demoEntries, leads, registrations, conversionPct}, series:{days[], views[], visitors[], leads[], registrations[]}, funnel:{visitors, demo, leads, registered}, topPages:[{path, views}] (top 10), referrers:[{referrer, visitors}] (top 10, `null` referrer bucketed as `"direct"`)}` | Bucketing/aggregation is done in PHP over the range's rows (same style as the owner dashboard) — fine at this scale, not SQL-side. `conversionPct` = `round(registrations / visitors * 100)`, `0` if no visitors. |
+| GET | `/admin/analytics/leads` | `analytics.view` | query: `q` (email like-search), `source` (`waitlist\|demo\|register`), `converted` (bool), `page`, `perPage` (default 20, clamped `min(100, max(1, n))`) | `200` `{data: AdminLeadResource[], meta:{page, perPage, total, lastPage}}` | Ordered `last_seen_at desc, id asc`. Each row decorated with `pageViews`/`demoEntered` from the lead's `visitor_id` events (one query each per page, not per row). |
+| GET | `/admin/analytics/leads/export.csv` | `analytics.view` | same filters as `leads` (minus pagination) | `200` streamed `text/csv; charset=UTF-8`, filename `roofly-leads-{Ymd-His}.csv` | Columns: `email, source, firstSeenAt, lastSeenAt, pageViews, demoEntered, convertedOwnerName`. Streams in chunks of 500. Logs `analytics.exported` (`AuditLogger::ANALYTICS_EXPORTED`) with the applied filters in `after`. Route is registered **before** `leads/{lead}` so `export.csv` isn't swallowed by the wildcard. |
+| GET | `/admin/analytics/leads/{lead}` | `analytics.view` | — | `200` `AdminLeadResource` `+ {events: LeadEventResource[]}` (latest 20 by `created_at`, only if the lead has a `visitor_id`) | Same per-lead decoration as the list. |
+| POST | `/admin/analytics/leads/{lead}/invite` | `analytics.view` + `broadcast.send` | — | `200` `AdminLeadResource` (updated `invitedAt`) | Emails the lead `App\Notifications\WaitlistInvitation` on demand (branded "Your Roofly invitation is here", `emails/waitlist-invitation(-text)`), button to `config('app.invite_signup_url')` (env `INVITE_SIGNUP_URL`, blank = `FRONTEND_URL/auth/register`; production → UAT's register page during the beta hunt) with `?email=` appended so the register form prefills. `409` if `source !== 'waitlist'`, or the lead is converted / a `users` row already has that email. Re-send allowed — bumps `leads.invited_at`. Mail is sent before `invited_at` is set, so a queue failure surfaces as an error and the lead stays un-invited. Logs `lead.invited` (subject = the lead; `AuditEntryResource.subjectName` = lead email). |
+
+### Enquiries (Messages tab)
+
+| Method | Path | `can:` | Request | Response | Notes |
+|---|---|---|---|---|---|
+| GET | `/admin/enquiries` | `support.manage` | query: `q` (name/email/message like-search), `status` (`new\|replied\|closed`), `type` (`issue\|feedback\|question`), `page`, `perPage` (default 20, clamped 1–100) | `200` `{data: AdminEnquiryResource[], meta:{page, perPage, total, lastPage, newCount}}` | Newest first. `newCount` = all `status: new` rows (for the tab badge), ignoring filters. `422` on an unknown status/type. |
+| PATCH | `/admin/enquiries/{enquiry}` | `support.manage` | body: `status?` (`new\|replied\|closed`), `adminNote?` (nullable, ≤5000) | `200` `AdminEnquiryResource` | Track only — no reply is sent. Sets `handled_by` to the caller; `status_changed_at` only moves when the status actually changes. Logs `enquiry.updated` (before/after status + note; `AuditEntryResource.subjectName` = sender name). |
+
+---
+
+### Tenants
+
+| Method | Path | `can:` | Request | Response | Notes |
+|---|---|---|---|---|---|
+| GET | `/admin/tenants` | `tenants.view` | query: `q` (like-search on the tenant's email or phone, or on their property name / owner name — **never the tenant's name**, so search can't recover the full name the resource shortens), `status`, `ownerId` (matches invited-by OR agreement-on-owner's-property), `page`, `perPage` (default 20) | `200` `{data: AdminTenantResource[], meta}` | |
+| GET | `/admin/tenants/{tenant}` | `tenants.view` | — | `200` `AdminTenantResource` | `404` if not a tenant. |
+| POST | `/admin/tenants/{tenant}/resend-invite` | `tenants.view` | — | `204` | `409` unless `tenant.status === 'invited'`. Bumps `invited_at`. **No mail sent** — `TODO Phase 2`: dispatch magic-link invite notification. Logs `tenant.invite_resent`. |
+
+### Admin users
+
+| Method | Path | `can:` | Request | Response | Notes |
+|---|---|---|---|---|---|
+| GET | `/admin/admins` | `admins.manage` | — | `200` array of `AdminUserResource` | Not paginated (unlike owners/tenants lists). |
+| POST | `/admin/admins` | `admins.manage` | body (`StoreAdminRequest`): `name` (required, ≤255), `email` (required, email≤255, unique), `permissions` (required, present array, each ∈ `AdminPermissions::keys()`), `isSuperAdmin` (sometimes, bool) | `201` `AdminUserResource` | **Authorization gate inside the FormRequest**: only an existing super-admin may set `isSuperAdmin: true` on the new record — otherwise the request itself is denied (403 via `authorize()` returning false), before validation. Creates the user with `password: null` (no password set yet) and immediately mints + emails an invite. |
+| PATCH | `/admin/admins/{admin}` | `admins.manage` | body (`UpdateAdminRequest`, all `sometimes`): `permissions` (array, each valid key), `isSuperAdmin` (bool), `disabled` (bool) | `200` `AdminUserResource` | Same super-admin-only gate on touching `isSuperAdmin`. `422` if trying to disable yourself. `422` if the change would leave zero enabled super-admins (demoting or disabling the last one). Disabling revokes all Sanctum tokens (`$admin->tokens()->delete()`). Logs `admin.permissions_changed` (with before/after snapshots) and/or `admin.disabled`/`admin.enabled` depending on which fields changed. |
+| POST | `/admin/admins/{admin}/resend-invite` | `admins.manage` | — | `204` | `409` if the admin already has `first_login_at` set (already accepted). Voids any live invite token and mints a new one. Logs `admin.invite_sent`. |
+
+### Audit
+
+| Method | Path | `can:` | Request | Response | Notes |
+|---|---|---|---|---|---|
+| GET | `/admin/audit` | *(no `can:` on the route — see notes)* | query: `page`, `perPage` (default 25, max 100), `actorId`, `action`, `subjectType` (`user` mapped to `App\Models\User::class`, else passed through raw), `subjectId`, `from`/`to` (`Y-m-d`, inclusive day bounds) | `200` `{data: AuditEntryResource[], meta}` | Every admin can call this (no route-level `can:`), but the **query is scoped in-controller**: without `audit.view`, results are forced to `causer_id = caller`, even if an `actorId` filter asks for someone else's entries (returns empty rather than someone else's rows). With `audit.view`, sees everything. |
+| GET | `/admin/audit/export.csv` | `audit.view` | same filters as above | `200` streamed `text/csv; charset=UTF-8`, filename `roofly-audit-{Ymd-His}.csv` | Columns: `id, createdAt, action, actorName, subjectType, subjectId, subjectName, reason, before, after` (`before`/`after` JSON-encoded per cell). Streams in chunks of 500. |
+
+---
+
+## Shell 5 — Webhooks
+
+| Method | Path | Middleware | Request | Response | Notes |
+|---|---|---|---|---|---|
+| POST | `/webhooks/billplz` | `api`, `touch-active` (explicitly `withoutMiddleware('auth:sanctum')`) | raw body, stored verbatim as `payload` on a new `PaymentWebhook` row | `200` plain text `"OK"` | **No signature verification yet** — `TODO Phase 3`: verify `X-Signature` header, dispatch a `ProcessBillplzWebhook` job. Currently just persists the payload and immediately marks it `processed_at: now()`; no actual invoice/payment state is touched by this endpoint today. |
+
+---
+
+## Resource shapes appendix
+
+Key lists below are read directly from each `toArray()`. `?` marks a value that can be `null`.
+
+- **`AgreementResource`** — `id, unitId, tenantId, startDate (Y-m-d), endDate (Y-m-d), rentAmount, depositAmount, lateFee?, rentDueDay, status?, sentAt?, acceptedAt?, changesRequestedAt?, reviewNote?, payoutAccountId?, createdAt?`
+- **`AgreementWithRefsResource`** — `{agreement: AgreementResource, unit: UnitResource?, property: PropertyResource?, tenant: TenantResource?, payoutAccount: PayoutAccountResource?}` — `payoutAccount` is the **resolved** account (agreement's own ?? owner's default ?? null).
+- **`AuthUserResource`** — 12 keys, in this order: `id, name, email, phone?, role?, permissions: string[] (admin only — [] for owner/tenant), isSuperAdmin: bool, hasPassword: bool (false only for a Google-only owner with no password set), avatarUrl?, onboardedAt? (ISO8601 — owner only, else null), purposes: string[] (owner only, else []), checklistDismissedAt? (ISO8601 — owner only, else null)`
+- **`InvoiceResource`** — `id, agreementId, invoiceNumber, amount, lateFee?, dueDate (Y-m-d), status?, createdAt?`
+- **`InvoiceWithRefsResource`** — `{invoice, agreement?, unit?, property?, tenant?, payments: PaymentResource[], payoutAccount: PayoutAccountResource?}` — `payoutAccount` resolved for the invoice's agreement.
+- **`OwnerAccountResource`** — `{profile:{id, name, email, phone?, photoUrl: null /*Phase 4*/, businessName?},  /* bankAccountLast4 dropped 2026-10-08 with users.bank_account_last4 */ preferences:{locale, theme, moneyLocale}, notifications:{events:{...5 booleans}, channels:{email, whatsapp, in_app}}, planTier?}`
+- **`PaymentResource`** — `id, invoiceId, amount, method?, status?, paidAt?, reference?, createdAt?, payoutAccountId?, note?, rejectionReason?, confirmedAt?`
+- **`PayoutAccountResource`** — `id, label, bank, accountHolderName, accountNumber? (digits only), duitnowIdType? ("phone"|"mykad"|"brn"|"passport"), duitnowId?, isDefault: bool, agreementCount: int (agreements explicitly pointing at it — owner endpoints only, 0 inside the …WithRefs envelopes), createdAt?`
+- **`PropertyCoOwnerResource`** — `id, name, sharePct: float, isPrimary: bool`
+- **`PropertyResource`** — `id, ownerId, name, internalLabel?, type?, purpose ("rental"|"own_stay"|"investment", defaults "rental"), notes?, address, city, state, postcode, yearBuilt?, builtUpSqft?, landSqft?, bedrooms?, bathrooms?, parkingLots?, furnishing?, ownership? (raw array), utilities? (raw array), coOwners: PropertyCoOwnerResource[], createdAt?`
+- **`TenantResource`** — `id, name, email, phone?, status, invitedAt?, createdAt?, personal? (raw array), emergencyContact? (raw array)`
+- **`TicketCommentResource`** — `id, ticketId, authorId, authorRole?, body, createdAt?`
+- **`TicketResource`** — `id, unitId, reporterId, reporterRole?, category?, priority?, title, description, status?, createdAt?, updatedAt?, resolvedAt?`
+- **`TicketWithRefsResource`** — `{ticket, unit?, property?, reporter: TenantResource? (null for owner-reported tickets), comments: TicketCommentResource[] (sorted by created_at)}`
+- **`UnitResource`** — `id, propertyId, label, bedrooms?, bathrooms?, sqft?, status?, createdAt?`
+- **`Admin\AdminLeadResource`** — `id, email, source ("waitlist"|"demo"|"register"), firstSeenAt, lastSeenAt, invitedAt?, pageViews: int, demoEntered: bool, convertedUserId?, convertedOwnerName?` (`pageViews`/`demoEntered` are controller-set attributes, not model columns — see the Analytics endpoints above)
+- **`Admin\AdminEnquiryResource`** — `id, type, status, message, pageUrl?, pageLabel?, name, email, role? ("owner"|"tenant"), userId?, adminNote?, handledByName?, statusChangedAt?, createdAt` (pinned by `AdminEnquiriesTest::ENQUIRY_KEYS`).
+- **`Admin\AdminOwnerResource`** — `id, name, email, phone?, businessName?, planTier ("free" default), unitsUsed, unitsCap (int? — null = unlimited), status ("active"|"suspended"), suspendedAt?, suspensionReason?, createdAt?, lastActiveAt?, counts:{properties, units, unitsOccupied, tenants, agreementsActive, agreementsExpiring30d, invoicesOverdue, ticketsOpen}`
+- **`Admin\AdminPropertySummaryResource`** — `id, name, location:{city, state}, type?, unitsTotal, unitsOccupied, createdAt?` (no street address or postcode)
+- **`Admin\AdminTenantResource`** — `id, displayName, email, phone?, status, ownerId?, ownerName?, propertyName?, unitLabel?, invitedAt?, acceptedAt?, createdAt?` (`ownerId`/`ownerName` prefer the direct inviter, fall back to the most-relevant agreement's property owner). Tenant details are owner-controlled (Roofly is the owner's processor): `displayName` is shortened by `App\Support\PrivacyMask::name` ("Aminah Y."), email + phone are kept for support, and the full name, MyKad, personal info and emergency contact never leave the server. `AuditEntryResource.subjectName` masks tenant subjects the same way. Key sets for all three admin resources are pinned in `AdminResourcesTest`, which also asserts the full values are absent.
+- **`Admin\AdminUserResource`** — `id, name, email, permissions: string[], isSuperAdmin: bool, status ("disabled"|"invited"|"active"), lastActiveAt?, createdAt?`
+- **`Admin\AuditEntryResource`** — `id (string), action, actorId?, actorName?, subjectType? (lowercased class basename, e.g. "user"), subjectId?, subjectName? (User → name, **masked via `PrivacyMask::name` when the user is a tenant**; Lead → email; Enquiry → name; else null), before: object, after: object, reason?, ip?, createdAt?`
+- **`Admin\LeadEventResource`** — `id, event, path?, props: object, createdAt?` (`props.email`, if present, is redacted to the lead's own email via `LeadEventResource::forLead($lead->email)` — never surfaces a different email another visitor on the same device may have typed)
+
+---
+
+## Uncertain / worth owner verification
+
+- `Owner\ReportController@dashboard` and `@yearly` return **snake_case** keys and raw Eloquent model arrays (`expiring_agreements`, `outstanding_invoices`, `properties`), breaking the stated camelCase convention. Need to confirm whether the frontend API adapter (`frontend/app/services/api/reports.ts`) transforms these client-side, or whether this is a live contract mismatch — the doc for this needs a look at `docs/frontend/API-MAP.md`'s reports section.
+- `POST /api/properties/{property}/co-owners` (single-row add) validates inline in the controller and does **not** enforce the sum=100/exactly-one-primary invariant that the sync (`PUT`) endpoint and `PUT /properties/{id}` both enforce — unclear if that's intentional (add-then-fix-up-with-sync workflow) or a gap.
+- `PUT /tickets/{ticket}` (owner ticket update) validates inline rather than via a FormRequest class, unlike almost every other write endpoint — noted for consistency, not necessarily a bug.
+- The `role:owner`/`role:tenant`/`role:admin` failure path (`EnsureRole`) returns a bare `{message}` via `abort_if(..., 403)`, which is Laravel's default abort body — worth confirming this is the intended shape versus something more structured, since `EnsureNotSuspended` on the neighboring middleware deliberately uses a `{code, message}` shape.

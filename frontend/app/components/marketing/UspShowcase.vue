@@ -33,6 +33,22 @@ const uspKeys: UspKey[] = [
 ];
 
 const { t } = useI18n();
+const { revealOnScroll, hoverExpand } = useHeroMotion();
+const grid = ref<HTMLElement | null>(null);
+let stopReveal: (() => void) | null = null;
+let stopHover: (() => void) | null = null;
+
+onMounted(() => {
+  if (grid.value) {
+    const cards = Array.from(grid.value.querySelectorAll<HTMLElement>("article"));
+    stopReveal = revealOnScroll(cards);
+    stopHover = hoverExpand(cards);
+  }
+});
+onBeforeUnmount(() => {
+  stopReveal?.();
+  stopHover?.();
+});
 </script>
 
 <template>
@@ -58,11 +74,11 @@ const { t } = useI18n();
       </p>
     </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div ref="grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <article
         v-for="usp in uspKeys"
         :key="usp.key"
-        class="relative rounded-lg p-6 overflow-hidden transition-all hover:translate-y-[-2px]"
+        class="relative rounded-lg p-6 overflow-hidden will-change-transform"
         style="
           background: rgba(247, 244, 237, 0.04);
           border: 1px solid rgba(247, 244, 237, 0.1);
@@ -72,6 +88,7 @@ const { t } = useI18n();
         <!-- Watermark icon, partially clipped right edge for accent -->
         <component
           :is="usp.icon"
+          data-watermark
           class="absolute -right-4 -bottom-4 pointer-events-none"
           :size="120"
           :stroke-width="0.5"
@@ -97,6 +114,7 @@ const { t } = useI18n();
             {{ t(`demo.usps.${usp.key}.title`) }}
           </h3>
           <p
+            data-body
             class="text-caption leading-snug"
             style="color: rgba(247, 244, 237, 0.72)"
           >

@@ -1,217 +1,75 @@
 import { computed, ref } from "vue";
-import type { Property } from "~/types/property";
-import type { Unit } from "~/types/unit";
-import type { Tenant } from "~/types/tenant";
-import type { Agreement } from "~/types/agreement";
-import type { Invoice } from "~/types/invoice";
-import type { Payment } from "~/types/payment";
-import type { Ticket } from "~/types/ticket";
+import type {
+  AttentionItem,
+  DashboardData,
+  DashboardStats,
+  MonthlyBucket,
+} from "~/services/contracts/dashboard";
+import { demoDashboard } from "~/demo/services/dashboard";
+import { apiDashboard } from "~/services/api/dashboard";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+export type {
+  AttentionItem,
+  AttentionKind,
+  DashboardData,
+  DashboardStats,
+  IncomeBucket,
+  MonthlyBucket,
+} from "~/services/contracts/dashboard";
 
-const ymKey = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+const EMPTY_STATS: DashboardStats = {
+  monthlyIncome: 0,
+  occupancyPct: 0,
+  occupiedCount: 0,
+  unitCount: 0,
+  outstanding: 0,
+  outstandingCount: 0,
+  expiringCount: 0,
+};
 
-export type AttentionKind =
-  | "overdue"
-  | "expiring"
-  | "notice_given"
-  | "ticket_new"
-  | "ticket_reopened";
-
-export interface AttentionItem {
-  kind: AttentionKind;
-  title: string;
-  meta: string;
-  link: string;
-}
-
-export interface MonthlyBucket {
-  key: string;          // YYYY-MM
-  label: string;        // localized short month name
-  amount: number;       // sen
-}
-
+/**
+ * Owner dashboard state. One `getDashboard()` fetch — the API (or the demo
+ * builder) computes stats, the income series, and the attention feed; the
+ * only client-side work left is localizing month labels.
+ */
 export const useDashboard = () => {
-  const loading = ref(true);
-  const properties = ref<Property[]>([]);
-  const units = ref<Unit[]>([]);
-  const tenants = ref<Tenant[]>([]);
-  const agreements = ref<Agreement[]>([]);
-  const invoices = ref<Invoice[]>([]);
-  const payments = ref<Payment[]>([]);
-  const tickets = ref<Ticket[]>([]);
+  const service = useEnv().useMock ? demoDashboard : apiDashboard;
 
-  const load = async () => {
+  const loading = ref(true);
+  const data = ref<DashboardData | null>(null);
+
+  const getDashboard = async () => {
     loading.value = true;
     try {
-      const [props, us, ts, ags, invsWithRefs, tk] = await Promise.all([
-        useProperties().list(),
-        useUnits().list(),
-        useTenants().list(),
-        useAgreements().list(),
-        useInvoices().listWithRefs(),
-        useTickets().list(),
-      ]);
-      properties.value = props;
-      units.value = us;
-      tenants.value = ts;
-      agreements.value = ags;
-      invoices.value = invsWithRefs.map((x) => x.invoice);
-      payments.value = invsWithRefs.flatMap((x) => x.payments);
-      tickets.value = tk;
+      data.value = await service.getDashboard();
     } finally {
       loading.value = false;
     }
   };
 
-  const monthlyIncome = computed(() => {
-    const thisMonth = ymKey(new Date());
-    return payments.value
-      .filter((p) => p.status === "successful")
-      .filter((p) => ymKey(new Date(p.paidAt)) === thisMonth)
-      .reduce((sum, p) => sum + p.amount, 0);
-  });
-
-  const occupancyPct = computed(() => {
-    if (units.value.length === 0) return 0;
-    const occupied = units.value.filter((u) => u.status === "occupied").length;
-    return Math.round((occupied / units.value.length) * 100);
-  });
-
-  const outstanding = computed(() =>
-    invoices.value
-      .filter((i) => i.status === "pending" || i.status === "overdue")
-      .reduce((sum, i) => sum + i.amount + i.lateFee, 0),
+  const isEmpty = computed(() => data.value?.isEmpty ?? true);
+  const stats = computed<DashboardStats>(() => data.value?.stats ?? EMPTY_STATS);
+  const needsAttention = computed<AttentionItem[]>(
+    () => data.value?.needsAttention ?? [],
   );
 
-  const expiringCount = computed(() => {
-    const now = Date.now();
-    const cutoff = now + 60 * DAY_MS;
-    return agreements.value.filter((a) => {
-      if (a.status !== "active") return false;
-      const end = new Date(a.endDate).getTime();
-      return end >= now && end <= cutoff;
-    }).length;
-  });
-
-  // Trailing 12 months ending in current month, oldest first.
-  const monthlyIncomeSeries = computed<MonthlyBucket[]>(() => {
-    const series: MonthlyBucket[] = [];
-    const now = new Date();
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      series.push({
-        key: ymKey(d),
-        label: d.toLocaleDateString("en-MY", { month: "short" }),
-        amount: 0,
-      });
-    }
-    payments.value
-      .filter((p) => p.status === "successful")
-      .forEach((p) => {
-        const k = ymKey(new Date(p.paidAt));
-        const bucket = series.find((s) => s.key === k);
-        if (bucket) bucket.amount += p.amount;
-      });
-    return series;
-  });
-
-  const needsAttention = computed<AttentionItem[]>(() => {
-    const items: AttentionItem[] = [];
-
-    invoices.value
-      .filter((i) => i.status === "overdue")
-      .forEach((inv) => {
-        const ag = agreements.value.find((a) => a.id === inv.agreementId);
-        const tenant = ag
-          ? tenants.value.find((t) => t.id === ag.tenantId)
-          : null;
-        items.push({
-          kind: "overdue",
-          title: inv.invoiceNumber,
-          meta: tenant?.name ?? "—",
-          link: "/owner/payments",
-        });
-      });
-
-    const now = Date.now();
-    agreements.value
-      .filter((a) => a.status === "active")
-      .filter((a) => {
-        const end = new Date(a.endDate).getTime();
-        return end >= now && end - now <= 60 * DAY_MS;
-      })
-      .forEach((a) => {
-        const tenant = tenants.value.find((t) => t.id === a.tenantId);
-        const daysLeft = Math.ceil(
-          (new Date(a.endDate).getTime() - now) / DAY_MS,
-        );
-        items.push({
-          kind: "expiring",
-          title: tenant?.name ?? "Agreement",
-          meta: `${daysLeft}d`,
-          link: "/owner/agreements",
-        });
-      });
-
-    tenants.value
-      .filter((t) => t.status === "notice_given")
-      .forEach((t) => {
-        items.push({
-          kind: "notice_given",
-          title: t.name,
-          meta: "",
-          link: `/owner/tenants/${t.id}`,
-        });
-      });
-
-    // High/urgent new tickets — low/medium new tickets stay in the Kanban
-    // so they don't crowd the feed.
-    tickets.value
-      .filter((t) => t.status === "new")
-      .filter((t) => t.priority === "high" || t.priority === "urgent")
-      .forEach((t) => {
-        items.push({
-          kind: "ticket_new",
-          title: t.title,
-          meta: t.priority,
-          link: `/owner/maintenance/${t.id}`,
-        });
-      });
-
-    // All reopened tickets surface — by definition they need attention again.
-    tickets.value
-      .filter((t) => t.status === "reopened")
-      .forEach((t) => {
-        items.push({
-          kind: "ticket_reopened",
-          title: t.title,
-          meta: t.priority,
-          link: `/owner/maintenance/${t.id}`,
-        });
-      });
-
-    return items;
-  });
-
-  const isEmpty = computed(() => properties.value.length === 0);
+  // Localize month labels client-side so the server payload stays locale-free.
+  const monthlyIncomeSeries = computed<MonthlyBucket[]>(() =>
+    (data.value?.incomeSeries ?? []).map((b) => ({
+      key: b.key,
+      amount: b.amount,
+      label: new Date(`${b.key}-01`).toLocaleDateString("en-MY", {
+        month: "short",
+      }),
+    })),
+  );
 
   return {
-    load,
+    getDashboard,
     loading,
-    properties,
-    units,
-    tenants,
-    agreements,
-    invoices,
-    payments,
-    monthlyIncome,
-    occupancyPct,
-    outstanding,
-    expiringCount,
-    monthlyIncomeSeries,
-    needsAttention,
     isEmpty,
+    stats,
+    needsAttention,
+    monthlyIncomeSeries,
   };
 };

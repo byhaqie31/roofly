@@ -52,3 +52,6 @@ docker/data/
 
 # Logs
 *.log
+
+#Docs
+docs/notes/

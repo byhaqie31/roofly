@@ -37,10 +37,11 @@ const initialValues = {
   managementCorpPhone: u.managementCorpPhone ?? "",
 };
 
-const { defineField, handleSubmit, errors, values } = useForm({
+const { defineField, handleSubmit, errors, values, setErrors } = useForm({
   validationSchema: toTypedSchema(propertyUtilitiesFormSchema),
   initialValues,
 });
+const { toFieldErrors } = useApiError();
 
 const [monthlyMaintenanceFee] = defineField("monthlyMaintenanceFee");
 const [sinkingFund] = defineField("sinkingFund");
@@ -88,6 +89,13 @@ const onSubmit = handleSubmit(async (vals) => {
     });
     show(t("common.savedToast"), "success");
     emit("saved", updated);
+  } catch (err) {
+    const fieldErrors = toFieldErrors(err);
+    if (fieldErrors) {
+      setErrors(fieldErrors);
+      return;
+    }
+    show(t("common.genericError"), "danger");
   } finally {
     submitting.value = false;
   }

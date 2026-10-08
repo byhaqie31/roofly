@@ -15,6 +15,7 @@ const emit = defineEmits<{ saved: [account: OwnerAccount] }>();
 
 const { t } = useI18n();
 const { show } = useToast();
+const { toFieldErrors } = useApiError();
 const submitting = ref(false);
 
 // Local working copy — only persisted on submit.
@@ -40,6 +41,9 @@ const onSubmit = async () => {
     });
     emit("saved", updated);
     show(t("common.savedToast"), "success");
+  } catch (err) {
+    const fieldErrors = toFieldErrors(err);
+    show(fieldErrors ? Object.values(fieldErrors)[0]! : t("common.genericError"), "danger");
   } finally {
     submitting.value = false;
   }

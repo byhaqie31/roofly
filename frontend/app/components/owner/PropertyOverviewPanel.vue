@@ -18,8 +18,8 @@ const loading = ref(true);
 onMounted(async () => {
   try {
     const [u, a] = await Promise.all([
-      useUnits().listByProperty(props.property.id),
-      useAgreements().listWithRefs(),
+      useUnits().getUnitsByProperty(props.property.id),
+      useAgreements().getAgreementsWithRefs(),
     ]);
     units.value = u;
     agreements.value = a.filter((row) =>

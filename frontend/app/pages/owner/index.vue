@@ -7,6 +7,7 @@ import MoneyDisplay from "~/components/ui/MoneyDisplay.vue";
 import MiniAreaChart from "~/components/ui/MiniAreaChart.vue";
 import Pill from "~/components/ui/Pill.vue";
 import Icon from "~/components/ui/Icon.vue";
+import GettingStartedCard from "~/components/owner/GettingStartedCard.vue";
 import { useDashboard, type AttentionKind } from "~/composables/useDashboard";
 
 definePageMeta({ layout: "owner" });
@@ -15,22 +16,13 @@ const { t } = useI18n();
 useHead({ title: () => t("owner.dashboard.title") });
 
 const dashboard = useDashboard();
+const checklist = useOnboardingChecklist();
 const demoTour = useDemoTour();
 onMounted(async () => {
-  await dashboard.load();
+  await Promise.all([dashboard.getDashboard(), checklist.load()]);
   // Auto-start the product tour once per browser on demo. No-op elsewhere.
   demoTour.maybeAutoStart();
 });
-
-const occupiedCount = computed(
-  () => dashboard.units.value.filter((u) => u.status === "occupied").length,
-);
-const outstandingCount = computed(
-  () =>
-    dashboard.invoices.value.filter(
-      (i) => i.status === "pending" || i.status === "overdue",
-    ).length,
-);
 
 // Trailing-12-month summary stats for the chart card.
 const incomeTotal12mo = computed(() =>
@@ -54,6 +46,7 @@ const attentionTone: Record<
   AttentionKind,
   "overdue" | "maintenance" | "draft" | "pending"
 > = {
+  payment_claim: "pending",
   overdue: "overdue",
   expiring: "maintenance",
   notice_given: "draft",
@@ -73,6 +66,13 @@ const attentionTone: Record<
       </p>
     </header>
 
+    <GettingStartedCard
+      v-if="checklist.visible.value"
+      :steps="checklist.steps.value"
+      :done-count="checklist.doneCount.value"
+      @dismiss="checklist.dismiss"
+    />
+
     <Card v-if="dashboard.loading.value" padding="loose">
       <p class="text-center text-body text-ink-muted">
         {{ t("common.loading") }}
@@ -86,7 +86,7 @@ const attentionTone: Record<
         :description="t('owner.dashboard.emptyState.description')"
       >
         <template #action>
-          <NuxtLink to="/owner/properties">
+          <NuxtLink to="/owner/properties?add=1">
             <Button variant="primary" size="lg">
               {{ t("owner.dashboard.emptyState.cta") }}
             </Button>
@@ -102,7 +102,7 @@ const attentionTone: Record<
             {{ t("owner.dashboard.incomeMonth") }}
           </p>
           <p class="mt-2 text-display-sub font-semibold tracking-snug">
-            <MoneyDisplay :cents="dashboard.monthlyIncome.value" emphasis />
+            <MoneyDisplay :cents="dashboard.stats.value.monthlyIncome" emphasis />
           </p>
           <p class="mt-1 text-micro text-ink-faint">
             {{ t("owner.dashboard.incomeMonthHelp") }}
@@ -113,13 +113,13 @@ const attentionTone: Record<
             {{ t("owner.dashboard.occupancy") }}
           </p>
           <p class="mt-2 text-display-sub font-semibold tracking-snug num">
-            {{ dashboard.occupancyPct.value }}%
+            {{ dashboard.stats.value.occupancyPct }}%
           </p>
           <p class="mt-1 text-micro text-ink-faint">
             {{
               t("owner.dashboard.occupancyHelp", {
-                occupied: occupiedCount,
-                total: dashboard.units.value.length,
+                occupied: dashboard.stats.value.occupiedCount,
+                total: dashboard.stats.value.unitCount,
               })
             }}
           </p>
@@ -129,11 +129,13 @@ const attentionTone: Record<
             {{ t("owner.dashboard.outstanding") }}
           </p>
           <p class="mt-2 text-display-sub font-semibold tracking-snug">
-            <MoneyDisplay :cents="dashboard.outstanding.value" emphasis />
+            <MoneyDisplay :cents="dashboard.stats.value.outstanding" emphasis />
           </p>
           <p class="mt-1 text-micro text-ink-faint">
             {{
-              t("owner.dashboard.outstandingHelp", { count: outstandingCount })
+              t("owner.dashboard.outstandingHelp", {
+                count: dashboard.stats.value.outstandingCount,
+              })
             }}
           </p>
         </Card>
@@ -142,7 +144,7 @@ const attentionTone: Record<
             {{ t("owner.dashboard.expiringAgreements") }}
           </p>
           <p class="mt-2 text-display-sub font-semibold tracking-snug num">
-            {{ dashboard.expiringCount.value }}
+            {{ dashboard.stats.value.expiringCount }}
           </p>
           <p class="mt-1 text-micro text-ink-faint">
             {{ t("owner.dashboard.expiringHelp") }}

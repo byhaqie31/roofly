@@ -32,7 +32,7 @@ const activeTab = ref<string>("overview");
 const load = async () => {
   loading.value = true;
   try {
-    const all = await useAgreements().listWithRefs();
+    const all = await useAgreements().getAgreementsWithRefs();
     row.value = all.find((r) => r.agreement.id === route.params.id) ?? null;
   } finally {
     loading.value = false;
@@ -48,12 +48,59 @@ useHead({
 
 const onSaved = async (updated: Agreement) => {
   if (!row.value) return;
+  const wasUnderReview = row.value.agreement.status === "pending_review" || row.value.agreement.status === "accepted";
   // Re-hydrate refs in case the unit/tenant changed.
   await load();
   // Fallback: at minimum, swap in the updated agreement so UI reflects edits
   // even if the row vanished from the listWithRefs result.
   if (row.value && row.value.agreement.id === updated.id) {
     row.value = { ...row.value, agreement: updated };
+  }
+  // A term edit while sent / accepted voids the tenant's answer (spec 2026-10-07 agreement-review § 3).
+  if (wasUnderReview && updated.status === "draft") {
+    show(t("owner.agreements.review.backToDraftToast"), "default");
+  }
+};
+
+// ── Review flow: send → tenant answers → owner activates ────────────────────
+const acting = ref(false);
+const applyAgreement = (updated: Agreement) => {
+  if (row.value) row.value = { ...row.value, agreement: updated };
+};
+const sendAgreement = async () => {
+  if (!row.value) return;
+  acting.value = true;
+  try {
+    applyAgreement(await useAgreements().send(row.value.agreement.id));
+    show(t("owner.agreements.review.sentToast", { name: row.value.tenant?.name ?? "" }), "success");
+  } catch {
+    show(t("common.genericError"), "danger");
+  } finally {
+    acting.value = false;
+  }
+};
+const withdrawAgreement = async () => {
+  if (!row.value) return;
+  acting.value = true;
+  try {
+    applyAgreement(await useAgreements().withdraw(row.value.agreement.id));
+    show(t("owner.agreements.review.withdrawnToast"), "default");
+  } catch {
+    show(t("common.genericError"), "danger");
+  } finally {
+    acting.value = false;
+  }
+};
+const activateAgreement = async () => {
+  if (!row.value) return;
+  acting.value = true;
+  try {
+    applyAgreement(await useAgreements().update(row.value.agreement.id, { status: "active" }));
+    show(t("owner.agreements.review.activatedToast"), "success");
+  } catch {
+    show(t("common.genericError"), "danger");
+  } finally {
+    acting.value = false;
   }
 };
 
@@ -103,16 +150,6 @@ const formatDate = (iso: string) => {
         <Icon name="ArrowLeft" :size="14" />
         {{ t("owner.agreements.detail.back") }}
       </NuxtLink>
-      <Button
-        v-if="row"
-        variant="ghost"
-        size="sm"
-        class="sm:hidden"
-        @click="showDeleteConfirm = true"
-      >
-        <Icon name="Trash2" :size="14" class="mr-1" />
-        {{ t("owner.agreements.delete") }}
-      </Button>
     </div>
 
     <Card v-if="loading" padding="loose">
@@ -145,15 +182,50 @@ const formatDate = (iso: string) => {
             </span>
           </p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          class="hidden shrink-0 sm:inline-flex"
-          @click="showDeleteConfirm = true"
-        >
-          <Icon name="Trash2" :size="14" class="mr-1" />
-          {{ t("owner.agreements.delete") }}
-        </Button>
+        <!-- Review-flow actions + icon-only delete (spec 2026-10-07 agreement-review § 5) -->
+        <div class="mt-4 flex shrink-0 flex-wrap items-center gap-2 sm:mt-0">
+          <Button
+            v-if="row.agreement.status === 'draft'"
+            variant="primary"
+            size="sm"
+            :loading="acting"
+            @click="sendAgreement"
+          >
+            <Icon name="Send" :size="14" class="mr-1" />
+            {{ t("owner.agreements.review.send") }}
+          </Button>
+          <Button
+            v-else-if="row.agreement.status === 'pending_review'"
+            variant="ghost"
+            size="sm"
+            :loading="acting"
+            @click="withdrawAgreement"
+          >
+            <Icon name="Undo2" :size="14" class="mr-1" />
+            {{ t("owner.agreements.review.withdraw") }}
+          </Button>
+          <Button
+            v-else-if="row.agreement.status === 'accepted'"
+            variant="primary"
+            size="sm"
+            :loading="acting"
+            @click="activateAgreement"
+          >
+            <Icon name="CircleCheck" :size="14" class="mr-1" />
+            {{ t("owner.agreements.review.activate") }}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            class="!px-2"
+            :aria-label="t('owner.agreements.review.deleteAria')"
+            :title="t('owner.agreements.review.deleteAria')"
+            :disabled="acting"
+            @click="showDeleteConfirm = true"
+          >
+            <Icon name="Trash2" :size="16" />
+          </Button>
+        </div>
       </header>
 
       <Card padding="loose">
@@ -184,7 +256,7 @@ const formatDate = (iso: string) => {
           </TabsList>
 
           <TabsContent value="overview" class="outline-none">
-            <AgreementOverviewPanel :row="row" />
+            <AgreementOverviewPanel :row="row" @updated="load" />
           </TabsContent>
           <TabsContent value="terms" class="outline-none">
             <AgreementTermsForm

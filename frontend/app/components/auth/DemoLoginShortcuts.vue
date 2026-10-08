@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Building2, DoorOpen } from "lucide-vue-next";
+import { ArrowUpRight, Building2, DoorOpen, Sparkles } from "lucide-vue-next";
 import Button from "~/components/ui/Button.vue";
 
 /**
@@ -7,26 +7,37 @@ import Button from "~/components/ui/Button.vue";
  * dashboard. Auth is mocked in Phase 1, so the email prefix decides role
  * (see app/stores/auth.ts).
  *
- * Visible only when import.meta.dev is true. Once the real backend lands,
- * this stays useful: the seeded accounts are owner@roofly.my / tenant@roofly.my
- * with the same password, so the shortcuts will hit the real /api/auth/login.
+ * Visible only on the demo environment (demo.roofly.my). Everywhere else —
+ * including local dev against the API — the customer login shows a single
+ * "Explore the demo" link pointing at demo.roofly.my instead. Anything demo
+ * lives on that subdomain, never on the customer login.
  */
 
 // Flip to true once the tenant shell is ready to demo. The button's
 // click handler and loading state are already wired — only the visual
 // gate below switches presentations.
-const TENANT_ENABLED = false;
+const TENANT_ENABLED = true;
 
 const auth = useAuthStore();
 const { t } = useI18n();
-const loadingRole = ref<"owner" | "tenant" | null>(null);
+const loadingRole = ref<"owner" | "tenant" | "google" | null>(null);
 const { showDemoShortcuts } = useEnv();
-const showShortcuts = import.meta.dev || showDemoShortcuts;
+const showShortcuts = showDemoShortcuts;
+const { track } = useTrack();
 
 const enter = async (role: "owner" | "tenant") => {
+  track("demo_enter", { role });
   loadingRole.value = role;
   await auth.login(`${role}@roofly.my`, "password");
   await navigateTo(role === "owner" ? "/owner" : "/tenant");
+  loadingRole.value = null;
+};
+
+const enterGoogle = async () => {
+  track("demo_enter", { role: "owner_google" });
+  loadingRole.value = "google";
+  await auth.loginWithGoogle("demo");
+  await navigateTo("/owner");
   loadingRole.value = null;
 };
 </script>
@@ -86,6 +97,34 @@ const enter = async (role: "owner" | "tenant") => {
           {{ t("demo.shortcuts.comingSoon") }}
         </span>
       </button>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        class="col-span-2"
+        :loading="loadingRole === 'google'"
+        :disabled="loadingRole !== null"
+        @click="enterGoogle"
+      >
+        <Sparkles :size="16" :stroke-width="1.5" />
+        {{ t("demo.shortcuts.continueWithGoogle") }}
+      </Button>
     </div>
   </section>
+
+  <p
+    v-else
+    class="mt-8 pt-6 border-t border-line-passive text-caption text-ink-muted text-center"
+  >
+    {{ t("demo.shortcuts.tryFirst") }}
+    <a
+      href="https://demo.roofly.my"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center gap-0.5 font-medium text-ink underline underline-offset-4 hover:text-accent"
+    >
+      {{ t("demo.shortcuts.exploreDemo") }}
+      <ArrowUpRight :size="14" :stroke-width="1.75" />
+    </a>
+  </p>
 </template>

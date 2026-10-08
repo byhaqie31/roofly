@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <!-- Malaysian residential skyline: terrace row, low-rise apartment, condo tower, kampung roofs.
+       Drawn as silhouettes so it reads as texture behind the hero, not as a photo competing with copy. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c1a17" stop-opacity="0"/>
+      <stop offset="1" stop-color="#c44d26" stop-opacity="0.22"/>
+    </linearGradient>
+    <linearGradient id="far" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7f4ed" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#f7f4ed" stop-opacity="0.02"/>
+    </linearGradient>
+    <linearGradient id="mid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7f4ed" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#f7f4ed" stop-opacity="0.04"/>
+    </linearGradient>
+    <linearGradient id="near" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e76a3f" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#e76a3f" stop-opacity="0.06"/>
+    </linearGradient>
+    <pattern id="win" width="22" height="30" patternUnits="userSpaceOnUse">
+      <rect x="6" y="8" width="10" height="14" rx="1" fill="#f7f4ed" fill-opacity="0.10"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#sky)"/>
+
+  <!-- Far layer: condo towers -->
+  <g fill="url(#far)">
+    <rect x="180" y="300" width="120" height="600"/>
+    <rect x="330" y="380" width="90" height="520"/>
+    <rect x="1080" y="260" width="140" height="640"/>
+    <rect x="1250" y="360" width="100" height="540"/>
+    <rect x="1400" y="320" width="130" height="580"/>
+    <rect x="700" y="340" width="110" height="560"/>
+  </g>
+  <g fill="url(#win)">
+    <rect x="180" y="300" width="120" height="600"/>
+    <rect x="1080" y="260" width="140" height="640"/>
+    <rect x="1400" y="320" width="130" height="580"/>
+    <rect x="700" y="340" width="110" height="560"/>
+  </g>
+
+  <!-- Mid layer: low-rise apartment blocks (5-storey walk-ups) -->
+  <g fill="url(#mid)">
+    <rect x="20" y="520" width="260" height="380"/>
+    <rect x="470" y="560" width="220" height="340"/>
+    <rect x="880" y="540" width="200" height="360"/>
+    <rect x="1320" y="580" width="280" height="320"/>
+  </g>
+  <g fill="#1c1a17" fill-opacity="0.45">
+    <!-- balcony bands -->
+    <rect x="20" y="580" width="260" height="6"/><rect x="20" y="650" width="260" height="6"/><rect x="20" y="720" width="260" height="6"/><rect x="20" y="790" width="260" height="6"/>
+    <rect x="470" y="620" width="220" height="6"/><rect x="470" y="690" width="220" height="6"/><rect x="470" y="760" width="220" height="6"/>
+    <rect x="880" y="600" width="200" height="6"/><rect x="880" y="670" width="200" height="6"/><rect x="880" y="740" width="200" height="6"/>
+    <rect x="1320" y="640" width="280" height="6"/><rect x="1320" y="710" width="280" height="6"/><rect x="1320" y="780" width="280" height="6"/>
+  </g>
+
+  <!-- Near layer: terrace row with pitched roofs + a kampung house on stilts -->
+  <g fill="url(#near)">
+    <!-- terrace houses -->
+    <path d="M300 900 V720 L370 660 L440 720 V900 Z"/>
+    <path d="M440 900 V720 L510 660 L580 720 V900 Z"/>
+    <path d="M580 900 V720 L650 660 L720 720 V900 Z"/>
+    <path d="M720 900 V720 L790 660 L860 720 V900 Z"/>
+    <path d="M860 900 V720 L930 660 L1000 720 V900 Z"/>
+    <path d="M1000 900 V720 L1070 660 L1140 720 V900 Z"/>
+    <!-- kampung house: raised floor, long eaves -->
+    <path d="M1160 900 V800 H1180 V760 L1240 700 L1330 700 L1390 760 V800 H1410 V900 Z"/>
+    <path d="M1140 770 L1240 690 L1330 690 L1430 770 L1420 780 L1325 705 L1245 705 L1150 780 Z"/>
+  </g>
+  <g fill="#1c1a17" fill-opacity="0.5">
+    <!-- doors / windows on terraces -->
+    <rect x="330" y="760" width="22" height="34" rx="2"/><rect x="392" y="760" width="22" height="34" rx="2"/>
+    <rect x="470" y="760" width="22" height="34" rx="2"/><rect x="532" y="760" width="22" height="34" rx="2"/>
+    <rect x="610" y="760" width="22" height="34" rx="2"/><rect x="672" y="760" width="22" height="34" rx="2"/>
+    <rect x="750" y="760" width="22" height="34" rx="2"/><rect x="812" y="760" width="22" height="34" rx="2"/>
+    <rect x="890" y="760" width="22" height="34" rx="2"/><rect x="952" y="760" width="22" height="34" rx="2"/>
+    <rect x="1030" y="760" width="22" height="34" rx="2"/><rect x="1092" y="760" width="22" height="34" rx="2"/>
+    <rect x="1230" y="780" width="30" height="40" rx="2"/><rect x="1310" y="780" width="30" height="40" rx="2"/>
+    <!-- stilts -->
+    <rect x="1185" y="800" width="8" height="100"/><rect x="1280" y="800" width="8" height="100"/><rect x="1380" y="800" width="8" height="100"/>
+  </g>
+
+  <!-- Ground -->
+  <rect x="0" y="880" width="1600" height="20" fill="#1c1a17" fill-opacity="0.6"/>
+</svg>

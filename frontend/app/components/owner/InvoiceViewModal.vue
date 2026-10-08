@@ -7,6 +7,8 @@ import Modal from "~/components/ui/Modal.vue";
 import Pill from "~/components/ui/Pill.vue";
 import Button from "~/components/ui/Button.vue";
 import Icon from "~/components/ui/Icon.vue";
+import PaymentClaimPanel from "~/components/owner/PaymentClaimPanel.vue";
+import { pendingClaim } from "~/utils/paymentClaim";
 
 const props = defineProps<{
   open: boolean;
@@ -15,6 +17,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   "update:open": [value: boolean];
+  /** A claim was confirmed or rejected — the list needs a refresh. */
+  changed: [];
 }>();
 
 const { t } = useI18n();
@@ -33,6 +37,13 @@ const formatDate = (iso: string) => {
   if (!iso) return "—";
   const [y, m, d] = iso.split("-");
   return `${d}/${m}/${y}`;
+};
+
+const claim = computed(() => (props.row ? pendingClaim(props.row.payments) : null));
+
+const onClaimResolved = () => {
+  emit("changed");
+  emit("update:open", false);
 };
 
 const total = computed(() => {
@@ -87,10 +98,18 @@ const onSend = async () => {
             {{ t("owner.payments.dueOn", { date: formatDate(row.invoice.dueDate) }) }}
           </div>
         </div>
-        <Pill :tone="statusToneMap[row.invoice.status]">
+        <Pill v-if="claim" tone="pending">{{ t("owner.payments.status.awaiting") }}</Pill>
+        <Pill v-else :tone="statusToneMap[row.invoice.status]">
           {{ t(`owner.payments.status.${row.invoice.status}`) }}
         </Pill>
       </div>
+
+      <PaymentClaimPanel
+        v-if="claim"
+        :claim="claim"
+        :payout-account="row.payoutAccount"
+        @resolved="onClaimResolved"
+      />
 
       <section>
         <div class="text-caption font-semibold uppercase tracking-wide text-ink-muted">
@@ -156,7 +175,7 @@ const onSend = async () => {
             :key="p.id"
             class="flex items-baseline justify-between py-2 text-caption"
           >
-            <div>
+            <div class="min-w-0">
               <span class="text-ink">
                 {{ t(`owner.payments.methods.${p.method}`) }}
               </span>
@@ -166,6 +185,12 @@ const onSend = async () => {
               <span v-if="p.reference" class="ml-2 text-ink-faint">
                 · {{ p.reference }}
               </span>
+              <span v-if="p.status !== 'successful'" class="ml-2 text-ink-muted">
+                · {{ t(`owner.payments.paymentStatus.${p.status}`) }}
+              </span>
+              <div v-if="p.rejectionReason" class="mt-0.5 text-micro text-ink-faint">
+                {{ t("owner.payments.claim.rejectedBecause", { reason: p.rejectionReason }) }}
+              </div>
             </div>
             <span class="tabular-nums text-ink">{{ formatRM(p.amount) }}</span>
           </li>

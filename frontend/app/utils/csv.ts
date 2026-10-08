@@ -25,14 +25,9 @@ export const buildCsv = (
   return lines.join("\n");
 };
 
-export const downloadCsv = (
-  filename: string,
-  headers: string[],
-  rows: (string | number | null | undefined)[][],
-): void => {
-  // BOM so Excel opens UTF-8 cleanly.
-  const csv = "﻿" + buildCsv(headers, rows);
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+/** Triggers a browser download for ready-made CSV text (BOM-prefixed so Excel opens UTF-8 cleanly). */
+export const downloadCsvText = (filename: string, csv: string): void => {
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -42,3 +37,9 @@ export const downloadCsv = (
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 };
+
+export const downloadCsv = (
+  filename: string,
+  headers: string[],
+  rows: (string | number | null | undefined)[][],
+): void => downloadCsvText(filename, buildCsv(headers, rows));

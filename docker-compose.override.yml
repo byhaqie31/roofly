@@ -4,9 +4,8 @@
 # Auto-loaded by `docker compose up` (Docker Compose's override convention).
 # GHA bypasses this file on the VPS by invoking `docker compose -f docker-compose.yml up`.
 #
-# This switches the build to the `dev` target (Nuxt dev server with HMR) and
-# bind-mounts the host's frontend source so file changes hot-reload without
-# rebuilding the image.
+# This switches both frontend and backend to dev build targets, bind-mounts
+# source for HMR / live-reload, and exposes extra ports for tooling.
 # ─────────────────────────────────────────────────────────────────────────────
 
 services:
@@ -16,12 +15,104 @@ services:
     volumes:
       - ./frontend:/app
       # Keep container's node_modules and .nuxt isolated from the host so the
-      # Linux container deps don't collide with the macOS host install.
+      # Linux container deps don't collide with the macOS/Windows host install.
       - frontend_node_modules:/app/node_modules
       - frontend_nuxt:/app/.nuxt
     environment:
       - NODE_ENV=development
 
+  backend:
+    build:
+      target: dev
+    volumes:
+      - ./backend:/var/www
+      - backend_vendor:/var/www/vendor
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      # Local mail goes to Mailpit (inbox UI at http://localhost:8025).
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=mailpit
+      - MAIL_PORT=1025
+    command: php artisan serve --host=0.0.0.0 --port=9000
+    # Publish the dev server directly — nginx expects php-fpm and can't proxy
+    # `artisan serve`, so local API testing hits this port instead.
+    ports:
+      - "${BACKEND_DEV_PORT:-8000}:9000"
+
+  queue-worker:
+    build:
+      target: dev
+    volumes:
+      - ./backend:/var/www
+      - backend_vendor:/var/www/vendor
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      # Local mail goes to Mailpit (inbox UI at http://localhost:8025).
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=mailpit
+      - MAIL_PORT=1025
+
+  scheduler:
+    build:
+      target: dev
+    volumes:
+      - ./backend:/var/www
+      - backend_vendor:/var/www/vendor
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+
+  # ── Local-only host ports for GUI clients (TablePlus, redis-cli, RabbitMQ UI) ─
+  # The base file deliberately publishes none of these; see its db/redis/rabbitmq
+  # comments. Override the host side if something on your machine already
+  # listens there.
+  db:
+    ports:
+      - "${DB_PORT_EXPOSE:-3306}:3306"
+
+  redis:
+    ports:
+      - "${REDIS_PORT_EXPOSE:-6379}:6379"
+
+  rabbitmq:
+    ports:
+      - "${RABBITMQ_PORT_EXPOSE:-5672}:5672"
+      - "${RABBITMQ_MGMT_PORT:-15672}:15672"
+
+  # ── Mailpit (local-only mail catcher) ──────────────────────────────────────
+  # Every email the backend / queue-worker sends lands here instead of a real
+  # inbox: open http://localhost:8025. Emails are queued, so queue-worker must
+  # be running too (`docker compose up -d mailpit queue-worker`).
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-roofly}-mailpit
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+    networks:
+      - roofly
+
+  # ── phpMyAdmin (local-only DB browser) ─────────────────────────────────────
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-roofly}-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "${PHPMYADMIN_PORT:-8081}:80"
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+      - PMA_USER=root
+      - PMA_PASSWORD=${DB_ROOT_PASSWORD:-rootsecret}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - roofly
+
 volumes:
   frontend_node_modules:
   frontend_nuxt:
+  backend_vendor:

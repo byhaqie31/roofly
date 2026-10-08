@@ -15,7 +15,7 @@ const loading = ref(true);
 
 onMounted(async () => {
   try {
-    rows.value = await useAgreements().listWithRefs();
+    rows.value = await useAgreements().getAgreementsWithRefs();
   } finally {
     loading.value = false;
   }

@@ -4,7 +4,7 @@ import { computed } from "vue";
 type Tone =
   | "vacant" | "occupied" | "maintenance"
   | "paid" | "pending" | "overdue" | "cancelled"
-  | "draft" | "active" | "expired" | "terminated"
+  | "draft" | "pending_review" | "accepted" | "active" | "expired" | "terminated"
   | "low" | "medium" | "high"
   | "neutral";
 
@@ -20,6 +20,8 @@ const toneClass = computed(() => {
     overdue: "bg-status-overdue-soft text-status-overdue",
     cancelled: "bg-status-cancelled-soft text-status-cancelled",
     draft: "bg-status-draft-soft text-status-draft",
+    pending_review: "bg-status-pending-soft text-status-pending", // awaiting the tenant
+    accepted: "bg-status-paid-soft text-status-paid",            // tenant agreed, owner to activate
     active: "bg-status-active-soft text-status-active",
     expired: "bg-status-expired-soft text-status-expired",
     terminated: "bg-status-terminated-soft text-status-terminated",
