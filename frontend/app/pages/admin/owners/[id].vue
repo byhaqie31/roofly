@@ -101,7 +101,7 @@ const countKeys = ["properties", "units", "unitsOccupied", "tenants", "agreement
             <h1 class="text-display-sub font-semibold tracking-snug">{{ owner.name }}</h1>
             <OwnerStatusPill :status="owner.status" />
           </div>
-          <p class="mt-1 text-caption text-ink-muted">{{ owner.businessName ? `${owner.businessName} · ` : "" }}{{ owner.email }}</p>
+          <p class="mt-1 text-caption text-ink-muted">{{ owner.businessName ? `${owner.businessName} · ` : "" }}{{ owner.email }}{{ owner.phone ? ` · ${owner.phone}` : "" }}</p>
         </div>
         <div class="flex gap-2 self-start">
           <Button v-if="can('owners.warn')" variant="ghost" size="sm" @click="showWarn = true">
@@ -168,7 +168,7 @@ const countKeys = ["properties", "units", "unitsOccupied", "tenants", "agreement
                 <NuxtLink :to="`/admin/tenants/${tn.id}`" class="min-w-0 flex-1">
                   <div class="flex items-center gap-2"><Pill :tone="tenantTone(tn.status)">{{ t(`admin.status.tenant.${tn.status}`) }}</Pill><span class="text-micro text-ink-faint">{{ tn.propertyName ?? "—" }} · {{ tn.unitLabel ?? "—" }}</span></div>
                   <p class="mt-1 text-body font-medium text-ink">{{ tn.displayName }}</p>
-                  <p class="text-caption text-ink-muted">{{ tn.emailMasked }}</p>
+                  <p class="text-caption text-ink-muted">{{ tn.email }}</p>
                 </NuxtLink>
                 <Button v-if="tn.status === 'invited' && can('tenants.view')" variant="ghost" size="sm" class="self-start" :loading="resendingId === tn.id" @click="resend(tn)">{{ t("admin.tenants.resendInvite") }}</Button>
               </li>

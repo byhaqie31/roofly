@@ -845,7 +845,7 @@ See [components/marketing/HeroSection.vue](../../frontend/app/components/marketi
 
 | Variant | Where | Links |
 |---|---|---|
-| `full` | marketing, coming-soon, legal pages | Privacy · Terms · Billing · Acceptable use · Contact (only if `contact.email` set) + operator line (name, SSM, address, email, phone — nulls dropped) + © and credit |
+| `full` | marketing, coming-soon, legal pages | Legal links centred **above** the footer line: Privacy · Terms · Billing · Acceptable use · Contact (only if `contact.email` set). Then the edge-to-edge divider, then one full-width row from `md:` — left: © Roofly.my · "A great product of Axel Nova Ventures" (`legal.footerProductOf`) · SSM / address / email / phone (nulls dropped); right: the Qie credit. Legal pages keep the formal "Roofly is a product of…" (`legal.operator.productOf`) in their operator block. Stacks and centres below `md`. |
 | `slim` | auth, onboarding, suspended | © · Privacy · Terms |
 | `shell` | owner + tenant layouts | © · Privacy · Terms · Help and support |
 | `admin` | admin layout + admin sign-in | © · Privacy · Terms, admin accent, never Beta |

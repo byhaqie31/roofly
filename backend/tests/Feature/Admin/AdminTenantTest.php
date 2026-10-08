@@ -39,12 +39,11 @@ class AdminTenantTest extends TestCase
         $res = $this->getJson('/api/admin/tenants')->assertOk();
         $this->assertSame(2, $res->json('meta.total'));
         $this->assertSame(AdminResourcesTest::TENANT_KEYS, array_keys($res->json('data.0')));
-        // Exact email or owner/property name only — a partial tenant name, email or phone finds nothing.
-        $this->assertSame(1, $this->getJson('/api/admin/tenants?q=AMINAH.YUSOF@example.com')->json('meta.total'));
+        // Email, phone, owner or property name — never the tenant's (shortened) name.
+        $this->assertSame(1, $this->getJson('/api/admin/tenants?q=yusof@example')->json('meta.total'));
+        $this->assertSame(1, $this->getJson('/api/admin/tenants?q=345 6789')->json('meta.total'));
         $this->assertSame(1, $this->getJson('/api/admin/tenants?q=farid')->json('meta.total'));
-        $this->assertSame(0, $this->getJson('/api/admin/tenants?q=aminah')->json('meta.total'));
-        $this->assertSame(0, $this->getJson('/api/admin/tenants?q=yusof@')->json('meta.total'));
-        $this->assertSame(0, $this->getJson('/api/admin/tenants?q=345')->json('meta.total'));
+        $this->assertSame(0, $this->getJson('/api/admin/tenants?q=Li Wei')->json('meta.total'));
         $this->assertSame(1, $this->getJson('/api/admin/tenants?status=invited')->json('meta.total'));
         $this->assertSame(1, $this->getJson("/api/admin/tenants?ownerId={$o2->id}")->json('meta.total'));
     }

@@ -81,8 +81,9 @@ const open = (tn: AdminTenant) => router.push(`/admin/tenants/${tn.id}`);
 const columns = computed<ColumnDef<AdminTenant>[]>(() => [
   { id: "name", header: () => t("admin.tenants.columns.tenant"), cell: (i) => h("div", { class: "min-w-0" }, [
       h("div", { class: "truncate text-body text-ink" }, i.row.original.displayName),
-      h("div", { class: "truncate text-caption text-ink-muted" }, i.row.original.emailMasked),
+      h("div", { class: "truncate text-caption text-ink-muted" }, i.row.original.email),
     ]) },
+  { id: "phone", header: () => t("admin.tenants.columns.phone"), cell: (i) => h("span", { class: "text-caption" }, i.row.original.phone ?? "—") },
   { id: "status", header: () => t("admin.tenants.columns.status"), cell: (i) => h(Pill, { tone: tenantTone(i.row.original.status) }, () => t(`admin.status.tenant.${i.row.original.status}`)) },
   { id: "owner", header: () => t("admin.tenants.columns.owner"), cell: (i) => h("span", { class: "text-caption" }, i.row.original.ownerName ?? "—") },
   { id: "propertyUnit", header: () => t("admin.tenants.columns.propertyUnit"), cell: (i) => h("span", { class: "text-caption" }, `${i.row.original.propertyName ?? "—"} · ${i.row.original.unitLabel ?? "—"}`) },
@@ -165,7 +166,7 @@ const table = useVueTable({
               <span class="text-micro text-ink-faint">{{ tn.ownerName ?? "—" }}</span>
             </div>
             <p class="mt-1 text-body font-medium text-ink">{{ tn.displayName }}</p>
-            <p class="text-caption text-ink-muted">{{ tn.emailMasked }}</p>
+            <p class="text-caption text-ink-muted">{{ tn.email }}</p>
             <p class="mt-1 text-micro text-ink-faint">{{ tn.propertyName ?? "—" }} · {{ tn.unitLabel ?? "—" }}</p>
           </button>
         </Card>

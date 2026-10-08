@@ -50,7 +50,7 @@ const resend = async () => {
       <header class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div class="flex items-center gap-2"><h1 class="text-display-sub font-semibold tracking-snug">{{ tenant.displayName }}</h1><Pill :tone="tone(tenant.status)">{{ t(`admin.status.tenant.${tenant.status}`) }}</Pill></div>
-          <p class="mt-1 text-caption text-ink-muted">{{ tenant.emailMasked }}</p>
+          <p class="mt-1 text-caption text-ink-muted">{{ tenant.email }}{{ tenant.phone ? ` · ${tenant.phone}` : "" }}</p>
         </div>
         <Button v-if="tenant.status === 'invited'" variant="ghost" size="sm" class="self-start" :loading="resending" @click="resend">{{ t("admin.tenants.resendInvite") }}</Button>
       </header>

@@ -7,10 +7,10 @@ use App\Support\PrivacyMask;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Spec § 6 tenant tier — placement only. Tenant details are the owner's
- * (Roofly processes them on the owner's behalf), so admins get a masked name
- * and email to tell tenants apart, and never the phone, MyKad, personal info
- * or emergency contact. Load `inviter:id,name` and
+ * Spec § 6 tenant tier — contact + placement only. Tenant details are the
+ * owner's (Roofly processes them on the owner's behalf): admins get the email
+ * and phone for support and a shortened name, never the full name, MyKad,
+ * personal info or emergency contact. Load `inviter:id,name` and
  * `agreements.unit.property:id,name,owner_id` first.
  */
 class AdminTenantResource extends JsonResource
@@ -25,7 +25,8 @@ class AdminTenantResource extends JsonResource
         return [
             'id'           => $this->id,
             'displayName'  => PrivacyMask::name($this->name),
-            'emailMasked'  => PrivacyMask::email($this->email),
+            'email'        => $this->email,
+            'phone'        => $this->phone,
             'status'       => $this->status,
             'ownerId'      => $this->invited_by ?? $property?->owner_id,
             'ownerName'    => $this->inviter?->name ?? $property?->owner?->name,

@@ -15,13 +15,4 @@ class PrivacyMaskTest extends TestCase
         $this->assertSame('•••', PrivacyMask::name(''));
         $this->assertSame('•••', PrivacyMask::name(null));
     }
-
-    public function test_email_keeps_two_characters_and_the_domain(): void
-    {
-        $this->assertSame('am•••@example.com', PrivacyMask::email('aminah.yusof@example.com'));
-        $this->assertSame('a•••@example.com', PrivacyMask::email('ab@example.com'));
-        $this->assertSame('•••', PrivacyMask::email('not-an-email'));
-        $this->assertSame('•••', PrivacyMask::email('@example.com'));
-        $this->assertSame('•••', PrivacyMask::email(null));
-    }
 }
