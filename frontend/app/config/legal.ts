@@ -39,7 +39,7 @@ export const LEGAL: LegalConfig = {
   operator: {
     name: "Axel Nova Ventures",
     ssmNumber: "202603119899 (CA0420977-U)",
-    registeredAddress: null, // TODO(legal): full registered business address
+    registeredAddress: "I-City, Seksyen 7, Shah Alam, Selangor",
     website: "https://axelnovaventures.com",
   },
   contact: {
@@ -49,24 +49,24 @@ export const LEGAL: LegalConfig = {
   },
   documents: {
     privacy: {
-      version: "0.1",
-      effectiveDate: null,
+      version: "1.0",
+      effectiveDate: "2026-10-08",
     },
     terms: {
-      version: "0.1",
-      effectiveDate: null,
+      version: "1.0",
+      effectiveDate: "2026-10-08",
     },
     billing: {
-      version: "0.1",
-      effectiveDate: null,
+      version: "1.0",
+      effectiveDate: "2026-10-08",
     },
     "acceptable-use": {
-      version: "0.1",
-      effectiveDate: null,
+      version: "1.0",
+      effectiveDate: "2026-10-08",
     },
     beta: {
-      version: "0.1",
-      effectiveDate: null,
+      version: "1.0",
+      effectiveDate: "2026-10-08",
     },
   },
 };
