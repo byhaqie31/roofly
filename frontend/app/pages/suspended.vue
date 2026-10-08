@@ -3,6 +3,7 @@ import Card from "~/components/ui/Card.vue";
 import Button from "~/components/ui/Button.vue";
 import Icon from "~/components/ui/Icon.vue";
 import SiteFooter from "~/components/layout/SiteFooter.vue";
+import { LEGAL } from "~/config/legal";
 
 definePageMeta({ layout: false });
 const { t } = useI18n();
@@ -22,8 +23,10 @@ const onLogout = async () => {
         <Icon name="ShieldOff" :size="40" class="mx-auto text-ink-faint" />
         <h1 class="mt-4 text-display-sub font-semibold tracking-snug">{{ t("suspended.title") }}</h1>
         <p class="mt-3 text-body text-ink-muted">{{ t("suspended.body") }}</p>
+        <!-- Contact email from config/legal.ts (roofly.my has no mailbox). -->
         <a
-          href="mailto:support@roofly.my"
+          v-if="LEGAL.contact.email"
+          :href="`mailto:${LEGAL.contact.email}`"
           class="mt-6 inline-block text-body text-ink underline underline-offset-2"
         >
           {{ t("suspended.contact") }}
