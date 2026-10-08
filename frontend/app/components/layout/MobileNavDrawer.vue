@@ -72,7 +72,7 @@ if (import.meta.client) {
             <X :size="20" :stroke-width="1.5" />
           </button>
         </header>
-        <div class="flex-1 overflow-y-auto px-3 py-4">
+        <div class="flex flex-1 flex-col overflow-y-auto px-3 py-4">
           <slot />
         </div>
       </aside>

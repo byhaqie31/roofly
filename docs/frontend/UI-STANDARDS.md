@@ -270,6 +270,8 @@ One pill per row; never stack pills.
 - Right-aligned controls: language switcher, dark-mode toggle, user menu
 - User menu trigger: 36px circle, `var(--accent-soft)` bg, `var(--accent)` foreground. Shows the account photo when `AuthUser.avatarUrl` is set (Google sign-in stores it; falls back on load error), otherwise the Lucide `User` icon at 18px. Never render name initials — one glyph for every account keeps owner / tenant / admin shells consistent.
 
+**Help and support is pinned to the bottom** of the owner + tenant sidebars (and the mobile drawer), below a `border-t` divider — it's a utility link, not a section of the product, so it never sits among the main items. The desktop sidebar is `md:sticky md:top-0 md:h-dvh` so the pinned link stays in view on long pages; the drawer body is a flex column for the same reason.
+
 ### 3.8 Empty states
 
 Every list view (properties, units, tenants, agreements, invoices, tickets) needs an empty state. Critical for Cik Aminah's first hour.

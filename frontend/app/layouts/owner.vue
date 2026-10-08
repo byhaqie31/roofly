@@ -19,7 +19,7 @@ const { isDemo, showSupportWidget } = useEnv();
     <!-- Desktop sidebar -->
     <aside
       data-tour="sidebar"
-      class="hidden md:flex w-64 shrink-0 flex-col border-r border-line-passive px-3 py-4"
+      class="hidden md:flex w-64 shrink-0 flex-col border-r border-line-passive px-3 py-4 md:sticky md:top-0 md:h-dvh md:overflow-y-auto"
     >
       <NuxtLink
         to="/owner"
