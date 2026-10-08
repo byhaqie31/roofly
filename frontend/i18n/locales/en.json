@@ -333,6 +333,15 @@
     "links": {
       "help": "Help and support"
     },
+    "contactUs": {
+      "link": "Contact us",
+      "title": "Contact us",
+      "description": "Reach the Roofly team the way that suits you.",
+      "email": "Email",
+      "call": "Call",
+      "whatsapp": "WhatsApp",
+      "whatsappText": "Hi Roofly, I have a question."
+    },
     "footerProductOf": "A great product of {name}",
     "footerNav": "Legal",
     "effective": "Effective {date}",

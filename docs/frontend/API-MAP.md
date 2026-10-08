@@ -143,6 +143,8 @@ The `POST /track` beacon (see `docs/backend/API-SPEC.md` § Shell 1 — Analytic
 
 `components/layout/SupportWidget.vue`, mounted in `layouts/owner.vue` and `layouts/tenant.vue` behind `useEnv().showSupportWidget` (`!isDemo` — demo keeps its Google Form `FloatingFeedback`, since demo never reaches the backend). Floating bottom-right button → modal (Issue / Feedback / Question + message; current `route.fullPath` attached, plus `utils/pageLabel.ts`'s readable name for it) → `useSupport().send({ type, message, pageUrl, pageLabel })` → `POST /support/enquiries`. Demo adapter (`demoSupport`) unshifts into `demo/data/enquiries.ts` so local mock mode shows it in the admin Messages tab.
 
+**In-app legal pages** — `/owner/legal/<slug>` and `/tenant/legal/<slug>` (`pages/{owner,tenant}/legal/[doc].vue`, layout `owner` / `tenant`): the same static `LegalDocument` as the public `/legal/*`, with `base-path` so links between documents stay in the app. No service calls; same 404 rule (beta only with `showBetaTerms`); never tracked (inside `/owner` / `/tenant`). The shell footer and the help page's Legal section link here, not to the public pages.
+
 **Help and support page** — `/owner/help` and `/tenant/help` (`components/layout/HelpPage.vue`, sidebar item last in owner nav / after Issues in tenant nav). No service calls: a "Send a message" button that opens the same widget through `useSupportWidget().open()` (a `useState` counter the widget watches — the widget still owns the form and the submit; hidden with the widget in demo) and `components/legal/LegalSupportSection.vue` (legal documents with effective dates, operator details, "Your data" access/correction note — all from `config/legal.ts`).
 
 ## Cross-shell composables worth flagging

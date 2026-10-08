@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { Mail, MapPin, Phone } from "lucide-vue-next";
 import { LEGAL } from "~/config/legal";
-import { footerLinks, operatorLines, type FooterVariant } from "~/utils/legal";
+import ContactUsModal from "~/components/legal/ContactUsModal.vue";
+import { contactOptions, footerLinks, operatorLines, type FooterVariant } from "~/utils/legal";
 
 /**
  * The one footer for every surface: legal links (config-driven), operator
@@ -28,16 +29,23 @@ const props = withDefaults(
     tone?: Tone;
     variant?: FooterVariant;
     helpTo?: string;
+    /** Where legal links point — the in-app copies ("/owner/legal") in the shells; public /legal elsewhere. */
+    legalBase?: string;
   }>(),
-  { tone: "dark", variant: "full", helpTo: undefined },
+  { tone: "dark", variant: "full", helpTo: undefined, legalBase: undefined },
 );
 
 const { t } = useI18n();
 const { showBetaTerms, showEnvBanner } = useEnv();
 const year = new Date().getFullYear();
 
+// Slim footer's "Contact us" pop-up (email / call / WhatsApp) — hidden when no
+// contact details are configured.
+const contactOpen = ref(false);
+const hasContact = contactOptions(LEGAL).length > 0;
+
 const links = computed(() =>
-  footerLinks(props.variant, { showBetaTerms, helpTo: props.helpTo }),
+  footerLinks(props.variant, { showBetaTerms, helpTo: props.helpTo, legalBase: props.legalBase }),
 );
 // Full footer: address / email / phone as icon links on the right of the legal
 // links (nulls dropped). The value is the accessible name + hover title. The
@@ -70,6 +78,8 @@ const palette = computed(() => {
 const footerClass = computed(() => [
   "relative z-10",
   props.variant === "full" ? "mt-16 pt-8" : "border-t px-4 py-4 sm:px-6 lg:px-12",
+  // Slim: © sits at the left edge, clear of UAT's fixed EnvBanner toggle.
+  props.variant === "slim" && showEnvBanner ? "md:pl-16 lg:pl-16" : "",
   palette.value ? "" : "border-line-passive text-ink-muted",
 ]);
 // UAT's fixed bottom-left EnvBanner toggle would cover the start of the © line,
@@ -107,7 +117,32 @@ const linkStyle = computed(() => (palette.value ? { color: palette.value.link } 
       </nav>
     </div>
 
-    <!-- Slim variants: © and the legal links on one centred line. flex-wrap +
+    <!-- Slim (auth, onboarding, suspended): © on the left, legal links at the
+         right edge from md:; below md the links sit on top and © underneath
+         (same order as the full footer). -->
+    <div
+      v-else-if="variant === 'slim'"
+      class="flex flex-col-reverse items-center gap-1.5 text-center text-micro md:flex-row md:justify-between md:gap-6 md:text-left"
+    >
+      <p>© {{ year }} Roofly.my</p>
+      <nav :aria-label="t('legal.footerNav')">
+        <ul class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 md:justify-end">
+          <li v-for="link in links" :key="link.key">
+            <NuxtLink :to="link.to" :external="link.external" :class="linkClass" :style="linkStyle">
+              {{ t(link.labelKey) }}
+            </NuxtLink>
+          </li>
+          <li v-if="hasContact">
+            <button type="button" :class="linkClass" :style="linkStyle" @click="contactOpen = true">
+              {{ t("legal.contactUs.link") }}
+            </button>
+          </li>
+        </ul>
+      </nav>
+      <ContactUsModal v-if="hasContact" v-model:open="contactOpen" />
+    </div>
+
+    <!-- Shell + admin: © and the legal links on one centred line. flex-wrap +
          gap, no "·" separators, so longer BM labels break cleanly. -->
     <nav v-else :aria-label="t('legal.footerNav')" class="mx-auto max-w-app text-center text-micro">
       <ul class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">

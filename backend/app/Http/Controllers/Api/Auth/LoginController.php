@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class LoginController extends Controller
 {
@@ -55,9 +56,25 @@ class LoginController extends Controller
         ]);
     }
 
+    /**
+     * Signs out every way a request can be authenticated. The SPA rides the
+     * `web` session cookie (its "current token" is Sanctum's TransientToken,
+     * which can't be deleted), so the session must be ended here — deleting
+     * the token alone left SPA users signed in. Bearer-token clients get
+     * their token revoked.
+     */
     public function destroy(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $token = $request->user()->currentAccessToken();
+        if ($token instanceof PersonalAccessToken) {
+            $token->delete();
+        }
+
+        Auth::guard('web')->logout();
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
 
         return response()->json(null, 204);
     }

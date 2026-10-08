@@ -3,6 +3,9 @@ import type { LegalConfig } from "~/config/legal";
 import { LEGAL } from "~/config/legal";
 import {
   availableLegalSlugs,
+  contactOptions,
+  legalPath,
+  scopeLegalHref,
   footerLinks,
   formatLegalDate,
   inlineSegments,
@@ -53,6 +56,26 @@ describe("footerLinks", () => {
   });
 });
 
+describe("in-app legal links", () => {
+  it("points shell footer links at the in-app copies", () => {
+    const links = footerLinks("shell", { showBetaTerms: true, helpTo: "/owner/help", legalBase: "/owner/legal" });
+    expect(links.map((l) => l.to)).toEqual(["/owner/legal/privacy", "/owner/legal/terms", "/owner/legal/beta", "/owner/help"]);
+    expect(footerLinks("slim", { showBetaTerms: false }).map((l) => l.to)).toEqual(["/legal/privacy", "/legal/terms"]);
+  });
+
+  it("builds paths under a base", () => {
+    expect(legalPath("terms")).toBe("/legal/terms");
+    expect(legalPath("terms", "/tenant/legal")).toBe("/tenant/legal/terms");
+  });
+
+  it("rewrites a document's own legal links to stay in the app", () => {
+    expect(scopeLegalHref("/legal/acceptable-use", "/owner/legal")).toBe("/owner/legal/acceptable-use");
+    expect(scopeLegalHref("/legal/terms")).toBe("/legal/terms");
+    expect(scopeLegalHref("mailto:hello@example.com", "/owner/legal")).toBe("mailto:hello@example.com");
+    expect(scopeLegalHref("/legalese", "/owner/legal")).toBe("/legalese");
+  });
+});
+
 describe("operatorLines", () => {
   it("drops every null field and keeps the operator name", () => {
     expect(operatorLines(config())).toEqual([{ key: "name", value: LEGAL.operator.name }]);
@@ -89,6 +112,22 @@ describe("operatorLines", () => {
 
   it("treats blank strings like null", () => {
     expect(operatorLines(config({ operator: { ssmNumber: "  " } })).map((l) => l.key)).toEqual(["name"]);
+  });
+});
+
+describe("contactOptions", () => {
+  it("offers email, call and WhatsApp from the configured contact details", () => {
+    const opts = contactOptions(config({ contact: { email: "hello@example.com", phone: "+60 18-317 3103" } }), { whatsappText: "Hi" });
+    expect(opts.map((o) => o.key)).toEqual(["email", "call", "whatsapp"]);
+    expect(opts[0]).toMatchObject({ href: "mailto:hello@example.com", external: false });
+    expect(opts[1]).toMatchObject({ href: "tel:+60183173103", external: false });
+    expect(opts[2]).toMatchObject({ href: "https://wa.me/60183173103?text=Hi", external: true });
+  });
+
+  it("drops what isn't configured, and is empty with no contact details", () => {
+    expect(contactOptions(config({ contact: { email: "hello@example.com" } })).map((o) => o.key)).toEqual(["email"]);
+    expect(contactOptions(config({ contact: { phone: "012-345 6789" } })).map((o) => o.key)).toEqual(["call", "whatsapp"]);
+    expect(contactOptions(config())).toEqual([]);
   });
 });
 

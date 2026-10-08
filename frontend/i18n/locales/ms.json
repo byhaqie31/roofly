@@ -318,6 +318,15 @@
     "links": {
       "help": "Bantuan dan sokongan"
     },
+    "contactUs": {
+      "link": "Hubungi kami",
+      "title": "Hubungi kami",
+      "description": "Hubungi pasukan Roofly dengan cara yang paling sesuai untuk anda.",
+      "email": "E-mel",
+      "call": "Panggil",
+      "whatsapp": "WhatsApp",
+      "whatsappText": "Hai Roofly, saya ada soalan."
+    },
     "footerProductOf": "Produk hebat {name}",
     "footerNav": "Perundangan",
     "effective": "Berkuat kuasa {date}",

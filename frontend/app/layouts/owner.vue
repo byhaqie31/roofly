@@ -79,6 +79,7 @@ const { isDemo, showSupportWidget } = useEnv();
         tone="theme"
         variant="shell"
         help-to="/owner/help"
+        legal-base="/owner/legal"
         :class="showSupportWidget ? 'pb-20 md:pb-4' : ''"
       />
     </div>

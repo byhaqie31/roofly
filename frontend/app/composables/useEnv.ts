@@ -72,6 +72,9 @@ export const useEnv = () => {
     // Demo keeps its Google Form button instead: demo never reaches the backend.
     showSupportWidget: !isDemo,
     redirectRootToDemo: isDemo,
+    // Where the public wordmark (SiteHeader) goes: the public home page, never
+    // "/" — "/" sends a signed-in visitor to their own dashboard (pages/index.vue).
+    publicHomePath: isDemo ? "/demo" : "/coming-soon",
 
     // Beta-tester hunt: production's public site is only /coming-soon (every
     // other non-admin route redirects there; the admin back office stays up to
