@@ -24,10 +24,10 @@ class AdminResourcesTest extends TestCase
 {
     use RefreshDatabase;
 
-    public const OWNER_KEYS = ['id', 'name', 'email', 'businessName', 'planTier', 'unitsUsed', 'unitsCap', 'status', 'suspendedAt', 'suspensionReason', 'createdAt', 'lastActiveAt', 'counts'];
+    public const OWNER_KEYS = ['id', 'name', 'email', 'phone', 'businessName', 'planTier', 'unitsUsed', 'unitsCap', 'status', 'suspendedAt', 'suspensionReason', 'createdAt', 'lastActiveAt', 'counts'];
     public const COUNT_KEYS = ['properties', 'units', 'unitsOccupied', 'tenants', 'agreementsActive', 'agreementsExpiring30d', 'invoicesOverdue', 'ticketsOpen'];
     public const PROPERTY_KEYS = ['id', 'name', 'location', 'type', 'unitsTotal', 'unitsOccupied', 'createdAt'];
-    public const TENANT_KEYS = ['id', 'displayName', 'emailMasked', 'status', 'ownerId', 'ownerName', 'propertyName', 'unitLabel', 'invitedAt', 'acceptedAt', 'createdAt'];
+    public const TENANT_KEYS = ['id', 'displayName', 'email', 'phone', 'status', 'ownerId', 'ownerName', 'propertyName', 'unitLabel', 'invitedAt', 'acceptedAt', 'createdAt'];
 
     public function test_owner_resource_emits_exactly_the_summary_tier(): void
     {
@@ -43,7 +43,7 @@ class AdminResourcesTest extends TestCase
         $this->assertSame(2, $json['unitsUsed']);
         $this->assertSame(5, $json['unitsCap']);
         $this->assertStringNotContainsString('4521', json_encode($json));
-        $this->assertStringNotContainsString('777', json_encode($json));
+        $this->assertSame('+60 12-777 0001', $json['phone']);
     }
 
     public function test_owner_resource_reports_suspension_and_unlimited_cap(): void
@@ -108,9 +108,11 @@ class AdminResourcesTest extends TestCase
         $this->assertSame('A-1', $json['unitLabel']);
         $this->assertNotNull($json['acceptedAt']);
         $this->assertSame('Aminah Y.', $json['displayName']);
-        $this->assertSame('am•••@example.com', $json['emailMasked']);
+        $this->assertSame('aminah.yusof@example.com', $json['email']);
+        $this->assertSame('+60 12-345 6789', $json['phone']);
         $encoded = json_encode($json, JSON_UNESCAPED_UNICODE);
-        foreach (['880314', 'Binti', 'Yusof', 'aminah.yusof', '345 6789', 'Yusof Ali', '000 1111'] as $secret) {
+        // Full name, MyKad and emergency contact never reach admin.
+        foreach (['880314', 'Binti', 'Yusof Ali', '000 1111'] as $secret) {
             $this->assertStringNotContainsString($secret, $encoded);
         }
     }

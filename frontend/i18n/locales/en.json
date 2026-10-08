@@ -334,6 +334,7 @@
       "help": "Help and support",
       "contact": "Contact"
     },
+    "footerProductOf": "A great product of {name}",
     "footerNav": "Legal",
     "effective": "Effective {date}",
     "version": "Version {version}",
@@ -1623,13 +1624,14 @@
     },
     "tenants": {
       "title": "Tenants",
-      "subtitle": "Every tenant across every owner — placement only. Names and emails are masked: tenant details belong to the owner.",
-      "searchPlaceholder": "Exact tenant email, or property or owner name",
+      "subtitle": "Every tenant across every owner — contact and placement only. Names are shortened: tenant details belong to the owner.",
+      "searchPlaceholder": "Search email, phone, property or owner",
       "filteredByOwner": "Filtered by owner",
       "resendInvite": "Resend invite",
       "resendToast": "Invite resent",
       "columns": {
         "tenant": "Tenant",
+        "phone": "Phone",
         "status": "Status",
         "owner": "Owner",
         "propertyUnit": "Property / unit",
@@ -1640,7 +1642,7 @@
         "placement": "Placement",
         "history": "History",
         "noHistory": "No admin actions on this tenant yet.",
-        "privacy": "Tenant details belong to the owner. Admins see a masked name and email and the placement — never phone numbers, MyKad, personal details, documents or payments."
+        "privacy": "Tenant details belong to the owner. Admins see a shortened name, contact details and the placement — never the full name, MyKad, personal details, emergency contacts, documents or payments."
       }
     },
     "enquiries": {

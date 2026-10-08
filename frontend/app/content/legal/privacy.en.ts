@@ -205,11 +205,11 @@ const doc: LegalDocumentContent = {
       blocks: [
         {
           type: "p",
-          text: "Our admin staff see only what they need to run accounts. For owners: name, email address, business name, plan, account status, record counts and each property's name, city and state. For tenants, whose details belong to the owner: a shortened name (such as \"Aminah Y.\") and a partly hidden email address, their status, and which owner, property and unit they are linked to. Staff also see waitlist emails with their visit history on our public pages, and the support messages people send us.",
+          text: "Our admin staff see only what they need to run accounts and give support. For owners: name, email address, phone number, business name, plan, account status, record counts and each property's name, city and state. For tenants, whose details belong to the owner: a shortened name (such as \"Aminah Y.\"), email address and phone number, their status, and which owner, property and unit they are linked to. Staff also see waitlist emails with their visit history on our public pages, and the support messages people send us.",
         },
         {
           type: "p",
-          text: "Admin staff do not see phone numbers, full tenant names or email addresses, MyKad numbers, other personal details, emergency contacts, street addresses, rent amounts, invoices or payments. Staff access is limited by role, and staff actions are logged.",
+          text: "Admin staff do not see full tenant names, MyKad numbers, other personal details, emergency contacts, street addresses, rent amounts, invoices or payments. Staff access is limited by role, and staff actions are logged.",
         },
       ],
     },

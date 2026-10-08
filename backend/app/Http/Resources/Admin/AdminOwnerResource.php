@@ -8,9 +8,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * Spec § 6 owner tier. Key set pinned by AdminResourcesTest — do not add keys
- * casually. Owners are Roofly's own customers, so name + email + business name
- * stay (support and account actions need them); phone, money and property
- * detail don't.
+ * casually. Owners are Roofly's own customers, so their contact details stay
+ * (support and account actions need them); money and property detail don't.
  */
 class AdminOwnerResource extends JsonResource
 {
@@ -22,6 +21,7 @@ class AdminOwnerResource extends JsonResource
             'id'               => $this->id,
             'name'             => $this->name,
             'email'            => $this->email,
+            'phone'            => $this->phone,
             'businessName'     => $this->business_name,
             'planTier'         => $this->plan_tier?->value ?? 'free',
             'unitsUsed'        => $counts['units'],

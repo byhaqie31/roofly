@@ -51,11 +51,14 @@ const palette = computed(() => {
     : { border: "rgba(231, 106, 63, 0.18)", text: "rgba(231, 106, 63, 0.75)", link: "#e76a3f" };
 });
 
+// The full footer draws its divider between the legal links and the bottom
+// line (edge to edge), so the outer border + padding only apply to the slim ones.
 const footerClass = computed(() => [
-  "relative z-10 border-t px-4 sm:px-6 lg:px-12",
-  props.variant === "full" ? "mt-16 py-8" : "py-4",
+  "relative z-10",
+  props.variant === "full" ? "mt-16 pt-8" : "border-t px-4 py-4 sm:px-6 lg:px-12",
   palette.value ? "" : "border-line-passive text-ink-muted",
 ]);
+const dividerStyle = computed(() => (palette.value ? { borderColor: palette.value.border } : undefined));
 
 const linkClass = computed(() => [
   "rounded-sm underline-offset-2 hover:underline focus-visible:shadow-focus transition-colors",
@@ -69,61 +72,70 @@ const linkStyle = computed(() => (palette.value ? { color: palette.value.link } 
     :class="footerClass"
     :style="palette ? { borderColor: palette.border, color: palette.text } : undefined"
   >
-    <div class="mx-auto flex max-w-app flex-col items-center gap-3 text-center text-micro">
-      <!-- Legal links (+ © on the slim variants). flex-wrap + gap, no "·"
-           separators, so longer BM labels break cleanly on narrow screens. -->
-      <nav :aria-label="t('legal.footerNav')" class="w-full">
-        <ul class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">
-          <li v-if="variant !== 'full'">© {{ year }} Roofly.my</li>
-          <li v-for="link in links" :key="link.key">
-            <NuxtLink :to="link.to" :external="link.external" :class="linkClass" :style="linkStyle">
-              {{ t(link.labelKey) }}
-            </NuxtLink>
-          </li>
-        </ul>
-      </nav>
+    <!-- Legal links (+ © on the slim variants). flex-wrap + gap, no "·"
+         separators, so longer BM labels break cleanly on narrow screens. -->
+    <nav
+      :aria-label="t('legal.footerNav')"
+      class="mx-auto max-w-app text-center text-micro"
+      :class="variant === 'full' ? 'px-4 pb-6 sm:px-6 lg:px-12' : ''"
+    >
+      <ul class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">
+        <li v-if="variant !== 'full'">© {{ year }} Roofly.my</li>
+        <li v-for="link in links" :key="link.key">
+          <NuxtLink :to="link.to" :external="link.external" :class="linkClass" :style="linkStyle">
+            {{ t(link.labelKey) }}
+          </NuxtLink>
+        </li>
+      </ul>
+    </nav>
 
-      <template v-if="variant === 'full'">
-        <!-- Operator identity (Consumer Protection (E-Trade) Regulations 2024
-             disclosures). Every value comes from config/legal.ts; nulls never render. -->
-        <ul class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-          <li>
-            <i18n-t keypath="legal.operator.productOf" tag="span" scope="global">
-              <template #name>
-                <a
-                  v-if="LEGAL.operator.website"
-                  :href="LEGAL.operator.website"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="font-medium"
-                  :class="linkClass"
-                  :style="linkStyle"
-                >{{ LEGAL.operator.name }}</a>
-                <span v-else>{{ LEGAL.operator.name }}</span>
-              </template>
-            </i18n-t>
-          </li>
-          <li v-for="line in operatorExtras" :key="line.key" class="tabular-nums">
-            <template v-if="line.key === 'ssmNumber'">{{ t("legal.operator.ssmNumber", { value: line.value }) }}</template>
-            <a v-else-if="line.href" :href="line.href" :class="linkClass" :style="linkStyle">{{ line.value }}</a>
-            <template v-else>{{ line.value }}</template>
-          </li>
-        </ul>
-
-        <p>
-          © {{ year }} Roofly.my
-          <span aria-hidden="true" class="mx-1.5">·</span>
-          Designed and developed with care and love by
-          <a
-            href="https://baihaqie.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="font-medium underline underline-offset-2 hover:opacity-80 transition-opacity"
-            :class="palette ? '' : 'text-ink-body'"
-            :style="linkStyle"
-          >Qie</a>
-        </p>
-      </template>
+    <!-- Full variant: the footer line, then one full-width row — © and the
+         operator identity on the left (Consumer Protection (E-Trade)
+         Regulations 2024 disclosures; every value from config/legal.ts, nulls
+         never render), designer credit on the right. Stacks and centres below md. -->
+    <div
+      v-if="variant === 'full'"
+      class="flex flex-col items-center gap-1.5 border-t px-4 py-5 text-center text-micro sm:px-6 md:flex-row md:items-start md:justify-between md:gap-6 md:text-left lg:px-12"
+      :class="palette ? '' : 'border-line-passive'"
+      :style="dividerStyle"
+    >
+      <ul class="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 md:justify-start">
+        <li>© {{ year }} Roofly.my</li>
+        <li>
+          <span aria-hidden="true" class="mr-1.5">·</span>
+          <i18n-t keypath="legal.footerProductOf" tag="span" scope="global">
+            <template #name>
+              <a
+                v-if="LEGAL.operator.website"
+                :href="LEGAL.operator.website"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-medium"
+                :class="linkClass"
+                :style="linkStyle"
+              >{{ LEGAL.operator.name }}</a>
+              <span v-else>{{ LEGAL.operator.name }}</span>
+            </template>
+          </i18n-t>
+        </li>
+        <li v-for="line in operatorExtras" :key="line.key" class="tabular-nums">
+          <span aria-hidden="true" class="mr-1.5">·</span>
+          <template v-if="line.key === 'ssmNumber'">{{ t("legal.operator.ssmNumber", { value: line.value }) }}</template>
+          <a v-else-if="line.href" :href="line.href" :class="linkClass" :style="linkStyle">{{ line.value }}</a>
+          <template v-else>{{ line.value }}</template>
+        </li>
+      </ul>
+      <p class="shrink-0 md:text-right">
+        Designed and developed with care and love by
+        <a
+          href="https://baihaqie.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-medium underline underline-offset-2 hover:opacity-80 transition-opacity"
+          :class="palette ? '' : 'text-ink-body'"
+          :style="linkStyle"
+        >Qie</a>
+      </p>
     </div>
   </footer>
 </template>

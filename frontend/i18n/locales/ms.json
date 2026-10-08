@@ -319,6 +319,7 @@
       "help": "Bantuan dan sokongan",
       "contact": "Hubungi kami"
     },
+    "footerProductOf": "Produk hebat {name}",
     "footerNav": "Perundangan",
     "effective": "Berkuat kuasa {date}",
     "version": "Versi {version}",

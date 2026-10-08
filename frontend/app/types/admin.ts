@@ -42,13 +42,14 @@ export interface AdminOwnerCounts {
 }
 
 /**
- * Owner tier — Roofly's own customer, so name + email + business name are
- * shown; phone, money and property detail are not (AdminResourcesTest pins it).
+ * Owner tier — Roofly's own customer, so contact details are shown; money and
+ * property detail are not (AdminResourcesTest pins it).
  */
 export interface AdminOwner {
   id: string;
   name: string;
   email: string;
+  phone: string | null;
   businessName: string | null;
   planTier: PlanTier;
   unitsUsed: number;
@@ -73,15 +74,16 @@ export interface AdminPropertySummary {
 }
 
 /**
- * Tenant tier — placement only. Tenant details are owner-controlled, so the
- * API masks them (backend App\Support\PrivacyMask, utils/privacyMask.ts):
- * "Aminah Y." / "am•••@example.com". No phone, MyKad, personal info or
- * emergency contact ever reaches admin.
+ * Tenant tier — contact + placement only. Tenant details are owner-controlled,
+ * so the API shortens the name (backend App\Support\PrivacyMask,
+ * utils/privacyMask.ts): "Aminah Y.". Email + phone are there for support; no
+ * MyKad, personal info or emergency contact ever reaches admin.
  */
 export interface AdminTenant {
   id: string;
   displayName: string;
-  emailMasked: string;
+  email: string;
+  phone: string | null;
   status: TenantStatus;
   ownerId: string | null;
   ownerName: string | null;
@@ -174,7 +176,7 @@ export interface OwnerListQuery {
 }
 
 export interface TenantListQuery {
-  /** Exact tenant email, or part of a property / owner name. */
+  /** Part of the tenant's email or phone, or of a property / owner name — never the tenant's name. */
   q?: string;
   status?: TenantStatus;
   ownerId?: string;

@@ -204,11 +204,11 @@ const doc: LegalDocumentContent = {
       blocks: [
         {
           type: "p",
-          text: "Kakitangan admin kami hanya melihat apa yang diperlukan untuk mengurus akaun. Bagi pemilik: nama, alamat e-mel, nama perniagaan, pelan, status akaun, bilangan rekod serta nama, bandar dan negeri setiap hartanah. Bagi penyewa, yang butirannya milik pemilik: nama yang dipendekkan (seperti \"Aminah Y.\") dan alamat e-mel yang sebahagiannya disembunyikan, status mereka, dan pemilik, hartanah serta unit yang dikaitkan dengan mereka. Kakitangan juga melihat e-mel senarai menunggu bersama sejarah lawatan di halaman awam kami, dan mesej sokongan yang dihantar kepada kami.",
+          text: "Kakitangan admin kami hanya melihat apa yang diperlukan untuk mengurus akaun dan memberi sokongan. Bagi pemilik: nama, alamat e-mel, nombor telefon, nama perniagaan, pelan, status akaun, bilangan rekod serta nama, bandar dan negeri setiap hartanah. Bagi penyewa, yang butirannya milik pemilik: nama yang dipendekkan (seperti \"Aminah Y.\"), alamat e-mel dan nombor telefon, status mereka, dan pemilik, hartanah serta unit yang dikaitkan dengan mereka. Kakitangan juga melihat e-mel senarai menunggu bersama sejarah lawatan di halaman awam kami, dan mesej sokongan yang dihantar kepada kami.",
         },
         {
           type: "p",
-          text: "Kakitangan admin tidak melihat nombor telefon, nama penuh atau alamat e-mel penyewa, nombor MyKad, butiran peribadi lain, kenalan kecemasan, alamat jalan, jumlah sewa, invois atau bayaran. Akses kakitangan dihadkan mengikut peranan, dan tindakan kakitangan direkodkan.",
+          text: "Kakitangan admin tidak melihat nama penuh penyewa, nombor MyKad, butiran peribadi lain, kenalan kecemasan, alamat jalan, jumlah sewa, invois atau bayaran. Akses kakitangan dihadkan mengikut peranan, dan tindakan kakitangan direkodkan.",
         },
       ],
     },

@@ -9,35 +9,35 @@ import type {
   AdminOwner, AdminPropertySummary, AdminTenant, AdminUser, AuditEntry, AuditAction,
 } from "~/types/admin";
 import { DEMO_OPS_ADMIN_ID, DEMO_OPS_PRESET, DEMO_SUPER_ADMIN_ID } from "~/demo/auth";
-import { maskEmail, maskName } from "~/utils/privacyMask";
+import { maskName } from "~/utils/privacyMask";
 
 const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString();
 const dateOnly = (iso: string) => iso.slice(0, 10);
 
 export const adminOwnersMock: AdminOwner[] = [
   {
-    id: "o-aminah", name: "Cik Aminah", email: "aminah@roofly.my",
+    id: "o-aminah", name: "Cik Aminah", email: "aminah@roofly.my", phone: "+60 12-345 6789",
     businessName: "Aminah Properties", planTier: "free", unitsUsed: 8, unitsCap: 2,
     status: "active", suspendedAt: null, suspensionReason: null,
     createdAt: daysAgo(400), lastActiveAt: daysAgo(0),
     counts: { properties: 5, units: 8, unitsOccupied: 4, tenants: 5, agreementsActive: 3, agreementsExpiring30d: 1, invoicesOverdue: 1, ticketsOpen: 4 },
   },
   {
-    id: "o-farid", name: "Farid Kamal", email: "farid@kamalhomes.my",
+    id: "o-farid", name: "Farid Kamal", email: "farid@kamalhomes.my", phone: "+60 13-222 8899",
     businessName: "Kamal Homes", planTier: "starter", unitsUsed: 4, unitsCap: 5,
     status: "active", suspendedAt: null, suspensionReason: null,
     createdAt: daysAgo(210), lastActiveAt: daysAgo(2),
     counts: { properties: 2, units: 4, unitsOccupied: 4, tenants: 4, agreementsActive: 4, agreementsExpiring30d: 0, invoicesOverdue: 3, ticketsOpen: 1 },
   },
   {
-    id: "o-mei", name: "Tan Mei Ling", email: "meiling@tanrealty.my",
+    id: "o-mei", name: "Tan Mei Ling", email: "meiling@tanrealty.my", phone: "+60 16-777 1122",
     businessName: "Tan Realty", planTier: "pro", unitsUsed: 14, unitsCap: 25,
     status: "suspended", suspendedAt: daysAgo(5), suspensionReason: "Subscription unpaid for two billing cycles after warning.",
     createdAt: daysAgo(320), lastActiveAt: daysAgo(6),
     counts: { properties: 2, units: 14, unitsOccupied: 11, tenants: 3, agreementsActive: 11, agreementsExpiring30d: 2, invoicesOverdue: 0, ticketsOpen: 2 },
   },
   {
-    id: "o-raj", name: "Rajesh Pillai", email: "rajesh.pillai@gmail.com",
+    id: "o-raj", name: "Rajesh Pillai", email: "rajesh.pillai@gmail.com", phone: null,
     businessName: null, planTier: "free", unitsUsed: 0, unitsCap: 2,
     status: "active", suspendedAt: null, suspensionReason: null,
     createdAt: daysAgo(12), lastActiveAt: daysAgo(11),
@@ -66,37 +66,30 @@ export const adminPropertiesMock: Record<string, AdminPropertySummary[]> = {
 };
 
 /**
- * Demo-side tenant seeds with the real name + email, which the admin shell
- * never sees: adminTenantsMock below masks them exactly like the API
- * (App\Support\PrivacyMask). The raw email is kept only for the exact-email
- * search the API supports.
+ * Demo-side tenant seeds with the full name, which the admin shell never sees:
+ * adminTenantsMock below shortens it exactly like the API (App\Support\PrivacyMask).
  */
-type DemoTenantSeed = Omit<AdminTenant, "displayName" | "emailMasked"> & { name: string; email: string };
+type DemoTenantSeed = Omit<AdminTenant, "displayName"> & { name: string };
 
 const adminTenantSeeds: DemoTenantSeed[] = [
-  { id: "t-aminah", name: "Aminah Binti Yusof", email: "aminah.yusof@example.com", status: "active", ownerId: "o-aminah", ownerName: "Cik Aminah", propertyName: "Suria KLCC Residences", unitLabel: "A-12-3", invitedAt: daysAgo(370), acceptedAt: daysAgo(369), createdAt: daysAgo(370) },
-  { id: "t-arif", name: "Arif Hakim", email: "arif.hakim@example.com", status: "active", ownerId: "o-aminah", ownerName: "Cik Aminah", propertyName: "Wangsa Maju Flats", unitLabel: "B-3-2", invitedAt: daysAgo(290), acceptedAt: daysAgo(288), createdAt: daysAgo(290) },
-  { id: "t-li-wei", name: "Lim Li Wei", email: "limlw@example.com", status: "invited", ownerId: "o-aminah", ownerName: "Cik Aminah", propertyName: "TTDI Terrace", unitLabel: "Main", invitedAt: daysAgo(9), acceptedAt: null, createdAt: daysAgo(9) },
-  { id: "t-ravi", name: "Ravi Kumar", email: "ravik@example.com", status: "moved_out", ownerId: "o-aminah", ownerName: "Cik Aminah", propertyName: "USJ Shoplot", unitLabel: "G-1", invitedAt: daysAgo(800), acceptedAt: daysAgo(799), createdAt: daysAgo(800) },
-  { id: "t-siti", name: "Siti Khadijah Binti Rahim", email: "siti.khadijah@example.com", status: "notice_given", ownerId: "o-aminah", ownerName: "Cik Aminah", propertyName: "Subang Rooms", unitLabel: "Master", invitedAt: daysAgo(560), acceptedAt: daysAgo(559), createdAt: daysAgo(560) },
-  { id: "t-f1", name: "Nurul Izzah", email: "nurul.izzah@example.com", status: "active", ownerId: "o-farid", ownerName: "Farid Kamal", propertyName: "Cyberjaya Studio Block", unitLabel: "3-01", invitedAt: daysAgo(180), acceptedAt: daysAgo(179), createdAt: daysAgo(180) },
-  { id: "t-f2", name: "Daniel Wong", email: "daniel.wong@example.com", status: "active", ownerId: "o-farid", ownerName: "Farid Kamal", propertyName: "Cyberjaya Studio Block", unitLabel: "3-02", invitedAt: daysAgo(170), acceptedAt: daysAgo(168), createdAt: daysAgo(170) },
-  { id: "t-f3", name: "Priya Nair", email: "priya.nair@example.com", status: "active", ownerId: "o-farid", ownerName: "Farid Kamal", propertyName: "Cyberjaya Studio Block", unitLabel: "3-03", invitedAt: daysAgo(120), acceptedAt: daysAgo(119), createdAt: daysAgo(120) },
-  { id: "t-f4", name: "Hafiz Rahman", email: "hafiz.r@example.com", status: "active", ownerId: "o-farid", ownerName: "Farid Kamal", propertyName: "Kajang Semi-D", unitLabel: "Main", invitedAt: daysAgo(140), acceptedAt: daysAgo(139), createdAt: daysAgo(140) },
-  { id: "t-m1", name: "Chong Wei Jie", email: "chong.wj@example.com", status: "active", ownerId: "o-mei", ownerName: "Tan Mei Ling", propertyName: "Gurney Heights", unitLabel: "12-A", invitedAt: daysAgo(300), acceptedAt: daysAgo(299), createdAt: daysAgo(300) },
-  { id: "t-m2", name: "Sarah Abdullah", email: "sarah.abd@example.com", status: "invited", ownerId: "o-mei", ownerName: "Tan Mei Ling", propertyName: "Bayan Lepas Rooms", unitLabel: "R-4", invitedAt: daysAgo(3), acceptedAt: null, createdAt: daysAgo(3) },
-  { id: "t-m3", name: "Kevin Ooi", email: "kevin.ooi@example.com", status: "invited", ownerId: "o-mei", ownerName: "Tan Mei Ling", propertyName: "Bayan Lepas Rooms", unitLabel: "R-5", invitedAt: daysAgo(15), acceptedAt: null, createdAt: daysAgo(15) },
+  { id: "t-aminah", name: "Aminah Binti Yusof", email: "aminah.yusof@example.com", phone: "+60 12-345 6789", status: "active", ownerId: "o-aminah", ownerName: "Cik Aminah", propertyName: "Suria KLCC Residences", unitLabel: "A-12-3", invitedAt: daysAgo(370), acceptedAt: daysAgo(369), createdAt: daysAgo(370) },
+  { id: "t-arif", name: "Arif Hakim", email: "arif.hakim@example.com", phone: "+60 17-888 1234", status: "active", ownerId: "o-aminah", ownerName: "Cik Aminah", propertyName: "Wangsa Maju Flats", unitLabel: "B-3-2", invitedAt: daysAgo(290), acceptedAt: daysAgo(288), createdAt: daysAgo(290) },
+  { id: "t-li-wei", name: "Lim Li Wei", email: "limlw@example.com", phone: "+60 16-222 3344", status: "invited", ownerId: "o-aminah", ownerName: "Cik Aminah", propertyName: "TTDI Terrace", unitLabel: "Main", invitedAt: daysAgo(9), acceptedAt: null, createdAt: daysAgo(9) },
+  { id: "t-ravi", name: "Ravi Kumar", email: "ravik@example.com", phone: "+60 13-456 7890", status: "moved_out", ownerId: "o-aminah", ownerName: "Cik Aminah", propertyName: "USJ Shoplot", unitLabel: "G-1", invitedAt: daysAgo(800), acceptedAt: daysAgo(799), createdAt: daysAgo(800) },
+  { id: "t-siti", name: "Siti Khadijah Binti Rahim", email: "siti.khadijah@example.com", phone: "+60 11-2233 4455", status: "notice_given", ownerId: "o-aminah", ownerName: "Cik Aminah", propertyName: "Subang Rooms", unitLabel: "Master", invitedAt: daysAgo(560), acceptedAt: daysAgo(559), createdAt: daysAgo(560) },
+  { id: "t-f1", name: "Nurul Izzah", email: "nurul.izzah@example.com", phone: "+60 19-100 2000", status: "active", ownerId: "o-farid", ownerName: "Farid Kamal", propertyName: "Cyberjaya Studio Block", unitLabel: "3-01", invitedAt: daysAgo(180), acceptedAt: daysAgo(179), createdAt: daysAgo(180) },
+  { id: "t-f2", name: "Daniel Wong", email: "daniel.wong@example.com", phone: "+60 12-900 1234", status: "active", ownerId: "o-farid", ownerName: "Farid Kamal", propertyName: "Cyberjaya Studio Block", unitLabel: "3-02", invitedAt: daysAgo(170), acceptedAt: daysAgo(168), createdAt: daysAgo(170) },
+  { id: "t-f3", name: "Priya Nair", email: "priya.nair@example.com", phone: "+60 14-333 4444", status: "active", ownerId: "o-farid", ownerName: "Farid Kamal", propertyName: "Cyberjaya Studio Block", unitLabel: "3-03", invitedAt: daysAgo(120), acceptedAt: daysAgo(119), createdAt: daysAgo(120) },
+  { id: "t-f4", name: "Hafiz Rahman", email: "hafiz.r@example.com", phone: "+60 11-555 6666", status: "active", ownerId: "o-farid", ownerName: "Farid Kamal", propertyName: "Kajang Semi-D", unitLabel: "Main", invitedAt: daysAgo(140), acceptedAt: daysAgo(139), createdAt: daysAgo(140) },
+  { id: "t-m1", name: "Chong Wei Jie", email: "chong.wj@example.com", phone: "+60 12-111 2222", status: "active", ownerId: "o-mei", ownerName: "Tan Mei Ling", propertyName: "Gurney Heights", unitLabel: "12-A", invitedAt: daysAgo(300), acceptedAt: daysAgo(299), createdAt: daysAgo(300) },
+  { id: "t-m2", name: "Sarah Abdullah", email: "sarah.abd@example.com", phone: "+60 13-999 8888", status: "invited", ownerId: "o-mei", ownerName: "Tan Mei Ling", propertyName: "Bayan Lepas Rooms", unitLabel: "R-4", invitedAt: daysAgo(3), acceptedAt: null, createdAt: daysAgo(3) },
+  { id: "t-m3", name: "Kevin Ooi", email: "kevin.ooi@example.com", phone: "+60 16-123 4567", status: "invited", ownerId: "o-mei", ownerName: "Tan Mei Ling", propertyName: "Bayan Lepas Rooms", unitLabel: "R-5", invitedAt: daysAgo(15), acceptedAt: null, createdAt: daysAgo(15) },
 ];
 
-export const adminTenantsMock: AdminTenant[] = adminTenantSeeds.map(({ name, email, ...rest }) => ({
+export const adminTenantsMock: AdminTenant[] = adminTenantSeeds.map(({ name, ...rest }) => ({
   ...rest,
   displayName: maskName(name),
-  emailMasked: maskEmail(email),
 }));
-
-/** Exact-email lookup for the demo search — mirrors Admin\TenantController. */
-export const adminTenantIdByEmail = (email: string): string | null =>
-  adminTenantSeeds.find((t) => t.email.toLowerCase() === email.trim().toLowerCase())?.id ?? null;
 
 export const adminUsersMock: AdminUser[] = [
   { id: DEMO_SUPER_ADMIN_ID, name: "Baihaqie (super-admin)", email: "admin@roofly.my", permissions: [], isSuperAdmin: true, status: "active", lastActiveAt: daysAgo(0), createdAt: daysAgo(60) },
