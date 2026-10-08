@@ -117,6 +117,21 @@ const onSubmit = async () => {
         >
           {{ error }}
         </p>
+        <i18n-t
+          keypath="marketing.emailCapture.privacyNote"
+          tag="p"
+          scope="global"
+          class="max-w-md text-micro"
+          style="color: rgba(247, 244, 237, 0.6)"
+        >
+          <template #link>
+            <NuxtLink
+              to="/legal/privacy"
+              class="underline underline-offset-2 hover:opacity-80 transition-opacity"
+              style="color: #f7f4ed"
+            >{{ t("marketing.emailCapture.privacyLink") }}</NuxtLink>
+          </template>
+        </i18n-t>
       </form>
 
       <!-- Success view -->

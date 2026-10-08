@@ -79,10 +79,10 @@ const promoUnavailable = ref(false);
       </div>
     </div>
 
-    <!-- Full-width site footer (credit + Axel Nova Ventures), its own band under
-         both panes rather than part of the marketing pane. -->
+    <!-- Full-width slim footer (© + Privacy / Terms), its own band under both
+         panes rather than part of the marketing pane. -->
     <div style="background-color: #1c1a17">
-      <SiteFooter tone="dark" compact />
+      <SiteFooter tone="dark" variant="slim" />
     </div>
   </div>
 </template>

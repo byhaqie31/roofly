@@ -830,6 +830,28 @@ See [components/marketing/HeroSection.vue](../../frontend/app/components/marketi
 
 **Floating buttons own a corner each** — bottom-left: the UAT `EnvBanner`; bottom-right: the owner/tenant **Help & feedback** button (`SupportWidget`, icon-only on mobile, label slides out on hover/focus from `md:`) or, in demo, the Google Form `FloatingFeedback` (never both — `showSupportWidget` is `!isDemo`). Don't add a third floating control in either corner.
 
+### 11.22 Legal documents and footers
+
+**Legal pages** (`/legal/*`, `layouts/legal.vue` + `components/legal/LegalDocument.vue`) read as calm editorial pages:
+
+- Theme-following cream/charcoal page (not the always-dark marketing layout), wordmark + theme toggle + language switcher in a bordered header, full footer.
+- Narrow reading column (`max-w-[680px]`), `text-body leading-relaxed text-ink-body`, `h2` at `text-card-title font-semibold`, sections `scroll-mt-6`. Title is 30px under `sm`, `text-display-sub` from `sm:` (negative tracking only at ≥36px).
+- Meta line under the title — effective date · version · "Baca dalam Bahasa Malaysia" / "Read in English" toggle — in `tabular-nums`. A `null` effective date simply drops out.
+- Section list: sticky aside at `lg:`, bordered two-column list `sm:`–`lg:`, `<Select>` dropdown under `sm` (§ 11.1 pattern) that jumps straight to the section — no smooth scroll, no GSAP, no motion on these pages.
+- Every document ends with "Who operates Roofly" (`LegalContactDetails`) and links to the other documents.
+- Copy lives in `content/legal/<slug>.<locale>.ts` (typed blocks: `p`, `ul`, `contact`, `plans`; inline `[label](href)` links only). Contact details never go in the copy — use a `contact` block so null config values drop out. `TODO(legal)` goes in source comments only; `registry.test.ts` fails on "TODO" in rendered strings.
+
+**Footers** — one component, `components/layout/SiteFooter.vue`, links decided by `utils/legal.ts footerLinks()`:
+
+| Variant | Where | Links |
+|---|---|---|
+| `full` | marketing, coming-soon, legal pages | Privacy · Terms · Billing · Acceptable use · Contact (only if `contact.email` set) + operator line (name, SSM, address, email, phone — nulls dropped) + © and credit |
+| `slim` | auth, onboarding, suspended | © · Privacy · Terms |
+| `shell` | owner + tenant layouts | © · Privacy · Terms · Help and support |
+| `admin` | admin layout + admin sign-in | © · Privacy · Terms, admin accent, never Beta |
+
+Beta terms joins every non-admin variant when `useEnv().showBetaTerms` (UAT). Links are a `flex-wrap gap-x-4 gap-y-1.5` list with **no `·` separators**, so the longer BM labels wrap cleanly on mobile. `tone="dark"`/`"light"` keep the brand-orange palette for charcoal panes; `tone="theme"` uses tokens so it follows dark mode. In the owner/tenant shells the footer gets `pb-20 md:pb-4` while the floating help button is shown, so the button never covers the links.
+
 ## 12. Hard rules — do not break
 
 1. Page background is **always** `#F7F4ED` (light) or `#1C1A17` (dark). Pure white only inside generated PDFs.

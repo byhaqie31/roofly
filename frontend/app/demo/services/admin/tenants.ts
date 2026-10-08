@@ -1,12 +1,17 @@
 import type { AdminTenantsService } from "~/services/contracts/admin/tenants";
-import { adminTenantsMock, pushAudit } from "~/demo/data/admin";
+import { adminTenantIdByEmail, adminTenantsMock, pushAudit } from "~/demo/data/admin";
 import { paginate } from "~/demo/services/admin/paginate";
 
 export const demoAdminTenants: AdminTenantsService = {
   async list(query) {
     let rows = [...adminTenantsMock].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     const q = query.q?.trim().toLowerCase();
-    if (q) rows = rows.filter((t) => [t.name, t.email, t.phone ?? ""].some((s) => s.toLowerCase().includes(q)));
+    // Mirrors Admin\TenantController: exact email, or part of a property / owner
+    // name — never a partial tenant name, email or phone.
+    if (q) {
+      const byEmail = adminTenantIdByEmail(q);
+      rows = rows.filter((t) => t.id === byEmail || [t.propertyName ?? "", t.ownerName ?? ""].some((s) => s.toLowerCase().includes(q)));
+    }
     if (query.status) rows = rows.filter((t) => t.status === query.status);
     if (query.ownerId) rows = rows.filter((t) => t.ownerId === query.ownerId);
     return structuredClone(paginate(rows, query.page, query.perPage));

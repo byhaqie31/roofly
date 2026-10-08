@@ -279,7 +279,9 @@
       "success": "Terima kasih! Kami akan beritahu apabila dilancarkan.",
       "invalid": "Sila masukkan alamat emel yang sah.",
       "submitError": "Gagal simpan emel anda. Sila cuba lagi.",
-      "submitting": "Menghantar…"
+      "submitting": "Menghantar…",
+      "privacyNote": "Dengan menyertai senarai menunggu, anda bersetuju dengan {link} kami.",
+      "privacyLink": "notis privasi"
     }
   },
   "support": {
@@ -303,6 +305,57 @@
     "send": "Hantar mesej",
     "sentTitle": "Mesej dihantar",
     "sentBody": "Terima kasih! Pasukan Roofly akan menghubungi anda di {email}."
+  },
+  "legal": {
+    "eyebrow": "Perundangan",
+    "docs": {
+      "privacy": "Notis privasi",
+      "terms": "Terma perkhidmatan",
+      "billing": "Polisi bil dan bayaran balik",
+      "acceptable-use": "Penggunaan yang dibenarkan",
+      "beta": "Terma beta"
+    },
+    "links": {
+      "help": "Bantuan dan sokongan",
+      "contact": "Hubungi kami"
+    },
+    "footerNav": "Perundangan",
+    "effective": "Berkuat kuasa {date}",
+    "version": "Versi {version}",
+    "onThisPage": "Dalam halaman ini",
+    "jumpTo": "Lompat ke seksyen",
+    "readIn": "Read in English",
+    "otherDocs": "Dokumen perundangan lain",
+    "operator": {
+      "heading": "Pengendali Roofly",
+      "productOf": "Roofly ialah produk {name}",
+      "ssmNumber": "No. pendaftaran SSM {value}",
+      "email": "E-mel",
+      "privacyEmail": "Kenalan privasi",
+      "phone": "Telefon"
+    },
+    "plans": {
+      "plan": "Pelan",
+      "units": "Unit",
+      "price": "Harga sebulan",
+      "unlimited": "Tanpa had"
+    },
+    "support": {
+      "title": "Perundangan",
+      "description": "Dokumen yang menerangkan cara Roofly berfungsi dan cara kami mengendalikan data anda.",
+      "yourDataTitle": "Data anda",
+      "yourDataBody": "Anda boleh meminta salinan data peribadi yang kami simpan tentang anda, atau meminta kami membetulkannya. Kebanyakannya boleh juga anda kemas kini sendiri di halaman profil atau tetapan.",
+      "yourDataPrivacyEmail": "E-mel kenalan privasi kami:",
+      "yourDataWidget": "Atau hantar mesej melalui Bantuan & maklum balas dan beritahu kami apa yang anda perlukan.",
+      "yourDataTenant": "Pemilik rumah anda mengurus butiran penyewaan anda, jadi anda juga boleh bertanya kepada mereka."
+    }
+  },
+  "help": {
+    "title": "Bantuan dan sokongan",
+    "subtitle": "Hubungi pasukan Roofly, dan cari dokumen perundangan kami.",
+    "contactTitle": "Hubungi pasukan Roofly",
+    "contactBody": "Laporkan masalah, kongsi maklum balas atau tanya soalan. Kami membalas melalui e-mel.",
+    "contactCta": "Hantar mesej"
   },
   "validation": {
     "required": "Ruangan ini wajib diisi",
@@ -634,7 +687,8 @@
       "payments": "Pembayaran",
       "maintenance": "Penyelenggaraan",
       "reports": "Laporan",
-      "settings": "Tetapan"
+      "settings": "Tetapan",
+      "help": "Bantuan dan sokongan"
     },
     "dashboard": {
       "title": "Halaman Utama",
@@ -1125,7 +1179,8 @@
       "agreement": "Perjanjian",
       "payments": "Pembayaran",
       "tickets": "Aduan",
-      "profile": "Profil"
+      "profile": "Profil",
+      "help": "Bantuan dan sokongan"
     },
     "home": {
       "reviewCard": {

@@ -8,6 +8,7 @@ import UserMenu from "~/components/topbar/UserMenu.vue";
 import MobileNavDrawer from "~/components/layout/MobileNavDrawer.vue";
 import DemoTourButton from "~/components/demo/DemoTourButton.vue";
 import SupportWidget from "~/components/layout/SupportWidget.vue";
+import SiteFooter from "~/components/layout/SiteFooter.vue";
 
 const drawerOpen = ref(false);
 const { isDemo, showSupportWidget } = useEnv();
@@ -73,6 +74,13 @@ const { isDemo, showSupportWidget } = useEnv();
           <slot />
         </div>
       </main>
+      <!-- Extra bottom room on mobile so the floating help button never covers the links. -->
+      <SiteFooter
+        tone="theme"
+        variant="shell"
+        help-to="/tenant/help"
+        :class="showSupportWidget ? 'pb-20 md:pb-4' : ''"
+      />
     </div>
     <!-- Help & feedback → admin Enquiries → Messages (hidden in demo). -->
     <SupportWidget v-if="showSupportWidget" />

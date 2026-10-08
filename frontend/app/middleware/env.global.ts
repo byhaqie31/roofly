@@ -10,12 +10,15 @@
  * /coming-soon  | redirect → /demo        | render                    | render                        | render              | render
  * /admin/*      | 404 (features.admin off)| render when features.admin (else 404) | render when features.admin (else 404) | render when features.admin (else 404) | render when features.admin (else 404)
  * / on admin host | n/a (demo has no admin host) | redirect → /admin    | redirect → /admin              | redirect → /admin   | redirect → /admin
+ * /legal/*     | render                  | render                    | render                        | render              | render
  * everything    | render                  | render                    | render                        | render              | render
  *
  * While `comingSoonOnly` is on (production during the beta-tester hunt), every
- * production route except /coming-soon and /admin/* redirects to /coming-soon
- * (admin.roofly.my still lands on /admin); the production columns above apply
- * again at launch.
+ * production route except /coming-soon, /admin/* and /legal/* redirects to
+ * /coming-soon (admin.roofly.my still lands on /admin); the production columns
+ * above apply again at launch. /legal/* stays up because the coming-soon page
+ * collects personal data and links to the privacy notice. The rule itself is
+ * `shouldRedirectToComingSoon` in utils/comingSoonGate.ts (Vitest-covered).
  *
  * Why:
  *  - Demo subdomain: clients land directly on the curated demo, never see the
@@ -36,6 +39,8 @@
  *  - admin.roofly.my is a hostname rule, not a separate app: root on that host
  *    always redirects straight to `/admin`, ahead of the demo/uat/prod split.
  */
+import { shouldRedirectToComingSoon } from "~/utils/comingSoonGate";
+
 export default defineNuxtRouteMiddleware((to) => {
   const { isDemo, isProduction, isAdminHost, features, comingSoonOnly } = useEnv();
   const isDemoRoute = to.path === "/demo" || to.path.startsWith("/demo/");
@@ -53,8 +58,8 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   // Production during the beta hunt: the coming-soon page is the whole public
-  // site; only the admin back office (Enquiries) stays reachable.
-  if (comingSoonOnly && !isComingSoon && !isAdminRoute) {
+  // site; only the admin back office (Enquiries) and the legal pages stay reachable.
+  if (shouldRedirectToComingSoon(to.path, comingSoonOnly)) {
     return navigateTo("/coming-soon", { redirectCode: 302 });
   }
 

@@ -294,7 +294,9 @@
       "success": "Thanks! We'll let you know when we go live.",
       "invalid": "Please enter a valid email address.",
       "submitError": "Couldn't save your email. Please try again.",
-      "submitting": "Sending…"
+      "submitting": "Sending…",
+      "privacyNote": "By joining the waitlist you agree to our {link}.",
+      "privacyLink": "privacy notice"
     }
   },
   "support": {
@@ -318,6 +320,57 @@
     "send": "Send message",
     "sentTitle": "Message sent",
     "sentBody": "Thanks! The Roofly team will get back to you at {email}."
+  },
+  "legal": {
+    "eyebrow": "Legal",
+    "docs": {
+      "privacy": "Privacy notice",
+      "terms": "Terms of service",
+      "billing": "Billing and refunds",
+      "acceptable-use": "Acceptable use",
+      "beta": "Beta terms"
+    },
+    "links": {
+      "help": "Help and support",
+      "contact": "Contact"
+    },
+    "footerNav": "Legal",
+    "effective": "Effective {date}",
+    "version": "Version {version}",
+    "onThisPage": "On this page",
+    "jumpTo": "Jump to a section",
+    "readIn": "Baca dalam Bahasa Malaysia",
+    "otherDocs": "Other legal documents",
+    "operator": {
+      "heading": "Who operates Roofly",
+      "productOf": "Roofly is a product of {name}",
+      "ssmNumber": "SSM registration no. {value}",
+      "email": "Email",
+      "privacyEmail": "Privacy contact",
+      "phone": "Phone"
+    },
+    "plans": {
+      "plan": "Plan",
+      "units": "Units",
+      "price": "Price per month",
+      "unlimited": "Unlimited"
+    },
+    "support": {
+      "title": "Legal",
+      "description": "The documents that cover how Roofly works and how we handle your data.",
+      "yourDataTitle": "Your data",
+      "yourDataBody": "You can ask for a copy of the personal data we hold about you, or ask us to correct it. Much of it you can also update yourself on your profile or settings page.",
+      "yourDataPrivacyEmail": "Email our privacy contact:",
+      "yourDataWidget": "Or send us a message with Help & feedback and tell us what you need.",
+      "yourDataTenant": "Your landlord manages the details on your tenancy, so you can also ask them."
+    }
+  },
+  "help": {
+    "title": "Help and support",
+    "subtitle": "Get in touch with the Roofly team, and find our legal documents.",
+    "contactTitle": "Contact the Roofly team",
+    "contactBody": "Report a problem, share feedback or ask a question. We reply by email.",
+    "contactCta": "Send a message"
   },
   "validation": {
     "required": "This field is required",
@@ -649,7 +702,8 @@
       "payments": "Payments",
       "maintenance": "Maintenance",
       "reports": "Reports",
-      "settings": "Settings"
+      "settings": "Settings",
+      "help": "Help and support"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -1140,7 +1194,8 @@
       "agreement": "Agreement",
       "payments": "Payments",
       "tickets": "Issues",
-      "profile": "Profile"
+      "profile": "Profile",
+      "help": "Help and support"
     },
     "home": {
       "reviewCard": {
@@ -1568,14 +1623,13 @@
     },
     "tenants": {
       "title": "Tenants",
-      "subtitle": "Every tenant across every owner — identity and placement only.",
-      "searchPlaceholder": "Search name, email or phone",
+      "subtitle": "Every tenant across every owner — placement only. Names and emails are masked: tenant details belong to the owner.",
+      "searchPlaceholder": "Exact tenant email, or property or owner name",
       "filteredByOwner": "Filtered by owner",
       "resendInvite": "Resend invite",
       "resendToast": "Invite resent",
       "columns": {
         "tenant": "Tenant",
-        "phone": "Phone",
         "status": "Status",
         "owner": "Owner",
         "propertyUnit": "Property / unit",
@@ -1586,7 +1640,7 @@
         "placement": "Placement",
         "history": "History",
         "noHistory": "No admin actions on this tenant yet.",
-        "privacy": "Personal details, documents and payments are never shown here."
+        "privacy": "Tenant details belong to the owner. Admins see a masked name and email and the placement — never phone numbers, MyKad, personal details, documents or payments."
       }
     },
     "enquiries": {

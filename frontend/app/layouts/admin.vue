@@ -5,6 +5,7 @@ import AdminSidebarNav from "~/components/admin/SidebarNav.vue";
 import ThemeToggle from "~/components/topbar/ThemeToggle.vue";
 import UserMenu from "~/components/topbar/UserMenu.vue";
 import MobileNavDrawer from "~/components/layout/MobileNavDrawer.vue";
+import SiteFooter from "~/components/layout/SiteFooter.vue";
 
 const drawerOpen = ref(false);
 const { t } = useI18n();
@@ -54,6 +55,7 @@ onMounted(() => { if (locale.value !== "en") setLocale("en"); });
       <main class="flex-1 px-4 md:px-6 py-8 overflow-auto">
         <div class="max-w-app mx-auto"><slot /></div>
       </main>
+      <SiteFooter tone="theme" variant="admin" />
     </div>
   </div>
 </template>

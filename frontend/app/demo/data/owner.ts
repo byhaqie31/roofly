@@ -1,4 +1,5 @@
 import type { OwnerAccount, Plan } from "~/types/owner";
+import { PLANS } from "~/config/plans";
 
 /**
  * Single owner record. The `id` matches the auth-store stub user
@@ -36,12 +37,8 @@ export const ownerAccountMock: OwnerAccount = {
 };
 
 /**
- * Plan ladder — display-only on the settings page. Pricing matches PROJECT.md
- * § 12; "Upgrade" CTAs toast a Phase-7 stub until billing ships.
+ * Plan ladder — display-only on the settings page. Prices live in
+ * `config/plans.ts` (shared with the legal pages); "Upgrade" CTAs toast a
+ * Phase-7 stub until billing ships.
  */
-export const plansMock: Plan[] = [
-  { tier: "free", priceRm: 0, unitsCap: 2, description: "free" }, // cap matches PlanCaps + PROJECT.md § 12
-  { tier: "starter", priceRm: 49, unitsCap: 5, description: "starter" },
-  { tier: "pro", priceRm: 99, unitsCap: 25, description: "pro" },
-  { tier: "business", priceRm: 199, unitsCap: "unlimited", description: "business" },
-];
+export const plansMock: Plan[] = PLANS.map((p) => ({ ...p }));

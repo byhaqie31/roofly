@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { House } from "lucide-vue-next";
 import LangSwitcher from "~/components/topbar/LangSwitcher.vue";
-
-const { t } = useI18n();
+import SiteFooter from "~/components/layout/SiteFooter.vue";
 </script>
 
 <template>
@@ -32,8 +31,6 @@ const { t } = useI18n();
       </div>
     </main>
 
-    <footer class="px-6 py-4 text-center text-micro text-ink-muted">
-      © {{ new Date().getFullYear() }} Roofly.my · {{ t("common.tagline") }}
-    </footer>
+    <SiteFooter tone="theme" variant="slim" />
   </div>
 </template>

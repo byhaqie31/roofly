@@ -13,6 +13,8 @@ describe("pageLabelFor", () => {
     ["/owner/agreements/new", "Owner app · New agreement"],
     ["/owner/agreements/a1#terms", "Owner app · Agreement details"],
     ["/owner/maintenance/t-7", "Owner app · Maintenance ticket"],
+    ["/owner/help", "Owner app · Help and support"],
+    ["/tenant/help", "Tenant app · Help and support"],
   ])("%s → %s", (path, label) => {
     expect(pageLabelFor(path)).toBe(label);
   });

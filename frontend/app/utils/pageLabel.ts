@@ -18,6 +18,7 @@ const OWNER: Array<[RegExp, string]> = [
   [/^\/owner\/maintenance\/[^/]+$/, "Maintenance ticket"],
   [/^\/owner\/reports$/, "Reports"],
   [/^\/owner\/settings$/, "Settings"],
+  [/^\/owner\/help$/, "Help and support"],
 ];
 
 const TENANT: Array<[RegExp, string]> = [
@@ -28,6 +29,7 @@ const TENANT: Array<[RegExp, string]> = [
   [/^\/tenant\/profile$/, "Profile"],
   [/^\/tenant\/tickets$/, "Issues"],
   [/^\/tenant\/tickets\/[^/]+$/, "Issue details"],
+  [/^\/tenant\/help$/, "Help and support"],
 ];
 
 export const pageLabelFor = (fullPath: string): string => {
