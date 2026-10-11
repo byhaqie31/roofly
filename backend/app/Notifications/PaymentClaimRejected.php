@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Support\NoticeMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -40,12 +41,23 @@ class PaymentClaimRejected extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
-            ->subject("Your payment for {$this->invoiceNumber} wasn't confirmed")
-            ->line("Hi {$notifiable->name}, your landlord couldn't confirm the transfer you reported for invoice {$this->invoiceNumber} (reference {$this->reference}).")
-            ->line("Reason: {$this->reason}")
-            ->line("Tuan rumah anda tidak dapat mengesahkan bayaran untuk invois {$this->invoiceNumber}.")
-            ->action('View invoice', $this->url())
-            ->line('Check the details and report the payment again. / Semak butiran dan laporkan bayaran sekali lagi.');
+        return NoticeMail::make("Your payment for {$this->invoiceNumber} wasn't confirmed", [
+            'tag'            => 'RENT PAYMENT',
+            'pill'           => 'NOT CONFIRMED',
+            'headlineLead'   => "Your payment wasn't",
+            'headlineAccent' => 'confirmed.',
+            'greeting'       => NoticeMail::firstName($notifiable->name),
+            'paragraphs'     => ["Your landlord couldn't confirm the transfer you reported for invoice {$this->invoiceNumber}."],
+            'rows'           => [
+                'Invoice'   => $this->invoiceNumber,
+                'Reference' => $this->reference,
+            ],
+            'note'     => ['label' => 'Reason', 'text' => $this->reason],
+            'malay'    => "Tuan rumah anda tidak dapat mengesahkan bayaran untuk invois {$this->invoiceNumber}. Semak butiran dan laporkan bayaran sekali lagi.",
+            'ctaUrl'   => $this->url(),
+            'ctaLabel' => 'View invoice',
+            'closing'  => 'Check the details and report the payment again.',
+            'reason'   => "You're receiving this because your landlord manages your tenancy on Roofly.",
+        ]);
     }
 }

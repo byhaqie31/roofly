@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Agreement;
+use App\Support\NoticeMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -37,13 +38,22 @@ class AgreementSent extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $rent = 'RM ' . number_format($this->rentCents / 100, 2);
-
-        return (new MailMessage)
-            ->subject('Your tenancy agreement is ready to review')
-            ->line("Hi {$notifiable->name}, your landlord has sent you the tenancy agreement for {$this->propertyLabel} ({$rent} per month) to review.")
-            ->line('Tuan rumah anda telah menghantar perjanjian sewa untuk semakan anda.')
-            ->action('Review agreement', $this->url())
-            ->line('You can agree, or ask for changes with a note. / Anda boleh bersetuju, atau minta perubahan dengan nota.');
+        return NoticeMail::make('Your tenancy agreement is ready to review', [
+            'tag'            => 'TENANCY AGREEMENT',
+            'pill'           => 'READY TO REVIEW',
+            'headlineLead'   => 'Your agreement is',
+            'headlineAccent' => 'ready to review.',
+            'greeting'       => NoticeMail::firstName($notifiable->name),
+            'paragraphs'     => ['Your landlord has sent you the tenancy agreement to review.'],
+            'rows'           => [
+                'Property'     => $this->propertyLabel,
+                'Monthly rent' => 'RM ' . number_format($this->rentCents / 100, 2),
+            ],
+            'malay'    => 'Tuan rumah anda telah menghantar perjanjian sewa untuk semakan anda. Anda boleh bersetuju, atau minta perubahan dengan nota.',
+            'ctaUrl'   => $this->url(),
+            'ctaLabel' => 'Review agreement',
+            'closing'  => 'You can agree, or ask for changes with a note.',
+            'reason'   => "You're receiving this because your landlord manages your tenancy on Roofly.",
+        ]);
     }
 }

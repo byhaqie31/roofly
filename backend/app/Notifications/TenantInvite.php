@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Services\TenantInvites;
+use App\Support\NoticeMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -34,16 +35,24 @@ class TenantInvite extends Notification implements ShouldQueue
         $subject = $this->inviterName
             ? "{$this->inviterName} invited you to Roofly"
             : 'You have been invited to Roofly';
-        $intro = $this->inviterName
-            ? "Hi {$notifiable->name}, {$this->inviterName} has set up your tenancy on Roofly, where you can see your rent, pay it and report issues."
-            : "Hi {$notifiable->name}, your landlord has set up your tenancy on Roofly, where you can see your rent, pay it and report issues.";
+        $intro = ($this->inviterName ?? 'Your landlord')
+            . ' has set up your tenancy on Roofly, where you can see your rent, pay it and report issues.';
 
-        return (new MailMessage)
-            ->subject($subject)
-            ->line($intro)
-            ->line('Tuan rumah anda telah menyediakan penyewaan anda di Roofly — lihat sewa, bayar dan laporkan masalah di satu tempat.')
-            ->action('Set your password', $this->url($notifiable))
-            ->line("This link expires in {$days} days. / Pautan ini tamat tempoh dalam {$days} hari.")
-            ->line('If you were not expecting this, you can ignore this email. / Jika anda tidak menjangkakannya, abaikan e-mel ini.');
+        return NoticeMail::make($subject, [
+            'tag'            => 'TENANT INVITE',
+            'pill'           => "YOU'RE INVITED",
+            'headlineLead'   => 'Your tenancy is',
+            'headlineAccent' => 'on Roofly.',
+            'greeting'       => NoticeMail::firstName($notifiable->name),
+            'paragraphs'     => [$intro, 'Set your password to get started.'],
+            'malay'          => 'Tuan rumah anda telah menyediakan penyewaan anda di Roofly — lihat sewa, bayar dan laporkan masalah di satu tempat.',
+            'ctaUrl'         => $this->url($notifiable),
+            'ctaLabel'       => 'Set your password',
+            'fineprint'      => [
+                "This link expires in {$days} days. / Pautan ini tamat tempoh dalam {$days} hari.",
+                'If you were not expecting this, you can ignore this email. / Jika anda tidak menjangkakannya, abaikan e-mel ini.',
+            ],
+            'reason' => "You're receiving this because your landlord added you as a tenant on Roofly.",
+        ]);
     }
 }

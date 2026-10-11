@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\User;
+use App\Support\NoticeMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -51,13 +52,26 @@ class PaymentClaimSubmitted extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $amount = 'RM ' . number_format($this->amountCents / 100, 2);
-
-        return (new MailMessage)
-            ->subject("{$this->tenantName} says they've paid {$this->invoiceNumber}")
-            ->line("Hi {$notifiable->name}, {$this->tenantName} has marked invoice {$this->invoiceNumber} ({$amount}) as paid by bank transfer on {$this->paidOn}, reference {$this->reference}.")
-            ->line("Penyewa anda menyatakan bayaran untuk invois {$this->invoiceNumber} telah dibuat. Sila semak akaun bank anda.")
-            ->action('Review payment', $this->url())
-            ->line('Check your bank account, then confirm or reject it. / Semak akaun bank anda, kemudian sahkan atau tolak.');
+        return NoticeMail::make("{$this->tenantName} says they've paid {$this->invoiceNumber}", [
+            'tag'            => 'RENT PAYMENT',
+            'pill'           => 'AWAITING CONFIRMATION',
+            'headlineLead'   => NoticeMail::firstName($this->tenantName) . ' says',
+            'headlineAccent' => "they've paid.",
+            'greeting'       => NoticeMail::firstName($notifiable->name),
+            'paragraphs'     => [
+                "{$this->tenantName} has marked invoice {$this->invoiceNumber} as paid by bank transfer.",
+                'Check your bank account, then confirm or reject it.',
+            ],
+            'rows' => [
+                'Invoice'   => $this->invoiceNumber,
+                'Amount'    => 'RM ' . number_format($this->amountCents / 100, 2),
+                'Paid on'   => $this->paidOn,
+                'Reference' => $this->reference,
+            ],
+            'malay'    => "Penyewa anda menyatakan bayaran untuk invois {$this->invoiceNumber} telah dibuat. Sila semak akaun bank anda, kemudian sahkan atau tolak.",
+            'ctaUrl'   => $this->url(),
+            'ctaLabel' => 'Review payment',
+            'reason'   => "You're receiving this because payment emails are on in your Roofly notification settings.",
+        ]);
     }
 }
