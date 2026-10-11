@@ -2,6 +2,7 @@
 // backend/app/Notifications/OwnerWarning.php
 namespace App\Notifications;
 
+use App\Support\NoticeMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -41,13 +42,17 @@ class OwnerWarning extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $lines = explode("\n\n", self::text($this->template, $this->suspendOn, $this->extraLine));
-
-        $mail = (new MailMessage)->subject('Action needed: your Roofly subscription');
-        foreach ($lines as $line) {
-            $mail->line($line);
-        }
-
-        return $mail->line('If you have already settled this, you can ignore this notice.');
+        return NoticeMail::make('Action needed: your Roofly subscription', [
+            'tag'            => 'ACCOUNT NOTICE',
+            'pill'           => 'ACTION NEEDED',
+            'headlineLead'   => 'Your subscription',
+            'headlineAccent' => 'needs attention.',
+            'greeting'       => NoticeMail::firstName($notifiable->name),
+            'paragraphs'     => explode("\n\n", self::text($this->template, $this->suspendOn, $this->extraLine)),
+            'ctaUrl'         => rtrim(config('app.frontend_url'), '/') . '/owner/settings?tab=plan',
+            'ctaLabel'       => 'Review your plan',
+            'closing'        => 'If you have already settled this, you can ignore this notice.',
+            'reason'         => "You're receiving this because you have a Roofly owner account.",
+        ]);
     }
 }

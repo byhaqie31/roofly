@@ -16,3 +16,4 @@ The Roofly Team
 --
 Roofly.my · Property management, reimagined.
 You're receiving this email because you joined the Roofly waitlist.
+@include('emails.partials.legal-footer-text')

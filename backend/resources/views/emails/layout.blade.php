@@ -1,14 +1,18 @@
 {{--
-  Shared Roofly marketing-email shell (table layout + inline styles so it
+  Shared shell for every Roofly email (table layout + inline styles so it
   survives Gmail/Outlook). Children set the strings via @section and pass
-  $ctaUrl / $ctaLabel from the notification:
-    @section('title')    the <title>
-    @section('tag')      right-aligned header label, e.g. WELCOME ABOARD
-    @section('pill')     orange pill above the headline
-    @section('headline') <h1> contents (may contain <br> / accent <span>)
-    @section('body')     paragraphs between headline and button
-    @section('closing')  paragraph after the button
-    @section('reason')   footer "you're receiving this because…" line
+  $ctaUrl / $ctaLabel from the notification (both optional — no URL, no button):
+    @section('title')     the <title>
+    @section('tag')       right-aligned header label, e.g. WELCOME ABOARD
+    @section('pill')      orange pill above the headline (optional)
+    @section('headline')  <h1> contents (may contain <br> / accent <span>)
+    @section('body')      paragraphs between headline and button
+    @section('closing')   paragraph after the button (optional)
+    @section('fineprint') small print above "Button not working?" (optional)
+    @section('reason')    footer "you're receiving this because…" line
+  The legal footer (App\Support\EmailFooter) is added here, never per email.
+  Transactional emails don't extend this directly — they go through
+  emails/notice via App\Support\NoticeMail.
 --}}
 <!DOCTYPE html>
 <html lang="en">
@@ -56,61 +60,78 @@
           <tr>
             <td style="background:#FFFEFA; padding:36px 32px; border-radius:0 0 16px 16px;">
 
-              <table role="presentation" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td style="background:#FAEBE3; padding:8px 12px; border-radius:20px;
-                    font-size:10px; font-weight:bold; letter-spacing:1.5px; color:#9A4427;">
-                    @yield('pill')
-                  </td>
-                </tr>
-              </table>
+              @php
+                $hasPill = trim($__env->yieldContent('pill')) !== '';
+                $hasFineprint = trim($__env->yieldContent('fineprint')) !== '';
+                $hasClosing = trim($__env->yieldContent('closing')) !== '';
+              @endphp
 
-              <h1 style="margin:24px 0; font-size:36px; line-height:42px;
+              @if ($hasPill)
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="background:#FAEBE3; padding:8px 12px; border-radius:20px;
+                      font-size:10px; font-weight:bold; letter-spacing:1.5px; color:#9A4427;">
+                      @yield('pill')
+                    </td>
+                  </tr>
+                </table>
+              @endif
+
+              <h1 style="margin:{{ $hasPill ? '24px' : '0' }} 0 24px; font-size:36px; line-height:42px;
                 letter-spacing:-1.5px; color:#24231F;">
                 @yield('headline')
               </h1>
 
               @yield('body')
 
-              <!-- CTA button -->
-              <table role="presentation" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td align="center" bgcolor="#DD7047"
-                    style="background:#DD7047; border-radius:8px; mso-padding-alt:17px 24px;">
-                    <a href="{{ $ctaUrl }}"
-                      target="_blank"
-                      style="display:inline-block; padding:17px 24px;
-                        border:1px solid #DD7047; border-radius:8px;
-                        font-size:15px; line-height:20px; font-weight:bold;
-                        color:#211C18; text-decoration:none;">
-                      {{ $ctaLabel }} &nbsp;→
-                    </a>
-                  </td>
-                </tr>
-              </table>
+              @if (! empty($ctaUrl))
+                <!-- CTA button -->
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center" bgcolor="#DD7047"
+                      style="background:#DD7047; border-radius:8px; mso-padding-alt:17px 24px;">
+                      <a href="{{ $ctaUrl }}"
+                        target="_blank"
+                        style="display:inline-block; padding:17px 24px;
+                          border:1px solid #DD7047; border-radius:8px;
+                          font-size:15px; line-height:20px; font-weight:bold;
+                          color:#211C18; text-decoration:none;">
+                        {{ $ctaLabel }} &nbsp;→
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              @endif
 
-              <p style="margin:28px 0 0; font-size:16px; line-height:26px; color:#4F4C45;">
-                @yield('closing')
-              </p>
+              @if ($hasClosing)
+                <p style="margin:{{ empty($ctaUrl) ? '0' : '28px' }} 0 0; font-size:16px; line-height:26px; color:#4F4C45;">
+                  @yield('closing')
+                </p>
+              @endif
 
-              <p style="margin:20px 0 0; font-size:15px; line-height:24px; color:#4F4C45;">
+              <p style="margin:{{ $hasClosing || empty($ctaUrl) ? '20px' : '28px' }} 0 0; font-size:15px; line-height:24px; color:#4F4C45;">
                 Warm regards,<br>
                 <strong style="color:#24231F;">The Roofly Team</strong>
               </p>
 
-              <!-- Fallback link -->
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-                style="margin-top:32px;">
-                <tr>
-                  <td style="border-top:1px solid #E8E4DC; padding-top:22px;
-                    font-size:12px; line-height:20px; color:#79746A;">
-                    Button not working?
-                    <a href="{{ $ctaUrl }}"
-                      style="color:#9A4427; text-decoration:underline;">
-                      Open it here</a>.
-                  </td>
-                </tr>
-              </table>
+              @if ($hasFineprint || ! empty($ctaUrl))
+                <!-- Small print + fallback link -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                  style="margin-top:32px;">
+                  <tr>
+                    <td style="border-top:1px solid #E8E4DC; padding-top:22px;
+                      font-size:12px; line-height:20px; color:#79746A;">
+                      @yield('fineprint')
+                      @if (! empty($ctaUrl))
+                        Button not working?
+                        <a href="{{ $ctaUrl }}"
+                          style="color:#9A4427; text-decoration:underline;">
+                          Open it here</a>.
+                      @endif
+                    </td>
+                  </tr>
+                </table>
+              @endif
 
             </td>
           </tr>
@@ -122,6 +143,19 @@
               <strong style="color:#5C574E;">Property management, reimagined.</strong>
               <br>
               @yield('reason')
+            </td>
+          </tr>
+
+          <!-- Legal footer -->
+          <tr>
+            <td align="center"
+              style="padding:0 16px 32px; font-size:11px; line-height:18px; color:#79746A;">
+              @foreach (\App\Support\EmailFooter::links() as $label => $href)
+                <a href="{{ $href }}" target="_blank"
+                  style="color:#5C574E; text-decoration:underline;">{{ $label }}</a>@if (! $loop->last)&nbsp;&nbsp;·&nbsp;&nbsp;@endif
+              @endforeach
+              <br>
+              {{ \App\Support\EmailFooter::operatorLine() }}
             </td>
           </tr>
 

@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Support\NoticeMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -30,12 +31,21 @@ class ResetPassword extends Notification implements ShouldQueue
     {
         $minutes = config('auth.passwords.' . config('auth.defaults.passwords') . '.expire');
 
-        return (new MailMessage)
-            ->subject('Reset your Roofly password')
-            ->line("Hi {$notifiable->name}, we received a request to reset your password.")
-            ->line('Kami menerima permintaan untuk menetapkan semula kata laluan anda.')
-            ->action('Reset password', $this->url($notifiable))
-            ->line("This link expires in {$minutes} minutes. / Pautan ini tamat tempoh dalam {$minutes} minit.")
-            ->line('If you did not request this, you can ignore this email. / Jika anda tidak memintanya, abaikan e-mel ini.');
+        return NoticeMail::make('Reset your Roofly password', [
+            'tag'            => 'ACCOUNT SECURITY',
+            'pill'           => 'PASSWORD RESET',
+            'headlineLead'   => 'Reset your',
+            'headlineAccent' => 'password.',
+            'greeting'       => NoticeMail::firstName($notifiable->name),
+            'paragraphs'     => ['We received a request to reset your password.'],
+            'malay'          => 'Kami menerima permintaan untuk menetapkan semula kata laluan anda.',
+            'ctaUrl'         => $this->url($notifiable),
+            'ctaLabel'       => 'Reset password',
+            'fineprint'      => [
+                "This link expires in {$minutes} minutes. / Pautan ini tamat tempoh dalam {$minutes} minit.",
+                'If you did not request this, you can ignore this email. / Jika anda tidak memintanya, abaikan e-mel ini.',
+            ],
+            'reason' => "You're receiving this because a password reset was requested for your Roofly account.",
+        ]);
     }
 }

@@ -16,3 +16,4 @@ The Roofly Team
 --
 Roofly.my · Property management, reimagined.
 You're receiving this email because you created a Roofly account.
+@include('emails.partials.legal-footer-text')

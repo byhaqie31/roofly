@@ -2,6 +2,7 @@
 // backend/app/Notifications/AdminInvite.php
 namespace App\Notifications;
 
+use App\Support\NoticeMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -25,11 +26,18 @@ class AdminInvite extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
-            ->subject('You have been invited to the Roofly admin portal')
-            ->line("Hi {$notifiable->name}, you've been given access to the Roofly admin portal.")
-            ->line('Anda telah diberi akses ke portal admin Roofly.')
-            ->action('Set your password', $this->url())
-            ->line('This link expires in 7 days. / Pautan ini tamat tempoh dalam 7 hari.');
+        return NoticeMail::make('You have been invited to the Roofly admin portal', [
+            'tag'            => 'ADMIN PORTAL',
+            'pill'           => 'ADMIN ACCESS',
+            'headlineLead'   => "You're invited to",
+            'headlineAccent' => 'Roofly admin.',
+            'greeting'       => NoticeMail::firstName($notifiable->name),
+            'paragraphs'     => ["You've been given access to the Roofly admin portal. Set your password to sign in."],
+            'malay'          => 'Anda telah diberi akses ke portal admin Roofly.',
+            'ctaUrl'         => $this->url(),
+            'ctaLabel'       => 'Set your password',
+            'fineprint'      => ['This link expires in 7 days. / Pautan ini tamat tempoh dalam 7 hari.'],
+            'reason'         => "You're receiving this because you were invited to the Roofly admin portal.",
+        ]);
     }
 }
