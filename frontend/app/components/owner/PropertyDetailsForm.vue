@@ -27,13 +27,16 @@ const initialValues = {
   city: props.property.city,
   state: props.property.state,
   postcode: props.property.postcode,
-  yearBuilt: props.property.yearBuilt,
-  builtUpSqft: props.property.builtUpSqft,
-  landSqft: props.property.landSqft,
-  bedrooms: props.property.bedrooms,
-  bathrooms: props.property.bathrooms,
-  parkingLots: props.property.parkingLots,
-  furnishing: props.property.furnishing,
+  // The API sends unset columns as null; the schema's .optional() only accepts
+  // undefined, so a null here fails validation — on a hidden field (landSqft on
+  // a condo) that makes Save silently do nothing.
+  yearBuilt: props.property.yearBuilt ?? undefined,
+  builtUpSqft: props.property.builtUpSqft ?? undefined,
+  landSqft: props.property.landSqft ?? undefined,
+  bedrooms: props.property.bedrooms ?? undefined,
+  bathrooms: props.property.bathrooms ?? undefined,
+  parkingLots: props.property.parkingLots ?? undefined,
+  furnishing: props.property.furnishing ?? undefined,
 };
 
 const { defineField, handleSubmit, errors, setErrors } = useForm({

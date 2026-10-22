@@ -8,3 +8,4 @@
 
 --
 Roofly.my · You're receiving this because you're a Roofly super admin.
+@include('emails.partials.legal-footer-text')

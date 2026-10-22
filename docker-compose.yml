@@ -23,7 +23,9 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME:-roofly}-frontend
     restart: unless-stopped
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      # Loopback only: the host nginx / Cloudflare Tunnel proxy the subdomain
+      # here, so the Node server is never reachable by the VPS's public IP.
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
       - HOST=0.0.0.0
