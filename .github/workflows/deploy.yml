@@ -69,7 +69,10 @@ jobs:
 
             # -f docker-compose.yml bypasses docker-compose.override.yml (which
             # is for local dev only — switches to dev target with bind mounts).
-            docker compose -f docker-compose.yml up -d --build
+            # --pull refreshes the node/php base images so upstream security
+            # fixes land on every deploy instead of reusing the VPS's cached copy.
+            docker compose -f docker-compose.yml build --pull
+            docker compose -f docker-compose.yml up -d
 
             echo "==> Waiting for app to respond on port $HEALTH_PORT..."
             sleep 5
