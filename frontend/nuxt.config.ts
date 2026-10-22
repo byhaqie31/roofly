@@ -22,6 +22,10 @@ export default defineNuxtConfig({
     dirs: ["services"],
   },
 
+  imports: {
+    dirs: ["services"],
+  },
+
   css: ["~/assets/css/main.css"],
 
   tailwindcss: {
