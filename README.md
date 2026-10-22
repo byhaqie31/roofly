@@ -130,9 +130,9 @@ Cloudflare DNS
   ▼
 VPS port 443 → Nginx
   │  Reads Host: demo.roofly.my, matches sites-enabled/demo.roofly.my
-  │  → proxy_pass http://localhost:3001
+  │  → proxy_pass http://127.0.0.1:3001
   ▼
-VPS localhost:3001 → Docker container "demo-roofly"
+VPS 127.0.0.1:3001 (loopback only) → Docker container "demo-roofly"
   │  Built from ~/roofly-demo (a git clone tracking the demo-roofly branch)
   │  Container reads ~/roofly-demo/.env → APP_ENV=demo
   ▼
