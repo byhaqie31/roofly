@@ -215,7 +215,7 @@ Two compose files govern the build:
 So:
 
 - **Local dev** (your Mac): `docker compose up -d --build` → loads both files → dev mode with HMR
-- **VPS prod** (GHA workflow): `docker compose -f docker-compose.yml up -d --build` → bypasses override → prod runtime
+- **VPS prod** (GHA workflow): `docker compose -f docker-compose.yml build --pull` then `up -d` → bypasses override → prod runtime (`--pull` keeps the node/php base images current)
 
 The same `frontend/Dockerfile` serves both contexts via multi-stage targets (`deps` → `dev` / `builder` → `runner`).
 
