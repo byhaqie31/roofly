@@ -45,6 +45,24 @@ When a UAT batch is ready to ship:
 gh pr create --base main --head UAT --title "release: vX.Y" --body "..."
 ```
 
+### After every release: back-merge `main` into `UAT`
+
+`main` only takes squash/rebase merges and requires linear history, so every release lands on `main` as a **new** commit that `UAT` doesn't have. Skip this step and the *next* release PR shows conflicts on every file touched since (first hit on #33, after the #28 squash).
+
+Right after the release PR merges, record `main` as merged into `UAT` while keeping UAT's files, with a merge commit whose tree is UAT's and whose parents are both branches. That's safe because `main` only ever holds what UAT shipped. It needs no checkout, so it works from any branch, even with uncommitted changes:
+
+```bash
+git fetch origin
+C=$(git commit-tree "origin/UAT^{tree}" -p origin/UAT -p origin/main -m "chore: back-merge main (#<release PR> squash) into UAT")
+echo "commit: $C"                                # must be a 40-char id
+git --no-pager diff --stat origin/UAT "$C"      # must print nothing: UAT's files untouched
+git push origin "${C}:refs/heads/UAT"           # admin bypass: a squash/rebase PR would strip the merge
+```
+
+Keep the braces in `"${C}:refs/heads/UAT"`. In zsh, `$C:r…` is parsed as a `:r` modifier and silently mangles the refspec. The push prints "Bypassed rule violations" (expected) and triggers a UAT deploy of identical code, which is harmless. Never run this if someone hot-fixed `main` directly, because keeping UAT's tree would drop that fix; merge normally instead.
+
+Check it worked: `git fetch origin && git merge-base --is-ancestor origin/main origin/UAT && echo synced`.
+
 ## Ruleset details
 
 The current setup intentionally keeps **review optional** — the team is small enough that approval requirements are friction without a real safety benefit. PR-and-CI is the only enforced gate; reviews are opt-in (you can still request one when you want a second pair of eyes).
